@@ -18,6 +18,6 @@ And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-smart-search/`.
 
 ## Search
 
-Run `Smart Seearch: Search` (`Ctrl + P` as default).
+Run `Smart Search: Search` (`Ctrl + P` as default).
 
 If the query starts with `/`, it shows suggestions order by time recently.
