@@ -6,7 +6,7 @@ import {
   parseFrontMatterAliases,
   TFile,
 } from "obsidian";
-import { sorter } from "../collection-helper";
+import { keyBy, sorter } from "../collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 
 interface SuggestionItem {
@@ -89,6 +89,17 @@ export class SmartSearchModal extends FuzzySuggestModal<SuggestionItem> {
   }
 
   getSuggestions(query: string): FuzzyMatch<SuggestionItem>[] {
+    if (!query) {
+      const fileByPath = keyBy(this.getItems(), (x) => x.file.path);
+      return this.app.workspace.getLastOpenFiles().map((x) => {
+        const s = fileByPath[x];
+        return {
+          item: s,
+          match: { score: 0, matches: [] },
+        };
+      });
+    }
+
     const recentMode = query.startsWith("/");
     const qs = (recentMode ? query.slice(1) : query)
       .split(" ")
