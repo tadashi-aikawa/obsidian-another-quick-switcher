@@ -16,3 +16,22 @@ tasks:
   dev:
     desc: Build and copy files when they are updated.
     deps: [build, watch]
+
+  release:
+    desc: |
+      Build
+          ∟ [Ex] task release VERSION=1.2.3
+    deps:
+      - build
+    cmds:
+      - |
+        sed -i -r 's/\"version\": \".+\"/\"version\": \"{{.VERSION}}\"/g' manifest.json
+      - git add manifest.json
+      - git commit -m "Update manifest"
+      - npm version {{.VERSION}}
+      - task: build
+      - git push --tags
+      - git push
+    preconditions:
+      - sh: "[ {{.VERSION}} != '' ]"
+        msg: "VERSION is required."

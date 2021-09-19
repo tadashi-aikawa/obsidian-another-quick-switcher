@@ -1,0 +1,54 @@
+name: "Release"
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - run: npm install
+      - run: npm run build
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            main.js
+            styles.css
+            manifest.json
+
+      - name: "Discord notification (not success)"
+        uses: rjstone/discord-webhook-notify@v1
+        if: "! success()"
+        with:
+          description: "⚠ Smart Search Release failed!"
+          details: "${{ github.ref }}"
+          severity: error
+          avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+
+  notify:
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Discord notification (success)"
+        uses: rjstone/discord-webhook-notify@v1
+        if: always()
+        with:
+          description: "✅ Smart Search Release finished!"
+          details: "${{ github.ref }}"
+          severity: info
+          avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
