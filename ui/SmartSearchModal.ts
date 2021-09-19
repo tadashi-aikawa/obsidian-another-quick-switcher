@@ -1,9 +1,8 @@
 import {
   App,
   CachedMetadata,
-  FuzzyMatch,
-  FuzzySuggestModal,
   parseFrontMatterAliases,
+  SuggestModal,
   TFile,
 } from "obsidian";
 import { keyBy, sorter } from "../collection-helper";
@@ -65,8 +64,8 @@ function stampMatchType(
   return item;
 }
 
-function toPrefixIconHTML(item: FuzzyMatch<SuggestionItem>): string {
-  switch (item.item.matchType) {
+function toPrefixIconHTML(item: SuggestionItem): string {
+  switch (item.matchType) {
     case "alias":
       return `<span class="another-quick-switcher__item__icon">${ALIAS}</span>`;
     case "directory":
@@ -75,7 +74,7 @@ function toPrefixIconHTML(item: FuzzyMatch<SuggestionItem>): string {
   return "";
 }
 
-export class SmartSearchModal extends FuzzySuggestModal<SuggestionItem> {
+export class SmartSearchModal extends SuggestModal<SuggestionItem> {
   constructor(app: App) {
     super(app);
     this.scope.register(
@@ -88,16 +87,10 @@ export class SmartSearchModal extends FuzzySuggestModal<SuggestionItem> {
     );
   }
 
-  getSuggestions(query: string): FuzzyMatch<SuggestionItem>[] {
+  getSuggestions(query: string): SuggestionItem[] {
     if (!query) {
       const fileByPath = keyBy(this.getItems(), (x) => x.file.path);
-      return this.app.workspace.getLastOpenFiles().map((x) => {
-        const s = fileByPath[x];
-        return {
-          item: s,
-          match: { score: 0, matches: [] },
-        };
-      });
+      return this.app.workspace.getLastOpenFiles().map((x) => fileByPath[x]);
     }
 
     let lastOpenFileIndexByPath: { [path: string]: number } = {};
@@ -114,24 +107,15 @@ export class SmartSearchModal extends FuzzySuggestModal<SuggestionItem> {
       .map((x) => stampMatchType(x, qs))
       .filter((x) => x.matchType)
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
-      .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535))
-      .map((x) => ({
-        item: x,
-        match: {
-          score: 0,
-          matches: [],
-        },
-      }));
+      .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535));
 
     if (!recentMode) {
       items = items
-        .sort(sorter((x) => (x.item.matchType === "directory" ? 1 : 0)))
+        .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))
         .sort(
           sorter(
             (x) =>
-              x.item.matchType === "prefix-name"
-                ? 1000 - x.item.file.name.length
-                : 0,
+              x.matchType === "prefix-name" ? 1000 - x.file.name.length : 0,
             "desc"
           )
         );
@@ -140,11 +124,11 @@ export class SmartSearchModal extends FuzzySuggestModal<SuggestionItem> {
     return items.slice(0, 10);
   }
 
-  renderSuggestion(item: FuzzyMatch<SuggestionItem>, el: HTMLElement) {
+  renderSuggestion(item: SuggestionItem, el: HTMLElement) {
     const suggestionItemHtml = `
 <div class="another-quick-switcher__item">
-  <div class="another-quick-switcher__item__file">${item.item.file.basename}</div>
-  <div class="another-quick-switcher__item__directory">${FOLDER} ${item.item.file.parent.name}</div>
+  <div class="another-quick-switcher__item__file">${item.file.basename}</div>
+  <div class="another-quick-switcher__item__directory">${FOLDER} ${item.file.parent.name}</div>
 </div>
 `.trim();
 
@@ -154,10 +138,6 @@ export class SmartSearchModal extends FuzzySuggestModal<SuggestionItem> {
     );
   }
 
-  getItemText(item: SuggestionItem): string {
-    return `${item.file.basename}`;
-  }
-
   getItems(): SuggestionItem[] {
     return this.app.vault.getMarkdownFiles().map((x) => ({
       file: x,
@@ -165,8 +145,10 @@ export class SmartSearchModal extends FuzzySuggestModal<SuggestionItem> {
     }));
   }
 
-  onChooseItem(item: SuggestionItem, evt: MouseEvent | KeyboardEvent): void {
-    // For Ctrl + Click, not Ctrl + Enter (TODO...)
+  onChooseSuggestion(
+    item: SuggestionItem,
+    evt: MouseEvent | KeyboardEvent
+  ): any {
     this.openFile(item.file, evt.ctrlKey);
   }
 
