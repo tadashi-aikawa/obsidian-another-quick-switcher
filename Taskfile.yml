@@ -11,7 +11,7 @@ tasks:
       - task -l
 
   build: npm run dev
-  watch: watchexec --exts "js,json,css" cp main.js styles.css manifest.json $USERPROFILE/work/minerva/.obsidian/plugins/obsidian-fuzzy-search/
+  watch: watchexec --exts "js,json,css" cp main.js styles.css manifest.json $USERPROFILE/work/minerva/.obsidian/plugins/obsidian-smart-search/
 
   dev:
     desc: Build and copy files when they are updated.

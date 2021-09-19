@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-fuzzy-search",
-	"name": "Fuzzy Search",
-	"version": "0.1.0",
-	"minAppVersion": "0.9.12",
-	"description": "Todo",
-	"author": "tadashi-aikawa",
-	"authorUrl": "https://github.com/tadashi-aikawa",
-	"isDesktopOnly": false
+  "id": "obsidian-smart-search",
+  "name": "Smart Search",
+  "version": "0.1.0",
+  "minAppVersion": "0.9.12",
+  "description": "Search files which is not fuzzy so much as Quick switcher",
+  "author": "tadashi-aikawa",
+  "authorUrl": "https://github.com/tadashi-aikawa",
+  "isDesktopOnly": false
 }

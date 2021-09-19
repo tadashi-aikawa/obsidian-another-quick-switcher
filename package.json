@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-fuzzy-search",
+  "name": "obsidian-smart-search",
   "version": "0.1.0",
   "description": "Todo",
   "main": "main.js",
@@ -20,6 +20,5 @@
     "rollup": "^2.32.1",
     "tslib": "^2.2.0",
     "typescript": "^4.2.4"
-  },
-  "dependencies": {}
+  }
 }
