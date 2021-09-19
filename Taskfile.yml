@@ -1,0 +1,18 @@
+# Required powershell
+version: "3"
+
+tasks:
+  default:
+    - task: help
+
+  help:
+    silent: true
+    cmds:
+      - task -l
+
+  build: npm run dev
+  watch: watchexec --exts "js,json,css" cp main.js styles.css manifest.json $USERPROFILE/work/minerva/.obsidian/plugins/obsidian-fuzzy-search/
+
+  dev:
+    desc: Build and copy files when they are updated.
+    deps: [build, watch]

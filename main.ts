@@ -1,112 +1,87 @@
-import { App, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {
+  CachedMetadata,
+  FuzzyMatch,
+  FuzzySuggestModal,
+  parseFrontMatterAliases,
+  Plugin,
+  TFile,
+} from "obsidian";
+import { sorter } from "./collection-helper";
 
-interface MyPluginSettings {
-	mySetting: string;
+export default class FuzzySearch extends Plugin {
+  async onload() {
+    console.log("loading plugin");
+
+    this.addCommand({
+      id: "search",
+      name: "Search",
+      hotkeys: [{ modifiers: ["Ctrl"], key: "p" }],
+      checkCallback: (checking: boolean) => {
+        if (!checking) {
+          this.showList();
+        }
+        return true;
+      },
+    });
+  }
+
+  showList() {
+    const modal = new FuzzySearchModal(this.app);
+    modal.open();
+  }
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+interface SuggestionItem {
+  file: TFile;
+  cache?: CachedMetadata;
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
-
-	async onload() {
-		console.log('loading plugin');
-
-		await this.loadSettings();
-
-		this.addRibbonIcon('dice', 'Sample Plugin', () => {
-			new Notice('This is a notice!');
-		});
-
-		this.addStatusBarItem().setText('Status Bar Text');
-
-		this.addCommand({
-			id: 'open-sample-modal',
-			name: 'Open Sample Modal',
-			// callback: () => {
-			// 	console.log('Simple Callback');
-			// },
-			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-					return true;
-				}
-				return false;
-			}
-		});
-
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		this.registerCodeMirror((cm: CodeMirror.Editor) => {
-			console.log('codemirror', cm);
-		});
-
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-	}
-
-	onunload() {
-		console.log('unloading plugin');
-	}
-
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
+function lowerInclude(text: string, query: string): boolean {
+  return text.toLowerCase().includes(query.toLowerCase());
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		let {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		let {contentEl} = this;
-		contentEl.empty();
-	}
+function matchAll(item: SuggestionItem, queries: string[]): boolean {
+  return queries.every(
+    (q) =>
+      lowerInclude(item.file.path, q) ||
+      (parseFrontMatterAliases(item.cache.frontmatter) ?? []).some((al) =>
+        lowerInclude(al, q)
+      )
+  );
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class FuzzySearchModal extends FuzzySuggestModal<SuggestionItem> {
+  getSuggestions(query: string): FuzzyMatch<SuggestionItem>[] {
+    const qs = query.split(" ").filter((x) => x);
+    return this.getItems()
+      .filter((x) => matchAll(x, qs))
+      .map((x) => ({
+        item: x,
+        match: {
+          score: x.file.stat.mtime,
+          matches: [],
+        },
+      }))
+      .sort(sorter((x) => x.item.file.stat.mtime, "desc"));
+  }
 
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
+  getItemText(item: SuggestionItem): string {
+    return `${item.file.path}`;
+  }
 
-	display(): void {
-		let {containerEl} = this;
+  getItems(): SuggestionItem[] {
+    return this.app.vault.getMarkdownFiles().map((x) => ({
+      file: x,
+      cache: this.app.metadataCache.getFileCache(x),
+    }));
+  }
 
-		containerEl.empty();
+  onChooseItem(item: SuggestionItem, evt: MouseEvent | KeyboardEvent): void {
+    // For Ctrl + Click, not Ctrl + Enter (TODO...)
+    const leaf = this.app.workspace.getLeaf(evt.ctrlKey);
 
-		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
-
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue('')
-				.onChange(async (value) => {
-					console.log('Secret: ' + value);
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
+    leaf.openFile(item.file).then(() => {
+      this.app.workspace.setActiveLeaf(leaf, true, evt.ctrlKey);
+    });
+  }
 }
