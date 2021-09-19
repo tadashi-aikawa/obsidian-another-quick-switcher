@@ -10,12 +10,15 @@ tasks:
     cmds:
       - task -l
 
-  build: npm run dev
+  build:dev: npm run dev
+
+  build: npm run build
+
   watch: watchexec --exts "js,json,css" cp main.js styles.css manifest.json $USERPROFILE/work/minerva/.obsidian/plugins/obsidian-smart-search/
 
   dev:
     desc: Build and copy files when they are updated.
-    deps: [build, watch]
+    deps: [build:dev, watch]
 
   release:
     desc: |
