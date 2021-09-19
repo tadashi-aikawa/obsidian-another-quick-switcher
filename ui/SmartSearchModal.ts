@@ -100,6 +100,11 @@ export class SmartSearchModal extends FuzzySuggestModal<SuggestionItem> {
       });
     }
 
+    let lastOpenFileIndexByPath: { [path: string]: number } = {};
+    this.app.workspace.getLastOpenFiles().forEach((v, i) => {
+      lastOpenFileIndexByPath[v] = i;
+    });
+
     const recentMode = query.startsWith("/");
     const qs = (recentMode ? query.slice(1) : query)
       .split(" ")
@@ -108,14 +113,15 @@ export class SmartSearchModal extends FuzzySuggestModal<SuggestionItem> {
     let items = this.getItems()
       .map((x) => stampMatchType(x, qs))
       .filter((x) => x.matchType)
+      .sort(sorter((x) => x.file.stat.mtime, "desc"))
+      .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535))
       .map((x) => ({
         item: x,
         match: {
-          score: x.file.stat.mtime,
+          score: 0,
           matches: [],
         },
-      }))
-      .sort(sorter((x) => x.item.file.stat.mtime, "desc"));
+      }));
 
     if (!recentMode) {
       items = items
