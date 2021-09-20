@@ -2,13 +2,29 @@
 
 This is an Obsidian plugin for those who prefer to search files not so much fuzzy.
 
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-smart-search/master/demo/2021-09-19.gif)
+- `Smart Search` can search regardless of tokens of appearance order
+- `Smart Search` shows file names and directory names separately
+- `Smart Search` shows suggestions order by prioritizing both last opened time and modified time
 
-## Get started
+## ⌨️Features
 
-## Install
+### Normal Search
 
-Download 3 files.
+Run `Smart Search: Normal search` on `Command palette` or push `Ctrl + Shift + P`.
+
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-smart-search/master/demo/normal.gif)
+
+### Recent Search
+
+Run `Smart Search: Recent search` on `Command palette` or push `Ctrl + Shift + E`.
+
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-smart-search/master/demo/recent.gif)
+
+If the query starts with `/`, it behaves as `Normal Search`.
+
+## ⏬Install
+
+Download 3 files from a [Releases page].
 
 - `main.js`
 - `styles.css`
@@ -16,13 +32,9 @@ Download 3 files.
 
 And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-smart-search/`.
 
-## Search
+[Releases page]: https://github.com/tadashi-aikawa/obsidian-smart-search/releases/latest
 
-Run `Smart Search: Search` (`Ctrl + P` as default).
-
-If the query starts with `/`, it shows suggestions as prioritizing matching rate, otherwise as prioritize opened time and modified time recently.
-
-## For developers
+## 🖥️For developers
 
 ### Release
 
