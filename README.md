@@ -1,6 +1,6 @@
 # Obsidian Smart Search Plugin
 
-Search files which is not fuzzy so much as Quick switcher.
+This is an Obsidian plugin for those who prefer to search files not so much fuzzy~~~~.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-smart-search/master/demo/2021-09-19.gif)
 
