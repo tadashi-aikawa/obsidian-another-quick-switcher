@@ -90,7 +90,10 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
   getSuggestions(query: string): SuggestionItem[] {
     if (!query) {
       const fileByPath = keyBy(this.getItems(), (x) => x.file.path);
-      return this.app.workspace.getLastOpenFiles().map((x) => fileByPath[x]);
+      return this.app.workspace
+        .getLastOpenFiles()
+        .map((x) => fileByPath[x])
+        .filter((x) => x);
     }
 
     let lastOpenFileIndexByPath: { [path: string]: number } = {};
