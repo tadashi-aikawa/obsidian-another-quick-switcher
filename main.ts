@@ -7,8 +7,8 @@ export default class SmartSearch extends Plugin {
 
     this.addCommand({
       id: "normal-search",
-      name: "Normal Search",
-      hotkeys: [{ modifiers: ["Ctrl"], key: "p" }],
+      name: "Normal search",
+      hotkeys: [{ modifiers: ["Ctrl", "Shift"], key: "p" }],
       checkCallback: (checking: boolean) => {
         if (!checking) {
           this.showSearchDialog("normal");
@@ -19,8 +19,8 @@ export default class SmartSearch extends Plugin {
 
     this.addCommand({
       id: "recent-search",
-      name: "Recent Search",
-      hotkeys: [{ modifiers: ["Ctrl"], key: "e" }],
+      name: "Recent search",
+      hotkeys: [{ modifiers: ["Ctrl", "Shift"], key: "e" }],
       checkCallback: (checking: boolean) => {
         if (!checking) {
           this.showSearchDialog("recent");
