@@ -60,10 +60,11 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
   constructor(app: App, public mode: Mode) {
     super(app);
     this.setInstructions([
-      { command: "↑↓", purpose: "navigate" },
-      { command: "↵", purpose: "open" },
-      { command: "ctrl ↵", purpose: "open in new pane" },
-      { command: "esc", purpose: "dismiss" },
+      { command: "Mode: ", purpose: mode },
+      { command: "[↑↓]", purpose: "navigate" },
+      { command: "[↵]", purpose: "open" },
+      { command: "[ctrl ↵]", purpose: "open in new pane" },
+      { command: "[esc]", purpose: "dismiss" },
     ]);
     this.scope.register(
       ["Ctrl"],
