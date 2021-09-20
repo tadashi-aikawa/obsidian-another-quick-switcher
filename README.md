@@ -20,7 +20,7 @@ And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-smart-search/`.
 
 Run `Smart Search: Search` (`Ctrl + P` as default).
 
-If the query starts with `/`, it shows suggestions order by opened time and modified time recently.
+If the query starts with `/`, it shows suggestions as prioritizing matching rate, otherwise as prioritize opened time and modified time recently.
 
 ## For developers
 

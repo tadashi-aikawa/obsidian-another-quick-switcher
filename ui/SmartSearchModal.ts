@@ -101,8 +101,8 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
       lastOpenFileIndexByPath[v] = i;
     });
 
-    const recentMode = query.startsWith("/");
-    const qs = (recentMode ? query.slice(1) : query)
+    const matchingPriorityMode = query.startsWith("/");
+    const qs = (matchingPriorityMode ? query.slice(1) : query)
       .split(" ")
       .filter((x) => x);
 
@@ -112,7 +112,7 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
       .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535));
 
-    if (!recentMode) {
+    if (matchingPriorityMode) {
       items = items
         .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))
         .sort(
