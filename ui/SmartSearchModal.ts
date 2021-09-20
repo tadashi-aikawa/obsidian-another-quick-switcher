@@ -7,32 +7,12 @@ import {
 } from "obsidian";
 import { keyBy, sorter } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
+import { smartIncludes, smartStartsWith } from "../utils/strings";
 
 interface SuggestionItem {
   file: TFile;
   cache?: CachedMetadata;
   matchType?: "name" | "prefix-name" | "directory" | "alias";
-}
-
-const regEmoji = new RegExp(
-  /[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/,
-  "g"
-);
-function excludeEmoji(text: string): string {
-  return text.replace(regEmoji, "");
-}
-function excludeSpace(text: string): string {
-  return text.replace(/ /g, "");
-}
-
-function smartIncludes(text: string, query: string): boolean {
-  return excludeSpace(text.toLowerCase()).includes(query.toLowerCase());
-}
-
-function smartStartsWith(text: string, query: string): boolean {
-  return excludeSpace(excludeEmoji(text.toLowerCase())).startsWith(
-    query.toLowerCase()
-  );
 }
 
 function stampMatchType(
