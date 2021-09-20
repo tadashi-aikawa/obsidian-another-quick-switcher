@@ -5,7 +5,7 @@ import {
   SuggestModal,
   TFile,
 } from "obsidian";
-import { keyBy, sorter } from "../collection-helper";
+import { keyBy, sorter } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 
 interface SuggestionItem {
