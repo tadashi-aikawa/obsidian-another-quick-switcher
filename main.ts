@@ -1,25 +1,37 @@
 import { Plugin } from "obsidian";
-import { SmartSearchModal } from "./ui/SmartSearchModal";
+import { Mode, SmartSearchModal } from "./ui/SmartSearchModal";
 
 export default class SmartSearch extends Plugin {
   async onload() {
     console.log("loading plugin");
 
     this.addCommand({
-      id: "search",
-      name: "Search",
+      id: "normal-search",
+      name: "Normal Search",
       hotkeys: [{ modifiers: ["Ctrl"], key: "p" }],
       checkCallback: (checking: boolean) => {
         if (!checking) {
-          this.showList();
+          this.showSearchDialog("normal");
+        }
+        return true;
+      },
+    });
+
+    this.addCommand({
+      id: "recent-search",
+      name: "Recent Search",
+      hotkeys: [{ modifiers: ["Ctrl"], key: "e" }],
+      checkCallback: (checking: boolean) => {
+        if (!checking) {
+          this.showSearchDialog("recent");
         }
         return true;
       },
     });
   }
 
-  showList() {
-    const modal = new SmartSearchModal(this.app);
+  showSearchDialog(mode: Mode) {
+    const modal = new SmartSearchModal(this.app, mode);
     modal.open();
   }
 }

@@ -9,6 +9,8 @@ import { keyBy, sorter } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 
+export type Mode = "normal" | "recent";
+
 interface SuggestionItem {
   file: TFile;
   cache?: CachedMetadata;
@@ -55,7 +57,7 @@ function toPrefixIconHTML(item: SuggestionItem): string {
 }
 
 export class SmartSearchModal extends SuggestModal<SuggestionItem> {
-  constructor(app: App) {
+  constructor(app: App, public mode: Mode) {
     super(app);
     this.scope.register(
       ["Ctrl"],
@@ -81,10 +83,14 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
       lastOpenFileIndexByPath[v] = i;
     });
 
-    const matchingPriorityMode = query.startsWith("/");
-    const qs = (matchingPriorityMode ? query.slice(1) : query)
-      .split(" ")
-      .filter((x) => x);
+    let searchMode = this.mode;
+    let searchQuery = query;
+    if (searchMode === "recent" && query.startsWith("/")) {
+      searchMode = "normal";
+      searchQuery = query.slice(1);
+    }
+
+    const qs = searchQuery.split(" ").filter((x) => x);
 
     let items = this.getItems()
       .map((x) => stampMatchType(x, qs))
@@ -92,7 +98,7 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
       .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535));
 
-    if (matchingPriorityMode) {
+    if (searchMode === "normal") {
       items = items
         .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))
         .sort(
