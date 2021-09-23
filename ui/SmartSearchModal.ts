@@ -17,26 +17,59 @@ interface SuggestionItem {
   matchType?: "name" | "prefix-name" | "directory" | "alias";
 }
 
+function matchQuery(
+  item: SuggestionItem,
+  query: string,
+  matcher: (item: SuggestionItem, query: string) => boolean
+): boolean {
+  const qs = query.split("/");
+  const file = qs.pop();
+  return (
+    qs.every((dir) => smartIncludes(item.file.parent.path, dir)) &&
+    matcher(item, file)
+  );
+}
+
+function matchQueryAll(
+  item: SuggestionItem,
+  queries: string[],
+  matcher: (item: SuggestionItem, query: string) => boolean
+): boolean {
+  return queries.every((q) => matchQuery(item, q, matcher));
+}
+
 function stampMatchType(
   item: SuggestionItem,
   queries: string[]
 ): SuggestionItem {
-  if (queries.every((q) => smartStartsWith(item.file.name, q))) {
+  if (
+    matchQueryAll(item, queries, (item, query) =>
+      smartStartsWith(item.file.name, query)
+    )
+  ) {
     return { ...item, matchType: "prefix-name" };
   }
 
-  if (queries.every((q) => smartIncludes(item.file.name, q))) {
+  if (
+    matchQueryAll(item, queries, (item, query) =>
+      smartIncludes(item.file.name, query)
+    )
+  ) {
     return { ...item, matchType: "name" };
   }
 
-  if (queries.every((q) => smartIncludes(item.file.path, q))) {
+  if (
+    matchQueryAll(item, queries, (item, query) =>
+      smartIncludes(item.file.path, query)
+    )
+  ) {
     return { ...item, matchType: "directory" };
   }
 
   if (
-    queries.every((q) =>
+    matchQueryAll(item, queries, (item, query) =>
       (parseFrontMatterAliases(item.cache.frontmatter) ?? []).some((al) =>
-        smartIncludes(al, q)
+        smartIncludes(al, query)
       )
     )
   ) {
