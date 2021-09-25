@@ -1,7 +1,7 @@
 {
   "id": "obsidian-smart-search",
   "name": "Smart Search",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "minAppVersion": "0.9.12",
   "description": "Search files which is not fuzzy so much as Quick switcher",
   "author": "tadashi-aikawa",
