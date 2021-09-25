@@ -7,7 +7,7 @@ export function excludeSpace(text: string): string {
   return text.replace(/ /g, "");
 }
 
-function excludeEmoji(text: string): string {
+export function excludeEmoji(text: string): string {
   return text.replace(regEmoji, "");
 }
 
