@@ -1,6 +1,6 @@
 {
   "name": "obsidian-smart-search",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Todo",
   "main": "main.js",
   "scripts": {
