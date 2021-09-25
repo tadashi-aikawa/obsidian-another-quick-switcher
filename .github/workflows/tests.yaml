@@ -1,0 +1,58 @@
+name: "Tests"
+
+on:
+  push:
+    paths:
+      - ".github/**/*"
+      - "src/*"
+      - "src/**/*"
+      - "*.js"
+      - "*.json"
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["12.x", "14.x"]
+    name: Node ${{ matrix.node }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: arduino/setup-task@v1
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+
+      - run: task ci
+      - uses: codecov/codecov-action@v1
+        if: "matrix.node == '12.x' && success()"
+        with:
+          file: ./coverage/clover.xml
+
+      - name: "Discord notification (not success)"
+        uses: rjstone/discord-webhook-notify@v1
+        if: "! success()"
+        with:
+          description: "⚠ Smart Search Tests failed!"
+          footer: "Node.js v*${{ matrix.node }}*"
+          severity: error
+          avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+
+  notify:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Discord notification (success)"
+        uses: rjstone/discord-webhook-notify@v1
+        if: always()
+        with:
+          description: "✅ Smart Search Tests passed!"
+          footer: "Node.js v*12/14*"
+          severity: info
+          avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
