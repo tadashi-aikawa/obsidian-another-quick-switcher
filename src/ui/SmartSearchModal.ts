@@ -168,10 +168,13 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
   }
 
   getItems(): SuggestionItem[] {
-    return this.app.vault.getMarkdownFiles().map((x) => ({
-      file: x,
-      cache: this.app.metadataCache.getFileCache(x),
-    }));
+    return this.app.vault
+      .getMarkdownFiles()
+      .filter((x) => x.path !== this.app.workspace.getActiveFile()?.path)
+      .map((x) => ({
+        file: x,
+        cache: this.app.metadataCache.getFileCache(x),
+      }));
   }
 
   onChooseSuggestion(
