@@ -5,11 +5,11 @@ import {
   SuggestModal,
   TFile,
 } from "obsidian";
-import { keyBy, sorter } from "../utils/collection-helper";
+import { sorter } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 
-export type Mode = "normal" | "recent";
+export type Mode = "normal" | "recent" | "backlink";
 
 interface SuggestionItem {
   file: TFile;
@@ -110,36 +110,45 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
   }
 
   getSuggestions(query: string): SuggestionItem[] {
-    if (!query) {
-      const fileByPath = keyBy(this.getItems(), (x) => x.file.path);
-      return this.app.workspace
-        .getLastOpenFiles()
-        .map((x) => fileByPath[x])
-        .filter((x) => x);
-    }
-
     let lastOpenFileIndexByPath: { [path: string]: number } = {};
     this.app.workspace.getLastOpenFiles().forEach((v, i) => {
       lastOpenFileIndexByPath[v] = i;
     });
 
+    const items = this.getItems();
     let searchMode = this.mode;
     let searchQuery = query;
     if (searchMode === "recent" && query.startsWith("/")) {
       searchMode = "normal";
       searchQuery = query.slice(1);
     }
-
     const qs = searchQuery.split(" ").filter((x) => x);
 
-    let items = this.getItems()
+    if (this.mode === "backlink") {
+      // XXX: This is unsafe implementation, so there are risks it is not working someday
+      const backlinksMap = (this.app.metadataCache as any).getBacklinksForFile(
+        this.app.workspace.getActiveFile()
+      )?.data;
+      return items
+        .filter((x) => backlinksMap[x.file.path])
+        .map((x) => stampMatchType(x, qs))
+        .filter((x) => x.matchType);
+    }
+
+    if (!query) {
+      return items
+        .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535))
+        .slice(0, 10);
+    }
+
+    let suggestions = items
       .map((x) => stampMatchType(x, qs))
       .filter((x) => x.matchType)
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
       .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535));
 
     if (searchMode === "normal") {
-      items = items
+      suggestions = suggestions
         .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))
         .sort(
           sorter(
@@ -150,7 +159,7 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
         );
     }
 
-    return items.slice(0, 10);
+    return suggestions.slice(0, 10);
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {

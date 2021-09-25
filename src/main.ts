@@ -28,6 +28,18 @@ export default class SmartSearch extends Plugin {
         return true;
       },
     });
+
+    this.addCommand({
+      id: "backlink-search",
+      name: "Backlink search",
+      hotkeys: [{ modifiers: ["Ctrl", "Shift"], key: "h" }],
+      checkCallback: (checking: boolean) => {
+        if (!checking) {
+          this.showSearchDialog("backlink");
+        }
+        return true;
+      },
+    });
   }
 
   showSearchDialog(mode: Mode) {

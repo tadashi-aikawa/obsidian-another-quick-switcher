@@ -22,6 +22,12 @@ Run `Smart Search: Recent search` on `Command palette` or push `Ctrl + Shift + E
 
 If the query starts with `/`, it behaves as `Normal Search`.
 
+### Backlink Search
+
+Run `Smart Search: Backlink search` on `Command palette` or push `Ctrl + Shift + H`.
+
+⚠️This feature is an experimental feature. And it has unsafe implementation, so there are risks it is not working someday :)
+
 ## ⏬Install
 
 Download 3 files from a [Releases page].
