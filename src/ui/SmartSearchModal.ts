@@ -8,6 +8,7 @@ import {
 import { sorter } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
+import { Settings } from "../settings";
 
 export type Mode = "normal" | "recent" | "backlink";
 
@@ -90,8 +91,15 @@ function toPrefixIconHTML(item: SuggestionItem): string {
 }
 
 export class SmartSearchModal extends SuggestModal<SuggestionItem> {
-  constructor(app: App, public mode: Mode) {
+  ignoreBackLinkPathPattern: RegExp | null;
+
+  constructor(app: App, public mode: Mode, settings: Settings) {
     super(app);
+
+    this.ignoreBackLinkPathPattern = settings.ignoreBackLinkPathPattern
+      ? new RegExp(settings.ignoreBackLinkPathPattern)
+      : null;
+
     this.setInstructions([
       { command: "Mode: ", purpose: mode },
       { command: "[↑↓]", purpose: "navigate" },
@@ -129,8 +137,14 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
       const backlinksMap = (this.app.metadataCache as any).getBacklinksForFile(
         this.app.workspace.getActiveFile()
       )?.data;
+
       return items
         .filter((x) => backlinksMap[x.file.path])
+        .filter(
+          (x) =>
+            !this.ignoreBackLinkPathPattern ||
+            !x.file.path.match(this.ignoreBackLinkPathPattern)
+        )
         .map((x) => stampMatchType(x, qs))
         .filter((x) => x.matchType);
     }
