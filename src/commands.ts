@@ -1,4 +1,4 @@
-import { Mode, SmartSearchModal } from "../ui/SmartSearchModal";
+import { Mode, SmartSearchModal } from "./ui/SmartSearchModal";
 import { App, Command } from "obsidian";
 
 export function showSearchDialog(app: App, mode: Mode) {
