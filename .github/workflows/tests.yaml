@@ -36,10 +36,10 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         if: "! success()"
         with:
-          description: "⚠ Smart Search Tests failed!"
+          description: "⚠ Another Quick Switcher Tests failed!"
           footer: "Node.js v*${{ matrix.node }}*"
           severity: error
-          avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
+          avatarUrl: https://cdn.otamart.com/item-picture/26205822/0-1574353123758.jpg
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   notify:
@@ -51,8 +51,8 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         if: always()
         with:
-          description: "✅ Smart Search Tests passed!"
+          description: "✅ Another Quick Switcher Tests passed!"
           footer: "Node.js v*12/14*"
           severity: info
-          avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
+          avatarUrl: https://cdn.otamart.com/item-picture/26205822/0-1574353123758.jpg
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}

@@ -32,7 +32,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         if: "! success()"
         with:
-          description: "⚠ Smart Search Release failed!"
+          description: "⚠ Another Quick Switcher Release failed!"
           details: "${{ github.ref }}"
           severity: error
           avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
@@ -47,7 +47,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         if: always()
         with:
-          description: "✅ Smart Search Release finished!"
+          description: "✅ Another Quick Switcher Release finished!"
           details: "${{ github.ref }}"
           severity: info
           avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
