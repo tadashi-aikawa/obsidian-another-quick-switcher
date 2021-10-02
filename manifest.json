@@ -1,9 +1,9 @@
 {
-  "id": "obsidian-smart-search",
-  "name": "Smart Search",
+  "id": "obsidian-another-quick-switcher",
+  "name": "Another Quick Switcher",
   "version": "0.7.0",
   "minAppVersion": "0.9.12",
-  "description": "Search files which is not fuzzy so much as Quick switcher",
+  "description": "This is an Obsidian plugin for those who prefer to search files not so much fuzzy",
   "author": "tadashi-aikawa",
   "authorUrl": "https://github.com/tadashi-aikawa",
   "isDesktopOnly": false

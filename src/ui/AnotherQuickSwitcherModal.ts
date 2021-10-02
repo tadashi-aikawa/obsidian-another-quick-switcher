@@ -92,7 +92,7 @@ function toPrefixIconHTML(item: SuggestionItem): string {
   return "";
 }
 
-export class SmartSearchModal extends SuggestModal<SuggestionItem> {
+export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
   ignoreBackLinkPathPattern: RegExp | null;
   items: SuggestionItem[];
 

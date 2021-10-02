@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import SmartSearch from "./main";
+import AnotherQuickSwitcher from "./main";
 
 export interface Settings {
   ignoreBackLinkPathPattern: string;
@@ -9,10 +9,10 @@ export const DEFAULT_SETTINGS: Settings = {
   ignoreBackLinkPathPattern: "",
 };
 
-export class SmartSearchSettingTab extends PluginSettingTab {
-  plugin: SmartSearch;
+export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
+  plugin: AnotherQuickSwitcher;
 
-  constructor(app: App, plugin: SmartSearch) {
+  constructor(app: App, plugin: AnotherQuickSwitcher) {
     super(app, plugin);
     this.plugin = plugin;
   }

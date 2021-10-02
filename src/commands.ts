@@ -1,9 +1,12 @@
-import { Mode, SmartSearchModal } from "./ui/SmartSearchModal";
+import {
+  Mode,
+  AnotherQuickSwitcherModal,
+} from "./ui/AnotherQuickSwitcherModal";
 import { App, Command } from "obsidian";
 import { Settings } from "./settings";
 
 export function showSearchDialog(app: App, mode: Mode, settings: Settings) {
-  const modal = new SmartSearchModal(app, mode, settings);
+  const modal = new AnotherQuickSwitcherModal(app, mode, settings);
   modal.open();
 }
 
