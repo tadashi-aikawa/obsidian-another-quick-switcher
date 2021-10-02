@@ -8,6 +8,14 @@ export function searchPhantomFiles(app: App): TFile[] {
   ).map((x) => createPhantomFile(app, x));
 }
 
+export function openFile(app: App, file: TFile, newLeaf: boolean) {
+  const leaf = app.workspace.getLeaf(newLeaf);
+
+  leaf.openFile(file, app.workspace.activeLeaf.getViewState()).then(() => {
+    app.workspace.setActiveLeaf(leaf, true, newLeaf);
+  });
+}
+
 function getPathToBeCreated(app: App, linkText: string): string {
   let linkPath = getLinkpath(linkText);
   if (!path.extname(linkPath)) {

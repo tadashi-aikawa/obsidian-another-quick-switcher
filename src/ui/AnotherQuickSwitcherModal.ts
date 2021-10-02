@@ -9,7 +9,7 @@ import { sorter } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
-import { searchPhantomFiles } from "../app-helper";
+import { openFile, searchPhantomFiles } from "../app-helper";
 
 export type Mode = "normal" | "recent" | "backlink";
 
@@ -221,14 +221,6 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       fileToOpened = await this.app.vault.create(item.file.path, "");
     }
 
-    this.openFile(fileToOpened, evt.ctrlKey);
-  }
-
-  openFile(file: TFile, newLeaf: boolean) {
-    const leaf = this.app.workspace.getLeaf(newLeaf);
-
-    leaf.openFile(file).then(() => {
-      this.app.workspace.setActiveLeaf(leaf, true, newLeaf);
-    });
+    openFile(this.app, fileToOpened, evt.ctrlKey);
   }
 }
