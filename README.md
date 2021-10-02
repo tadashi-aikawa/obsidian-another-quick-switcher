@@ -12,13 +12,13 @@ This is an Obsidian plugin for those who prefer to search files not so much fuzz
 
 Run `Another Quick Switcher: Normal search` on `Command palette` or push `Ctrl + Shift + P`.
 
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-smart-search/master/demo/normal.gif)
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/normal.gif)
 
 ### Recent Search
 
 Run `Another Quick Switcher: Recent search` on `Command palette` or push `Ctrl + Shift + E`.
 
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-smart-search/master/demo/recent.gif)
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/recent.gif)
 
 If the query starts with `/`, it behaves as `Normal Search`.
 
@@ -26,7 +26,7 @@ If the query starts with `/`, it behaves as `Normal Search`.
 
 Run `Another Quick Switcher: Backlink search` on `Command palette` or push `Ctrl + Shift + H`.
 
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-smart-search/master/demo/backlink.gif)
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink.gif)
 
 ⚠️This feature is an experimental feature. And it has unsafe implementation, so there are risks it is not working someday :)
 
@@ -38,9 +38,9 @@ Download 3 files from a [Releases page].
 - `styles.css`
 - `manifest.json`
 
-And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-smart-search/`.
+And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-another-quick-switcher/`.
 
-[Releases page]: https://github.com/tadashi-aikawa/obsidian-smart-search/releases/latest
+[Releases page]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/latest
 
 ## 🖥️For developers
 
