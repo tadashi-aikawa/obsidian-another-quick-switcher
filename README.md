@@ -1,10 +1,10 @@
 # Obsidian Smart Search Plugin
 
-This is an Obsidian plugin for those who prefer to search files not so much fuzzy.
+This is an Obsidian plugin for those who prefer to search files not so much fuzzy. Moreover..
 
-- `Smart Search` can search regardless of tokens of appearance order
+- `Smart Search` can search **regardless of the appearance order of tokens**
 - `Smart Search` shows file names and directory names separately
-- `Smart Search` shows suggestions order by prioritizing both last opened time and modified time
+- `Smart Search` shows suggestions order by prioritizing both last opened time and modified time **even after typing**
 
 ## ⌨️Features
 
