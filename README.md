@@ -1,5 +1,9 @@
 # Obsidian Another Quick Switcher Plugin
 
+[![release](https://img.shields.io/github/release/tadashi-aikawa/obsidian-another-quick-switcher.svg)](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/latest)
+[![Tests](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/workflows/Tests/badge.svg)](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/actions)
+![downloads](https://img.shields.io/github/downloads/tadashi-aikawa/obsidian-another-quick-switcher/total)
+
 This is an Obsidian plugin for those who prefer to search files not so much fuzzy. Moreover..
 
 - `Another Quick Switcher` can search **regardless of the appearance order of tokens**
