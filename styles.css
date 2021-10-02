@@ -5,6 +5,11 @@
     align-items: center;
 }
 
+.another-quick-switcher__phantom_item {
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-faint);
+}
+
 .another-quick-switcher__item__icon {
     position: absolute;
     /*noinspection CssUnresolvedCustomProperty*/

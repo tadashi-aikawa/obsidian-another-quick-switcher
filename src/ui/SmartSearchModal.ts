@@ -9,6 +9,7 @@ import { sorter } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
+import { searchPhantomFiles } from "../app-helper";
 
 export type Mode = "normal" | "recent" | "backlink";
 
@@ -16,6 +17,7 @@ interface SuggestionItem {
   file: TFile;
   cache?: CachedMetadata;
   matchType?: "name" | "prefix-name" | "directory" | "alias";
+  phantom: boolean;
 }
 
 function matchQuery(
@@ -69,7 +71,7 @@ function stampMatchType(
 
   if (
     matchQueryAll(item, queries, (item, query) =>
-      (parseFrontMatterAliases(item.cache.frontmatter) ?? []).some((al) =>
+      (parseFrontMatterAliases(item.cache?.frontmatter) ?? []).some((al) =>
         smartIncludes(al, query)
       )
     )
@@ -92,6 +94,7 @@ function toPrefixIconHTML(item: SuggestionItem): string {
 
 export class SmartSearchModal extends SuggestModal<SuggestionItem> {
   ignoreBackLinkPathPattern: RegExp | null;
+  items: SuggestionItem[];
 
   constructor(app: App, public mode: Mode, settings: Settings) {
     super(app);
@@ -115,6 +118,22 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
         (x: any) => !x.modifiers && x.key === "Enter"
       ).func
     );
+
+    const phantomItems: SuggestionItem[] = searchPhantomFiles(app).map((x) => ({
+      file: x,
+      phantom: true,
+    }));
+
+    const markdownItems = app.vault
+      .getMarkdownFiles()
+      .filter((x) => x.path !== app.workspace.getActiveFile()?.path)
+      .map((x) => ({
+        file: x,
+        cache: app.metadataCache.getFileCache(x),
+        phantom: false,
+      }));
+
+    this.items = [...markdownItems, ...phantomItems];
   }
 
   getSuggestions(query: string): SuggestionItem[] {
@@ -123,7 +142,6 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
       lastOpenFileIndexByPath[v] = i;
     });
 
-    const items = this.getItems();
     let searchMode = this.mode;
     let searchQuery = query;
     if (searchMode === "recent" && query.startsWith("/")) {
@@ -138,7 +156,7 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
         this.app.workspace.getActiveFile()
       )?.data;
 
-      return items
+      return this.items
         .filter((x) => backlinksMap[x.file.path])
         .filter(
           (x) =>
@@ -150,12 +168,12 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
     }
 
     if (!query) {
-      return items
+      return this.items
         .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535))
         .slice(0, 10);
     }
 
-    let suggestions = items
+    let suggestions = this.items
       .map((x) => stampMatchType(x, qs))
       .filter((x) => x.matchType)
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
@@ -178,9 +196,13 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
     const suggestionItemHtml = `
-<div class="another-quick-switcher__item">
+<div class="another-quick-switcher__item ${
+      item.phantom ? "another-quick-switcher__phantom_item" : ""
+    }">
   <div class="another-quick-switcher__item__file">${item.file.basename}</div>
-  <div class="another-quick-switcher__item__directory">${FOLDER} ${item.file.parent.name}</div>
+  <div class="another-quick-switcher__item__directory">${FOLDER} ${
+      item.file.parent.name
+    }</div>
 </div>
 `.trim();
 
@@ -190,21 +212,16 @@ export class SmartSearchModal extends SuggestModal<SuggestionItem> {
     );
   }
 
-  getItems(): SuggestionItem[] {
-    return this.app.vault
-      .getMarkdownFiles()
-      .filter((x) => x.path !== this.app.workspace.getActiveFile()?.path)
-      .map((x) => ({
-        file: x,
-        cache: this.app.metadataCache.getFileCache(x),
-      }));
-  }
-
-  onChooseSuggestion(
+  async onChooseSuggestion(
     item: SuggestionItem,
     evt: MouseEvent | KeyboardEvent
-  ): any {
-    this.openFile(item.file, evt.ctrlKey);
+  ): Promise<void> {
+    let fileToOpened = item.file;
+    if (item.phantom) {
+      fileToOpened = await this.app.vault.create(item.file.path, "");
+    }
+
+    this.openFile(fileToOpened, evt.ctrlKey);
   }
 
   openFile(file: TFile, newLeaf: boolean) {

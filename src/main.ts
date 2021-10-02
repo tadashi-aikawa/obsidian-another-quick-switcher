@@ -6,8 +6,6 @@ export default class SmartSearch extends Plugin {
   settings: Settings;
 
   async onload() {
-    console.log("loading plugin");
-
     await this.loadSettings();
     this.addSettingTab(new SmartSearchSettingTab(this.app, this));
 

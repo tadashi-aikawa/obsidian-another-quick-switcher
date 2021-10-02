@@ -38,3 +38,11 @@ export const keyBy = <T>(
     (prev, cur, _1, _2, k = toKey(cur)) => ((prev[k] = cur), prev),
     {} as { [key: string]: T }
   );
+
+export function flatten<T>(matrix: T[][]): T[] {
+  return [].concat(...matrix);
+}
+
+export function uniq<T>(values: T[]): T[] {
+  return [...new Set(values)];
+}

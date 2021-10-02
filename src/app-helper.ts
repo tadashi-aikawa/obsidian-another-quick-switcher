@@ -1,0 +1,51 @@
+import { App, getLinkpath, TFile } from "obsidian";
+import path from "path";
+import { flatten, uniq } from "./utils/collection-helper";
+
+export function searchPhantomFiles(app: App): TFile[] {
+  return uniq(
+    flatten(Object.values(app.metadataCache.unresolvedLinks).map(Object.keys))
+  ).map((x) => createPhantomFile(app, x));
+}
+
+function getPathToBeCreated(app: App, linkText: string): string {
+  let linkPath = getLinkpath(linkText);
+  if (!path.extname(linkPath)) {
+    linkPath += ".md";
+  }
+
+  if (linkPath.includes("/")) {
+    return linkPath;
+  }
+
+  const parent = app.fileManager.getNewFileParent("").path;
+  return `${parent}/${linkPath}`;
+}
+
+// TODO: Use another interface instead of TFile
+function createPhantomFile(app: App, linkText: string): TFile {
+  const linkPath = getPathToBeCreated(app, linkText);
+  const ext = path.extname(linkPath);
+
+  return {
+    path: linkPath,
+    name: path.basename(linkPath),
+    vault: app.vault,
+    extension: ext.replace(".", ""),
+    basename: path.basename(linkPath, ext),
+    parent: {
+      name: path.dirname(linkPath).split("/").pop(),
+      path: path.dirname(linkPath),
+      vault: app.vault,
+      // XXX: From here, Untrusted properties
+      children: [],
+      parent: undefined,
+      isRoot: () => true,
+    },
+    stat: {
+      mtime: 0,
+      ctime: 0,
+      size: 0,
+    },
+  };
+}
