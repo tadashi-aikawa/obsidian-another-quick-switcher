@@ -40,13 +40,26 @@ Download 3 files from a [Releases page].
 
 And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-another-quick-switcher/`.
 
+ℹ I'm hoping to upload it as `Community plugins` when it's a bit more stable, just a moment, please :)
+
 [Releases page]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/latest
 
 ## 🖥️For developers
+
+- Requirements
+  - [Task]
+
+### Development
+
+```console
+task init
+task dev
+```
 
 ### Release
 
 ```console
 task release VERSION=1.2.3
 ```
-~~~~
+
+[Task]: https://github.com/go-task/task
