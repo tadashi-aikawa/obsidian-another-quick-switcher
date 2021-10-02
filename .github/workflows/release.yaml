@@ -47,7 +47,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         if: always()
         with:
-          description: "✅ Another Quick Switcher Release finished!"
+          description: "🚀 Another Quick Switcher Release finished!"
           details: "${{ github.ref }}"
           severity: info
           avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
