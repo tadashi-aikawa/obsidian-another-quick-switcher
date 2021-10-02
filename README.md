@@ -26,6 +26,8 @@ If the query starts with `/`, it behaves as `Normal Search`.
 
 Run `Smart Search: Backlink search` on `Command palette` or push `Ctrl + Shift + H`.
 
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-smart-search/master/demo/backlink.gif)
+
 ⚠️This feature is an experimental feature. And it has unsafe implementation, so there are risks it is not working someday :)
 
 ## ⏬Install
