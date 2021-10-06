@@ -117,7 +117,7 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
     this.scope.register(
       ["Ctrl"],
       "Enter",
-      // XXX: This is unsafe code..!! 😂
+      // XXX: This is unsafe code..!! However, I didn't know how to implement its feature in another way.
       (this.scope as any).keys.find(
         (x: any) => !x.modifiers && x.key === "Enter"
       ).func
