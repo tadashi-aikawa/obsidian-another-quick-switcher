@@ -9,12 +9,7 @@ import { sorter } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
-import {
-  createBacklinksMap,
-  findFirstLinkOffset,
-  openFile,
-  searchPhantomFiles,
-} from "../app-helper";
+import { AppHelper } from "../app-helper";
 
 export type Mode = "normal" | "recent" | "backlink";
 
@@ -100,10 +95,12 @@ function toPrefixIconHTML(item: SuggestionItem): string {
 export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
   ignoreBackLinkPathPattern: RegExp | null;
   items: SuggestionItem[];
+  appHelper: AppHelper;
 
   constructor(app: App, public mode: Mode, settings: Settings) {
     super(app);
 
+    this.appHelper = new AppHelper(app);
     this.ignoreBackLinkPathPattern = settings.ignoreBackLinkPathPattern
       ? new RegExp(settings.ignoreBackLinkPathPattern)
       : null;
@@ -124,10 +121,12 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       ).func
     );
 
-    const phantomItems: SuggestionItem[] = searchPhantomFiles(app).map((x) => ({
-      file: x,
-      phantom: true,
-    }));
+    const phantomItems: SuggestionItem[] = this.appHelper
+      .searchPhantomFiles()
+      .map((x) => ({
+        file: x,
+        phantom: true,
+      }));
 
     const markdownItems = app.vault
       .getMarkdownFiles()
@@ -157,7 +156,7 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
 
     if (this.mode === "backlink") {
       // ✨ If I can use MetadataCache.getBacklinksForFile, I would like to use it instead of original createBacklinksMap :)
-      const backlinksMap = createBacklinksMap(this.app);
+      const backlinksMap = this.appHelper.createBacklinksMap();
 
       return this.items
         .filter((x) =>
@@ -230,13 +229,12 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
 
     const offset =
       this.mode === "backlink"
-        ? findFirstLinkOffset(
-            this.app,
+        ? this.appHelper.findFirstLinkOffset(
             item.file,
             this.app.workspace.getActiveFile()
           )
         : undefined;
 
-    openFile(this.app, fileToOpened, evt.ctrlKey, offset);
+    this.appHelper.openFile(fileToOpened, evt.ctrlKey, offset);
   }
 }
