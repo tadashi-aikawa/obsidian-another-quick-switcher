@@ -1,6 +1,20 @@
-import { App, getLinkpath, TFile } from "obsidian";
+import { App, getLinkpath, LinkCache, MarkdownView, TFile } from "obsidian";
 import path from "path";
 import { flatten, uniq } from "./utils/collection-helper";
+
+export function findFirstLinkOffset(
+  app: App,
+  file: TFile,
+  linkFile: TFile
+): number {
+  return app.metadataCache
+    .getFileCache(file)
+    .links.find(
+      (x: LinkCache) =>
+        app.metadataCache.getFirstLinkpathDest(x.link, file.path).path ===
+        linkFile.path
+    ).position.start.offset;
+}
 
 // noinspection FunctionWithMultipleLoopsJS
 export function createBacklinksMap(app: App): Record<string, Set<string>> {
@@ -26,11 +40,18 @@ export function searchPhantomFiles(app: App): TFile[] {
   ).map((x) => createPhantomFile(app, x));
 }
 
-export function openFile(app: App, file: TFile, newLeaf: boolean) {
+export function openFile(
+  app: App,
+  file: TFile,
+  newLeaf: boolean,
+  offset: number = 0
+) {
   const leaf = app.workspace.getLeaf(newLeaf);
 
   leaf.openFile(file, app.workspace.activeLeaf.getViewState()).then(() => {
     app.workspace.setActiveLeaf(leaf, true, newLeaf);
+    const editor = app.workspace.getActiveViewOfType(MarkdownView).editor;
+    editor.setCursor(editor.offsetToPos(offset));
   });
 }
 

@@ -11,6 +11,7 @@ import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
 import {
   createBacklinksMap,
+  findFirstLinkOffset,
   openFile,
   searchPhantomFiles,
 } from "../app-helper";
@@ -227,6 +228,15 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       fileToOpened = await this.app.vault.create(item.file.path, "");
     }
 
-    openFile(this.app, fileToOpened, evt.ctrlKey);
+    const offset =
+      this.mode === "backlink"
+        ? findFirstLinkOffset(
+            this.app,
+            item.file,
+            this.app.workspace.getActiveFile()
+          )
+        : undefined;
+
+    openFile(this.app, fileToOpened, evt.ctrlKey, offset);
   }
 }
