@@ -8,6 +8,8 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 
 - `Another Quick Switcher` can search **regardless of the appearance order of tokens**
 - `Another Quick Switcher` shows suggestions order by prioritizing both last opened time and modified time **even after typing**
+- `Another Quick Switcher` can search backlinks and move them **without leaving from a keyboard**
+- `Another Quick Switcher` does not search very fuzzy
 - `Another Quick Switcher` shows file names and directory names separately
 
 At the moment, there are only a few options. However, if you would like to customize behavior, I will add options to make it better :)
@@ -46,7 +48,7 @@ And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-another-quick-sw
 
 ℹ I'm hoping to upload it as `Community plugins` when it's a bit more stable, just a moment, please :)
 
-[Releases page]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/latest
+[releases page]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/latest
 
 ## 🖥️For developers
 
@@ -66,4 +68,4 @@ task dev
 task release VERSION=1.2.3
 ```
 
-[Task]: https://github.com/go-task/task
+[task]: https://github.com/go-task/task
