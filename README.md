@@ -32,8 +32,6 @@ Run `Another Quick Switcher: Backlink search` on `Command palette` or push `Ctrl
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink.gif)
 
-⚠️This feature is an experimental feature. And it has unsafe implementation, so there are risks it is not working someday :)
-
 ## ⏬Install
 
 Download 3 files from a [Releases page].

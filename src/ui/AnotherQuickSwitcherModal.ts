@@ -9,7 +9,11 @@ import { sorter } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
-import { openFile, searchPhantomFiles } from "../app-helper";
+import {
+  createBacklinksMap,
+  openFile,
+  searchPhantomFiles,
+} from "../app-helper";
 
 export type Mode = "normal" | "recent" | "backlink";
 
@@ -151,13 +155,15 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
     const qs = searchQuery.split(" ").filter((x) => x);
 
     if (this.mode === "backlink") {
-      // XXX: This is unsafe implementation, so there are risks it is not working someday
-      const backlinksMap = (this.app.metadataCache as any).getBacklinksForFile(
-        this.app.workspace.getActiveFile()
-      )?.data;
+      // ✨ If I can use MetadataCache.getBacklinksForFile, I would like to use it instead of original createBacklinksMap :)
+      const backlinksMap = createBacklinksMap(this.app);
 
       return this.items
-        .filter((x) => backlinksMap[x.file.path])
+        .filter((x) =>
+          backlinksMap[this.app.workspace.getActiveFile()?.path].has(
+            x.file.path
+          )
+        )
         .filter(
           (x) =>
             !this.ignoreBackLinkPathPattern ||

@@ -2,6 +2,24 @@ import { App, getLinkpath, TFile } from "obsidian";
 import path from "path";
 import { flatten, uniq } from "./utils/collection-helper";
 
+// noinspection FunctionWithMultipleLoopsJS
+export function createBacklinksMap(app: App): Record<string, Set<string>> {
+  const backLinksMap: Record<string, Set<string>> = {};
+
+  for (const [filePath, linkMap] of Object.entries(
+    app.metadataCache.resolvedLinks
+  ) as [string, Record<string, number>][]) {
+    for (const linkPath of Object.keys(linkMap)) {
+      if (!backLinksMap[linkPath]) {
+        backLinksMap[linkPath] = new Set();
+      }
+      backLinksMap[linkPath].add(filePath);
+    }
+  }
+
+  return backLinksMap;
+}
+
 export function searchPhantomFiles(app: App): TFile[] {
   return uniq(
     flatten(Object.values(app.metadataCache.unresolvedLinks).map(Object.keys))
