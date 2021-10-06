@@ -3,7 +3,7 @@
   "name": "Another Quick Switcher",
   "version": "0.9.0",
   "minAppVersion": "0.9.12",
-  "description": "This is an Obsidian plugin for those who prefer to search files not so much fuzzy",
+  "description": "This is an Obsidian plugin which is another choice of Quick switcher.",
   "author": "tadashi-aikawa",
   "authorUrl": "https://github.com/tadashi-aikawa",
   "isDesktopOnly": false

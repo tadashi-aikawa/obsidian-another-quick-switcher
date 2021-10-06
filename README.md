@@ -4,11 +4,13 @@
 [![Tests](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/workflows/Tests/badge.svg)](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/actions)
 ![downloads](https://img.shields.io/github/downloads/tadashi-aikawa/obsidian-another-quick-switcher/total)
 
-This is an Obsidian plugin for those who prefer to search files not so much fuzzy. Moreover..
+This is an Obsidian plugin which is another choice of Quick switcher.
 
 - `Another Quick Switcher` can search **regardless of the appearance order of tokens**
-- `Another Quick Switcher` shows file names and directory names separately
 - `Another Quick Switcher` shows suggestions order by prioritizing both last opened time and modified time **even after typing**
+- `Another Quick Switcher` shows file names and directory names separately
+
+At the moment, there are only a few options. However, if you would like to customize behavior, I will add options to make it better :)
 
 ## ⌨️Features
 
