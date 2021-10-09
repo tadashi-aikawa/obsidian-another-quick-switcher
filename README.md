@@ -13,7 +13,7 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 - `Another Quick Switcher` does not search very fuzzy
 - `Another Quick Switcher` shows file names and directory names separately
 
-At the moment, there are only a few options. However, if you would like to customize behavior, I will add options to make it better :)
+At the moment, there are only a few options. However, if you would like to customize behavior, I will add options to make it better as well as I can :)
 
 ## ⌨️Features
 
