@@ -56,6 +56,24 @@ export class AppHelper {
     ).map((x) => this.createPhantomFile(x));
   }
 
+  insertLinkToActiveFileBy(file: TFile) {
+    const activeFilePath = this.app.workspace.getActiveFile()?.path;
+    if (!activeFilePath) {
+      return;
+    }
+
+    const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+    if (!editor) {
+      return;
+    }
+
+    const linkText = this.app.fileManager.generateMarkdownLink(
+      file,
+      activeFilePath
+    );
+    editor.replaceRange(linkText, editor.getCursor("from"));
+  }
+
   private getPathToBeCreated(linkText: string): string {
     let linkPath = getLinkpath(linkText);
     if (!path.extname(linkPath)) {

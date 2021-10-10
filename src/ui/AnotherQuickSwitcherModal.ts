@@ -110,10 +110,19 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       { command: "[↑↓]", purpose: "navigate" },
       { command: "[↵]", purpose: "open" },
       { command: "[ctrl ↵]", purpose: "open in new pane" },
+      { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
     this.scope.register(
       ["Ctrl"],
+      "Enter",
+      // XXX: This is unsafe code..!! However, I didn't know how to implement its feature in another way.
+      (this.scope as any).keys.find(
+        (x: any) => !x.modifiers && x.key === "Enter"
+      ).func
+    );
+    this.scope.register(
+      ["Alt"],
       "Enter",
       // XXX: This is unsafe code..!! However, I didn't know how to implement its feature in another way.
       (this.scope as any).keys.find(
@@ -223,6 +232,11 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
     evt: MouseEvent | KeyboardEvent
   ): Promise<void> {
     let fileToOpened = item.file;
+    if (evt.altKey) {
+      this.appHelper.insertLinkToActiveFileBy(fileToOpened);
+      return;
+    }
+
     if (item.phantom) {
       fileToOpened = await this.app.vault.create(item.file.path, "");
     }
