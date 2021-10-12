@@ -109,12 +109,12 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       { command: "Mode: ", purpose: mode },
       { command: "[↑↓]", purpose: "navigate" },
       { command: "[↵]", purpose: "open" },
-      { command: "[ctrl ↵]", purpose: "open in new pane" },
+      { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
     this.scope.register(
-      ["Ctrl"],
+      ["Mod"],
       "Enter",
       // XXX: This is unsafe code..!! However, I didn't know how to implement its feature in another way.
       (this.scope as any).keys.find(
@@ -249,6 +249,6 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
           )
         : undefined;
 
-    this.appHelper.openFile(fileToOpened, evt.ctrlKey, offset);
+    this.appHelper.openFile(fileToOpened, evt.ctrlKey || evt.metaKey, offset);
   }
 }

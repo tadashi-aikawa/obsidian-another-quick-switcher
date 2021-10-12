@@ -15,7 +15,7 @@ export function createCommands(app: App, settings: Settings): Command[] {
     {
       id: "normal-search",
       name: "Normal search",
-      hotkeys: [{ modifiers: ["Ctrl", "Shift"], key: "p" }],
+      hotkeys: [{ modifiers: ["Mod", "Shift"], key: "p" }],
       checkCallback: (checking: boolean) => {
         if (!checking) {
           showSearchDialog(app, "normal", settings);
@@ -26,7 +26,7 @@ export function createCommands(app: App, settings: Settings): Command[] {
     {
       id: "recent-search",
       name: "Recent search",
-      hotkeys: [{ modifiers: ["Ctrl", "Shift"], key: "e" }],
+      hotkeys: [{ modifiers: ["Mod", "Shift"], key: "e" }],
       checkCallback: (checking: boolean) => {
         if (!checking) {
           showSearchDialog(app, "recent", settings);
@@ -37,7 +37,7 @@ export function createCommands(app: App, settings: Settings): Command[] {
     {
       id: "backlink-search",
       name: "Backlink search",
-      hotkeys: [{ modifiers: ["Ctrl", "Shift"], key: "h" }],
+      hotkeys: [{ modifiers: ["Mod", "Shift"], key: "h" }],
       checkCallback: (checking: boolean) => {
         if (!checking) {
           showSearchDialog(app, "backlink", settings);
