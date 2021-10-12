@@ -41,7 +41,7 @@ export class AppHelper {
     leaf
       .openFile(file, this.app.workspace.activeLeaf.getViewState())
       .then(() => {
-        this.app.workspace.setActiveLeaf(leaf, true, newLeaf);
+        this.app.workspace.setActiveLeaf(leaf, true, true);
         const editor =
           this.app.workspace.getActiveViewOfType(MarkdownView).editor;
         editor.setCursor(editor.offsetToPos(offset));
