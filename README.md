@@ -37,7 +37,7 @@ Run `Another Quick Switcher: Backlink search` on `Command palette` or push `Ctrl
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink.gif)
 
-## ⏬Install
+## ⏬ Install
 
 Download 3 files from a [Releases page].
 
@@ -51,7 +51,11 @@ And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-another-quick-sw
 
 [releases page]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/latest
 
-## 🖥️For developers
+## 🛣 Roadmap
+
+- [ ] Add support for mobile
+
+## 🖥️ For developers
 
 - Requirements
   - [Task]
