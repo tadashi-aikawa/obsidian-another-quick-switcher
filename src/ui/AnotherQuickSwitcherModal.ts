@@ -93,7 +93,6 @@ function toPrefixIconHTML(item: SuggestionItem): string {
 }
 
 export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
-  ignoreBackLinkPathPattern: RegExp | null;
   items: SuggestionItem[];
   appHelper: AppHelper;
 
@@ -101,9 +100,6 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
     super(app);
 
     this.appHelper = new AppHelper(app);
-    this.ignoreBackLinkPathPattern = settings.ignoreBackLinkPathPattern
-      ? new RegExp(settings.ignoreBackLinkPathPattern)
-      : null;
 
     this.setInstructions([
       { command: "Mode: ", purpose: mode },
@@ -146,7 +142,23 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
         phantom: false,
       }));
 
-    this.items = [...markdownItems, ...phantomItems];
+    const items = [...markdownItems, ...phantomItems];
+    const ignoreItems = (pattern: string): SuggestionItem[] =>
+      pattern
+        ? items.filter((x) => !x.file.path.match(new RegExp(pattern)))
+        : items;
+
+    switch (mode) {
+      case "normal":
+        this.items = ignoreItems(settings.ignoreNormalPathPattern);
+        break;
+      case "recent":
+        this.items = ignoreItems(settings.ignoreRecentPathPattern);
+        break;
+      case "backlink":
+        this.items = ignoreItems(settings.ignoreBackLinkPathPattern);
+        break;
+    }
   }
 
   getSuggestions(query: string): SuggestionItem[] {
@@ -172,11 +184,6 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
           backlinksMap[this.app.workspace.getActiveFile()?.path].has(
             x.file.path
           )
-        )
-        .filter(
-          (x) =>
-            !this.ignoreBackLinkPathPattern ||
-            !x.file.path.match(this.ignoreBackLinkPathPattern)
         )
         .map((x) => stampMatchType(x, qs))
         .filter((x) => x.matchType);
