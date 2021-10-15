@@ -53,7 +53,8 @@ And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-another-quick-sw
 
 ## 🛣 Roadmap
 
-- [ ] Add support for mobile
+- [ ] Add support for mobile (#2)
+- [ ] Switch between ignore profiles (#3)
 
 ## 🖥️ For developers
 
