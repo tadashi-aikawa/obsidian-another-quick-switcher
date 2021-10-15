@@ -93,16 +93,19 @@ function toPrefixIconHTML(item: SuggestionItem): string {
 }
 
 export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
-  items: SuggestionItem[];
+  originItems: SuggestionItem[];
+  ignoredItems: SuggestionItem[];
   appHelper: AppHelper;
+  mode: Mode;
+  settings: Settings;
 
-  constructor(app: App, public mode: Mode, settings: Settings) {
+  constructor(app: App, public initialMode: Mode, settings: Settings) {
     super(app);
 
     this.appHelper = new AppHelper(app);
+    this.settings = settings;
 
     this.setInstructions([
-      { command: "Mode: ", purpose: mode },
       { command: "[↑↓]", purpose: "navigate" },
       { command: "[↵]", purpose: "open" },
       { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
@@ -142,22 +145,25 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
         phantom: false,
       }));
 
-    const items = [...markdownItems, ...phantomItems];
+    this.originItems = [...markdownItems, ...phantomItems];
+    this.ignoredItems = this.ignoreItems(initialMode);
+  }
+
+  ignoreItems(mode: Mode): SuggestionItem[] {
     const ignoreItems = (pattern: string): SuggestionItem[] =>
       pattern
-        ? items.filter((x) => !x.file.path.match(new RegExp(pattern)))
-        : items;
+        ? this.originItems.filter(
+            (x) => !x.file.path.match(new RegExp(pattern))
+          )
+        : this.originItems;
 
     switch (mode) {
       case "normal":
-        this.items = ignoreItems(settings.ignoreNormalPathPattern);
-        break;
+        return ignoreItems(this.settings.ignoreNormalPathPattern);
       case "recent":
-        this.items = ignoreItems(settings.ignoreRecentPathPattern);
-        break;
+        return ignoreItems(this.settings.ignoreRecentPathPattern);
       case "backlink":
-        this.items = ignoreItems(settings.ignoreBackLinkPathPattern);
-        break;
+        return ignoreItems(this.settings.ignoreBackLinkPathPattern);
     }
   }
 
@@ -167,19 +173,31 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       lastOpenFileIndexByPath[v] = i;
     });
 
-    let searchMode = this.mode;
     let searchQuery = query;
-    if (searchMode === "recent" && query.startsWith("/")) {
-      searchMode = "normal";
-      searchQuery = query.slice(1);
+    const changeMode = (mode: Mode, slice: number = 0) => {
+      if (this.mode !== mode) {
+        this.ignoredItems = this.ignoreItems(mode);
+      }
+      this.mode = mode;
+      searchQuery = query.slice(slice);
+    };
+    if (query.startsWith(":n ")) {
+      changeMode("normal", 3);
+    } else if (query.startsWith(":r ")) {
+      changeMode("recent", 3);
+    } else if (query.startsWith(":b ")) {
+      changeMode("backlink", 3);
+    } else {
+      changeMode(this.initialMode);
     }
+
     const qs = searchQuery.split(" ").filter((x) => x);
 
     if (this.mode === "backlink") {
       // ✨ If I can use MetadataCache.getBacklinksForFile, I would like to use it instead of original createBacklinksMap :)
       const backlinksMap = this.appHelper.createBacklinksMap();
 
-      return this.items
+      return this.ignoredItems
         .filter((x) =>
           backlinksMap[this.app.workspace.getActiveFile()?.path].has(
             x.file.path
@@ -190,18 +208,18 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
     }
 
     if (!query) {
-      return this.items
+      return this.ignoredItems
         .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535))
         .slice(0, 10);
     }
 
-    let suggestions = this.items
+    let suggestions = this.ignoredItems
       .map((x) => stampMatchType(x, qs))
       .filter((x) => x.matchType)
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
       .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535));
 
-    if (searchMode === "normal") {
+    if (this.mode === "normal") {
       suggestions = suggestions
         .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))
         .sort(
