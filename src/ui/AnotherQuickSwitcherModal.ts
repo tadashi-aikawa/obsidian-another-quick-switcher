@@ -82,14 +82,19 @@ function stampMatchType(
   return item;
 }
 
-function toPrefixIconHTML(item: SuggestionItem): string {
+function toPrefixIconHTML(item: SuggestionItem): HTMLSpanElement {
+  const el = createSpan({ cls: "another-quick-switcher__item__icon" });
   switch (item.matchType) {
     case "alias":
-      return `<span class="another-quick-switcher__item__icon">${ALIAS}</span>`;
+      el.insertAdjacentHTML("beforeend", ALIAS);
+      break;
     case "directory":
-      return `<span class="another-quick-switcher__item__icon">${FOLDER}</span>`;
+      el.insertAdjacentHTML("beforeend", FOLDER);
+      break;
+    default:
+    // do nothing
   }
-  return "";
+  return el;
 }
 
 export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
@@ -232,21 +237,29 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
-    const suggestionItemHtml = `
-<div class="another-quick-switcher__item ${
-      item.phantom ? "another-quick-switcher__phantom_item" : ""
-    }">
-  <div class="another-quick-switcher__item__file">${item.file.basename}</div>
-  <div class="another-quick-switcher__item__directory">${FOLDER} ${
-      item.file.parent.name
-    }</div>
-</div>
-`.trim();
+    const itemDiv = createDiv({
+      cls: [
+        "another-quick-switcher__item",
+        item.phantom ? "another-quick-switcher__phantom_item" : "",
+      ],
+    });
 
-    el.insertAdjacentHTML(
-      "beforeend",
-      `${toPrefixIconHTML(item)}${suggestionItemHtml}`
-    );
+    const fileDiv = createDiv({
+      cls: "another-quick-switcher__item__file",
+      text: item.file.basename,
+    });
+    itemDiv.appendChild(fileDiv);
+
+    const directoryDiv = createDiv({
+      cls: "another-quick-switcher__item__directory",
+    });
+    directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
+    directoryDiv.insertAdjacentHTML("beforeend", ` ${item.file.parent.name}`);
+    itemDiv.appendChild(directoryDiv);
+
+    itemDiv.insertAdjacentElement("beforeend", toPrefixIconHTML(item));
+
+    el.insertAdjacentElement("beforeend", itemDiv);
   }
 
   async onChooseSuggestion(
