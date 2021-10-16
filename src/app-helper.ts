@@ -59,20 +59,18 @@ export class AppHelper {
   }
 
   insertLinkToActiveFileBy(file: TFile) {
-    const activeFilePath = this.app.workspace.getActiveFile()?.path;
-    if (!activeFilePath) {
-      return;
-    }
-
-    const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
-    if (!editor) {
+    const activeMarkdownView =
+      this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!activeMarkdownView) {
       return;
     }
 
     const linkText = this.app.fileManager.generateMarkdownLink(
       file,
-      activeFilePath
+      activeMarkdownView.file.path
     );
+
+    const editor = activeMarkdownView.editor;
     editor.replaceRange(linkText, editor.getCursor("from"));
   }
 
