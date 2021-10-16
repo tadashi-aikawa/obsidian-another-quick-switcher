@@ -274,6 +274,10 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
           )
         : undefined;
 
-    this.appHelper.openFile(fileToOpened, evt.ctrlKey || evt.metaKey, offset);
+    this.appHelper.openMarkdownFile(
+      fileToOpened,
+      evt.ctrlKey || evt.metaKey,
+      offset
+    );
   }
 }

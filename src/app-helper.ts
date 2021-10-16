@@ -35,7 +35,7 @@ export class AppHelper {
     return backLinksMap;
   }
 
-  openFile(file: TFile, newLeaf: boolean, offset: number = 0) {
+  openMarkdownFile(file: TFile, newLeaf: boolean, offset: number = 0) {
     const leaf = this.app.workspace.getLeaf(newLeaf);
 
     leaf
