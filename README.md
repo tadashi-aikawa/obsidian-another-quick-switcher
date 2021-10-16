@@ -65,6 +65,8 @@ And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-another-quick-sw
 ## 🛣 Roadmap
 
 - [ ] Add support for mobile (#2)
+  - [ ] Fix Layout issues
+  - [ ] Fix sidebar icon issues
 - [ ] Switch between ignore profiles (#3)
 
 ## 🖥️ For developers
