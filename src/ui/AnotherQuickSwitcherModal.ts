@@ -179,6 +179,7 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       this.mode = mode;
       searchQuery = query.slice(slice);
     };
+    // noinspection IfStatementWithTooManyBranchesJS
     if (query.startsWith(":n ")) {
       changeMode("normal", 3);
     } else if (query.startsWith(":r ")) {
