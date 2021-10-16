@@ -42,9 +42,11 @@ export class AppHelper {
       .openFile(file, this.app.workspace.activeLeaf.getViewState())
       .then(() => {
         this.app.workspace.setActiveLeaf(leaf, true, true);
-        const editor =
-          this.app.workspace.getActiveViewOfType(MarkdownView).editor;
-        editor.setCursor(editor.offsetToPos(offset));
+        const viewOfType = this.app.workspace.getActiveViewOfType(MarkdownView);
+        if (viewOfType) {
+          const editor = viewOfType.editor;
+          editor.setCursor(editor.offsetToPos(offset));
+        }
       });
   }
 
