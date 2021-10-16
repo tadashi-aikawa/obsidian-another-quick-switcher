@@ -1,6 +1,6 @@
 import { App, getLinkpath, LinkCache, MarkdownView, TFile } from "obsidian";
-import path from "path";
 import { flatten, uniq } from "./utils/collection-helper";
+import { basename, dirname, extname } from "./utils/path";
 
 export class AppHelper {
   constructor(private app: App) {}
@@ -76,7 +76,7 @@ export class AppHelper {
 
   private getPathToBeCreated(linkText: string): string {
     let linkPath = getLinkpath(linkText);
-    if (!path.extname(linkPath)) {
+    if (!extname(linkPath)) {
       linkPath += ".md";
     }
 
@@ -91,17 +91,17 @@ export class AppHelper {
   // TODO: Use another interface instead of TFile
   private createPhantomFile(linkText: string): TFile {
     const linkPath = this.getPathToBeCreated(linkText);
-    const ext = path.extname(linkPath);
+    const ext = extname(linkPath);
 
     return {
       path: linkPath,
-      name: path.basename(linkPath),
+      name: basename(linkPath),
       vault: this.app.vault,
       extension: ext.replace(".", ""),
-      basename: path.basename(linkPath, ext),
+      basename: basename(linkPath, ext),
       parent: {
-        name: path.dirname(linkPath).split("/").pop(),
-        path: path.dirname(linkPath),
+        name: basename(dirname(linkPath)),
+        path: dirname(linkPath),
         vault: this.app.vault,
         // XXX: From here, Untrusted properties
         children: [],
