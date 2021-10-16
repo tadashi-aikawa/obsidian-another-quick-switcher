@@ -134,9 +134,10 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
         phantom: true,
       }));
 
+    const activeFilePath = app.workspace.getActiveFile()?.path;
     const markdownItems = app.vault
       .getMarkdownFiles()
-      .filter((x) => x.path !== app.workspace.getActiveFile()?.path)
+      .filter((x) => x.path !== activeFilePath)
       .map((x) => ({
         file: x,
         cache: app.metadataCache.getFileCache(x),
@@ -196,12 +197,9 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       // ✨ If I can use MetadataCache.getBacklinksForFile, I would like to use it instead of original createBacklinksMap :)
       const backlinksMap = this.appHelper.createBacklinksMap();
 
+      const activeFilePath = this.app.workspace.getActiveFile()?.path;
       return this.ignoredItems
-        .filter((x) =>
-          backlinksMap[this.app.workspace.getActiveFile()?.path].has(
-            x.file.path
-          )
-        )
+        .filter((x) => backlinksMap[activeFilePath].has(x.file.path))
         .map((x) => stampMatchType(x, qs))
         .filter((x) => x.matchType);
     }
