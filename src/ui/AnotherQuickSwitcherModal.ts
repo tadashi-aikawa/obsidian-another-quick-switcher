@@ -115,18 +115,16 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
     this.scope.register(
       ["Mod"],
       "Enter",
-      // XXX: This is unsafe code..!! However, I didn't know how to implement its feature in another way.
-      (this.scope as any).keys.find(
-        (x: any) => !x.modifiers && x.key === "Enter"
-      ).func
+      // This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
+      // https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
+      () => (this as any).chooser.useSelectedItem({ metaKey: true })
     );
     this.scope.register(
       ["Alt"],
       "Enter",
-      // XXX: This is unsafe code..!! However, I didn't know how to implement its feature in another way.
-      (this.scope as any).keys.find(
-        (x: any) => !x.modifiers && x.key === "Enter"
-      ).func
+      // This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
+      // https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
+      () => (this as any).chooser.useSelectedItem({ altKey: true })
     );
 
     const phantomItems: SuggestionItem[] = this.appHelper
