@@ -39,7 +39,7 @@ export class AppHelper {
     const leaf = this.app.workspace.getLeaf(newLeaf);
 
     leaf
-      .openFile(file, this.app.workspace.activeLeaf.getViewState())
+      .openFile(file, this.app.workspace.activeLeaf?.getViewState())
       .then(() => {
         this.app.workspace.setActiveLeaf(leaf, true, true);
         const viewOfType = this.app.workspace.getActiveViewOfType(MarkdownView);
