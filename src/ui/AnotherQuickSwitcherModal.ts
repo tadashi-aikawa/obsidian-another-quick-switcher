@@ -254,12 +254,10 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       cls: "another-quick-switcher__item__directory",
     });
     directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
-    directoryDiv.insertAdjacentHTML("beforeend", ` ${item.file.parent.name}`);
-    itemDiv.appendChild(directoryDiv);
+    directoryDiv.appendText(` ${item.file.parent.name}`);
 
-    itemDiv.insertAdjacentElement("beforeend", toPrefixIconHTML(item));
-
-    el.insertAdjacentElement("beforeend", itemDiv);
+    itemDiv.appendChild(directoryDiv).appendChild(toPrefixIconHTML(item));
+    el.appendChild(itemDiv);
   }
 
   async onChooseSuggestion(
