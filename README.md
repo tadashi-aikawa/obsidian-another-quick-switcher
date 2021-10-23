@@ -48,24 +48,22 @@ One of the following.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink.gif)
 
+## 📱 Mobile support
+
+It both supports desktop and mobile.
+
+![img_1.png](demo/img_1.png)
+
 ## ⏬ Install
 
-Download 3 files from a [Releases page].
+You can download from `Community plugins` in Obsidian settings.
 
-- `main.js`
-- `styles.css`
-- `manifest.json`
-
-And copy to directory, `<your-vault>/.obsidian/plugins/obsidian-another-quick-switcher/`.
-
-ℹ I'm hoping to upload it as `Community plugins` when it's a bit more stable, just a moment, please :)
-
-[releases page]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/latest
+![img.png](demo/img.png)
 
 ## 🛣 Roadmap
 
-- [ ] Add support for mobile (#2)
-  - [ ] Fix Layout issues
+- [x] Add support for mobile (#2)
+  - [x] Fix Layout issues
 - [ ] Switch between ignore profiles (#3)
 
 ## 🖥️ For developers
