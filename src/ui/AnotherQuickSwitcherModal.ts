@@ -88,9 +88,6 @@ function toPrefixIconHTML(item: SuggestionItem): HTMLSpanElement {
     case "alias":
       el.insertAdjacentHTML("beforeend", ALIAS);
       break;
-    case "directory":
-      el.insertAdjacentHTML("beforeend", FOLDER);
-      break;
     default:
     // do nothing
   }
@@ -244,19 +241,26 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       ],
     });
 
+    const entryDiv = createDiv({
+      cls: "another-quick-switcher__item__entry",
+    });
+
     const fileDiv = createDiv({
       cls: "another-quick-switcher__item__file",
       text: item.file.basename,
     });
-    itemDiv.appendChild(fileDiv);
+    entryDiv.appendChild(fileDiv);
 
     const directoryDiv = createDiv({
       cls: "another-quick-switcher__item__directory",
     });
     directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
     directoryDiv.appendText(` ${item.file.parent.name}`);
+    entryDiv.appendChild(directoryDiv);
 
-    itemDiv.appendChild(directoryDiv).appendChild(toPrefixIconHTML(item));
+    itemDiv.appendChild(toPrefixIconHTML(item));
+    itemDiv.appendChild(entryDiv);
+
     el.appendChild(itemDiv);
   }
 
