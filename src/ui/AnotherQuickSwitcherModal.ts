@@ -201,7 +201,7 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
 
       const activeFilePath = this.app.workspace.getActiveFile()?.path;
       return this.ignoredItems
-        .filter((x) => backlinksMap[activeFilePath].has(x.file.path))
+        .filter((x) => backlinksMap[activeFilePath]?.has(x.file.path))
         .map((x) => stampMatchType(x, qs))
         .filter((x) => x.matchType);
     }
