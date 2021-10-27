@@ -1,6 +1,7 @@
 import {
   App,
   CachedMetadata,
+  Notice,
   parseFrontMatterAliases,
   SuggestModal,
   TFile,
@@ -100,6 +101,7 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
   appHelper: AppHelper;
   mode: Mode;
   settings: Settings;
+  searchQuery: string;
 
   constructor(app: App, public initialMode: Mode, settings: Settings) {
     super(app);
@@ -111,6 +113,8 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       { command: "[↑↓]", purpose: "navigate" },
       { command: "[↵]", purpose: "open" },
       { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
+      { command: "[shift ↵]", purpose: "create" },
+      { command: "[ctrl/cmd shift ↵]", purpose: "create in new pane" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
@@ -128,6 +132,16 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       // https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
       () => (this as any).chooser.useSelectedItem({ altKey: true })
     );
+    this.scope.register(["Shift"], "Enter", () => {
+      if (this.searchQuery) {
+        this.handleCreateNew(this.searchQuery, false);
+      }
+    });
+    this.scope.register(["Shift", "Mod"], "Enter", () => {
+      if (this.searchQuery) {
+        this.handleCreateNew(this.searchQuery, true);
+      }
+    });
 
     const phantomItems: SuggestionItem[] = this.appHelper
       .searchPhantomFiles()
@@ -148,6 +162,18 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
 
     this.originItems = [...markdownItems, ...phantomItems];
     this.ignoredItems = this.ignoreItems(initialMode);
+  }
+
+  async handleCreateNew(searchQuery: string, newLeaf: boolean) {
+    const file = await this.appHelper.createMarkdown(this.searchQuery);
+    if (!file) {
+      // noinspection ObjectAllocationIgnored
+      new Notice("This file already exists.");
+      return;
+    }
+
+    this.appHelper.openMarkdownFile(file, newLeaf);
+    this.close();
   }
 
   ignoreItems(mode: Mode): SuggestionItem[] {
@@ -192,6 +218,8 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
     } else {
       changeMode(this.initialMode);
     }
+
+    this.searchQuery = searchQuery;
 
     const qs = searchQuery.split(" ").filter((x) => x);
 

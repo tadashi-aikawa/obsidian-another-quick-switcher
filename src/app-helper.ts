@@ -74,6 +74,24 @@ export class AppHelper {
     editor.replaceRange(linkText, editor.getCursor("from"));
   }
 
+  async createMarkdown(linkText: string): Promise<TFile | null> {
+    const linkPath = this.getPathToBeCreated(linkText);
+    if (await this.exists(linkPath)) {
+      return null;
+    }
+
+    const dir = dirname(linkPath);
+    if (!(await this.exists(dir))) {
+      await this.app.vault.createFolder(dir);
+    }
+
+    return this.app.vault.create(linkPath, "");
+  }
+
+  exists(normalizedPath: string): Promise<boolean> {
+    return this.app.vault.adapter.exists(normalizedPath);
+  }
+
   private getPathToBeCreated(linkText: string): string {
     let linkPath = getLinkpath(linkText);
     if (!extname(linkPath)) {
