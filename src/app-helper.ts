@@ -94,7 +94,7 @@ export class AppHelper {
 
   private getPathToBeCreated(linkText: string): string {
     let linkPath = getLinkpath(linkText);
-    if (!extname(linkPath)) {
+    if (extname(linkPath) !== ".md") {
       linkPath += ".md";
     }
 
@@ -109,14 +109,13 @@ export class AppHelper {
   // TODO: Use another interface instead of TFile
   private createPhantomFile(linkText: string): TFile {
     const linkPath = this.getPathToBeCreated(linkText);
-    const ext = extname(linkPath);
 
     return {
       path: linkPath,
       name: basename(linkPath),
       vault: this.app.vault,
-      extension: ext.replace(".", ""),
-      basename: basename(linkPath, ext),
+      extension: "md",
+      basename: basename(linkPath, ".md"),
       parent: {
         name: basename(dirname(linkPath)),
         path: dirname(linkPath),
