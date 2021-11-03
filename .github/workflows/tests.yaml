@@ -14,21 +14,15 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: ["12.x", "14.x"]
-    name: Node ${{ matrix.node }}
-
     steps:
       - uses: actions/checkout@v2
       - uses: arduino/setup-task@v1
       - uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node }}
+          node-version: '16'
 
       - run: task ci
       - uses: codecov/codecov-action@v1
-        if: "matrix.node == '12.x' && success()"
         with:
           file: ./coverage/clover.xml
 
@@ -37,7 +31,7 @@ jobs:
         if: "! success()"
         with:
           description: "⚠ Another Quick Switcher Tests failed!"
-          footer: "Node.js v*${{ matrix.node }}*"
+          footer: "Node.js v16"
           severity: error
           avatarUrl: https://cdn.otamart.com/item-picture/26205822/0-1574353123758.jpg
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
@@ -52,7 +46,7 @@ jobs:
         if: always()
         with:
           description: "✅ Another Quick Switcher Tests passed!"
-          footer: "Node.js v*12/14*"
+          footer: "Node.js v16"
           severity: info
           avatarUrl: https://cdn.otamart.com/item-picture/26205822/0-1574353123758.jpg
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
