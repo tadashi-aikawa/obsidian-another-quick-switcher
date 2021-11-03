@@ -6,13 +6,14 @@
 
 This is an Obsidian plugin which is another choice of Quick switcher.
 
-- `Another Quick Switcher` can search **regardless of the appearance order of tokens**
-- `Another Quick Switcher` shows suggestions order by prioritizing both last opened time and modified time **even after typing** (Recent search)
-- `Another Quick Switcher` can search backlinks and move them **without leaving from a keyboard** (Backlink search)
-- `Another Quick Switcher` can search to **consider prefix emoji**.
-- `Another Quick Switcher` **only searches Markdown files**.
-- `Another Quick Switcher` does not search very fuzzy
-- `Another Quick Switcher` shows file names and directory names separately
+- It can search **regardless of the appearance order of tokens**
+- It shows suggestions order by prioritizing both last opened time and modified time **even after typing** (`Recent search`)
+- It can search backlinks and move them **without leaving from a keyboard** (`Backlink search`)
+- It can move a file to another folder (`Move file to another folder`)
+- It can search to **consider prefix emoji**
+- It **only searches Markdown files** except for the case of `Move file to another folder`
+- It does not search very fuzzy
+- It shows file names and directory names separately
 
 At the moment, there are only a few options. However, if you would like to customize behavior, I will add options to make it better as well as I can :)
 
@@ -48,6 +49,15 @@ One of the following.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink.gif)
 
+### Move file to another folder
+
+One of the following.
+
+- Run `Another Quick Switcher: Move file to another folder` on `Command palette`
+- Push `Ctrl/Cmd + Shift + M` in the default case
+
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/move-to-folder.gif)
+
 ## 📱 Mobile support
 
 It both supports desktop and mobile.
@@ -62,8 +72,6 @@ You can download from `Community plugins` in Obsidian settings.
 
 ## 🛣 Roadmap
 
-- [x] Add support for mobile (#2)
-  - [x] Fix Layout issues
 - [ ] Switch between ignore profiles (#3)
 
 ## 🖥️ For developers

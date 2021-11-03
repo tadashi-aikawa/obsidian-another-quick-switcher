@@ -1,9 +1,22 @@
-import { App, getLinkpath, LinkCache, MarkdownView, TFile } from "obsidian";
+import {
+  App,
+  getLinkpath,
+  LinkCache,
+  MarkdownView,
+  TFile,
+  TFolder,
+} from "obsidian";
 import { flatten, uniq } from "./utils/collection-helper";
 import { basename, dirname, extname } from "./utils/path";
 
 export class AppHelper {
   constructor(private app: App) {}
+
+  getFolders(): TFolder[] {
+    return this.app.vault
+      .getAllLoadedFiles()
+      .filter((x) => x instanceof TFolder) as TFolder[];
+  }
 
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
     return this.app.metadataCache
