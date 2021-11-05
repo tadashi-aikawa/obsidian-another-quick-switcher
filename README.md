@@ -9,6 +9,7 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 - It can search **regardless of the appearance order of tokens**
 - It shows suggestions order by prioritizing both last opened time and modified time **even after typing** (`Recent search`)
 - It can search backlinks and move them **without leaving from a keyboard** (`Backlink search`)
+- It can search **by tags** when you input queries start with `#`
 - It can move a file to another folder (`Move file to another folder`)
 - It can search to **consider prefix emoji**
 - It **only searches Markdown files** except for the case of `Move file to another folder`
