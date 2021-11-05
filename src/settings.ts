@@ -2,17 +2,20 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import AnotherQuickSwitcher from "./main";
 
 export interface Settings {
+  showTags: boolean;
+  showDirectory: boolean;
   ignoreNormalPathPattern: string;
   ignoreRecentPathPattern: string;
   ignoreBackLinkPathPattern: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  showTags: true,
+  showDirectory: true,
   ignoreNormalPathPattern: "",
   ignoreRecentPathPattern: "",
   ignoreBackLinkPathPattern: "",
 };
-
 export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   plugin: AnotherQuickSwitcher;
 
@@ -25,6 +28,24 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     let { containerEl } = this;
 
     containerEl.empty();
+
+    containerEl.createEl("h2", { text: "Another Quick Switcher - Settings" });
+
+    new Setting(containerEl).setName("Show Directory").addToggle((tc) => {
+      tc.setValue(this.plugin.settings.showDirectory).onChange(
+        async (value) => {
+          this.plugin.settings.showDirectory = value;
+          await this.plugin.saveSettings();
+        }
+      );
+    });
+
+    new Setting(containerEl).setName("Show Tags").addToggle((tc) => {
+      tc.setValue(this.plugin.settings.showTags).onChange(async (value) => {
+        this.plugin.settings.showTags = value;
+        await this.plugin.saveSettings();
+      });
+    });
 
     new Setting(containerEl)
       .setName("Ignore normal path pattern")

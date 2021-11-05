@@ -37,6 +37,18 @@
     padding-left: 15px;
 }
 
+.another-quick-switcher__item__tags {
+    margin-left: 5px;
+}
+
+.another-quick-switcher__item__tag {
+    font-size: 0.65em;
+    margin: 0 3px;
+    display: inline-block;
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-muted);
+}
+
 /*mobile*/
 
 .is-mobile .another-quick-switcher__item {

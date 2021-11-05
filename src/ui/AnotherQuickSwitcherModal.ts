@@ -1,12 +1,12 @@
 import {
   App,
-  CachedMetadata,
   Notice,
   parseFrontMatterAliases,
+  parseFrontMatterTags,
   SuggestModal,
   TFile,
 } from "obsidian";
-import { sorter } from "../utils/collection-helper";
+import { sorter, uniq } from "../utils/collection-helper";
 import { ALIAS, FOLDER } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
@@ -16,7 +16,8 @@ export type Mode = "normal" | "recent" | "backlink";
 
 interface SuggestionItem {
   file: TFile;
-  cache?: CachedMetadata;
+  tags: string[];
+  aliases: string[];
   matchType?: "name" | "prefix-name" | "directory" | "alias";
   phantom: boolean;
 }
@@ -26,6 +27,11 @@ function matchQuery(
   query: string,
   matcher: (item: SuggestionItem, query: string) => boolean
 ): boolean {
+  if (query.startsWith("#")) {
+    // XXX: Don't use matcher...
+    return item.tags.some((tag) => smartIncludes(tag.slice(1), query.slice(1)));
+  }
+
   const qs = query.split("/");
   const file = qs.pop();
   return (
@@ -72,9 +78,7 @@ function stampMatchType(
 
   if (
     matchQueryAll(item, queries, (item, query) =>
-      (parseFrontMatterAliases(item.cache?.frontmatter) ?? []).some((al) =>
-        smartIncludes(al, query)
-      )
+      item.aliases.some((al) => smartIncludes(al, query))
     )
   ) {
     return { ...item, matchType: "alias" };
@@ -147,6 +151,8 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       .searchPhantomFiles()
       .map((x) => ({
         file: x,
+        aliases: [],
+        tags: [],
         phantom: true,
       }));
 
@@ -154,11 +160,18 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
     const markdownItems = app.vault
       .getMarkdownFiles()
       .filter((x) => x.path !== activeFilePath)
-      .map((x) => ({
-        file: x,
-        cache: app.metadataCache.getFileCache(x),
-        phantom: false,
-      }));
+      .map((x) => {
+        const cache = app.metadataCache.getFileCache(x);
+        return {
+          file: x,
+          aliases: parseFrontMatterAliases(cache.frontmatter) ?? [],
+          tags: uniq([
+            ...(cache.tags ?? []).map((x) => x.tag),
+            ...(parseFrontMatterTags(cache.frontmatter) ?? []),
+          ]),
+          phantom: false,
+        };
+      });
 
     this.originItems = [...markdownItems, ...phantomItems];
     this.ignoredItems = this.ignoreItems(initialMode);
@@ -279,17 +292,34 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
     });
     entryDiv.appendChild(fileDiv);
 
-    const directoryDiv = createDiv({
-      cls: "another-quick-switcher__item__directory",
-    });
-    directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
-    directoryDiv.appendText(` ${item.file.parent.name}`);
-    entryDiv.appendChild(directoryDiv);
+    if (this.settings.showDirectory) {
+      const directoryDiv = createDiv({
+        cls: "another-quick-switcher__item__directory",
+      });
+      directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
+      directoryDiv.appendText(` ${item.file.parent.name}`);
+      entryDiv.appendChild(directoryDiv);
+    }
 
     itemDiv.appendChild(toPrefixIconHTML(item));
     itemDiv.appendChild(entryDiv);
 
     el.appendChild(itemDiv);
+
+    if (this.settings.showTags) {
+      const tagsDiv = createDiv({
+        cls: "another-quick-switcher__item__tags",
+      });
+      item.tags.forEach((tag) => {
+        const labelSpan = createSpan({
+          cls: "another-quick-switcher__item__tag",
+        });
+        labelSpan.appendText(tag);
+        tagsDiv.appendChild(labelSpan);
+      });
+
+      el.appendChild(tagsDiv);
+    }
   }
 
   async onChooseSuggestion(
