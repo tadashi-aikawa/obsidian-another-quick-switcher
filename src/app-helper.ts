@@ -19,15 +19,17 @@ export class AppHelper {
   }
 
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
-    return this.app.metadataCache
-      .getFileCache(file)
-      .links.find((x: LinkCache) => {
-        const toLinkFilePath = this.app.metadataCache.getFirstLinkpathDest(
-          x.link,
-          file.path
-        )?.path;
-        return toLinkFilePath === linkFile.path;
-      }).position.start.offset;
+    const fileCache = this.app.metadataCache.getFileCache(file);
+    const links = fileCache.links ?? [];
+    const embeds = fileCache.embeds ?? [];
+
+    return [...links, ...embeds].find((x: LinkCache) => {
+      const toLinkFilePath = this.app.metadataCache.getFirstLinkpathDest(
+        x.link,
+        file.path
+      )?.path;
+      return toLinkFilePath === linkFile.path;
+    }).position.start.offset;
   }
 
   // noinspection FunctionWithMultipleLoopsJS
