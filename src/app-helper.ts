@@ -60,7 +60,9 @@ export class AppHelper {
         const viewOfType = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (viewOfType) {
           const editor = viewOfType.editor;
-          editor.setCursor(editor.offsetToPos(offset));
+          const pos = editor.offsetToPos(offset);
+          editor.setCursor(pos);
+          editor.scrollIntoView({ from: pos, to: pos }, 200);
         }
       });
   }
