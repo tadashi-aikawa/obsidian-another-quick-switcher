@@ -99,13 +99,28 @@ function toPrefixIconHTML(item: SuggestionItem): HTMLSpanElement {
   return el;
 }
 
-export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
+// This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
+// https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
+interface UnsafeModalInterface {
+  chooser: {
+    selectedItem: number;
+    setSelectedItem(item: number): void;
+    useSelectedItem(ev: Partial<KeyboardEvent>): void;
+  };
+}
+
+export class AnotherQuickSwitcherModal
+  extends SuggestModal<SuggestionItem>
+  implements UnsafeModalInterface
+{
   originItems: SuggestionItem[];
   ignoredItems: SuggestionItem[];
   appHelper: AppHelper;
   mode: Mode;
   settings: Settings;
   searchQuery: string;
+
+  chooser: UnsafeModalInterface["chooser"];
 
   constructor(app: App, public initialMode: Mode, settings: Settings) {
     super(app);
@@ -122,19 +137,11 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
-    this.scope.register(
-      ["Mod"],
-      "Enter",
-      // This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
-      // https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
-      () => (this as any).chooser.useSelectedItem({ metaKey: true })
+    this.scope.register(["Mod"], "Enter", () =>
+      this.chooser.useSelectedItem({ metaKey: true })
     );
-    this.scope.register(
-      ["Alt"],
-      "Enter",
-      // This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
-      // https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
-      () => (this as any).chooser.useSelectedItem({ altKey: true })
+    this.scope.register(["Alt"], "Enter", () =>
+      this.chooser.useSelectedItem({ altKey: true })
     );
     this.scope.register(["Shift"], "Enter", () => {
       if (this.searchQuery) {
@@ -145,6 +152,12 @@ export class AnotherQuickSwitcherModal extends SuggestModal<SuggestionItem> {
       if (this.searchQuery) {
         this.handleCreateNew(this.searchQuery, true);
       }
+    });
+    this.scope.register(["Mod"], "N", () => {
+      this.chooser.setSelectedItem(this.chooser.selectedItem + 1);
+    });
+    this.scope.register(["Mod"], "P", () => {
+      this.chooser.setSelectedItem(this.chooser.selectedItem - 1);
     });
 
     const phantomItems: SuggestionItem[] = this.appHelper
