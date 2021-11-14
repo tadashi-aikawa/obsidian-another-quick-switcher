@@ -2,7 +2,6 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import AnotherQuickSwitcher from "./main";
 
 export interface Settings {
-  showTags: boolean;
   showDirectory: boolean;
   ignoreNormalPathPattern: string;
   ignoreRecentPathPattern: string;
@@ -10,7 +9,6 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  showTags: true,
   showDirectory: true,
   ignoreNormalPathPattern: "",
   ignoreRecentPathPattern: "",
@@ -38,13 +36,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }
       );
-    });
-
-    new Setting(containerEl).setName("Show Tags").addToggle((tc) => {
-      tc.setValue(this.plugin.settings.showTags).onChange(async (value) => {
-        this.plugin.settings.showTags = value;
-        await this.plugin.saveSettings();
-      });
     });
 
     new Setting(containerEl)

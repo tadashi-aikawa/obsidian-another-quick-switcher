@@ -7,96 +7,87 @@ import {
   TFile,
 } from "obsidian";
 import { sorter, uniq } from "../utils/collection-helper";
-import { ALIAS, FOLDER } from "./icons";
+import { ALIAS, FOLDER, TAG } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 
 export type Mode = "normal" | "recent" | "backlink";
+type MatchType = "not found" | "name" | "prefix-name" | "directory" | "tag";
 
 interface SuggestionItem {
   file: TFile;
   tags: string[];
   aliases: string[];
-  matchType?: "name" | "prefix-name" | "directory" | "alias";
+  matchResults: MatchQueryResult[];
   phantom: boolean;
 }
 
-function matchQuery(
-  item: SuggestionItem,
-  query: string,
-  matcher: (item: SuggestionItem, query: string) => boolean
-): boolean {
+interface MatchQueryResult {
+  type: MatchType;
+  alias: boolean;
+  meta?: string[];
+}
+
+function matchQuery(item: SuggestionItem, query: string): MatchQueryResult {
+  // tag
   if (query.startsWith("#")) {
-    // XXX: Don't use matcher...
-    return item.tags.some((tag) => smartIncludes(tag.slice(1), query.slice(1)));
+    const tags = item.tags.filter((tag) =>
+      smartIncludes(tag.slice(1), query.slice(1))
+    );
+    return {
+      type: tags.length > 0 ? "tag" : "not found",
+      meta: tags,
+      alias: false,
+    };
   }
 
   const qs = query.split("/");
   const file = qs.pop();
-  return (
-    qs.every((dir) => smartIncludes(item.file.parent.path, dir)) &&
-    matcher(item, file)
+  const includeDir = qs.every((dir) =>
+    smartIncludes(item.file.parent.path, dir)
   );
+  if (!includeDir) {
+    return { type: "not found", alias: false };
+  }
+
+  if (smartStartsWith(item.file.name, file)) {
+    return { type: "prefix-name", meta: [item.file.name], alias: false };
+  }
+  const prefixNameMatchedAliases = item.aliases.filter((x) =>
+    smartStartsWith(x, file)
+  );
+  if (prefixNameMatchedAliases.length > 0) {
+    return { type: "prefix-name", meta: prefixNameMatchedAliases, alias: true };
+  }
+
+  if (smartIncludes(item.file.name, file)) {
+    return { type: "name", meta: [item.file.name], alias: false };
+  }
+  const nameMatchedAliases = item.aliases.filter((x) => smartIncludes(x, file));
+  if (nameMatchedAliases.length > 0) {
+    return { type: "name", meta: nameMatchedAliases, alias: true };
+  }
+
+  if (smartIncludes(item.file.path, file)) {
+    return { type: "directory", meta: [item.file.path], alias: false };
+  }
+
+  return { type: "not found", alias: false };
 }
 
 function matchQueryAll(
   item: SuggestionItem,
-  queries: string[],
-  matcher: (item: SuggestionItem, query: string) => boolean
-): boolean {
-  return queries.every((q) => matchQuery(item, q, matcher));
+  queries: string[]
+): MatchQueryResult[] {
+  return queries.map((q) => matchQuery(item, q));
 }
 
-function stampMatchType(
+function stampMatchResults(
   item: SuggestionItem,
   queries: string[]
 ): SuggestionItem {
-  if (
-    matchQueryAll(item, queries, (item, query) =>
-      smartStartsWith(item.file.name, query)
-    )
-  ) {
-    return { ...item, matchType: "prefix-name" };
-  }
-
-  if (
-    matchQueryAll(item, queries, (item, query) =>
-      smartIncludes(item.file.name, query)
-    )
-  ) {
-    return { ...item, matchType: "name" };
-  }
-
-  if (
-    matchQueryAll(item, queries, (item, query) =>
-      smartIncludes(item.file.path, query)
-    )
-  ) {
-    return { ...item, matchType: "directory" };
-  }
-
-  if (
-    matchQueryAll(item, queries, (item, query) =>
-      item.aliases.some((al) => smartIncludes(al, query))
-    )
-  ) {
-    return { ...item, matchType: "alias" };
-  }
-
-  return item;
-}
-
-function toPrefixIconHTML(item: SuggestionItem): HTMLSpanElement {
-  const el = createSpan({ cls: "another-quick-switcher__item__icon" });
-  switch (item.matchType) {
-    case "alias":
-      el.insertAdjacentHTML("beforeend", ALIAS);
-      break;
-    default:
-    // do nothing
-  }
-  return el;
+  return { ...item, matchResults: matchQueryAll(item, queries) };
 }
 
 // This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
@@ -160,14 +151,13 @@ export class AnotherQuickSwitcherModal
       this.chooser.setSelectedItem(this.chooser.selectedItem - 1);
     });
 
-    const phantomItems: SuggestionItem[] = this.appHelper
-      .searchPhantomFiles()
-      .map((x) => ({
-        file: x,
-        aliases: [],
-        tags: [],
-        phantom: true,
-      }));
+    const phantomItems = this.appHelper.searchPhantomFiles().map((x) => ({
+      file: x,
+      aliases: [],
+      tags: [],
+      phantom: true,
+      matchResults: [],
+    }));
 
     const activeFilePath = app.workspace.getActiveFile()?.path;
     const markdownItems = app.vault
@@ -183,6 +173,7 @@ export class AnotherQuickSwitcherModal
             ...(parseFrontMatterTags(cache.frontmatter) ?? []),
           ]),
           phantom: false,
+          matchResults: [],
         };
       });
 
@@ -256,8 +247,8 @@ export class AnotherQuickSwitcherModal
       const activeFilePath = this.app.workspace.getActiveFile()?.path;
       return this.ignoredItems
         .filter((x) => backlinksMap[activeFilePath]?.has(x.file.path))
-        .map((x) => stampMatchType(x, qs))
-        .filter((x) => x.matchType);
+        .map((x) => stampMatchResults(x, qs))
+        .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
     }
 
     if (!query) {
@@ -267,20 +258,29 @@ export class AnotherQuickSwitcherModal
     }
 
     let suggestions = this.ignoredItems
-      .map((x) => stampMatchType(x, qs))
-      .filter((x) => x.matchType)
+      .map((x) => stampMatchResults(x, qs))
+      .filter((x) => x.matchResults.every((x) => x.type !== "not found"))
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
       .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535));
 
     if (this.mode === "normal") {
       suggestions = suggestions
-        .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))
         .sort(
-          sorter(
-            (x) =>
-              x.matchType === "prefix-name" ? 1000 - x.file.name.length : 0,
-            "desc"
+          sorter((x) =>
+            x.matchResults.some(
+              (x) => x.type === "prefix-name" || x.type === "name"
+            )
+              ? 0
+              : 1
           )
+        )
+        .sort(
+          sorter((x) => {
+            const firstPrefixMatch = x.matchResults.find(
+              (x) => x.type === "prefix-name"
+            );
+            return firstPrefixMatch ? 1000 - x.file.name.length : 0;
+          }, "desc")
         );
     }
 
@@ -314,24 +314,55 @@ export class AnotherQuickSwitcherModal
       entryDiv.appendChild(directoryDiv);
     }
 
-    itemDiv.appendChild(toPrefixIconHTML(item));
     itemDiv.appendChild(entryDiv);
 
     el.appendChild(itemDiv);
 
-    if (this.settings.showTags) {
-      const tagsDiv = createDiv({
-        cls: "another-quick-switcher__item__tags",
-      });
-      item.tags.forEach((tag) => {
-        const labelSpan = createSpan({
-          cls: "another-quick-switcher__item__tag",
-        });
-        labelSpan.appendText(tag);
-        tagsDiv.appendChild(labelSpan);
-      });
+    // reasons..
+    const aliases = item.matchResults.filter((res) => res.alias);
+    const tags = item.matchResults.filter((res) => res.type === "tag");
 
-      el.appendChild(tagsDiv);
+    if (aliases.length === 0 && tags.length === 0) {
+      return;
+    }
+
+    const reasonsDiv = createDiv({
+      cls: "another-quick-switcher__item__reasons",
+    });
+    el.appendChild(reasonsDiv);
+
+    if (aliases.length > 0) {
+      const aliasDiv = createDiv({
+        cls: "another-quick-switcher__item__reason",
+      });
+      aliases.forEach((res) => {
+        res.meta.forEach((x) => {
+          const aliasSpan = createSpan({
+            cls: "another-quick-switcher__item__reason__alias",
+          });
+          aliasSpan.insertAdjacentHTML("beforeend", ALIAS);
+          aliasSpan.appendText(x);
+          aliasDiv.appendChild(aliasSpan);
+        });
+      });
+      reasonsDiv.appendChild(aliasDiv);
+    }
+
+    if (tags.length > 0) {
+      const tagsDiv = createDiv({
+        cls: "another-quick-switcher__item__reason",
+      });
+      tags.forEach((res) => {
+        res.meta.forEach((x) => {
+          const tagsSpan = createSpan({
+            cls: "another-quick-switcher__item__reason__tag",
+          });
+          tagsSpan.insertAdjacentHTML("beforeend", TAG);
+          tagsSpan.appendText(x.replace("#", ""));
+          tagsDiv.appendChild(tagsSpan);
+        });
+      });
+      reasonsDiv.appendChild(tagsDiv);
     }
   }
 
