@@ -38,12 +38,10 @@
 }
 
 .another-quick-switcher__item__reasons {
-    margin-left: 5px;
 }
 
 .another-quick-switcher__item__reason {
     font-size: 0.75em;
-    margin: 0 3px;
     display: inline-block;
     /*noinspection CssUnresolvedCustomProperty*/
     color: var(--text-muted);
@@ -52,12 +50,12 @@
 .another-quick-switcher__item__reason__alias {
     display: inline-flex;
     align-items: center;
-    margin: 0 3px;
+    margin-right: 5px;
 }
 .another-quick-switcher__item__reason__tag {
     display: inline-flex;
     align-items: center;
-    margin: 0 3px;
+    margin-right: 5px;
 }
 
 /*mobile*/
