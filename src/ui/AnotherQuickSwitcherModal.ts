@@ -6,7 +6,7 @@ import {
   SuggestModal,
   TFile,
 } from "obsidian";
-import { sorter, uniq } from "../utils/collection-helper";
+import { sorter, uniq, uniqFlatMap } from "../utils/collection-helper";
 import { ALIAS, FOLDER, TAG } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
@@ -335,15 +335,13 @@ export class AnotherQuickSwitcherModal
       const aliasDiv = createDiv({
         cls: "another-quick-switcher__item__reason",
       });
-      aliases.forEach((res) => {
-        res.meta.forEach((x) => {
-          const aliasSpan = createSpan({
-            cls: "another-quick-switcher__item__reason__alias",
-          });
-          aliasSpan.insertAdjacentHTML("beforeend", ALIAS);
-          aliasSpan.appendText(x);
-          aliasDiv.appendChild(aliasSpan);
+      uniqFlatMap(aliases, (x) => x.meta).forEach((x) => {
+        const aliasSpan = createSpan({
+          cls: "another-quick-switcher__item__reason__alias",
         });
+        aliasSpan.insertAdjacentHTML("beforeend", ALIAS);
+        aliasSpan.appendText(x);
+        aliasDiv.appendChild(aliasSpan);
       });
       reasonsDiv.appendChild(aliasDiv);
     }
@@ -352,15 +350,13 @@ export class AnotherQuickSwitcherModal
       const tagsDiv = createDiv({
         cls: "another-quick-switcher__item__reason",
       });
-      tags.forEach((res) => {
-        res.meta.forEach((x) => {
-          const tagsSpan = createSpan({
-            cls: "another-quick-switcher__item__reason__tag",
-          });
-          tagsSpan.insertAdjacentHTML("beforeend", TAG);
-          tagsSpan.appendText(x.replace("#", ""));
-          tagsDiv.appendChild(tagsSpan);
+      uniqFlatMap(tags, (x) => x.meta).forEach((x) => {
+        const tagsSpan = createSpan({
+          cls: "another-quick-switcher__item__reason__tag",
         });
+        tagsSpan.insertAdjacentHTML("beforeend", TAG);
+        tagsSpan.appendText(x.replace("#", ""));
+        tagsDiv.appendChild(tagsSpan);
       });
       reasonsDiv.appendChild(tagsDiv);
     }

@@ -46,3 +46,7 @@ export function flatten<T>(matrix: T[][]): T[] {
 export function uniq<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
+
+export function uniqFlatMap<T, U>(values: T[], mapper: (x: T) => U[]): U[] {
+  return uniq(flatten(values.map(mapper)));
+}
