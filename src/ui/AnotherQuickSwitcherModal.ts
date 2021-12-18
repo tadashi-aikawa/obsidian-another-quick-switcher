@@ -196,20 +196,22 @@ export class AnotherQuickSwitcherModal
   }
 
   ignoreItems(mode: Mode): SuggestionItem[] {
-    const ignoreItems = (pattern: string): SuggestionItem[] =>
-      pattern
-        ? this.originItems.filter(
-            (x) => !x.file.path.match(new RegExp(pattern))
-          )
-        : this.originItems;
+    const ignoreItems = (patterns: string): SuggestionItem[] => {
+      const ps = patterns.split("\n").filter((x) => x);
+      return ps.length === 0
+        ? this.originItems
+        : this.originItems.filter(
+            (x) => !ps.some((p) => x.file.path.startsWith(p))
+          );
+    };
 
     switch (mode) {
       case "normal":
-        return ignoreItems(this.settings.ignoreNormalPathPattern);
+        return ignoreItems(this.settings.ignoreNormalPathPrefixPatterns);
       case "recent":
-        return ignoreItems(this.settings.ignoreRecentPathPattern);
+        return ignoreItems(this.settings.ignoreRecentPathPrefixPatterns);
       case "backlink":
-        return ignoreItems(this.settings.ignoreBackLinkPathPattern);
+        return ignoreItems(this.settings.ignoreBackLinkPathPrefixPatterns);
     }
   }
 

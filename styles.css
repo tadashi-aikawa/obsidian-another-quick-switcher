@@ -88,3 +88,8 @@
     /*noinspection CssUnresolvedCustomProperty*/
     color: var(--text-muted);
 }
+
+.another-quick-switcher__settings__ignore_path_patterns {
+    height: 120px;
+    width: 500px;
+}

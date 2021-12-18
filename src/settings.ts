@@ -4,17 +4,17 @@ import AnotherQuickSwitcher from "./main";
 export interface Settings {
   showDirectory: boolean;
   showExistingFilesOnly: boolean;
-  ignoreNormalPathPattern: string;
-  ignoreRecentPathPattern: string;
-  ignoreBackLinkPathPattern: string;
+  ignoreNormalPathPrefixPatterns: string;
+  ignoreRecentPathPrefixPatterns: string;
+  ignoreBackLinkPathPrefixPatterns: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   showDirectory: true,
   showExistingFilesOnly: false,
-  ignoreNormalPathPattern: "",
-  ignoreRecentPathPattern: "",
-  ignoreBackLinkPathPattern: "",
+  ignoreNormalPathPrefixPatterns: "",
+  ignoreRecentPathPrefixPatterns: "",
+  ignoreBackLinkPathPrefixPatterns: "",
 };
 export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   plugin: AnotherQuickSwitcher;
@@ -51,43 +51,55 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         );
       });
 
-    new Setting(containerEl)
-      .setName("Ignore normal path pattern")
-      .setDesc("A Ignore path pattern for Normal search")
-      .addText((tc) =>
-        tc
-          .setPlaceholder("Enter a RegExp pattern")
-          .setValue(this.plugin.settings.ignoreNormalPathPattern)
-          .onChange(async (value) => {
-            this.plugin.settings.ignoreNormalPathPattern = value;
-            await this.plugin.saveSettings();
-          })
-      );
+    containerEl.createEl("h3", { text: "🔍 Normal search" });
 
     new Setting(containerEl)
-      .setName("Ignore recent path pattern")
-      .setDesc("A Ignore path pattern for Recent search")
-      .addText((tc) =>
-        tc
-          .setPlaceholder("Enter a RegExp pattern")
-          .setValue(this.plugin.settings.ignoreRecentPathPattern)
+      .setName("Ignore prefix path patterns for Normal search")
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("Prefix match patterns")
+          .setValue(this.plugin.settings.ignoreNormalPathPrefixPatterns)
           .onChange(async (value) => {
-            this.plugin.settings.ignoreRecentPathPattern = value;
+            this.plugin.settings.ignoreNormalPathPrefixPatterns = value;
             await this.plugin.saveSettings();
-          })
-      );
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__ignore_path_patterns";
+        return el;
+      });
+
+    containerEl.createEl("h3", { text: "⏱ Recent search" });
 
     new Setting(containerEl)
-      .setName("Ignore backlink path pattern")
-      .setDesc("A Ignore path pattern for Backlink search")
-      .addText((tc) =>
-        tc
-          .setPlaceholder("Enter a RegExp pattern")
-          .setValue(this.plugin.settings.ignoreBackLinkPathPattern)
+      .setName("Ignore prefix path patterns for Recent search")
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("Prefix match patterns")
+          .setValue(this.plugin.settings.ignoreRecentPathPrefixPatterns)
           .onChange(async (value) => {
-            this.plugin.settings.ignoreBackLinkPathPattern = value;
+            this.plugin.settings.ignoreRecentPathPrefixPatterns = value;
             await this.plugin.saveSettings();
-          })
-      );
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__ignore_path_patterns";
+        return el;
+      });
+
+    containerEl.createEl("h3", { text: "👀 Backlink search" });
+
+    new Setting(containerEl)
+      .setName("Ignore prefix path patterns for Backlink search")
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("Prefix match patterns")
+          .setValue(this.plugin.settings.ignoreBackLinkPathPrefixPatterns)
+          .onChange(async (value) => {
+            this.plugin.settings.ignoreBackLinkPathPrefixPatterns = value;
+            await this.plugin.saveSettings();
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__ignore_path_patterns";
+        return el;
+      });
   }
 }
