@@ -151,13 +151,15 @@ export class AnotherQuickSwitcherModal
       this.chooser.setSelectedItem(this.chooser.selectedItem - 1);
     });
 
-    const phantomItems = this.appHelper.searchPhantomFiles().map((x) => ({
-      file: x,
-      aliases: [],
-      tags: [],
-      phantom: true,
-      matchResults: [],
-    }));
+    const phantomItems = this.settings.showExistingFilesOnly
+      ? []
+      : this.appHelper.searchPhantomFiles().map((x) => ({
+          file: x,
+          aliases: [],
+          tags: [],
+          phantom: true,
+          matchResults: [],
+        }));
 
     const activeFilePath = app.workspace.getActiveFile()?.path;
     const markdownItems = app.vault

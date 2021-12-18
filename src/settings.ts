@@ -3,6 +3,7 @@ import AnotherQuickSwitcher from "./main";
 
 export interface Settings {
   showDirectory: boolean;
+  showExistingFilesOnly: boolean;
   ignoreNormalPathPattern: string;
   ignoreRecentPathPattern: string;
   ignoreBackLinkPathPattern: string;
@@ -10,6 +11,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   showDirectory: true,
+  showExistingFilesOnly: false,
   ignoreNormalPathPattern: "",
   ignoreRecentPathPattern: "",
   ignoreBackLinkPathPattern: "",
@@ -29,7 +31,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Another Quick Switcher - Settings" });
 
-    new Setting(containerEl).setName("Show Directory").addToggle((tc) => {
+    new Setting(containerEl).setName("Show directory").addToggle((tc) => {
       tc.setValue(this.plugin.settings.showDirectory).onChange(
         async (value) => {
           this.plugin.settings.showDirectory = value;
@@ -37,6 +39,17 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         }
       );
     });
+
+    new Setting(containerEl)
+      .setName("Show existing files only")
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.showExistingFilesOnly).onChange(
+          async (value) => {
+            this.plugin.settings.showExistingFilesOnly = value;
+            await this.plugin.saveSettings();
+          }
+        );
+      });
 
     new Setting(containerEl)
       .setName("Ignore normal path pattern")
