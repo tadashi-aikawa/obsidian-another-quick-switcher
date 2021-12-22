@@ -88,7 +88,7 @@ export class AppHelper {
     );
 
     const editor = activeMarkdownView.editor;
-    editor.replaceRange(linkText, editor.getCursor("from"));
+    editor.replaceSelection(linkText);
   }
 
   async createMarkdown(linkText: string): Promise<TFile | null> {
