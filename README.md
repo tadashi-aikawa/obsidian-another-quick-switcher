@@ -71,10 +71,6 @@ You can download from `Community plugins` in Obsidian settings.
 
 ![img.png](demo/img.png)
 
-## 🛣 Roadmap
-
-- [ ] Switch between ignore profiles (#3)
-
 ## 🖥️ For developers
 
 - Requirements
