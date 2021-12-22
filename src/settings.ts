@@ -4,6 +4,7 @@ import AnotherQuickSwitcher from "./main";
 export interface Settings {
   showDirectory: boolean;
   showExistingFilesOnly: boolean;
+  maxNumberOfSuggestions: number;
   ignoreNormalPathPrefixPatterns: string;
   ignoreRecentPathPrefixPatterns: string;
   ignoreBackLinkPathPrefixPatterns: string;
@@ -12,6 +13,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   showDirectory: true,
   showExistingFilesOnly: false,
+  maxNumberOfSuggestions: 50,
   ignoreNormalPathPrefixPatterns: "",
   ignoreRecentPathPrefixPatterns: "",
   ignoreBackLinkPathPrefixPatterns: "",
@@ -50,6 +52,19 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           }
         );
       });
+
+    new Setting(containerEl)
+      .setName("Max number of suggestions")
+      .addSlider((sc) =>
+        sc
+          .setLimits(1, 255, 1)
+          .setValue(this.plugin.settings.maxNumberOfSuggestions)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.maxNumberOfSuggestions = value;
+            await this.plugin.saveSettings();
+          })
+      );
 
     containerEl.createEl("h3", { text: "🔍 Normal search" });
 

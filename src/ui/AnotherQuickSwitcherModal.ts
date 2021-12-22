@@ -252,13 +252,14 @@ export class AnotherQuickSwitcherModal
       return this.ignoredItems
         .filter((x) => backlinksMap[activeFilePath]?.has(x.file.path))
         .map((x) => stampMatchResults(x, qs))
-        .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
+        .filter((x) => x.matchResults.every((x) => x.type !== "not found"))
+        .slice(0, this.settings.maxNumberOfSuggestions);
     }
 
     if (!query) {
       return this.ignoredItems
         .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535))
-        .slice(0, 10);
+        .slice(0, this.settings.maxNumberOfSuggestions);
     }
 
     let suggestions = this.ignoredItems
@@ -288,7 +289,7 @@ export class AnotherQuickSwitcherModal
         );
     }
 
-    return suggestions.slice(0, 10);
+    return suggestions.slice(0, this.settings.maxNumberOfSuggestions);
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
