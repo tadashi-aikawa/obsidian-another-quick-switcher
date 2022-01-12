@@ -120,7 +120,10 @@ export class AnotherQuickSwitcherModal
     this.settings = settings;
 
     this.setInstructions([
-      { command: "[↑↓]", purpose: "navigate" },
+      {
+        command: "[↑↓][ctrl/cmd n or p][ctrl/cmd j or k]",
+        purpose: "navigate",
+      },
       { command: "[↵]", purpose: "open" },
       { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
       { command: "[shift ↵]", purpose: "create" },
@@ -148,6 +151,12 @@ export class AnotherQuickSwitcherModal
       this.chooser.setSelectedItem(this.chooser.selectedItem + 1);
     });
     this.scope.register(["Mod"], "P", () => {
+      this.chooser.setSelectedItem(this.chooser.selectedItem - 1);
+    });
+    this.scope.register(["Mod"], "J", () => {
+      this.chooser.setSelectedItem(this.chooser.selectedItem + 1);
+    });
+    this.scope.register(["Mod"], "K", () => {
       this.chooser.setSelectedItem(this.chooser.selectedItem - 1);
     });
 
