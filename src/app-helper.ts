@@ -62,7 +62,7 @@ export class AppHelper {
           const editor = viewOfType.editor;
           const pos = editor.offsetToPos(offset);
           editor.setCursor(pos);
-          editor.scrollIntoView({ from: pos, to: pos }, 200);
+          editor.scrollIntoView({ from: pos, to: pos }, true);
         }
       });
   }
