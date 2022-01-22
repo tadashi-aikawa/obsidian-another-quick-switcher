@@ -267,6 +267,7 @@ export class AnotherQuickSwitcherModal
 
     if (!query) {
       return this.ignoredItems
+        .sort(sorter((x) => x.file.stat.mtime, "desc"))
         .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535))
         .slice(0, this.settings.maxNumberOfSuggestions);
     }
