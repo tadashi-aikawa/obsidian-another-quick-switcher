@@ -51,9 +51,7 @@ export function uniqFlatMap<T, U>(values: T[], mapper: (x: T) => U[]): U[] {
   return uniq(flatten(values.map(mapper)));
 }
 
-export function minBy<T>(values: T[], toNumber: (x: T) => number): T {
-  return values.reduce(
-    (a: T, b: T) => (toNumber(a) <= toNumber(b) ? a : b),
-    values[0]
-  );
-}
+export const minBy = <T>(collection: T[], toNum: (t: T) => number) => {
+  const select = (a: T, b: T) => (toNum(a) <= toNum(b) ? a : b);
+  return collection.reduce(select);
+};
