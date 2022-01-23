@@ -50,3 +50,10 @@ export function uniq<T>(values: T[]): T[] {
 export function uniqFlatMap<T, U>(values: T[], mapper: (x: T) => U[]): U[] {
   return uniq(flatten(values.map(mapper)));
 }
+
+export function minBy<T>(values: T[], toNumber: (x: T) => number): T {
+  return values.reduce(
+    (a: T, b: T) => (toNumber(a) <= toNumber(b) ? a : b),
+    values[0]
+  );
+}

@@ -6,7 +6,7 @@ import {
   SuggestModal,
   TFile,
 } from "obsidian";
-import { sorter, uniq, uniqFlatMap } from "../utils/collection-helper";
+import { minBy, sorter, uniq, uniqFlatMap } from "../utils/collection-helper";
 import { ALIAS, FOLDER, TAG } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
@@ -25,7 +25,8 @@ interface SuggestionItem {
 
 interface MatchQueryResult {
   type: MatchType;
-  alias: boolean;
+  alias?: string;
+  hitWord?: string;
   meta?: string[];
 }
 
@@ -38,7 +39,6 @@ function matchQuery(item: SuggestionItem, query: string): MatchQueryResult {
     return {
       type: tags.length > 0 ? "tag" : "not found",
       meta: tags,
-      alias: false,
     };
   }
 
@@ -48,32 +48,40 @@ function matchQuery(item: SuggestionItem, query: string): MatchQueryResult {
     smartIncludes(item.file.parent.path, dir)
   );
   if (!includeDir) {
-    return { type: "not found", alias: false };
+    return { type: "not found" };
   }
 
   if (smartStartsWith(item.file.name, file)) {
-    return { type: "prefix-name", meta: [item.file.name], alias: false };
+    return { type: "prefix-name", meta: [item.file.name] };
   }
   const prefixNameMatchedAliases = item.aliases.filter((x) =>
     smartStartsWith(x, file)
   );
   if (prefixNameMatchedAliases.length > 0) {
-    return { type: "prefix-name", meta: prefixNameMatchedAliases, alias: true };
+    return {
+      type: "prefix-name",
+      meta: prefixNameMatchedAliases,
+      alias: minBy(prefixNameMatchedAliases, (x) => x.length),
+    };
   }
 
   if (smartIncludes(item.file.name, file)) {
-    return { type: "name", meta: [item.file.name], alias: false };
+    return { type: "name", meta: [item.file.name] };
   }
   const nameMatchedAliases = item.aliases.filter((x) => smartIncludes(x, file));
   if (nameMatchedAliases.length > 0) {
-    return { type: "name", meta: nameMatchedAliases, alias: true };
+    return {
+      type: "name",
+      meta: nameMatchedAliases,
+      alias: minBy(nameMatchedAliases, (x) => x.length),
+    };
   }
 
   if (smartIncludes(item.file.path, file)) {
-    return { type: "directory", meta: [item.file.path], alias: false };
+    return { type: "directory", meta: [item.file.path] };
   }
 
-  return { type: "not found", alias: false };
+  return { type: "not found" };
 }
 
 function matchQueryAll(
@@ -294,7 +302,15 @@ export class AnotherQuickSwitcherModal
             const firstPrefixMatch = x.matchResults.find(
               (x) => x.type === "prefix-name"
             );
-            return firstPrefixMatch ? 1000 - x.file.name.length : 0;
+            if (firstPrefixMatch) {
+              return (
+                1000 -
+                (firstPrefixMatch.alias
+                  ? firstPrefixMatch.alias.length
+                  : x.file.name.length)
+              );
+            }
+            return 0;
           }, "desc")
         );
     }
