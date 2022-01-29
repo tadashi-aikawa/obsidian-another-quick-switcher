@@ -6,7 +6,13 @@ import {
   SuggestModal,
   TFile,
 } from "obsidian";
-import { minBy, sorter, uniq, uniqFlatMap } from "../utils/collection-helper";
+import {
+  ignoreItems,
+  minBy,
+  sorter,
+  uniq,
+  uniqFlatMap,
+} from "../utils/collection-helper";
 import { ALIAS, FOLDER, TAG } from "./icons";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
@@ -213,22 +219,16 @@ export class AnotherQuickSwitcherModal
   }
 
   ignoreItems(mode: Mode): SuggestionItem[] {
-    const ignoreItems = (patterns: string): SuggestionItem[] => {
-      const ps = patterns.split("\n").filter((x) => x);
-      return ps.length === 0
-        ? this.originItems
-        : this.originItems.filter(
-            (x) => !ps.some((p) => x.file.path.startsWith(p))
-          );
-    };
+    const _ignoreItems = (patterns: string): SuggestionItem[] =>
+      ignoreItems(this.originItems, patterns, (x) => x.file.path);
 
     switch (mode) {
       case "normal":
-        return ignoreItems(this.settings.ignoreNormalPathPrefixPatterns);
+        return _ignoreItems(this.settings.ignoreNormalPathPrefixPatterns);
       case "recent":
-        return ignoreItems(this.settings.ignoreRecentPathPrefixPatterns);
+        return _ignoreItems(this.settings.ignoreRecentPathPrefixPatterns);
       case "backlink":
-        return ignoreItems(this.settings.ignoreBackLinkPathPrefixPatterns);
+        return _ignoreItems(this.settings.ignoreBackLinkPathPrefixPatterns);
     }
   }
 

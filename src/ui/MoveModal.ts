@@ -1,5 +1,5 @@
 import { App, SuggestModal, TFolder } from "obsidian";
-import { sorter } from "../utils/collection-helper";
+import { ignoreItems, sorter } from "../utils/collection-helper";
 import { FOLDER } from "./icons";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
@@ -64,6 +64,7 @@ function stampMatchType(
 
 export class MoveModal extends SuggestModal<SuggestionItem> {
   originItems: SuggestionItem[];
+  ignoredItems: SuggestionItem[];
   appHelper: AppHelper;
   settings: Settings;
 
@@ -85,12 +86,18 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
       .map((x) => ({
         folder: x,
       }));
+
+    this.ignoredItems = ignoreItems(
+      this.originItems,
+      this.settings.ignoreMoveFileToAnotherFolderPrefixPatterns,
+      (x) => x.folder.path
+    );
   }
 
   getSuggestions(query: string): SuggestionItem[] {
     const qs = query.split(" ").filter((x) => x);
 
-    return this.originItems
+    return this.ignoredItems
       .map((x) => stampMatchType(x, qs))
       .filter((x) => x.matchType)
       .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))

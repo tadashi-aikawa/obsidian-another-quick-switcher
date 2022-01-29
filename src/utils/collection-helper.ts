@@ -55,3 +55,14 @@ export const minBy = <T>(collection: T[], toNum: (t: T) => number) => {
   const select = (a: T, b: T) => (toNum(a) <= toNum(b) ? a : b);
   return collection.reduce(select);
 };
+
+export function ignoreItems<T>(
+  items: T[],
+  patternsSeparatedLineBreak: string,
+  toPath: (t: T) => string
+): T[] {
+  const ps = patternsSeparatedLineBreak.split("\n").filter((x) => x);
+  return ps.length === 0
+    ? items
+    : items.filter((x: T) => !ps.some((p) => toPath(x).startsWith(p)));
+}

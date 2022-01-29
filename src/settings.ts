@@ -8,6 +8,7 @@ export interface Settings {
   ignoreNormalPathPrefixPatterns: string;
   ignoreRecentPathPrefixPatterns: string;
   ignoreBackLinkPathPrefixPatterns: string;
+  ignoreMoveFileToAnotherFolderPrefixPatterns: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -17,6 +18,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ignoreNormalPathPrefixPatterns: "",
   ignoreRecentPathPrefixPatterns: "",
   ignoreBackLinkPathPrefixPatterns: "",
+  ignoreMoveFileToAnotherFolderPrefixPatterns: "",
 };
 export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   plugin: AnotherQuickSwitcher;
@@ -110,6 +112,26 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.ignoreBackLinkPathPrefixPatterns)
           .onChange(async (value) => {
             this.plugin.settings.ignoreBackLinkPathPrefixPatterns = value;
+            await this.plugin.saveSettings();
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__ignore_path_patterns";
+        return el;
+      });
+
+    containerEl.createEl("h3", { text: "📁 Move file to another folder" });
+
+    new Setting(containerEl)
+      .setName("Ignore prefix path patterns for Move file to another folder")
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("Prefix match patterns")
+          .setValue(
+            this.plugin.settings.ignoreMoveFileToAnotherFolderPrefixPatterns
+          )
+          .onChange(async (value) => {
+            this.plugin.settings.ignoreMoveFileToAnotherFolderPrefixPatterns =
+              value;
             await this.plugin.saveSettings();
           });
         el.inputEl.className =
