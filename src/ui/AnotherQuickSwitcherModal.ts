@@ -162,16 +162,20 @@ export class AnotherQuickSwitcherModal
       }
     });
     this.scope.register(["Mod"], "N", () => {
-      this.chooser.setSelectedItem(this.chooser.selectedItem + 1);
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown" })
+      );
     });
     this.scope.register(["Mod"], "P", () => {
-      this.chooser.setSelectedItem(this.chooser.selectedItem - 1);
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
     });
     this.scope.register(["Mod"], "J", () => {
-      this.chooser.setSelectedItem(this.chooser.selectedItem + 1);
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown" })
+      );
     });
     this.scope.register(["Mod"], "K", () => {
-      this.chooser.setSelectedItem(this.chooser.selectedItem - 1);
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
     });
 
     const phantomItems = this.settings.showExistingFilesOnly
