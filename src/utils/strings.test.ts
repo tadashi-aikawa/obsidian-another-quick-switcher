@@ -1,6 +1,7 @@
 import {
   excludeEmoji,
   excludeSpace,
+  normalizeAccentsDiacritics,
   smartIncludes,
   smartStartsWith,
 } from "./strings";
@@ -28,6 +29,18 @@ describe.each`
 `("excludeEmoji", ({ text, expected }) => {
   test(`excludeEmoji(${text}) = ${expected}`, () => {
     expect(excludeEmoji(text)).toBe(expected);
+  });
+});
+
+describe.each`
+  text        | expected
+  ${"abcde"}  | ${"abcde"}
+  ${"àáâãäå"} | ${"aaaaaa"}
+  ${"çüöà"}   | ${"cuoa"}
+  ${"a🍰b"}   | ${"a🍰b"}
+`("normalizeAccentsDiacritics", ({ text, expected }) => {
+  test(`normalizeAccentsDiacritics(${text}) = ${expected}`, () => {
+    expect(normalizeAccentsDiacritics(text)).toBe(expected);
   });
 });
 
