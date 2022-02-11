@@ -37,6 +37,7 @@ describe.each`
   ${"abcde"}  | ${"abcde"}
   ${"àáâãäå"} | ${"aaaaaa"}
   ${"çüöà"}   | ${"cuoa"}
+  ${"Ø"}      | ${"O"}
   ${"a🍰b"}   | ${"a🍰b"}
 `("normalizeAccentsDiacritics", ({ text, expected }) => {
   test(`normalizeAccentsDiacritics(${text}) = ${expected}`, () => {

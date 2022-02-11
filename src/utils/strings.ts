@@ -1,4 +1,5 @@
 import { normalize } from "jest-config";
+import diacriticsMap from "./diacritics-map";
 
 const regEmoji = new RegExp(
   /[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|[\uFE0E-\uFE0F]/,
@@ -15,7 +16,7 @@ export function excludeEmoji(text: string): string {
 
 export function normalizeAccentsDiacritics(text: string): string {
   // https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript
-  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return text.replace(/[^\u0000-\u007E]/g, (x) => diacriticsMap[x] ?? x);
 }
 
 export function smartIncludes(text: string, query: string): boolean {
