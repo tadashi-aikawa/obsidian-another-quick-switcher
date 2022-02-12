@@ -5,20 +5,26 @@ export interface Settings {
   showDirectory: boolean;
   showExistingFilesOnly: boolean;
   maxNumberOfSuggestions: number;
+  normalizeAccentsAndDiacritics: boolean;
   ignoreNormalPathPrefixPatterns: string;
   ignoreRecentPathPrefixPatterns: string;
   ignoreBackLinkPathPrefixPatterns: string;
   ignoreMoveFileToAnotherFolderPrefixPatterns: string;
+  // debug
+  showLogAboutPerformanceInConsole: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   showDirectory: true,
   showExistingFilesOnly: false,
   maxNumberOfSuggestions: 50,
+  normalizeAccentsAndDiacritics: false,
   ignoreNormalPathPrefixPatterns: "",
   ignoreRecentPathPrefixPatterns: "",
   ignoreBackLinkPathPrefixPatterns: "",
   ignoreMoveFileToAnotherFolderPrefixPatterns: "",
+  // debug
+  showLogAboutPerformanceInConsole: false,
 };
 export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   plugin: AnotherQuickSwitcher;
@@ -67,6 +73,18 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+
+    new Setting(containerEl)
+      .setName("Normalize accents/diacritics")
+      .setDesc("⚠ If enabled, it is about 2 to 5 times slower than disabled")
+      .addToggle((tc) => {
+        tc.setValue(
+          this.plugin.settings.normalizeAccentsAndDiacritics
+        ).onChange(async (value) => {
+          this.plugin.settings.normalizeAccentsAndDiacritics = value;
+          await this.plugin.saveSettings();
+        });
+      });
 
     containerEl.createEl("h3", { text: "🔍 Normal search" });
 
@@ -137,6 +155,19 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         el.inputEl.className =
           "another-quick-switcher__settings__ignore_path_patterns";
         return el;
+      });
+
+    containerEl.createEl("h3", { text: "Debug" });
+
+    new Setting(containerEl)
+      .setName("Show log about performance in a console")
+      .addToggle((tc) => {
+        tc.setValue(
+          this.plugin.settings.showLogAboutPerformanceInConsole
+        ).onChange(async (value) => {
+          this.plugin.settings.showLogAboutPerformanceInConsole = value;
+          await this.plugin.saveSettings();
+        });
       });
   }
 }

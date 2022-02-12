@@ -1,4 +1,3 @@
-import { normalize } from "jest-config";
 import diacriticsMap from "./diacritics-map";
 
 const regEmoji = new RegExp(
@@ -19,14 +18,38 @@ export function normalizeAccentsDiacritics(text: string): string {
   return text.replace(/[^\u0000-\u007E]/g, (x) => diacriticsMap[x] ?? x);
 }
 
-export function smartIncludes(text: string, query: string): boolean {
-  return excludeSpace(normalizeAccentsDiacritics(text.toLowerCase())).includes(
-    normalizeAccentsDiacritics(query.toLowerCase())
-  );
+export function smartIncludes(
+  text: string,
+  query: string,
+  isNormalizeAccentsDiacritics: boolean
+): boolean {
+  let t = text.toLowerCase();
+  if (isNormalizeAccentsDiacritics) {
+    t = normalizeAccentsDiacritics(t);
+  }
+
+  let q = query.toLowerCase();
+  if (isNormalizeAccentsDiacritics) {
+    q = normalizeAccentsDiacritics(q);
+  }
+
+  return excludeSpace(t).includes(q);
 }
 
-export function smartStartsWith(text: string, query: string): boolean {
-  return excludeSpace(
-    excludeEmoji(normalizeAccentsDiacritics(text.toLowerCase()))
-  ).startsWith(normalizeAccentsDiacritics(query.toLowerCase()));
+export function smartStartsWith(
+  text: string,
+  query: string,
+  isNormalizeAccentsDiacritics: boolean
+): boolean {
+  let t = text.toLowerCase();
+  if (isNormalizeAccentsDiacritics) {
+    t = normalizeAccentsDiacritics(t);
+  }
+
+  let q = query.toLowerCase();
+  if (isNormalizeAccentsDiacritics) {
+    q = normalizeAccentsDiacritics(q);
+  }
+
+  return excludeSpace(excludeEmoji(t)).startsWith(q);
 }

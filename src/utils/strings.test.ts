@@ -57,7 +57,7 @@ describe.each`
   ${" AB CD "}    | ${"ab bc"} | ${false}
 `("smartIncludes", ({ text, query, expected }) => {
   test(`smartIncludes(${text}, ${query}) = ${expected}`, () => {
-    expect(smartIncludes(text, query)).toBe(expected);
+    expect(smartIncludes(text, query, false)).toBe(expected);
   });
 });
 
@@ -77,6 +77,6 @@ describe.each`
   ${" AB CD "}    | ${"ab bc"} | ${false}
 `("smartStartsWith", ({ text, query, expected }) => {
   test(`smartStartsWith(${text}, ${query}) = ${expected}`, () => {
-    expect(smartStartsWith(text, query)).toBe(expected);
+    expect(smartStartsWith(text, query, false)).toBe(expected);
   });
 });

@@ -18,6 +18,10 @@ import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 
+function buildLogMessage(message: string, msec: number) {
+  return `${message}: ${Math.round(msec)}[ms]`;
+}
+
 export type Mode = "normal" | "recent" | "backlink";
 type MatchType = "not found" | "name" | "prefix-name" | "directory" | "tag";
 
@@ -36,11 +40,15 @@ interface MatchQueryResult {
   meta?: string[];
 }
 
-function matchQuery(item: SuggestionItem, query: string): MatchQueryResult {
+function matchQuery(
+  item: SuggestionItem,
+  query: string,
+  isNormalizeAccentsDiacritics: boolean
+): MatchQueryResult {
   // tag
   if (query.startsWith("#")) {
     const tags = item.tags.filter((tag) =>
-      smartIncludes(tag.slice(1), query.slice(1))
+      smartIncludes(tag.slice(1), query.slice(1), isNormalizeAccentsDiacritics)
     );
     return {
       type: tags.length > 0 ? "tag" : "not found",
@@ -51,17 +59,17 @@ function matchQuery(item: SuggestionItem, query: string): MatchQueryResult {
   const qs = query.split("/");
   const file = qs.pop();
   const includeDir = qs.every((dir) =>
-    smartIncludes(item.file.parent.path, dir)
+    smartIncludes(item.file.parent.path, dir, isNormalizeAccentsDiacritics)
   );
   if (!includeDir) {
     return { type: "not found" };
   }
 
-  if (smartStartsWith(item.file.name, file)) {
+  if (smartStartsWith(item.file.name, file, isNormalizeAccentsDiacritics)) {
     return { type: "prefix-name", meta: [item.file.name] };
   }
   const prefixNameMatchedAliases = item.aliases.filter((x) =>
-    smartStartsWith(x, file)
+    smartStartsWith(x, file, isNormalizeAccentsDiacritics)
   );
   if (prefixNameMatchedAliases.length > 0) {
     return {
@@ -71,10 +79,12 @@ function matchQuery(item: SuggestionItem, query: string): MatchQueryResult {
     };
   }
 
-  if (smartIncludes(item.file.name, file)) {
+  if (smartIncludes(item.file.name, file, isNormalizeAccentsDiacritics)) {
     return { type: "name", meta: [item.file.name] };
   }
-  const nameMatchedAliases = item.aliases.filter((x) => smartIncludes(x, file));
+  const nameMatchedAliases = item.aliases.filter((x) =>
+    smartIncludes(x, file, isNormalizeAccentsDiacritics)
+  );
   if (nameMatchedAliases.length > 0) {
     return {
       type: "name",
@@ -83,7 +93,7 @@ function matchQuery(item: SuggestionItem, query: string): MatchQueryResult {
     };
   }
 
-  if (smartIncludes(item.file.path, file)) {
+  if (smartIncludes(item.file.path, file, isNormalizeAccentsDiacritics)) {
     return { type: "directory", meta: [item.file.path] };
   }
 
@@ -92,16 +102,21 @@ function matchQuery(item: SuggestionItem, query: string): MatchQueryResult {
 
 function matchQueryAll(
   item: SuggestionItem,
-  queries: string[]
+  queries: string[],
+  isNormalizeAccentsDiacritics: boolean
 ): MatchQueryResult[] {
-  return queries.map((q) => matchQuery(item, q));
+  return queries.map((q) => matchQuery(item, q, isNormalizeAccentsDiacritics));
 }
 
 function stampMatchResults(
   item: SuggestionItem,
-  queries: string[]
+  queries: string[],
+  isNormalizeAccentsDiacritics: boolean
 ): SuggestionItem {
-  return { ...item, matchResults: matchQueryAll(item, queries) };
+  return {
+    ...item,
+    matchResults: matchQueryAll(item, queries, isNormalizeAccentsDiacritics),
+  };
 }
 
 // This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
@@ -237,6 +252,8 @@ export class AnotherQuickSwitcherModal
   }
 
   getSuggestions(query: string): SuggestionItem[] {
+    const start = performance.now();
+
     let lastOpenFileIndexByPath: { [path: string]: number } = {};
     this.app.workspace.getLastOpenFiles().forEach((v, i) => {
       lastOpenFileIndexByPath[v] = i;
@@ -270,11 +287,17 @@ export class AnotherQuickSwitcherModal
       const backlinksMap = this.appHelper.createBacklinksMap();
 
       const activeFilePath = this.app.workspace.getActiveFile()?.path;
-      return this.ignoredItems
+      const items = this.ignoredItems
         .filter((x) => backlinksMap[activeFilePath]?.has(x.file.path))
-        .map((x) => stampMatchResults(x, qs))
+        .map((x) =>
+          stampMatchResults(x, qs, this.settings.normalizeAccentsAndDiacritics)
+        )
         .filter((x) => x.matchResults.every((x) => x.type !== "not found"))
         .slice(0, this.settings.maxNumberOfSuggestions);
+      this.showDebugLog(() =>
+        buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
+      );
+      return items;
     }
 
     if (!query) {
@@ -285,7 +308,9 @@ export class AnotherQuickSwitcherModal
     }
 
     let suggestions = this.ignoredItems
-      .map((x) => stampMatchResults(x, qs))
+      .map((x) =>
+        stampMatchResults(x, qs, this.settings.normalizeAccentsAndDiacritics)
+      )
       .filter((x) => x.matchResults.every((x) => x.type !== "not found"))
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
       .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535));
@@ -319,7 +344,12 @@ export class AnotherQuickSwitcherModal
         );
     }
 
-    return suggestions.slice(0, this.settings.maxNumberOfSuggestions);
+    const items = suggestions.slice(0, this.settings.maxNumberOfSuggestions);
+
+    this.showDebugLog(() =>
+      buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
+    );
+    return items;
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
@@ -424,5 +454,11 @@ export class AnotherQuickSwitcherModal
       evt.ctrlKey || evt.metaKey,
       offset
     );
+  }
+
+  private showDebugLog(toMessage: () => string) {
+    if (this.settings.showLogAboutPerformanceInConsole) {
+      console.log(toMessage());
+    }
   }
 }
