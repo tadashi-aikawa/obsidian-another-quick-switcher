@@ -13,47 +13,65 @@ interface SuggestionItem {
 function matchQuery(
   item: SuggestionItem,
   query: string,
-  matcher: (item: SuggestionItem, query: string) => boolean
+  matcher: (item: SuggestionItem, query: string) => boolean,
+  isNormalizeAccentsDiacritics: boolean
 ): boolean {
   const qs = query.split("/");
   const folder = qs.pop();
   return (
-    qs.every((dir) => smartIncludes(item.folder.parent.path, dir)) &&
-    matcher(item, folder)
+    qs.every((dir) =>
+      smartIncludes(item.folder.parent.path, dir, isNormalizeAccentsDiacritics)
+    ) && matcher(item, folder)
   );
 }
 
 function matchQueryAll(
   item: SuggestionItem,
   queries: string[],
-  matcher: (item: SuggestionItem, query: string) => boolean
+  matcher: (item: SuggestionItem, query: string) => boolean,
+  isNormalizeAccentsDiacritics: boolean
 ): boolean {
-  return queries.every((q) => matchQuery(item, q, matcher));
+  return queries.every((q) =>
+    matchQuery(item, q, matcher, isNormalizeAccentsDiacritics)
+  );
 }
 
 function stampMatchType(
   item: SuggestionItem,
-  queries: string[]
+  queries: string[],
+  isNormalizeAccentsDiacritics: boolean
 ): SuggestionItem {
   if (
-    matchQueryAll(item, queries, (item, query) =>
-      smartStartsWith(item.folder.name, query)
+    matchQueryAll(
+      item,
+      queries,
+      (item, query) =>
+        smartStartsWith(item.folder.name, query, isNormalizeAccentsDiacritics),
+      isNormalizeAccentsDiacritics
     )
   ) {
     return { ...item, matchType: "prefix-name" };
   }
 
   if (
-    matchQueryAll(item, queries, (item, query) =>
-      smartIncludes(item.folder.name, query)
+    matchQueryAll(
+      item,
+      queries,
+      (item, query) =>
+        smartIncludes(item.folder.name, query, isNormalizeAccentsDiacritics),
+      isNormalizeAccentsDiacritics
     )
   ) {
     return { ...item, matchType: "name" };
   }
 
   if (
-    matchQueryAll(item, queries, (item, query) =>
-      smartIncludes(item.folder.path, query)
+    matchQueryAll(
+      item,
+      queries,
+      (item, query) =>
+        smartIncludes(item.folder.path, query, isNormalizeAccentsDiacritics),
+      isNormalizeAccentsDiacritics
     )
   ) {
     return { ...item, matchType: "directory" };
@@ -98,7 +116,9 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     const qs = query.split(" ").filter((x) => x);
 
     return this.ignoredItems
-      .map((x) => stampMatchType(x, qs))
+      .map((x) =>
+        stampMatchType(x, qs, this.settings.normalizeAccentsAndDiacritics)
+      )
       .filter((x) => x.matchType)
       .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))
       .sort(
