@@ -5,16 +5,11 @@ import {
   parseFrontMatterTags,
   SuggestModal,
 } from "obsidian";
-import {
-  ignoreItems,
-  sorter,
-  uniq,
-  uniqFlatMap,
-} from "../utils/collection-helper";
-import { ALIAS, FOLDER, TAG } from "./icons";
+import { ignoreItems, sorter, uniq } from "../utils/collection-helper";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
+import { createElements } from "./suggestion-factory";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -109,9 +104,11 @@ export class AnotherQuickSwitcherModal
     const activeFilePath = app.workspace.getActiveFile()?.path;
     const markdownItems = app.vault
       .getMarkdownFiles()
-      .filter((x) => x.path !== activeFilePath)
+      .filter(
+        (x) => x.path !== activeFilePath && app.metadataCache.getFileCache(x)
+      )
       .map((x) => {
-        const cache = app.metadataCache.getFileCache(x);
+        const cache = app.metadataCache.getFileCache(x)!; // already filtered
         return {
           file: x,
           aliases: parseFrontMatterAliases(cache.frontmatter) ?? [],
@@ -186,10 +183,13 @@ export class AnotherQuickSwitcherModal
     const qs = searchQuery.split(" ").filter((x) => x);
 
     if (this.mode === "backlink") {
+      const activeFilePath = this.app.workspace.getActiveFile()?.path;
+      if (!activeFilePath) {
+        return [];
+      }
+
       // ✨ If I can use MetadataCache.getBacklinksForFile, I would like to use it instead of original createBacklinksMap :)
       const backlinksMap = this.appHelper.createBacklinksMap();
-
-      const activeFilePath = this.app.workspace.getActiveFile()?.path;
       const items = this.ignoredItems
         .filter((x) => backlinksMap[activeFilePath]?.has(x.file.path))
         .map((x) =>
@@ -256,77 +256,13 @@ export class AnotherQuickSwitcherModal
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
-    const itemDiv = createDiv({
-      cls: [
-        "another-quick-switcher__item",
-        item.phantom ? "another-quick-switcher__phantom_item" : "",
-      ],
+    const { itemDiv, descriptionDiv } = createElements(item, {
+      showDirectory: this.settings.showDirectory,
     });
-
-    const entryDiv = createDiv({
-      cls: "another-quick-switcher__item__entry",
-    });
-
-    const fileDiv = createDiv({
-      cls: "another-quick-switcher__item__file",
-      text: item.file.basename,
-    });
-    entryDiv.appendChild(fileDiv);
-
-    if (this.settings.showDirectory) {
-      const directoryDiv = createDiv({
-        cls: "another-quick-switcher__item__directory",
-      });
-      directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
-      directoryDiv.appendText(` ${item.file.parent.name}`);
-      entryDiv.appendChild(directoryDiv);
-    }
-
-    itemDiv.appendChild(entryDiv);
 
     el.appendChild(itemDiv);
-
-    // reasons..
-    const aliases = item.matchResults.filter((res) => res.alias);
-    const tags = item.matchResults.filter((res) => res.type === "tag");
-
-    if (aliases.length === 0 && tags.length === 0) {
-      return;
-    }
-
-    const reasonsDiv = createDiv({
-      cls: "another-quick-switcher__item__reasons",
-    });
-    el.appendChild(reasonsDiv);
-
-    if (aliases.length > 0) {
-      const aliasDiv = createDiv({
-        cls: "another-quick-switcher__item__reason",
-      });
-      uniqFlatMap(aliases, (x) => x.meta).forEach((x) => {
-        const aliasSpan = createSpan({
-          cls: "another-quick-switcher__item__reason__alias",
-        });
-        aliasSpan.insertAdjacentHTML("beforeend", ALIAS);
-        aliasSpan.appendText(x);
-        aliasDiv.appendChild(aliasSpan);
-      });
-      reasonsDiv.appendChild(aliasDiv);
-    }
-
-    if (tags.length > 0) {
-      const tagsDiv = createDiv({
-        cls: "another-quick-switcher__item__reason",
-      });
-      uniqFlatMap(tags, (x) => x.meta).forEach((x) => {
-        const tagsSpan = createSpan({
-          cls: "another-quick-switcher__item__reason__tag",
-        });
-        tagsSpan.insertAdjacentHTML("beforeend", TAG);
-        tagsSpan.appendText(x.replace("#", ""));
-        tagsDiv.appendChild(tagsSpan);
-      });
-      reasonsDiv.appendChild(tagsDiv);
+    if (descriptionDiv) {
+      el.appendChild(descriptionDiv);
     }
   }
 
@@ -348,7 +284,7 @@ export class AnotherQuickSwitcherModal
       this.mode === "backlink"
         ? this.appHelper.findFirstLinkOffset(
             item.file,
-            this.app.workspace.getActiveFile()
+            this.app.workspace.getActiveFile()! // never undefined
           )
         : undefined;
 

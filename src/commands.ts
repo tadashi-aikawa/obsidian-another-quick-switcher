@@ -42,7 +42,10 @@ export function createCommands(app: App, settings: Settings): Command[] {
       id: "backlink-search",
       name: "Backlink search",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "h" }],
-      callback: () => {
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return Boolean(app.workspace.getActiveFile());
+        }
         showSearchDialog(app, "backlink", settings);
       },
     },
