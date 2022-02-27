@@ -4,120 +4,23 @@ import {
   parseFrontMatterAliases,
   parseFrontMatterTags,
   SuggestModal,
-  TFile,
 } from "obsidian";
 import {
   ignoreItems,
-  minBy,
   sorter,
   uniq,
   uniqFlatMap,
 } from "../utils/collection-helper";
 import { ALIAS, FOLDER, TAG } from "./icons";
-import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
+import { stampMatchResults, SuggestionItem } from "src/matcher";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
 }
 
 export type Mode = "normal" | "recent" | "backlink";
-type MatchType = "not found" | "name" | "prefix-name" | "directory" | "tag";
-
-interface SuggestionItem {
-  file: TFile;
-  tags: string[];
-  aliases: string[];
-  matchResults: MatchQueryResult[];
-  phantom: boolean;
-}
-
-interface MatchQueryResult {
-  type: MatchType;
-  alias?: string;
-  hitWord?: string;
-  meta?: string[];
-}
-
-function matchQuery(
-  item: SuggestionItem,
-  query: string,
-  isNormalizeAccentsDiacritics: boolean
-): MatchQueryResult {
-  // tag
-  if (query.startsWith("#")) {
-    const tags = item.tags.filter((tag) =>
-      smartIncludes(tag.slice(1), query.slice(1), isNormalizeAccentsDiacritics)
-    );
-    return {
-      type: tags.length > 0 ? "tag" : "not found",
-      meta: tags,
-    };
-  }
-
-  const qs = query.split("/");
-  const file = qs.pop();
-  const includeDir = qs.every((dir) =>
-    smartIncludes(item.file.parent.path, dir, isNormalizeAccentsDiacritics)
-  );
-  if (!includeDir) {
-    return { type: "not found" };
-  }
-
-  if (smartStartsWith(item.file.name, file, isNormalizeAccentsDiacritics)) {
-    return { type: "prefix-name", meta: [item.file.name] };
-  }
-  const prefixNameMatchedAliases = item.aliases.filter((x) =>
-    smartStartsWith(x, file, isNormalizeAccentsDiacritics)
-  );
-  if (prefixNameMatchedAliases.length > 0) {
-    return {
-      type: "prefix-name",
-      meta: prefixNameMatchedAliases,
-      alias: minBy(prefixNameMatchedAliases, (x) => x.length),
-    };
-  }
-
-  if (smartIncludes(item.file.name, file, isNormalizeAccentsDiacritics)) {
-    return { type: "name", meta: [item.file.name] };
-  }
-  const nameMatchedAliases = item.aliases.filter((x) =>
-    smartIncludes(x, file, isNormalizeAccentsDiacritics)
-  );
-  if (nameMatchedAliases.length > 0) {
-    return {
-      type: "name",
-      meta: nameMatchedAliases,
-      alias: minBy(nameMatchedAliases, (x) => x.length),
-    };
-  }
-
-  if (smartIncludes(item.file.path, file, isNormalizeAccentsDiacritics)) {
-    return { type: "directory", meta: [item.file.path] };
-  }
-
-  return { type: "not found" };
-}
-
-function matchQueryAll(
-  item: SuggestionItem,
-  queries: string[],
-  isNormalizeAccentsDiacritics: boolean
-): MatchQueryResult[] {
-  return queries.map((q) => matchQuery(item, q, isNormalizeAccentsDiacritics));
-}
-
-function stampMatchResults(
-  item: SuggestionItem,
-  queries: string[],
-  isNormalizeAccentsDiacritics: boolean
-): SuggestionItem {
-  return {
-    ...item,
-    matchResults: matchQueryAll(item, queries, isNormalizeAccentsDiacritics),
-  };
-}
 
 // This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
 // https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
