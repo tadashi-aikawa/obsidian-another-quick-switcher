@@ -7,10 +7,10 @@ interface Elements {
   descriptionDiv?: HTMLDivElement;
 }
 
-export function createElements(
+function createItemDiv(
   item: SuggestionItem,
-  options: { showDirectory: boolean }
-): Elements {
+  showDirectory: boolean
+): Elements["itemDiv"] {
   const itemDiv = createDiv({
     cls: [
       "another-quick-switcher__item",
@@ -22,13 +22,13 @@ export function createElements(
     cls: "another-quick-switcher__item__entry",
   });
 
-  const fileDiv = createDiv({
-    cls: "another-quick-switcher__item__file",
+  const titleDiv = createDiv({
+    cls: "another-quick-switcher__item__title",
     text: item.file.basename,
   });
-  entryDiv.appendChild(fileDiv);
+  entryDiv.appendChild(titleDiv);
 
-  if (options.showDirectory) {
+  if (showDirectory) {
     const directoryDiv = createDiv({
       cls: "another-quick-switcher__item__directory",
     });
@@ -39,25 +39,25 @@ export function createElements(
 
   itemDiv.appendChild(entryDiv);
 
-  // reasons..
-  const aliases = item.matchResults.filter((res) => res.alias);
-  const tags = item.matchResults.filter((res) => res.type === "tag");
+  return itemDiv;
+}
 
-  if (aliases.length === 0 && tags.length === 0) {
-    return { itemDiv };
-  }
-
+function createDescriptionDiv(
+  item: SuggestionItem,
+  aliases: string[],
+  tags: string[]
+): Elements["descriptionDiv"] {
   const descriptionDiv = createDiv({
-    cls: "another-quick-switcher__item__reasons",
+    cls: "another-quick-switcher__item__descriptions",
   });
 
   if (aliases.length > 0) {
     const aliasDiv = createDiv({
-      cls: "another-quick-switcher__item__reason",
+      cls: "another-quick-switcher__item__description",
     });
-    uniqFlatMap(aliases, (x) => x.meta ?? []).forEach((x) => {
+    aliases.forEach((x) => {
       const aliasSpan = createSpan({
-        cls: "another-quick-switcher__item__reason__alias",
+        cls: "another-quick-switcher__item__description__alias",
       });
       aliasSpan.insertAdjacentHTML("beforeend", ALIAS);
       aliasSpan.appendText(x);
@@ -68,11 +68,11 @@ export function createElements(
 
   if (tags.length > 0) {
     const tagsDiv = createDiv({
-      cls: "another-quick-switcher__item__reason",
+      cls: "another-quick-switcher__item__description",
     });
-    uniqFlatMap(tags, (x) => x.meta ?? []).forEach((x) => {
+    tags.forEach((x) => {
       const tagsSpan = createSpan({
-        cls: "another-quick-switcher__item__reason__tag",
+        cls: "another-quick-switcher__item__description__tag",
       });
       tagsSpan.insertAdjacentHTML("beforeend", TAG);
       tagsSpan.appendText(x.replace("#", ""));
@@ -80,6 +80,27 @@ export function createElements(
     });
     descriptionDiv.appendChild(tagsDiv);
   }
+
+  return descriptionDiv;
+}
+
+export function createElements(
+  item: SuggestionItem,
+  options: { showDirectory: boolean }
+): Elements {
+  const itemDiv = createItemDiv(item, options.showDirectory);
+
+  const aliases = item.matchResults.filter((res) => res.alias);
+  const tags = item.matchResults.filter((res) => res.type === "tag");
+  if (aliases.length === 0 && tags.length === 0) {
+    return { itemDiv };
+  }
+
+  const descriptionDiv = createDescriptionDiv(
+    item,
+    uniqFlatMap(aliases, (x) => x.meta ?? []),
+    uniqFlatMap(tags, (x) => x.meta ?? [])
+  );
 
   return {
     itemDiv,

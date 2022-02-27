@@ -36,7 +36,7 @@ function matchQuery(
   }
 
   const qs = query.split("/");
-  const file = qs.pop();
+  const file = qs.pop()!;
   const includeDir = qs.every((dir) =>
     smartIncludes(item.file.parent.path, dir, isNormalizeAccentsDiacritics)
   );

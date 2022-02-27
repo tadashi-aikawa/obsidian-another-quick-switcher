@@ -17,7 +17,7 @@ function matchQuery(
   isNormalizeAccentsDiacritics: boolean
 ): boolean {
   const qs = query.split("/");
-  const folder = qs.pop();
+  const folder = qs.pop()!;
   return (
     qs.every((dir) =>
       smartIncludes(item.folder.parent.path, dir, isNormalizeAccentsDiacritics)
@@ -141,7 +141,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     });
 
     const folderDiv = createDiv({
-      cls: "another-quick-switcher__item__file",
+      cls: "another-quick-switcher__item__title",
       text: item.folder.name,
     });
     entryDiv.appendChild(folderDiv);
