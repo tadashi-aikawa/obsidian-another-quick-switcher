@@ -3,6 +3,7 @@ import AnotherQuickSwitcher from "./main";
 
 export interface Settings {
   showDirectory: boolean;
+  showAliasesOnTop: boolean;
   showExistingFilesOnly: boolean;
   maxNumberOfSuggestions: number;
   normalizeAccentsAndDiacritics: boolean;
@@ -16,6 +17,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   showDirectory: true,
+  showAliasesOnTop: false,
   showExistingFilesOnly: false,
   maxNumberOfSuggestions: 50,
   normalizeAccentsAndDiacritics: false,
@@ -45,6 +47,15 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       tc.setValue(this.plugin.settings.showDirectory).onChange(
         async (value) => {
           this.plugin.settings.showDirectory = value;
+          await this.plugin.saveSettings();
+        }
+      );
+    });
+
+    new Setting(containerEl).setName("Show aliases on top").addToggle((tc) => {
+      tc.setValue(this.plugin.settings.showAliasesOnTop).onChange(
+        async (value) => {
+          this.plugin.settings.showAliasesOnTop = value;
           await this.plugin.saveSettings();
         }
       );

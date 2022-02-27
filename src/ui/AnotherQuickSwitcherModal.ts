@@ -258,6 +258,7 @@ export class AnotherQuickSwitcherModal
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
     const { itemDiv, descriptionDiv } = createElements(item, {
       showDirectory: this.settings.showDirectory,
+      showAliasesOnTop: this.settings.showAliasesOnTop,
     });
 
     el.appendChild(itemDiv);

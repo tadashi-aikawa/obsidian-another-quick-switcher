@@ -7,9 +7,15 @@ interface Elements {
   descriptionDiv?: HTMLDivElement;
 }
 
+interface Options {
+  showDirectory: boolean;
+  showAliasesOnTop: boolean;
+}
+
 function createItemDiv(
   item: SuggestionItem,
-  showDirectory: boolean
+  aliases: string[],
+  options: Options
 ): Elements["itemDiv"] {
   const itemDiv = createDiv({
     cls: [
@@ -24,11 +30,14 @@ function createItemDiv(
 
   const titleDiv = createDiv({
     cls: "another-quick-switcher__item__title",
-    text: item.file.basename,
+    text:
+      options.showAliasesOnTop && aliases.length > 0
+        ? aliases.join(" / ")
+        : item.file.basename,
   });
   entryDiv.appendChild(titleDiv);
 
-  if (showDirectory) {
+  if (options.showDirectory) {
     const directoryDiv = createDiv({
       cls: "another-quick-switcher__item__directory",
     });
@@ -45,7 +54,8 @@ function createItemDiv(
 function createDescriptionDiv(
   item: SuggestionItem,
   aliases: string[],
-  tags: string[]
+  tags: string[],
+  options: Options
 ): Elements["descriptionDiv"] {
   const descriptionDiv = createDiv({
     cls: "another-quick-switcher__item__descriptions",
@@ -55,7 +65,11 @@ function createDescriptionDiv(
     const aliasDiv = createDiv({
       cls: "another-quick-switcher__item__description",
     });
-    aliases.forEach((x) => {
+
+    const displayAliases = options.showAliasesOnTop
+      ? [item.file.basename]
+      : aliases;
+    displayAliases.forEach((x) => {
       const aliasSpan = createSpan({
         cls: "another-quick-switcher__item__description__alias",
       });
@@ -86,21 +100,23 @@ function createDescriptionDiv(
 
 export function createElements(
   item: SuggestionItem,
-  options: { showDirectory: boolean }
+  options: Options
 ): Elements {
-  const itemDiv = createItemDiv(item, options.showDirectory);
+  const aliases = uniqFlatMap(
+    item.matchResults.filter((res) => res.alias),
+    (x) => x.meta ?? []
+  );
+  const tags = uniqFlatMap(
+    item.matchResults.filter((res) => res.type === "tag"),
+    (x) => x.meta ?? []
+  );
 
-  const aliases = item.matchResults.filter((res) => res.alias);
-  const tags = item.matchResults.filter((res) => res.type === "tag");
+  const itemDiv = createItemDiv(item, aliases, options);
+
   if (aliases.length === 0 && tags.length === 0) {
     return { itemDiv };
   }
-
-  const descriptionDiv = createDescriptionDiv(
-    item,
-    uniqFlatMap(aliases, (x) => x.meta ?? []),
-    uniqFlatMap(tags, (x) => x.meta ?? [])
-  );
+  const descriptionDiv = createDescriptionDiv(item, aliases, tags, options);
 
   return {
     itemDiv,
