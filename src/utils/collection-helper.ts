@@ -40,7 +40,7 @@ export const keyBy = <T>(
   );
 
 export function flatten<T>(matrix: T[][]): T[] {
-  return [].concat(...matrix);
+  return matrix.reduce((a, c) => [...a, ...c], []);
 }
 
 export function uniq<T>(values: T[]): T[] {

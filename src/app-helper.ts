@@ -20,8 +20,8 @@ export class AppHelper {
 
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
     const fileCache = this.app.metadataCache.getFileCache(file);
-    const links = fileCache.links ?? [];
-    const embeds = fileCache.embeds ?? [];
+    const links = fileCache?.links ?? [];
+    const embeds = fileCache?.embeds ?? [];
 
     return [...links, ...embeds].find((x: LinkCache) => {
       const toLinkFilePath = this.app.metadataCache.getFirstLinkpathDest(
@@ -29,7 +29,7 @@ export class AppHelper {
         file.path
       )?.path;
       return toLinkFilePath === linkFile.path;
-    }).position.start.offset;
+    })!.position.start.offset;
   }
 
   // noinspection FunctionWithMultipleLoopsJS
@@ -127,6 +127,8 @@ export class AppHelper {
   private createPhantomFile(linkText: string): TFile {
     const linkPath = this.getPathToBeCreated(linkText);
 
+    // @ts-ignore
+    // @ts-ignore
     return {
       path: linkPath,
       name: basename(linkPath),
@@ -139,7 +141,8 @@ export class AppHelper {
         vault: this.app.vault,
         // XXX: From here, Untrusted properties
         children: [],
-        parent: undefined,
+        // @ts-ignore
+        parent: null,
         isRoot: () => true,
       },
       stat: {
