@@ -76,6 +76,16 @@ function matchQuery(
     return { type: "directory", meta: [item.file.path] };
   }
 
+  const tags = item.tags.filter((tag) =>
+    smartIncludes(tag.slice(1), query, isNormalizeAccentsDiacritics)
+  );
+  if (tags.length > 0) {
+    return {
+      type: "tag",
+      meta: tags,
+    };
+  }
+
   return { type: "not found" };
 }
 
