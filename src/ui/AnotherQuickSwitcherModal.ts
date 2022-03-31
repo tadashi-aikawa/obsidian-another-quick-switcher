@@ -203,48 +203,51 @@ export class AnotherQuickSwitcherModal
       return items;
     }
 
+    const lastModifiedSorter = sorter(
+      (x: SuggestionItem) => x.file.stat.mtime,
+      "desc"
+    );
+    const lastOpenedSorter = sorter(
+      (x: SuggestionItem) => lastOpenFileIndexByPath[x.file.path] ?? 65535
+    );
+    const nameSorter = sorter((x: SuggestionItem) =>
+      x.matchResults.some((x) => x.type === "prefix-name" || x.type === "name")
+        ? 0
+        : 1
+    );
+    const prefixLengthSorter = sorter((x: SuggestionItem) => {
+      const firstPrefixMatch = x.matchResults.find(
+        (x) => x.type === "prefix-name"
+      );
+      if (firstPrefixMatch) {
+        return (
+          1000 -
+          (firstPrefixMatch.alias
+            ? firstPrefixMatch.alias.length
+            : x.file.name.length)
+        );
+      }
+      return 0;
+    }, "desc");
+
     if (!query) {
       return this.ignoredItems
-        .sort(sorter((x) => x.file.stat.mtime, "desc"))
-        .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535))
+        .sort(lastModifiedSorter)
+        .sort(lastOpenedSorter)
         .slice(0, this.settings.maxNumberOfSuggestions);
     }
 
-    let suggestions = this.ignoredItems
+    const matchedSuggestions = this.ignoredItems
       .map((x) =>
         stampMatchResults(x, qs, this.settings.normalizeAccentsAndDiacritics)
       )
-      .filter((x) => x.matchResults.every((x) => x.type !== "not found"))
-      .sort(sorter((x) => x.file.stat.mtime, "desc"))
-      .sort(sorter((x) => lastOpenFileIndexByPath[x.file.path] ?? 65535));
+      .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
 
+    let suggestions = matchedSuggestions
+      .sort(lastModifiedSorter)
+      .sort(lastOpenedSorter);
     if (this.mode === "normal") {
-      suggestions = suggestions
-        .sort(
-          sorter((x) =>
-            x.matchResults.some(
-              (x) => x.type === "prefix-name" || x.type === "name"
-            )
-              ? 0
-              : 1
-          )
-        )
-        .sort(
-          sorter((x) => {
-            const firstPrefixMatch = x.matchResults.find(
-              (x) => x.type === "prefix-name"
-            );
-            if (firstPrefixMatch) {
-              return (
-                1000 -
-                (firstPrefixMatch.alias
-                  ? firstPrefixMatch.alias.length
-                  : x.file.name.length)
-              );
-            }
-            return 0;
-          }, "desc")
-        );
+      suggestions = suggestions.sort(nameSorter).sort(prefixLengthSorter);
     }
 
     const items = suggestions.slice(0, this.settings.maxNumberOfSuggestions);
