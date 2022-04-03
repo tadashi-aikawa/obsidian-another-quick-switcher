@@ -56,7 +56,7 @@ The difference with Recent Search is the sort priority order.
 | 2        | Last opened   | Last modified          |
 | 3        | -             | Last opened            |
 
-### Backlink Searc~~~~h
+### Backlink Search
 
 One of the following.
 
