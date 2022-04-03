@@ -52,9 +52,9 @@ The difference with Recent Search is the sort priority order.
 
 | Priority | Recent Search | Filename Recent Search |
 | -------- | ------------- | ---------------------- |
-| 1        | Last modified | **Filename matched**   |
-| 2        | Last opened   | Last modified          |
-| 3        | -             | Last opened            |
+| 1        | Last opened | **Filename matched**   |
+| 2        | Last modified   | Last opened          |
+| 3        | -             | Last modified            |
 
 ### Backlink Search
 
