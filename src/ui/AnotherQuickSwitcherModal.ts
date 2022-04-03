@@ -216,15 +216,16 @@ export class AnotherQuickSwitcherModal
     const lastOpenedSorter = sorter(
       (x: SuggestionItem) => lastOpenFileIndexByPath[x.file.path] ?? 65535
     );
-    const nameSorter = sorter((x: SuggestionItem) =>
-      x.matchResults.some((x) => x.type === "prefix-name" || x.type === "name")
-        ? 0
-        : 1
+    const nameSorter = sorter(
+      (x: SuggestionItem) =>
+        x.matchResults.filter(
+          (x) => x.type === "prefix-name" || x.type === "name"
+        ).length,
+      "desc"
     );
     const prefixLengthSorter = sorter((x: SuggestionItem) => {
-      const firstPrefixMatch = x.matchResults.find(
-        (x) => x.type === "prefix-name"
-      );
+      const firstPrefixMatch =
+        x.matchResults[0].type === "prefix-name" ? x.matchResults[0] : null;
       if (firstPrefixMatch) {
         return (
           1000 -
@@ -257,7 +258,7 @@ export class AnotherQuickSwitcherModal
         suggestions = suggestions.sort(nameSorter);
         break;
       case "normal":
-        suggestions = suggestions.sort(nameSorter).sort(prefixLengthSorter);
+        suggestions = suggestions.sort(prefixLengthSorter).sort(nameSorter);
         break;
     }
     const items = suggestions.slice(0, this.settings.maxNumberOfSuggestions);
