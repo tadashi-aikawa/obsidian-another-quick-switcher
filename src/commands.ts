@@ -39,6 +39,14 @@ export function createCommands(app: App, settings: Settings): Command[] {
       },
     },
     {
+      id: "filename-recent-search",
+      name: "Filename recent search",
+      hotkeys: [{ modifiers: ["Mod", "Shift"], key: "f" }],
+      callback: () => {
+        showSearchDialog(app, "filename-recent", settings);
+      },
+    },
+    {
       id: "backlink-search",
       name: "Backlink search",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "h" }],

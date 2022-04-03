@@ -9,6 +9,7 @@ export interface Settings {
   normalizeAccentsAndDiacritics: boolean;
   ignoreNormalPathPrefixPatterns: string;
   ignoreRecentPathPrefixPatterns: string;
+  ignoreFilenameRecentPathPrefixPatterns: string;
   ignoreBackLinkPathPrefixPatterns: string;
   ignoreMoveFileToAnotherFolderPrefixPatterns: string;
   // debug
@@ -23,6 +24,7 @@ export const DEFAULT_SETTINGS: Settings = {
   normalizeAccentsAndDiacritics: false,
   ignoreNormalPathPrefixPatterns: "",
   ignoreRecentPathPrefixPatterns: "",
+  ignoreFilenameRecentPathPrefixPatterns: "",
   ignoreBackLinkPathPrefixPatterns: "",
   ignoreMoveFileToAnotherFolderPrefixPatterns: "",
   // debug
@@ -124,6 +126,23 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.ignoreRecentPathPrefixPatterns)
           .onChange(async (value) => {
             this.plugin.settings.ignoreRecentPathPrefixPatterns = value;
+            await this.plugin.saveSettings();
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__ignore_path_patterns";
+        return el;
+      });
+
+    containerEl.createEl("h3", { text: "⏱ Filename recent search" });
+
+    new Setting(containerEl)
+      .setName("Ignore prefix path patterns for Filename Recent search")
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("Prefix match patterns")
+          .setValue(this.plugin.settings.ignoreFilenameRecentPathPrefixPatterns)
+          .onChange(async (value) => {
+            this.plugin.settings.ignoreFilenameRecentPathPrefixPatterns = value;
             await this.plugin.saveSettings();
           });
         el.inputEl.className =

@@ -15,7 +15,7 @@ function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
 }
 
-export type Mode = "normal" | "recent" | "backlink";
+export type Mode = "normal" | "recent" | "backlink" | "filename-recent";
 
 // This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
 // https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
@@ -146,6 +146,10 @@ export class AnotherQuickSwitcherModal
         return _ignoreItems(this.settings.ignoreNormalPathPrefixPatterns);
       case "recent":
         return _ignoreItems(this.settings.ignoreRecentPathPrefixPatterns);
+      case "filename-recent":
+        return _ignoreItems(
+          this.settings.ignoreFilenameRecentPathPrefixPatterns
+        );
       case "backlink":
         return _ignoreItems(this.settings.ignoreBackLinkPathPrefixPatterns);
     }
@@ -172,6 +176,8 @@ export class AnotherQuickSwitcherModal
       changeMode("normal", 3);
     } else if (query.startsWith(":r ")) {
       changeMode("recent", 3);
+    } else if (query.startsWith(":f ")) {
+      changeMode("filename-recent", 3);
     } else if (query.startsWith(":b ")) {
       changeMode("backlink", 3);
     } else {
@@ -246,10 +252,14 @@ export class AnotherQuickSwitcherModal
     let suggestions = matchedSuggestions
       .sort(lastModifiedSorter)
       .sort(lastOpenedSorter);
-    if (this.mode === "normal") {
-      suggestions = suggestions.sort(nameSorter).sort(prefixLengthSorter);
+    switch (this.mode) {
+      case "filename-recent":
+        suggestions = suggestions.sort(nameSorter);
+        break;
+      case "normal":
+        suggestions = suggestions.sort(nameSorter).sort(prefixLengthSorter);
+        break;
     }
-
     const items = suggestions.slice(0, this.settings.maxNumberOfSuggestions);
 
     this.showDebugLog(() =>

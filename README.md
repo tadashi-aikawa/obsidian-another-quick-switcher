@@ -40,7 +40,23 @@ One of the following.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/recent.gif)
 
-### Backlink Search
+### Filename Recent Search
+
+One of the following.
+
+- Run `Another Quick Switcher: Filename recent search` on `Command palette`
+- Push `Ctrl/Cmd + Shift + F` in the default case
+- Search query starts with `:f ` like `:f hoge`
+
+The difference with Recent Search is the sort priority order.
+
+| Priority | Recent Search | Filename Recent Search |
+| -------- | ------------- | ---------------------- |
+| 1        | Last modified | **Filename matched**   |
+| 2        | Last opened   | Last modified          |
+| 3        | -             | Last opened            |
+
+### Backlink Searc~~~~h
 
 One of the following.
 
