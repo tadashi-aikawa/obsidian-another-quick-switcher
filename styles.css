@@ -8,6 +8,7 @@
 .another-quick-switcher__phantom_item {
     /*noinspection CssUnresolvedCustomProperty*/
     color: var(--text-faint);
+    opacity: 0.5;
 }
 
 .another-quick-switcher__item__icon {
