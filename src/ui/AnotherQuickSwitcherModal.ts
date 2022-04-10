@@ -192,10 +192,6 @@ export class AnotherQuickSwitcherModal
   }
 
   getSuggestions(query: string): SuggestionItem[] {
-    if (!query.trim()) {
-      return [];
-    }
-
     const start = performance.now();
 
     let lastOpenFileIndexByPath: { [path: string]: number } = {};
@@ -249,7 +245,7 @@ export class AnotherQuickSwitcherModal
       return items;
     }
 
-    if (!query) {
+    if (!query.trim()) {
       return this.ignoredItems
         .sort((a, b) => {
           let result: 0 | -1 | 1;
