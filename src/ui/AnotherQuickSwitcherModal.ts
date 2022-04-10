@@ -21,6 +21,7 @@ export type Mode = "normal" | "recent" | "backlink" | "filename-recent";
 // https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
 interface UnsafeModalInterface {
   chooser: {
+    values: SuggestionItem[];
     selectedItem: number;
     setSelectedItem(item: number): void;
     useSelectedItem(ev: Partial<KeyboardEvent>): void;
@@ -56,6 +57,7 @@ export class AnotherQuickSwitcherModal
       { command: "[shift ↵]", purpose: "create" },
       { command: "[ctrl/cmd shift ↵]", purpose: "create in new pane" },
       { command: "[ctrl/cmd d]", purpose: "clear input" },
+      { command: "[tab]", purpose: "replace input" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
@@ -75,6 +77,7 @@ export class AnotherQuickSwitcherModal
         this.handleCreateNew(this.searchQuery, true);
       }
     });
+
     this.scope.register(["Mod"], "N", () => {
       document.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown" })
@@ -91,10 +94,20 @@ export class AnotherQuickSwitcherModal
     this.scope.register(["Mod"], "K", () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
     });
-    // Delete whole input line
+
+    this.scope.register([], "Tab", (evt) => {
+      evt.preventDefault();
+
+      if (this.chooser.values) {
+        this.inputEl.value =
+          this.chooser.values[this.chooser.selectedItem].file.basename;
+        // Necessary to rerender suggestions
+        this.inputEl.dispatchEvent(new Event("input"));
+      }
+    });
     this.scope.register(["Mod"], "D", () => {
-      this.inputEl.select();
-      this.inputEl.setRangeText("");
+      this.inputEl.value = "";
+      // Necessary to rerender suggestions
       this.inputEl.dispatchEvent(new Event("input"));
     });
 
