@@ -90,6 +90,12 @@ export class AnotherQuickSwitcherModal
     this.scope.register(["Mod"], "K", () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
     });
+    // Delete whole input line
+    this.scope.register(["Mod"], "D", () => {
+      this.inputEl.select();
+      this.inputEl.setRangeText("");
+      this.inputEl.dispatchEvent(new Event("input"));
+    });
 
     const phantomItems = this.settings.showExistingFilesOnly
       ? []
