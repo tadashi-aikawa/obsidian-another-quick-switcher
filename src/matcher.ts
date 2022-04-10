@@ -1,8 +1,14 @@
 import { TFile } from "obsidian";
-import { smartIncludes, smartStartsWith } from "./utils/strings";
+import { smartEquals, smartIncludes, smartStartsWith } from "./utils/strings";
 import { minBy } from "./utils/collection-helper";
 
-type MatchType = "not found" | "name" | "prefix-name" | "directory" | "tag";
+type MatchType =
+  | "not found"
+  | "name"
+  | "prefix-name"
+  | "word-perfect"
+  | "directory"
+  | "tag";
 
 export interface SuggestionItem {
   file: TFile;
@@ -11,6 +17,7 @@ export interface SuggestionItem {
   matchResults: MatchQueryResult[];
   phantom: boolean;
   starred: boolean;
+  tokens: string[];
 }
 
 interface MatchQueryResult {
@@ -43,6 +50,12 @@ function matchQuery(
   );
   if (!includeDir) {
     return { type: "not found" };
+  }
+
+  if (
+    item.tokens.some((t) => smartEquals(t, file, isNormalizeAccentsDiacritics))
+  ) {
+    return { type: "word-perfect", meta: [item.file.name] };
   }
 
   if (smartStartsWith(item.file.name, file, isNormalizeAccentsDiacritics)) {

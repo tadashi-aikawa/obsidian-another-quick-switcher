@@ -5,11 +5,19 @@ import {
   parseFrontMatterTags,
   SuggestModal,
 } from "obsidian";
-import { ignoreItems, keyBy, sorter, uniq } from "../utils/collection-helper";
+import { ignoreItems, keyBy, uniq } from "../utils/collection-helper";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
+import {
+  priorityToLastModified,
+  priorityToLastOpened,
+  priorityToLength,
+  priorityToName,
+  priorityToPerfectWord,
+  priorityToPrefixName,
+} from "../sorters";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -120,6 +128,7 @@ export class AnotherQuickSwitcherModal
           phantom: true,
           starred: false,
           matchResults: [],
+          tokens: x.basename.split(" "),
         }));
 
     const starredPathMap = keyBy(
@@ -144,6 +153,7 @@ export class AnotherQuickSwitcherModal
           phantom: false,
           starred: x.path in starredPathMap,
           matchResults: [],
+          tokens: x.basename.split(" "),
         };
       });
 
@@ -235,38 +245,23 @@ export class AnotherQuickSwitcherModal
       return items;
     }
 
-    const lastModifiedSorter = sorter(
-      (x: SuggestionItem) => x.file.stat.mtime,
-      "desc"
-    );
-    const lastOpenedSorter = sorter(
-      (x: SuggestionItem) => lastOpenFileIndexByPath[x.file.path] ?? 65535
-    );
-    const nameSorter = sorter(
-      (x: SuggestionItem) =>
-        x.matchResults.filter(
-          (x) => x.type === "prefix-name" || x.type === "name"
-        ).length,
-      "desc"
-    );
-    const prefixLengthSorter = sorter((x: SuggestionItem) => {
-      const firstPrefixMatch =
-        x.matchResults[0].type === "prefix-name" ? x.matchResults[0] : null;
-      if (firstPrefixMatch) {
-        return (
-          1000 -
-          (firstPrefixMatch.alias
-            ? firstPrefixMatch.alias.length
-            : x.file.name.length)
-        );
-      }
-      return 0;
-    }, "desc");
-
     if (!query) {
       return this.ignoredItems
-        .sort(lastModifiedSorter)
-        .sort(lastOpenedSorter)
+        .sort((a, b) => {
+          let result: 0 | -1 | 1;
+
+          result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
+          if (result !== 0) {
+            return result;
+          }
+
+          result = priorityToLastModified(a, b);
+          if (result !== 0) {
+            return result;
+          }
+
+          return 0;
+        })
         .slice(0, this.settings.maxNumberOfSuggestions);
     }
 
@@ -276,22 +271,68 @@ export class AnotherQuickSwitcherModal
       )
       .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
 
-    let suggestions = matchedSuggestions
-      .sort(lastModifiedSorter)
-      .sort(lastOpenedSorter);
-    switch (this.mode) {
-      case "filename-recent":
-        suggestions = suggestions.sort(nameSorter);
-        break;
-      case "normal":
-        suggestions = suggestions.sort(prefixLengthSorter).sort(nameSorter);
-        break;
-    }
-    const items = suggestions.slice(0, this.settings.maxNumberOfSuggestions);
+    const items = matchedSuggestions
+      .sort((a, b) => {
+        let result: 0 | -1 | 1;
+
+        switch (this.mode) {
+          case "normal":
+            result = priorityToPerfectWord(a, b);
+            if (result !== 0) {
+              return result;
+            }
+
+            result = priorityToPrefixName(a, b);
+            if (result !== 0) {
+              return result;
+            }
+
+            result = priorityToName(a, b);
+            if (result !== 0) {
+              return result;
+            }
+
+            result = priorityToLength(a, b);
+            if (result !== 0) {
+              return result;
+            }
+            break;
+          case "recent":
+            // DO Nothing
+            break;
+          case "backlink":
+            throw new Error("Unreachable error: this.mode = backlink");
+          case "filename-recent":
+            result = priorityToPerfectWord(a, b);
+            if (result !== 0) {
+              return result;
+            }
+
+            result = priorityToName(a, b);
+            if (result !== 0) {
+              return result;
+            }
+            break;
+        }
+
+        result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
+        if (result !== 0) {
+          return result;
+        }
+
+        result = priorityToLastModified(a, b);
+        if (result !== 0) {
+          return result;
+        }
+
+        return 0;
+      })
+      .slice(0, this.settings.maxNumberOfSuggestions);
 
     this.showDebugLog(() =>
       buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
     );
+
     return items;
   }
 

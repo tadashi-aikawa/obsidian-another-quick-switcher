@@ -18,22 +18,19 @@ export function normalizeAccentsDiacritics(text: string): string {
   return text.replace(/[^\u0000-\u007E]/g, (x) => diacriticsMap[x] ?? x);
 }
 
+function normalize(str: string, isNormalizeAccentsDiacritics: boolean): string {
+  const t = str.toLowerCase();
+  return isNormalizeAccentsDiacritics ? normalizeAccentsDiacritics(t) : t;
+}
+
 export function smartIncludes(
   text: string,
   query: string,
   isNormalizeAccentsDiacritics: boolean
 ): boolean {
-  let t = text.toLowerCase();
-  if (isNormalizeAccentsDiacritics) {
-    t = normalizeAccentsDiacritics(t);
-  }
-
-  let q = query.toLowerCase();
-  if (isNormalizeAccentsDiacritics) {
-    q = normalizeAccentsDiacritics(q);
-  }
-
-  return excludeSpace(t).includes(q);
+  return excludeSpace(normalize(text, isNormalizeAccentsDiacritics)).includes(
+    normalize(query, isNormalizeAccentsDiacritics)
+  );
 }
 
 export function smartStartsWith(
@@ -41,15 +38,19 @@ export function smartStartsWith(
   query: string,
   isNormalizeAccentsDiacritics: boolean
 ): boolean {
-  let t = text.toLowerCase();
-  if (isNormalizeAccentsDiacritics) {
-    t = normalizeAccentsDiacritics(t);
-  }
+  return excludeSpace(
+    excludeEmoji(normalize(text, isNormalizeAccentsDiacritics))
+  ).startsWith(normalize(query, isNormalizeAccentsDiacritics));
+}
 
-  let q = query.toLowerCase();
-  if (isNormalizeAccentsDiacritics) {
-    q = normalizeAccentsDiacritics(q);
-  }
-
-  return excludeSpace(excludeEmoji(t)).startsWith(q);
+export function smartEquals(
+  text: string,
+  query: string,
+  isNormalizeAccentsDiacritics: boolean
+): boolean {
+  return (
+    excludeSpace(
+      excludeEmoji(normalize(text, isNormalizeAccentsDiacritics))
+    ) === normalize(query, isNormalizeAccentsDiacritics)
+  );
 }

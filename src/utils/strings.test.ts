@@ -2,6 +2,7 @@ import {
   excludeEmoji,
   excludeSpace,
   normalizeAccentsDiacritics,
+  smartEquals,
   smartIncludes,
   smartStartsWith,
 } from "./strings";
@@ -78,5 +79,25 @@ describe.each`
 `("smartStartsWith", ({ text, query, expected }) => {
   test(`smartStartsWith(${text}, ${query}) = ${expected}`, () => {
     expect(smartStartsWith(text, query, false)).toBe(expected);
+  });
+});
+
+describe.each`
+  text            | query      | expected
+  ${"abcd"}       | ${"ab"}    | ${false}
+  ${"abcd"}       | ${"AB"}    | ${false}
+  ${"ABCD"}       | ${"ab"}    | ${false}
+  ${"abcd"}       | ${"bc"}    | ${false}
+  ${"abcd"}       | ${"BC"}    | ${false}
+  ${"ABCD"}       | ${"bc"}    | ${false}
+  ${" AB CD "}    | ${"ab"}    | ${false}
+  ${" AB CD "}    | ${"bc"}    | ${false}
+  ${"🍰Cake"}     | ${"cake"}  | ${true}
+  ${"🍰Cake"}     | ${"🍰"}    | ${false}
+  ${"🍰AB🍰CD🍰"} | ${"bc"}    | ${false}
+  ${" AB CD "}    | ${"ab bc"} | ${false}
+`("smartStartsWith", ({ text, query, expected }) => {
+  test(`smartStartsWith(${text}, ${query}) = ${expected}`, () => {
+    expect(smartEquals(text, query, false)).toBe(expected);
   });
 });
