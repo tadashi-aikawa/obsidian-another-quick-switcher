@@ -5,7 +5,7 @@ import {
   parseFrontMatterTags,
   SuggestModal,
 } from "obsidian";
-import { ignoreItems, sorter, uniq } from "../utils/collection-helper";
+import { ignoreItems, keyBy, sorter, uniq } from "../utils/collection-helper";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
@@ -118,9 +118,14 @@ export class AnotherQuickSwitcherModal
           aliases: [],
           tags: [],
           phantom: true,
+          starred: false,
           matchResults: [],
         }));
 
+    const starredPathMap = keyBy(
+      this.appHelper.getStarredFilePaths(),
+      (x) => x
+    );
     const activeFilePath = app.workspace.getActiveFile()?.path;
     const markdownItems = app.vault
       .getMarkdownFiles()
@@ -137,6 +142,7 @@ export class AnotherQuickSwitcherModal
             ...(parseFrontMatterTags(cache.frontmatter) ?? []),
           ]),
           phantom: false,
+          starred: x.path in starredPathMap,
           matchResults: [],
         };
       });

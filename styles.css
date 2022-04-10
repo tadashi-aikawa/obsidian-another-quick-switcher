@@ -11,6 +11,17 @@
     opacity: 0.5;
 }
 
+.another-quick-switcher__item::before {
+    filter: invert(0.5) hue-rotate(180deg);
+    width: 20px;
+    margin-top: 5px;
+    margin-left: -30px;
+    margin-right: 10px;
+}
+.another-quick-switcher__starred_item::before {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPiA8cG9seWdvbiBwb2ludHM9IjEyIDIgMTUuMDkgOC4yNiAyMiA5LjI3IDE3IDE0LjE0IDE4LjE4IDIxLjAyIDEyIDE3Ljc3IDUuODIgMjEuMDIgNyAxNC4xNCAyIDkuMjcgOC45MSA4LjI2IDEyIDIiPjwvcG9seWdvbj4gPC9zdmc+");
+}
+
 .another-quick-switcher__item__icon {
     position: absolute;
     /*noinspection CssUnresolvedCustomProperty*/

@@ -10,6 +10,7 @@ export interface SuggestionItem {
   aliases: string[];
   matchResults: MatchQueryResult[];
   phantom: boolean;
+  starred: boolean;
 }
 
 interface MatchQueryResult {

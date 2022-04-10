@@ -21,6 +21,7 @@ function createItemDiv(
     cls: [
       "another-quick-switcher__item",
       item.phantom ? "another-quick-switcher__phantom_item" : "",
+      item.starred ? "another-quick-switcher__starred_item" : "",
     ],
   });
 

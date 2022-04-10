@@ -9,22 +9,38 @@ import {
 import { flatten, uniq } from "./utils/collection-helper";
 import { basename, dirname, extname } from "./utils/path";
 
+interface UnsafeAppInterface {
+  internalPlugins: {
+    plugins: {
+      starred: {
+        instance: {
+          items: { path: string }[];
+        };
+      };
+    };
+  };
+}
+
 export class AppHelper {
-  constructor(private app: App) {}
+  private unsafeApp: App & UnsafeAppInterface;
+
+  constructor(app: App) {
+    this.unsafeApp = app as any;
+  }
 
   getFolders(): TFolder[] {
-    return this.app.vault
+    return this.unsafeApp.vault
       .getAllLoadedFiles()
       .filter((x) => x instanceof TFolder) as TFolder[];
   }
 
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
-    const fileCache = this.app.metadataCache.getFileCache(file);
+    const fileCache = this.unsafeApp.metadataCache.getFileCache(file);
     const links = fileCache?.links ?? [];
     const embeds = fileCache?.embeds ?? [];
 
     return [...links, ...embeds].find((x: LinkCache) => {
-      const toLinkFilePath = this.app.metadataCache.getFirstLinkpathDest(
+      const toLinkFilePath = this.unsafeApp.metadataCache.getFirstLinkpathDest(
         x.link,
         file.path
       )?.path;
@@ -37,7 +53,7 @@ export class AppHelper {
     const backLinksMap: Record<string, Set<string>> = {};
 
     for (const [filePath, linkMap] of Object.entries(
-      this.app.metadataCache.resolvedLinks
+      this.unsafeApp.metadataCache.resolvedLinks
     ) as [string, Record<string, number>][]) {
       for (const linkPath of Object.keys(linkMap)) {
         if (!backLinksMap[linkPath]) {
@@ -51,13 +67,14 @@ export class AppHelper {
   }
 
   openMarkdownFile(file: TFile, newLeaf: boolean, offset: number = 0) {
-    const leaf = this.app.workspace.getLeaf(newLeaf);
+    const leaf = this.unsafeApp.workspace.getLeaf(newLeaf);
 
     leaf
-      .openFile(file, this.app.workspace.activeLeaf?.getViewState())
+      .openFile(file, this.unsafeApp.workspace.activeLeaf?.getViewState())
       .then(() => {
-        this.app.workspace.setActiveLeaf(leaf, true, true);
-        const viewOfType = this.app.workspace.getActiveViewOfType(MarkdownView);
+        this.unsafeApp.workspace.setActiveLeaf(leaf, true, true);
+        const viewOfType =
+          this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
         if (viewOfType) {
           const editor = viewOfType.editor;
           const pos = editor.offsetToPos(offset);
@@ -67,22 +84,30 @@ export class AppHelper {
       });
   }
 
+  getStarredFilePaths(): string[] {
+    return this.unsafeApp.internalPlugins.plugins.starred.instance.items.map(
+      (x) => x.path
+    );
+  }
+
   searchPhantomFiles(): TFile[] {
     return uniq(
       flatten(
-        Object.values(this.app.metadataCache.unresolvedLinks).map(Object.keys)
+        Object.values(this.unsafeApp.metadataCache.unresolvedLinks).map(
+          Object.keys
+        )
       )
     ).map((x) => this.createPhantomFile(x));
   }
 
   insertLinkToActiveFileBy(file: TFile) {
     const activeMarkdownView =
-      this.app.workspace.getActiveViewOfType(MarkdownView);
+      this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
     if (!activeMarkdownView) {
       return;
     }
 
-    const linkText = this.app.fileManager.generateMarkdownLink(
+    const linkText = this.unsafeApp.fileManager.generateMarkdownLink(
       file,
       activeMarkdownView.file.path
     );
@@ -99,14 +124,14 @@ export class AppHelper {
 
     const dir = dirname(linkPath);
     if (!(await this.exists(dir))) {
-      await this.app.vault.createFolder(dir);
+      await this.unsafeApp.vault.createFolder(dir);
     }
 
-    return this.app.vault.create(linkPath, "");
+    return this.unsafeApp.vault.create(linkPath, "");
   }
 
   exists(normalizedPath: string): Promise<boolean> {
-    return this.app.vault.adapter.exists(normalizedPath);
+    return this.unsafeApp.vault.adapter.exists(normalizedPath);
   }
 
   private getPathToBeCreated(linkText: string): string {
@@ -119,7 +144,7 @@ export class AppHelper {
       return linkPath;
     }
 
-    const parent = this.app.fileManager.getNewFileParent("").path;
+    const parent = this.unsafeApp.fileManager.getNewFileParent("").path;
     return `${parent}/${linkPath}`;
   }
 
@@ -132,13 +157,13 @@ export class AppHelper {
     return {
       path: linkPath,
       name: basename(linkPath),
-      vault: this.app.vault,
+      vault: this.unsafeApp.vault,
       extension: "md",
       basename: basename(linkPath, ".md"),
       parent: {
         name: basename(dirname(linkPath)),
         path: dirname(linkPath),
-        vault: this.app.vault,
+        vault: this.unsafeApp.vault,
         // XXX: From here, Untrusted properties
         children: [],
         // @ts-ignore
