@@ -192,6 +192,10 @@ export class AnotherQuickSwitcherModal
   }
 
   getSuggestions(query: string): SuggestionItem[] {
+    if (!query.trim()) {
+      return [];
+    }
+
     const start = performance.now();
 
     let lastOpenFileIndexByPath: { [path: string]: number } = {};
