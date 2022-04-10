@@ -92,38 +92,9 @@ export class AnotherQuickSwitcherModal
     });
     // Delete whole input line
     this.scope.register(["Mod"], "D", () => {
-      const elem = this.inputEl;
-      const str = elem.value;
-      elem.setSelectionRange(0, str.length);
-      elem.setRangeText("");
-    });
-    // Delete word at cursor or before cursor if at end of string
-    this.scope.register(["Mod"], "W", () => {
-      const elem = this.inputEl;
-      let curpos = elem.selectionStart;
-      if (curpos === null) {
-        curpos = 0;
-      }
-      let str = elem.value;
-      const endstr = str.substring(curpos);
-      // when CTRL+W is applied at the end of the input but to the right of
-      //   the last word, pretend that it was applied inside the last word of the input
-      if (endstr.match(/^\s*$/)) {
-        str = str.replace(/\s+$/, "");
-      }
-      let idx1 = str.lastIndexOf(' ', curpos);
-      if (idx1 == -1) {
-        idx1 = 0;
-      }
-      else {
-        idx1 += 1;
-      }
-      let idx2 = str.indexOf(' ', curpos);
-      if (idx2 == -1) {
-        idx2 = str.length;
-      }
-      elem.setSelectionRange(idx1, idx2);
-      elem.setRangeText("");
+      this.inputEl.select();
+      this.inputEl.setRangeText("");
+      this.inputEl.dispatchEvent(new Event("input"));
     });
 
     const phantomItems = this.settings.showExistingFilesOnly
