@@ -55,6 +55,7 @@ export class AnotherQuickSwitcherModal
       { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
       { command: "[shift ↵]", purpose: "create" },
       { command: "[ctrl/cmd shift ↵]", purpose: "create in new pane" },
+      { command: "[ctrl/cmd d]", purpose: "clear input" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
