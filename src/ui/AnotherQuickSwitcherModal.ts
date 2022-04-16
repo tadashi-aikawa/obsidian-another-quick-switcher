@@ -162,7 +162,7 @@ export class AnotherQuickSwitcherModal
       return;
     }
 
-    this.appHelper.openMarkdownFile(file, newLeaf);
+    this.appHelper.openMarkdownFile(file, { newLeaf: true });
     this.close();
   }
 
@@ -305,11 +305,10 @@ export class AnotherQuickSwitcherModal
           )
         : undefined;
 
-    this.appHelper.openMarkdownFile(
-      fileToOpened,
-      evt.ctrlKey || evt.metaKey,
-      offset
-    );
+    this.appHelper.openMarkdownFile(fileToOpened, {
+      newLeaf: evt.ctrlKey || evt.metaKey,
+      offset,
+    });
   }
 
   private showDebugLog(toMessage: () => string) {

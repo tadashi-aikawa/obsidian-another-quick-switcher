@@ -66,7 +66,12 @@ export class AppHelper {
     return backLinksMap;
   }
 
-  openMarkdownFile(file: TFile, newLeaf: boolean, offset: number = 0) {
+  openMarkdownFile(
+    file: TFile,
+    option: { newLeaf?: boolean; offset?: number } = {}
+  ) {
+    const { newLeaf, offset } = { ...{ newLeaf: false, offset: 0 }, ...option };
+
     const leaf = this.unsafeApp.workspace.getLeaf(newLeaf);
 
     leaf
