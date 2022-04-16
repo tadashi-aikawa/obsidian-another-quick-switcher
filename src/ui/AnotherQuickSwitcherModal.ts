@@ -10,14 +10,7 @@ import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
-import {
-  priorityToLastModified,
-  priorityToLastOpened,
-  priorityToLength,
-  priorityToName,
-  priorityToPerfectWord,
-  priorityToPrefixName,
-} from "../sorters";
+import { fileNameRecentSort, normalSort, recentSort } from "../sorters";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -246,23 +239,10 @@ export class AnotherQuickSwitcherModal
     }
 
     if (!query.trim()) {
-      return this.ignoredItems
-        .sort((a, b) => {
-          let result: 0 | -1 | 1;
-
-          result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
-          if (result !== 0) {
-            return result;
-          }
-
-          result = priorityToLastModified(a, b);
-          if (result !== 0) {
-            return result;
-          }
-
-          return 0;
-        })
-        .slice(0, this.settings.maxNumberOfSuggestions);
+      return recentSort(this.ignoredItems, lastOpenFileIndexByPath).slice(
+        0,
+        this.settings.maxNumberOfSuggestions
+      );
     }
 
     const matchedSuggestions = this.ignoredItems
@@ -271,69 +251,24 @@ export class AnotherQuickSwitcherModal
       )
       .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
 
-    const items = matchedSuggestions
-      .sort((a, b) => {
-        let result: 0 | -1 | 1;
-
-        switch (this.mode) {
-          case "normal":
-            result = priorityToPerfectWord(a, b);
-            if (result !== 0) {
-              return result;
-            }
-
-            result = priorityToPrefixName(a, b);
-            if (result !== 0) {
-              return result;
-            }
-
-            result = priorityToName(a, b);
-            if (result !== 0) {
-              return result;
-            }
-
-            result = priorityToLength(a, b);
-            if (result !== 0) {
-              return result;
-            }
-            break;
-          case "recent":
-            // DO Nothing
-            break;
-          case "backlink":
-            throw new Error("Unreachable error: this.mode = backlink");
-          case "filename-recent":
-            result = priorityToPerfectWord(a, b);
-            if (result !== 0) {
-              return result;
-            }
-
-            result = priorityToName(a, b);
-            if (result !== 0) {
-              return result;
-            }
-            break;
-        }
-
-        result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
-        if (result !== 0) {
-          return result;
-        }
-
-        result = priorityToLastModified(a, b);
-        if (result !== 0) {
-          return result;
-        }
-
-        return 0;
-      })
-      .slice(0, this.settings.maxNumberOfSuggestions);
+    let items: SuggestionItem[] = [];
+    switch (this.mode) {
+      case "normal":
+        items = normalSort(matchedSuggestions, lastOpenFileIndexByPath);
+        break;
+      case "recent":
+        items = recentSort(matchedSuggestions, lastOpenFileIndexByPath);
+        break;
+      case "filename-recent":
+        items = fileNameRecentSort(matchedSuggestions, lastOpenFileIndexByPath);
+        break;
+    }
 
     this.showDebugLog(() =>
       buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
     );
 
-    return items;
+    return items.slice(0, this.settings.maxNumberOfSuggestions);
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {

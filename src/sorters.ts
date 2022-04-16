@@ -1,5 +1,98 @@
 import { SuggestionItem } from "./matcher";
 
+export function normalSort(
+  items: SuggestionItem[],
+  lastOpenFileIndexByPath: { [path: string]: number }
+): SuggestionItem[] {
+  return items.sort((a, b) => {
+    let result: 0 | -1 | 1;
+
+    result = priorityToPerfectWord(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToPrefixName(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToName(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLength(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLastModified(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    return 0;
+  });
+}
+
+export function recentSort(
+  items: SuggestionItem[],
+  lastOpenFileIndexByPath: { [path: string]: number }
+): SuggestionItem[] {
+  return items.sort((a, b) => {
+    let result: 0 | -1 | 1;
+
+    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLastModified(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    return 0;
+  });
+}
+
+export function fileNameRecentSort(
+  items: SuggestionItem[],
+  lastOpenFileIndexByPath: { [path: string]: number }
+): SuggestionItem[] {
+  return items.sort((a, b) => {
+    let result: 0 | -1 | 1;
+
+    result = priorityToPerfectWord(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToName(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLastModified(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    return 0;
+  });
+}
+
 function compare<T, U extends number | string>(
   a: T,
   b: T,
@@ -32,7 +125,7 @@ function compare<T, U extends number | string>(
   }
 }
 
-export function priorityToPerfectWord(
+function priorityToPerfectWord(
   a: SuggestionItem,
   b: SuggestionItem
 ): 0 | -1 | 1 {
@@ -45,7 +138,7 @@ export function priorityToPerfectWord(
   );
 }
 
-export function priorityToPrefixName(
+function priorityToPrefixName(
   a: SuggestionItem,
   b: SuggestionItem
 ): 0 | -1 | 1 {
@@ -57,10 +150,7 @@ export function priorityToPrefixName(
   );
 }
 
-export function priorityToName(
-  a: SuggestionItem,
-  b: SuggestionItem
-): 0 | -1 | 1 {
+function priorityToName(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
   return compare(
     a,
     b,
@@ -72,10 +162,7 @@ export function priorityToName(
   );
 }
 
-export function priorityToLength(
-  a: SuggestionItem,
-  b: SuggestionItem
-): 0 | -1 | 1 {
+function priorityToLength(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
   return compare(
     a,
     b,
@@ -87,7 +174,7 @@ export function priorityToLength(
   );
 }
 
-export function priorityToLastOpened(
+function priorityToLastOpened(
   a: SuggestionItem,
   b: SuggestionItem,
   lastOpenFileIndexByPath: { [path: string]: number }
@@ -100,7 +187,7 @@ export function priorityToLastOpened(
   );
 }
 
-export function priorityToLastModified(
+function priorityToLastModified(
   a: SuggestionItem,
   b: SuggestionItem
 ): 0 | -1 | 1 {
