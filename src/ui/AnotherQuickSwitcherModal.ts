@@ -7,7 +7,7 @@ import {
 } from "obsidian";
 import { ignoreItems, keyBy, uniq } from "../utils/collection-helper";
 import { Settings } from "../settings";
-import { AppHelper } from "../app-helper";
+import { AppHelper, LeafType } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
 import { fileNameRecentSort, normalSort, recentSort } from "../sorters";
@@ -53,12 +53,14 @@ export class AnotherQuickSwitcherModal
         command: "[↑↓][ctrl/cmd n or p][ctrl/cmd j or k]",
         purpose: "navigate",
       },
-      { command: "[↵]", purpose: "open" },
-      { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
-      { command: "[shift ↵]", purpose: "create" },
-      { command: "[ctrl/cmd shift ↵]", purpose: "create in new pane" },
       { command: "[ctrl/cmd d]", purpose: "clear input" },
       { command: "[tab]", purpose: "replace input" },
+      { command: "[↵]", purpose: "open" },
+      { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
+      { command: "[ctrl/cmd alt ↵]", purpose: "open in popup" },
+      { command: "[shift ↵]", purpose: "create" },
+      { command: "[ctrl/cmd shift ↵]", purpose: "create in new pane" },
+      { command: "[ctrl/cmd shift alt ↵]", purpose: "create in popup" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
@@ -68,14 +70,23 @@ export class AnotherQuickSwitcherModal
     this.scope.register(["Alt"], "Enter", () =>
       this.chooser.useSelectedItem({ altKey: true })
     );
+    this.scope.register(["Mod", "Alt"], "Enter", () =>
+      this.chooser.useSelectedItem({ metaKey: true, altKey: true })
+    );
+
     this.scope.register(["Shift"], "Enter", () => {
       if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, false);
+        this.handleCreateNew(this.searchQuery, "same");
       }
     });
     this.scope.register(["Shift", "Mod"], "Enter", () => {
       if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, true);
+        this.handleCreateNew(this.searchQuery, "new");
+      }
+    });
+    this.scope.register(["Shift", "Mod", "Alt"], "Enter", () => {
+      if (this.searchQuery) {
+        this.handleCreateNew(this.searchQuery, "popup");
       }
     });
 
@@ -154,7 +165,7 @@ export class AnotherQuickSwitcherModal
     this.ignoredItems = this.ignoreItems(initialMode);
   }
 
-  async handleCreateNew(searchQuery: string, newLeaf: boolean) {
+  async handleCreateNew(searchQuery: string, leafType: LeafType) {
     const file = await this.appHelper.createMarkdown(this.searchQuery);
     if (!file) {
       // noinspection ObjectAllocationIgnored
@@ -162,7 +173,7 @@ export class AnotherQuickSwitcherModal
       return;
     }
 
-    this.appHelper.openMarkdownFile(file, { newLeaf: true });
+    this.appHelper.openMarkdownFile(file, { leaf: leafType });
     this.close();
   }
 
@@ -288,7 +299,7 @@ export class AnotherQuickSwitcherModal
     evt: MouseEvent | KeyboardEvent
   ): Promise<void> {
     let fileToOpened = item.file;
-    if (evt.altKey) {
+    if (evt.altKey && !evt.metaKey) {
       this.appHelper.insertLinkToActiveFileBy(fileToOpened);
       return;
     }
@@ -303,10 +314,10 @@ export class AnotherQuickSwitcherModal
             item.file,
             this.app.workspace.getActiveFile()! // never undefined
           )
-        : undefined;
+        : 0;
 
     this.appHelper.openMarkdownFile(fileToOpened, {
-      newLeaf: evt.ctrlKey || evt.metaKey,
+      leaf: evt.metaKey && evt.altKey ? "popup" : evt.metaKey ? "new" : "same",
       offset,
     });
   }

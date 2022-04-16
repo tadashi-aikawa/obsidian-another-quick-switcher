@@ -75,6 +75,26 @@ One of the following.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/move-to-folder.gif)
 
+### Hotkeys on quick switcher
+
+⚠ `open in popup` and `create in popup` need the [Obsidian Hover Editor](https://github.com/nothingislost/obsidian-hover-editor) plugin. It doesn't support as an official feature, so there is a possibility that it will not to working someday.
+
+| Key                       | Description               |
+| ------------------------- | ------------------------- |
+| `[↑↓]`                  | navigate                  |
+| `[ctrl/cmd n or p]`       | navigate (for emacs user) |
+| `[ctrl/cmd j or k]`       | navigate (for vimmer)     |
+| `[ctrl/cmd d]`            | clear input               |
+| `[tab]`                   | replace input             |
+| `[↵]`                    | open                      |
+| `[ctrl/cmd ↵]`           | open in new pane          |
+| `[ctrl/cmd alt ↵]`       | open in popup             |
+| `[shift ↵]`              | create                    |
+| `[ctrl/cmd shift ↵]`     | create in new pane        |
+| `[ctrl/cmd shift alt ↵]` | create in popup           |
+| `[alt ↵]`                | insert to editor          |
+| `[esc]`                   | dismiss                   |
+
 ## 📱 Mobile support
 
 It both supports desktop and mobile.

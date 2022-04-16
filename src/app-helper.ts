@@ -5,6 +5,7 @@ import {
   MarkdownView,
   TFile,
   TFolder,
+  WorkspaceLeaf,
 } from "obsidian";
 import { flatten, uniq } from "./utils/collection-helper";
 import { basename, dirname, extname } from "./utils/path";
@@ -19,7 +20,23 @@ interface UnsafeAppInterface {
       };
     };
   };
+  plugins: {
+    plugins: {
+      "obsidian-hover-editor"?: {
+        spawnPopover(
+          initiatingEl?: HTMLElement,
+          onShowCallback?: () => unknown
+        ): WorkspaceLeaf;
+      };
+    };
+  };
 }
+
+export type LeafType = "same" | "new" | "popup";
+type OpenMarkdownFileOption = {
+  leaf: LeafType;
+  offset: number;
+};
 
 export class AppHelper {
   private unsafeApp: App & UnsafeAppInterface;
@@ -66,27 +83,50 @@ export class AppHelper {
     return backLinksMap;
   }
 
-  openMarkdownFile(
-    file: TFile,
-    option: { newLeaf?: boolean; offset?: number } = {}
-  ) {
-    const { newLeaf, offset } = { ...{ newLeaf: false, offset: 0 }, ...option };
+  openMarkdownFile(file: TFile, option: Partial<OpenMarkdownFileOption> = {}) {
+    const opt: OpenMarkdownFileOption = {
+      ...{ leaf: "same", offset: 0 },
+      ...option,
+    };
 
-    const leaf = this.unsafeApp.workspace.getLeaf(newLeaf);
+    const openFile = (leaf: WorkspaceLeaf) => {
+      leaf
+        .openFile(file, this.unsafeApp.workspace.activeLeaf?.getViewState())
+        .then(() => {
+          this.unsafeApp.workspace.setActiveLeaf(leaf, true, true);
+          const viewOfType =
+            this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
+          if (viewOfType) {
+            const editor = viewOfType.editor;
+            const pos = editor.offsetToPos(opt.offset);
+            editor.setCursor(pos);
+            editor.scrollIntoView({ from: pos, to: pos }, true);
+          }
+        });
+    };
 
-    leaf
-      .openFile(file, this.unsafeApp.workspace.activeLeaf?.getViewState())
-      .then(() => {
-        this.unsafeApp.workspace.setActiveLeaf(leaf, true, true);
-        const viewOfType =
-          this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
-        if (viewOfType) {
-          const editor = viewOfType.editor;
-          const pos = editor.offsetToPos(offset);
-          editor.setCursor(pos);
-          editor.scrollIntoView({ from: pos, to: pos }, true);
+    let leaf: WorkspaceLeaf;
+    switch (opt.leaf) {
+      case "same":
+        leaf = this.unsafeApp.workspace.getLeaf();
+        openFile(leaf);
+        break;
+      case "new":
+        leaf = this.unsafeApp.workspace.getLeaf(true);
+        openFile(leaf);
+        break;
+      case "popup":
+        const hoverEditorInstance =
+          this.unsafeApp.plugins.plugins["obsidian-hover-editor"];
+        if (hoverEditorInstance) {
+          leaf = hoverEditorInstance.spawnPopover(undefined, () => {
+            openFile(leaf);
+          });
+        } else {
+          openFile(this.unsafeApp.workspace.getLeaf());
         }
-      });
+        break;
+    }
   }
 
   getStarredFilePaths(): string[] {
