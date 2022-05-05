@@ -66,6 +66,15 @@ One of the following.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink.gif)
 
+### Header search in file
+
+Run `Another Quick Switcher: Header search in file` on `Command palette`.
+
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/header-in-search.gif)
+
+- Show all headers even after filtering to retain file structures in the brain
+- Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab`
+
 ### Move file to another folder
 
 One of the following.
