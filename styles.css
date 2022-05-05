@@ -53,9 +53,17 @@
     color: var(--interactive-accent);
     font-weight: bold;
 }
+.another-quick-switcher__item__title__header_hit__counter {
+    font-size: 80%;
+    margin-right: 20px;
+    font-weight: bolder;
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-accent)
+}
 .another-quick-switcher__item__title__header_no_hit {
     /** do nothing */
 }
+
 .another-quick-switcher__item__title__header1 {
     /* nothing */
 }

@@ -144,6 +144,16 @@ export class HeaderModal
     });
     entryDiv.appendChild(headerDiv);
 
+    if (item.hit) {
+      const i = this.hitItems.findIndex((x) => x.index === item.index);
+      if (i !== -1) {
+        entryDiv.createSpan({
+          cls: "another-quick-switcher__item__title__header_hit__counter",
+          text: `${i + 1} / ${this.hitItems.length}`,
+        });
+      }
+    }
+
     itemDiv.appendChild(entryDiv);
 
     el.appendChild(itemDiv);
