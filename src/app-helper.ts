@@ -1,8 +1,11 @@
 import {
   App,
+  Editor,
   getLinkpath,
+  HeadingCache,
   LinkCache,
   MarkdownView,
+  Pos,
   TFile,
   TFolder,
   WorkspaceLeaf,
@@ -45,6 +48,33 @@ export class AppHelper {
     this.unsafeApp = app as any;
   }
 
+  getActiveFile(): TFile | null {
+    return this.unsafeApp.workspace.getActiveFile();
+  }
+
+  getMarkdownViewInActiveLeaf(): MarkdownView | null {
+    if (!this.unsafeApp.workspace.getActiveViewOfType(MarkdownView)) {
+      return null;
+    }
+
+    return this.unsafeApp.workspace.activeLeaf!.view as MarkdownView;
+  }
+
+  getCurrentEditor(): Editor | null {
+    return this.getMarkdownViewInActiveLeaf()?.editor ?? null;
+  }
+
+  getHeadersInActiveFile(): HeadingCache[] {
+    const activeFile = this.getActiveFile();
+    if (!activeFile) {
+      return [];
+    }
+
+    return (
+      this.unsafeApp.metadataCache.getFileCache(activeFile)?.headings ?? []
+    );
+  }
+
   getFolders(): TFolder[] {
     return this.unsafeApp.vault
       .getAllLoadedFiles()
@@ -83,6 +113,19 @@ export class AppHelper {
     return backLinksMap;
   }
 
+  moveTo(to: Pos | number, editor?: Editor) {
+    const targetEditor = editor ?? this.getCurrentEditor();
+    if (!targetEditor) {
+      return;
+    }
+
+    const pos = targetEditor.offsetToPos(
+      typeof to === "number" ? to : to.start.offset
+    );
+    targetEditor.setCursor(pos);
+    targetEditor.scrollIntoView({ from: pos, to: pos }, true);
+  }
+
   openMarkdownFile(file: TFile, option: Partial<OpenMarkdownFileOption> = {}) {
     const opt: OpenMarkdownFileOption = {
       ...{ leaf: "same", offset: 0 },
@@ -94,13 +137,10 @@ export class AppHelper {
         .openFile(file, this.unsafeApp.workspace.activeLeaf?.getViewState())
         .then(() => {
           this.unsafeApp.workspace.setActiveLeaf(leaf, true, true);
-          const viewOfType =
+          const markdownView =
             this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
-          if (viewOfType) {
-            const editor = viewOfType.editor;
-            const pos = editor.offsetToPos(opt.offset);
-            editor.setCursor(pos);
-            editor.scrollIntoView({ from: pos, to: pos }, true);
+          if (markdownView) {
+            this.moveTo(opt.offset, markdownView.editor);
           }
         });
     };

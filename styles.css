@@ -43,6 +43,38 @@
     flex: 1;
 }
 
+.another-quick-switcher__item__title__header {
+    line-height: 1.1em;
+    display: list-item;
+    list-style: circle;
+}
+.another-quick-switcher__item__title__header_hit {
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--interactive-accent);
+    font-weight: bold;
+}
+.another-quick-switcher__item__title__header_no_hit {
+    /** do nothing */
+}
+.another-quick-switcher__item__title__header1 {
+    /* nothing */
+}
+.another-quick-switcher__item__title__header2 {
+    margin-left: 1em;
+}
+.another-quick-switcher__item__title__header3 {
+    margin-left: 2em;
+}
+.another-quick-switcher__item__title__header4 {
+    margin-left: 3em;
+}
+.another-quick-switcher__item__title__header5 {
+    margin-left: 4em;
+}
+.another-quick-switcher__item__title__header6 {
+    margin-left: 5em;
+}
+
 .another-quick-switcher__item__directory {
     display: flex;
     align-items: center;

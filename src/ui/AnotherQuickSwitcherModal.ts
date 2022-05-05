@@ -11,6 +11,7 @@ import { AppHelper, LeafType } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
 import { fileNameRecentSort, normalSort, recentSort } from "../sorters";
+import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -18,20 +19,9 @@ function buildLogMessage(message: string, msec: number) {
 
 export type Mode = "normal" | "recent" | "backlink" | "filename-recent";
 
-// This is an unsafe code..!! However, it might be a public interface because lishid commented it as a better way on PR :)
-// https://github.com/obsidianmd/obsidian-releases/pull/520#issuecomment-944846642
-interface UnsafeModalInterface {
-  chooser: {
-    values: SuggestionItem[];
-    selectedItem: number;
-    setSelectedItem(item: number): void;
-    useSelectedItem(ev: Partial<KeyboardEvent>): void;
-  };
-}
-
 export class AnotherQuickSwitcherModal
   extends SuggestModal<SuggestionItem>
-  implements UnsafeModalInterface
+  implements UnsafeModalInterface<SuggestionItem>
 {
   originItems: SuggestionItem[];
   ignoredItems: SuggestionItem[];
@@ -40,7 +30,7 @@ export class AnotherQuickSwitcherModal
   settings: Settings;
   searchQuery: string;
 
-  chooser: UnsafeModalInterface["chooser"];
+  chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
 
   constructor(app: App, public initialMode: Mode, settings: Settings) {
     super(app);

@@ -5,6 +5,7 @@ import {
 import { App, Command } from "obsidian";
 import { Settings } from "./settings";
 import { MoveModal } from "./ui/MoveModal";
+import { HeaderModal } from "./ui/HeaderModal";
 
 export function showSearchDialog(app: App, mode: Mode, settings: Settings) {
   const modal = new AnotherQuickSwitcherModal(app, mode, settings);
@@ -17,6 +18,15 @@ export function showMoveDialog(app: App, settings: Settings) {
   }
 
   const modal = new MoveModal(app, settings);
+  modal.open();
+}
+
+export function showHeaderDialog(app: App, settings: Settings) {
+  if (!app.workspace.getActiveFile()) {
+    return;
+  }
+
+  const modal = new HeaderModal(app, settings);
   modal.open();
 }
 
@@ -55,6 +65,16 @@ export function createCommands(app: App, settings: Settings): Command[] {
           return Boolean(app.workspace.getActiveFile());
         }
         showSearchDialog(app, "backlink", settings);
+      },
+    },
+    {
+      id: "header-search-in-file",
+      name: "Header search in file",
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return Boolean(app.workspace.getActiveFile());
+        }
+        showHeaderDialog(app, settings);
       },
     },
     {
