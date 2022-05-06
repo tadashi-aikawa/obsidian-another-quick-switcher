@@ -23,10 +23,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          prerelease: "contains(github.ref, 'beta'"
           files: |
             main.js
             styles.css
             manifest.json
+            manifest-beta.json
 
       - name: "Discord notification (not success)"
         uses: rjstone/discord-webhook-notify@v1

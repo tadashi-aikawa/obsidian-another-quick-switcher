@@ -131,6 +131,10 @@ task dev
 ### Release
 
 ```console
+# Beta
+task release-beta VERSION=1.2.3-beta1
+
+# Stable
 task release VERSION=1.2.3
 ```
 
