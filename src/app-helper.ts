@@ -113,17 +113,34 @@ export class AppHelper {
     return backLinksMap;
   }
 
-  moveTo(to: Pos | number, editor?: Editor) {
+  async moveTo(to: Pos | number, editor?: Editor) {
+    const isToOffset = typeof to === "number";
+
+    const activeFile = this.getActiveFile();
+    const activeLeaf = this.unsafeApp.workspace.activeLeaf;
+    if (!activeFile || !activeLeaf) {
+      return;
+    }
+
+    const subView = this.getMarkdownViewInActiveLeaf()?.currentMode;
+    if (!subView) {
+      return;
+    }
+
     const targetEditor = editor ?? this.getCurrentEditor();
     if (!targetEditor) {
       return;
     }
 
-    const pos = targetEditor.offsetToPos(
-      typeof to === "number" ? to : to.start.offset
+    const line = isToOffset ? targetEditor.offsetToPos(to).line : to.start.line;
+    targetEditor.setCursor(
+      targetEditor.offsetToPos(isToOffset ? to : to.start.offset)
     );
-    targetEditor.setCursor(pos);
-    targetEditor.scrollIntoView({ from: pos, to: pos }, true);
+    await activeLeaf.openFile(activeFile, {
+      eState: {
+        line,
+      },
+    });
   }
 
   openMarkdownFile(file: TFile, option: Partial<OpenMarkdownFileOption> = {}) {
@@ -139,7 +156,7 @@ export class AppHelper {
           this.unsafeApp.workspace.setActiveLeaf(leaf, true, true);
           const markdownView =
             this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
-          if (markdownView) {
+          if (markdownView && opt.offset > 0) {
             this.moveTo(opt.offset, markdownView.editor);
           }
         });
