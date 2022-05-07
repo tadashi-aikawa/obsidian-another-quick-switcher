@@ -114,7 +114,16 @@ describe.each`
   ${"[aaa](https://aaa)"}                  | ${"aaa"}
   ${"[aaa]"}                               | ${"aaa"}
   ${"`aaa`"}                               | ${"aaa"}
+  ${"~~aaa~~"}                             | ${"aaa"}
+  ${"==aaa=="}                             | ${"aaa"}
   ${"**aaa**"}                             | ${"aaa"}
+  ${"*aaa*"}                               | ${"aaa"}
+  ${"*aaa* **bbb** *ccc* **ddd**"}         | ${"aaa bbb ccc ddd"}
+  ${"__aaa__"}                             | ${"aaa"}
+  ${"_aaa_"}                               | ${"aaa"}
+  ${"_aaa_ __bbb__ _ccc_ __ddd__"}         | ${"aaa bbb ccc ddd"}
+  ${"<div>aaa</div>"}                      | ${"aaa"}
+  ${"<div>aaa</div> [bbb] <b>ccc</b>"}     | ${"aaa bbb ccc"}
   ${"[[aa]] [bb](https://bb) `cc` **dd**"} | ${"aa bb cc dd"}
 `("excludeFormat", ({ text, expected }) => {
   test(`excludeFormat(${text}) = ${expected}`, () => {
