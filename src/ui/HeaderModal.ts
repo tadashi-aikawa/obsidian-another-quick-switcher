@@ -74,19 +74,30 @@ export class HeaderModal
 
   onOpen() {
     super.onOpen();
-    if (this.items.length === 0) {
+
+    const leaf = this.appHelper.getMarkdownViewInActiveLeaf();
+    if (!leaf || this.items.length === 0) {
       return;
     }
 
-    const offset = this.appHelper.getCurrentOffset();
-    if (offset) {
-      const firstOverIndex = this.items.findIndex(
-        (x) => x.position.start.offset > offset
-      );
-      this.select(
-        firstOverIndex > 0 ? firstOverIndex - 1 : this.items.last()!.index
-      );
+    const mode = leaf.getMode();
+    const offset =
+      mode === "source"
+        ? this.appHelper.getCurrentOffset()
+        : leaf.editor.posToOffset({
+            ch: 0,
+            line: leaf.previewMode.getScroll(),
+          });
+    if (!offset) {
+      return;
     }
+
+    const firstOverIndex = this.items.findIndex(
+      (x) => x.position.start.offset > offset
+    );
+    this.select(
+      firstOverIndex > 0 ? firstOverIndex - 1 : this.items.last()!.index
+    );
   }
 
   getSuggestions(query: string): SuggestionItem[] {
