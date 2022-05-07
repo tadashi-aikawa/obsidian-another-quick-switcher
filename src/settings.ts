@@ -1,5 +1,12 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import AnotherQuickSwitcher from "./main";
+import { mirrorMap } from "./utils/collection-helper";
+
+const headerSearchFeatureList = [
+  "navigate",
+  "move to next/previous hit",
+] as const;
+export type HeaderSearchFeature = typeof headerSearchFeatureList[number];
 
 export interface Settings {
   showDirectory: boolean;
@@ -7,10 +14,20 @@ export interface Settings {
   showExistingFilesOnly: boolean;
   maxNumberOfSuggestions: number;
   normalizeAccentsAndDiacritics: boolean;
+  // Normal search
   ignoreNormalPathPrefixPatterns: string;
+  // Recent search
   ignoreRecentPathPrefixPatterns: string;
+  // File name recent search
   ignoreFilenameRecentPathPrefixPatterns: string;
+  // Back link search
   ignoreBackLinkPathPrefixPatterns: string;
+  // Header search in file
+  headerSearchKeyBindArrowUpDown: HeaderSearchFeature;
+  headerSearchKeyBindTab: HeaderSearchFeature;
+  headerSearchKeyBindVim: HeaderSearchFeature;
+  headerSearchKeyBindEmacs: HeaderSearchFeature;
+  // Move file to another folder
   ignoreMoveFileToAnotherFolderPrefixPatterns: string;
   // debug
   showLogAboutPerformanceInConsole: boolean;
@@ -22,10 +39,20 @@ export const DEFAULT_SETTINGS: Settings = {
   showExistingFilesOnly: false,
   maxNumberOfSuggestions: 50,
   normalizeAccentsAndDiacritics: false,
+  // Normal search
   ignoreNormalPathPrefixPatterns: "",
+  // Recent search
   ignoreRecentPathPrefixPatterns: "",
+  // File name recent search
   ignoreFilenameRecentPathPrefixPatterns: "",
+  // Back link search
   ignoreBackLinkPathPrefixPatterns: "",
+  // Header search in file
+  headerSearchKeyBindArrowUpDown: "navigate",
+  headerSearchKeyBindTab: "move to next/previous hit",
+  headerSearchKeyBindVim: "navigate",
+  headerSearchKeyBindEmacs: "navigate",
+  // Move file to another folder
   ignoreMoveFileToAnotherFolderPrefixPatterns: "",
   // debug
   showLogAboutPerformanceInConsole: false,
@@ -166,6 +193,55 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           "another-quick-switcher__settings__ignore_path_patterns";
         return el;
       });
+
+    containerEl.createEl("h3", { text: "📰 Header search in file" });
+
+    containerEl.createEl("h4", { text: "Hot keys in dialog" });
+
+    new Setting(containerEl).setName("↑↓").addDropdown((tc) =>
+      tc
+        .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
+        .setValue(this.plugin.settings.headerSearchKeyBindArrowUpDown)
+        .onChange(async (value) => {
+          this.plugin.settings.headerSearchKeyBindArrowUpDown =
+            value as HeaderSearchFeature;
+          await this.plugin.saveSettings();
+        })
+    );
+    new Setting(containerEl).setName("Tab / Shift+Tab").addDropdown((tc) =>
+      tc
+        .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
+        .setValue(this.plugin.settings.headerSearchKeyBindTab)
+        .onChange(async (value) => {
+          this.plugin.settings.headerSearchKeyBindTab =
+            value as HeaderSearchFeature;
+          await this.plugin.saveSettings();
+        })
+    );
+    new Setting(containerEl)
+      .setName("Ctrl+J / Ctrl+K (for Vimmer)")
+      .addDropdown((tc) =>
+        tc
+          .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
+          .setValue(this.plugin.settings.headerSearchKeyBindVim)
+          .onChange(async (value) => {
+            this.plugin.settings.headerSearchKeyBindVim =
+              value as HeaderSearchFeature;
+            await this.plugin.saveSettings();
+          })
+      );
+    new Setting(containerEl)
+      .setName("Ctrl+N / Ctrl+P (for Emacs user)")
+      .addDropdown((tc) =>
+        tc
+          .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
+          .setValue(this.plugin.settings.headerSearchKeyBindEmacs)
+          .onChange(async (value) => {
+            this.plugin.settings.headerSearchKeyBindEmacs =
+              value as HeaderSearchFeature;
+            await this.plugin.saveSettings();
+          })
+      );
 
     containerEl.createEl("h3", { text: "📁 Move file to another folder" });
 

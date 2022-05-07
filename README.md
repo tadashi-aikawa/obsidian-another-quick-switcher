@@ -73,7 +73,7 @@ Run `Another Quick Switcher: Header search in file` on `Command palette`.
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/header-in-file.gif)
 
 - Show all headers even after filtering to retain file structures in the brain
-- Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab`
+- Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab` as default
 
 ### Move file to another folder
 

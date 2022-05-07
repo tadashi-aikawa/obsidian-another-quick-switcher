@@ -149,12 +149,22 @@ export class HeaderModal
   bindHotKeys() {
     this.setInstructions([
       {
-        command: "[↑↓][ctrl/cmd n or p][ctrl/cmd j or k]",
-        purpose: "navigate",
+        command: "[↑↓]",
+        purpose: this.settings.headerSearchKeyBindArrowUpDown,
+      },
+      {
+        command: "[tab or shift tab]",
+        purpose: this.settings.headerSearchKeyBindTab,
+      },
+      {
+        command: "[ctrl/cmd j or k]",
+        purpose: this.settings.headerSearchKeyBindVim,
+      },
+      {
+        command: "[ctrl/cmd n or p]",
+        purpose: this.settings.headerSearchKeyBindEmacs,
       },
       { command: "[ctrl/cmd d]", purpose: "clear input" },
-      { command: "[tab]", purpose: "move to next hit" },
-      { command: "[shift tab]", purpose: "move to previous hit" },
       { command: "[↵]", purpose: "move to header" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
@@ -168,48 +178,80 @@ export class HeaderModal
     this.scope.keys
       .filter((x) => ["ArrowDown", "ArrowUp"].includes(x.key!))
       .forEach((x) => this.scope.unregister(x));
-    this.scope.register([], "ArrowDown", () => {
-      this.select(this.getNextSelectIndex());
-    });
-    this.scope.register([], "ArrowUp", () => {
-      this.select(this.getPreviousSelectIndex());
-    });
-    this.scope.register(["Mod"], "N", () => {
-      this.select(this.getNextSelectIndex());
-    });
-    this.scope.register(["Mod"], "P", () => {
-      this.select(this.getPreviousSelectIndex());
-    });
-    this.scope.register(["Mod"], "J", () => {
-      this.select(this.getNextSelectIndex());
-    });
-    this.scope.register(["Mod"], "K", () => {
-      this.select(this.getPreviousSelectIndex());
-    });
 
-    this.scope.register([], "Tab", (evt) => {
-      evt.preventDefault();
+    const navigateNext = () => {
+      this.select(this.getNextSelectIndex());
+    };
+    const navigatePrevious = () => {
+      this.select(this.getPreviousSelectIndex());
+    };
+    const moveToNextHit = () => {
       if (this.hitItems.length < 2) {
         return;
       }
 
       const nextIndex =
-        this.hitItems.find((x) => x.index > this.chooser.selectedItem)?.index ??
+        this.hitItems.find((x) => x.index > this.unsafeSelectedIndex)?.index ??
         this.hitItems[0].index;
       this.select(nextIndex);
-    });
-    this.scope.register(["Shift"], "Tab", (evt) => {
-      evt.preventDefault();
+    };
+    const moveToPreviousHit = () => {
       if (this.hitItems.length < 2) {
         return;
       }
 
       const currentIndex = this.hitItems.findIndex(
-        (x) => x.index >= this.chooser.selectedItem
+        (x) => x.index >= this.unsafeSelectedIndex
       );
       const previousIndex =
-        currentIndex === -1 ? this.hitItems.length - 1 : currentIndex - 1;
+        currentIndex === 0 ? this.hitItems.length - 1 : currentIndex - 1;
       this.select(this.hitItems[previousIndex].index);
+    };
+
+    this.scope.register([], "ArrowDown", () => {
+      (this.settings.headerSearchKeyBindArrowUpDown === "navigate"
+        ? navigateNext
+        : moveToNextHit)();
+    });
+    this.scope.register([], "ArrowUp", () => {
+      (this.settings.headerSearchKeyBindArrowUpDown === "navigate"
+        ? navigatePrevious
+        : moveToPreviousHit)();
+    });
+
+    this.scope.register(["Mod"], "J", () => {
+      (this.settings.headerSearchKeyBindVim === "navigate"
+        ? navigateNext
+        : moveToNextHit)();
+    });
+    this.scope.register(["Mod"], "K", () => {
+      (this.settings.headerSearchKeyBindVim === "navigate"
+        ? navigatePrevious
+        : moveToPreviousHit)();
+    });
+
+    this.scope.register(["Mod"], "N", () => {
+      (this.settings.headerSearchKeyBindEmacs === "navigate"
+        ? navigateNext
+        : moveToNextHit)();
+    });
+    this.scope.register(["Mod"], "P", () => {
+      (this.settings.headerSearchKeyBindEmacs === "navigate"
+        ? navigatePrevious
+        : moveToPreviousHit)();
+    });
+
+    this.scope.register([], "Tab", (evt) => {
+      evt.preventDefault();
+      (this.settings.headerSearchKeyBindTab === "navigate"
+        ? navigateNext
+        : moveToNextHit)();
+    });
+    this.scope.register(["Shift"], "Tab", (evt) => {
+      evt.preventDefault();
+      (this.settings.headerSearchKeyBindTab === "navigate"
+        ? navigatePrevious
+        : moveToPreviousHit)();
     });
   }
 }
