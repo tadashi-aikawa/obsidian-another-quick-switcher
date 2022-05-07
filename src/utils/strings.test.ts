@@ -1,5 +1,6 @@
 import {
   excludeEmoji,
+  excludeFormat,
   excludeSpace,
   normalizeAccentsDiacritics,
   smartEquals,
@@ -99,5 +100,24 @@ describe.each`
 `("smartStartsWith", ({ text, query, expected }) => {
   test(`smartStartsWith(${text}, ${query}) = ${expected}`, () => {
     expect(smartEquals(text, query, false)).toBe(expected);
+  });
+});
+
+describe.each`
+  text                                     | expected
+  ${"[[aaa]]"}                             | ${"aaa"}
+  ${"[[aaa]] aaa"}                         | ${"aaa aaa"}
+  ${"aaa [[aaa]]"}                         | ${"aaa aaa"}
+  ${"aaa [[aaa]] aaa"}                     | ${"aaa aaa aaa"}
+  ${"[[aaa]] [[bbb]]"}                     | ${"aaa bbb"}
+  ${"[aaa](http://aaa)"}                   | ${"aaa"}
+  ${"[aaa](https://aaa)"}                  | ${"aaa"}
+  ${"[aaa]"}                               | ${"aaa"}
+  ${"`aaa`"}                               | ${"aaa"}
+  ${"**aaa**"}                             | ${"aaa"}
+  ${"[[aa]] [bb](https://bb) `cc` **dd**"} | ${"aa bb cc dd"}
+`("excludeFormat", ({ text, expected }) => {
+  test(`excludeFormat(${text}) = ${expected}`, () => {
+    expect(excludeFormat(text)).toBe(expected);
   });
 });

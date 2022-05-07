@@ -54,3 +54,12 @@ export function smartEquals(
     ) === normalize(query, isNormalizeAccentsDiacritics)
   );
 }
+
+export function excludeFormat(text: string): string {
+  return text
+    .replace(/\[\[([^\]]+)]]/g, "$1")
+    .replace(/\[([^\]]+)]\(https?[^)]+\)/g, "$1")
+    .replace(/\[([^\]]+)]/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1");
+}

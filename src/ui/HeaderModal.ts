@@ -1,7 +1,7 @@
 import { App, Pos, SuggestModal } from "obsidian";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
-import { smartIncludes } from "../utils/strings";
+import { excludeFormat, smartIncludes } from "../utils/strings";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 interface SuggestionItem {
@@ -30,7 +30,7 @@ export class HeaderModal
     this.settings = settings;
 
     this.items = this.appHelper.getHeadersInActiveFile().map((x, i) => ({
-      value: x.heading,
+      value: excludeFormat(x.heading),
       level: x.level as SuggestionItem["level"],
       position: x.position,
       hit: false,
