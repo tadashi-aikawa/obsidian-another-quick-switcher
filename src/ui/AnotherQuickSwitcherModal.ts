@@ -31,6 +31,7 @@ export class AnotherQuickSwitcherModal
   searchQuery: string;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
+  scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   constructor(app: App, public initialMode: Mode, settings: Settings) {
     super(app);
