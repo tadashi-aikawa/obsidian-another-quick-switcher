@@ -186,7 +186,11 @@ export class HeaderModal
       this.select(this.getPreviousSelectIndex());
     };
     const moveToNextHit = () => {
-      if (this.hitItems.length < 2) {
+      if (this.hitItems.length === 1) {
+        return;
+      }
+      if (this.hitItems.length === 0) {
+        navigateNext();
         return;
       }
 
@@ -196,7 +200,11 @@ export class HeaderModal
       this.select(nextIndex);
     };
     const moveToPreviousHit = () => {
-      if (this.hitItems.length < 2) {
+      if (this.hitItems.length === 1) {
+        return;
+      }
+      if (this.hitItems.length === 0) {
+        navigatePrevious();
         return;
       }
 
