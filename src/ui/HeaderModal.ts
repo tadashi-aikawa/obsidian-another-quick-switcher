@@ -20,8 +20,11 @@ export class HeaderModal
   hitItems: SuggestionItem[] = [];
   appHelper: AppHelper;
   settings: Settings;
+  /** ⚠Not work correctly in all cases */
+  unsafeSelectedIndex = 0;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
+  scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   constructor(app: App, settings: Settings) {
     super(app);
@@ -39,71 +42,51 @@ export class HeaderModal
 
     this.inputEl.addEventListener("input", () => {
       if (this.hitItems.length === 0) {
-        return;
-      }
-      this.chooser.setSelectedItem(this.hitItems[0].index, true);
-    });
-
-    this.setInstructions([
-      {
-        command: "[↑↓][ctrl/cmd n or p][ctrl/cmd j or k]",
-        purpose: "navigate",
-      },
-      { command: "[ctrl/cmd d]", purpose: "clear input" },
-      { command: "[tab]", purpose: "move to next hit" },
-      { command: "[shift tab]", purpose: "move to previous hit" },
-      { command: "[↵]", purpose: "move to header" },
-      { command: "[esc]", purpose: "dismiss" },
-    ]);
-
-    this.scope.register(["Mod"], "D", () => {
-      this.inputEl.value = "";
-      // Necessary to rerender suggestions
-      this.inputEl.dispatchEvent(new Event("input"));
-    });
-
-    this.scope.register(["Mod"], "N", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
-    });
-    this.scope.register(["Mod"], "P", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-    });
-    this.scope.register(["Mod"], "J", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
-    });
-    this.scope.register(["Mod"], "K", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-    });
-
-    this.scope.register([], "Tab", (evt) => {
-      evt.preventDefault();
-      if (this.hitItems.length < 2) {
+        this.select(this.unsafeSelectedIndex);
         return;
       }
 
-      this.chooser.setSelectedItem(
-        this.hitItems.find((x) => x.index > this.chooser.selectedItem)?.index ??
-          this.hitItems[0].index,
-        true
-      );
+      const nextIndex =
+        this.hitItems.find((x) => x.index >= this.unsafeSelectedIndex)?.index ??
+        this.hitItems[0].index;
+      this.select(nextIndex);
     });
-    this.scope.register(["Shift"], "Tab", (evt) => {
-      evt.preventDefault();
-      if (this.hitItems.length < 2) {
-        return;
-      }
 
-      const currentIndex = this.hitItems.findIndex(
-        (x) => x.index === this.chooser.selectedItem
+    this.bindHotKeys();
+  }
+
+  select(index: number) {
+    this.chooser.setSelectedItem(index, true);
+    this.unsafeSelectedIndex = index;
+  }
+
+  getNextSelectIndex(): number {
+    return this.unsafeSelectedIndex + 1 > this.items.length - 1
+      ? 0
+      : this.unsafeSelectedIndex + 1;
+  }
+
+  getPreviousSelectIndex(): number {
+    return this.unsafeSelectedIndex - 1 < 0
+      ? this.items.length - 1
+      : this.unsafeSelectedIndex - 1;
+  }
+
+  onOpen() {
+    super.onOpen();
+    if (this.items.length === 0) {
+      return;
+    }
+
+    const offset = this.appHelper.getCurrentOffset();
+    if (offset) {
+      const firstOverIndex = this.items.findIndex(
+        (x) => x.position.start.offset > offset
       );
-      const previousIndex =
-        currentIndex === 0 ? this.hitItems.length - 1 : currentIndex - 1;
-      this.chooser.setSelectedItem(this.hitItems[previousIndex].index, true);
-    });
+      this.select(
+        firstOverIndex > 0 ? firstOverIndex - 1 : this.items.last()!.index
+      );
+    }
   }
 
   getSuggestions(query: string): SuggestionItem[] {
@@ -161,5 +144,72 @@ export class HeaderModal
 
   async onChooseSuggestion(item: SuggestionItem): Promise<void> {
     this.appHelper.moveTo(item.position);
+  }
+
+  bindHotKeys() {
+    this.setInstructions([
+      {
+        command: "[↑↓][ctrl/cmd n or p][ctrl/cmd j or k]",
+        purpose: "navigate",
+      },
+      { command: "[ctrl/cmd d]", purpose: "clear input" },
+      { command: "[tab]", purpose: "move to next hit" },
+      { command: "[shift tab]", purpose: "move to previous hit" },
+      { command: "[↵]", purpose: "move to header" },
+      { command: "[esc]", purpose: "dismiss" },
+    ]);
+
+    this.scope.register(["Mod"], "D", () => {
+      this.inputEl.value = "";
+      // Necessary to rerender suggestions
+      this.inputEl.dispatchEvent(new Event("input"));
+    });
+
+    this.scope.keys
+      .filter((x) => ["ArrowDown", "ArrowUp"].includes(x.key!))
+      .forEach((x) => this.scope.unregister(x));
+    this.scope.register([], "ArrowDown", () => {
+      this.select(this.getNextSelectIndex());
+    });
+    this.scope.register([], "ArrowUp", () => {
+      this.select(this.getPreviousSelectIndex());
+    });
+    this.scope.register(["Mod"], "N", () => {
+      this.select(this.getNextSelectIndex());
+    });
+    this.scope.register(["Mod"], "P", () => {
+      this.select(this.getPreviousSelectIndex());
+    });
+    this.scope.register(["Mod"], "J", () => {
+      this.select(this.getNextSelectIndex());
+    });
+    this.scope.register(["Mod"], "K", () => {
+      this.select(this.getPreviousSelectIndex());
+    });
+
+    this.scope.register([], "Tab", (evt) => {
+      evt.preventDefault();
+      if (this.hitItems.length < 2) {
+        return;
+      }
+
+      const nextIndex =
+        this.hitItems.find((x) => x.index > this.chooser.selectedItem)?.index ??
+        this.hitItems[0].index;
+      this.select(nextIndex);
+    });
+    this.scope.register(["Shift"], "Tab", (evt) => {
+      evt.preventDefault();
+      if (this.hitItems.length < 2) {
+        return;
+      }
+
+      const currentIndex = this.hitItems.findIndex(
+        (x) => x.index >= this.chooser.selectedItem
+      );
+      const previousIndex =
+        currentIndex === -1 ? this.hitItems.length - 1 : currentIndex - 1;
+      this.select(this.hitItems[previousIndex].index);
+    });
   }
 }

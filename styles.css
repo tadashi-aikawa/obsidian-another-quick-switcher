@@ -54,6 +54,7 @@
     font-weight: bold;
 }
 .another-quick-switcher__item__title__header_hit__counter {
+    line-height: 1.1em;
     font-size: 80%;
     margin-right: 20px;
     font-weight: bolder;

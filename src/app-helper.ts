@@ -64,6 +64,20 @@ export class AppHelper {
     return this.getMarkdownViewInActiveLeaf()?.editor ?? null;
   }
 
+  getCurrentOffset(): number | null {
+    const editor = this.getCurrentEditor();
+    if (!editor) {
+      return null;
+    }
+
+    const cursor = this.getCurrentEditor()?.getCursor();
+    if (!cursor) {
+      return null;
+    }
+
+    return editor.posToOffset(cursor);
+  }
+
   getHeadersInActiveFile(): HeadingCache[] {
     const activeFile = this.getActiveFile();
     if (!activeFile) {
