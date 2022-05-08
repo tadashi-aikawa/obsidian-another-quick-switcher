@@ -18,6 +18,25 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 
 At the moment, there are only a few options. However, if you would like to customize behavior, I will add options to make it better as well as I can :)
 
+
+## 👥 For users
+
+### Feature requests / Bugs
+
+Please create a new [issue].
+
+### Questions / Others
+
+Please create a new [discussion].
+
+### Pull requests
+
+Before creating a pull request, please make an [issue] or a [discussion]😉
+
+[issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
+[discussion]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/discussions
+
+
 ## ⌨️Features
 
 ### Normal Search
