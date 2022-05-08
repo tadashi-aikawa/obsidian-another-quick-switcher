@@ -95,9 +95,13 @@ export class HeaderModal
     const firstOverIndex = this.items.findIndex(
       (x) => x.position.start.offset > offset
     );
-    this.select(
-      firstOverIndex > 0 ? firstOverIndex - 1 : this.items.last()!.index
-    );
+    if (firstOverIndex === -1) {
+      this.select(this.items.last()!.index);
+    } else if (firstOverIndex === 0) {
+      this.select(0);
+    } else {
+      this.select(firstOverIndex - 1);
+    }
   }
 
   getSuggestions(query: string): SuggestionItem[] {
