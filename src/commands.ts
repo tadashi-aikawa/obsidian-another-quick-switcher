@@ -21,12 +21,16 @@ export function showMoveDialog(app: App, settings: Settings) {
   modal.open();
 }
 
-export function showHeaderDialog(app: App, settings: Settings) {
+export function showHeaderDialog(
+  app: App,
+  settings: Settings,
+  floating: boolean
+) {
   if (!app.workspace.getActiveFile()) {
     return;
   }
 
-  const modal = new HeaderModal(app, settings);
+  const modal = new HeaderModal(app, settings, floating);
   modal.open();
 }
 
@@ -74,7 +78,17 @@ export function createCommands(app: App, settings: Settings): Command[] {
         if (checking) {
           return Boolean(app.workspace.getActiveFile());
         }
-        showHeaderDialog(app, settings);
+        showHeaderDialog(app, settings, false);
+      },
+    },
+    {
+      id: "header-floating-search-in-file",
+      name: "Header floating search in file",
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return Boolean(app.workspace.getActiveFile());
+        }
+        showHeaderDialog(app, settings, true);
       },
     },
     {

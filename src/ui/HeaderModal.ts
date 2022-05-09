@@ -20,17 +20,19 @@ export class HeaderModal
   hitItems: SuggestionItem[] = [];
   appHelper: AppHelper;
   settings: Settings;
+  floating: boolean;
   /** ⚠Not work correctly in all cases */
   unsafeSelectedIndex = 0;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
-  constructor(app: App, settings: Settings) {
+  constructor(app: App, settings: Settings, floating: boolean) {
     super(app);
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
+    this.floating = floating;
 
     this.items = this.appHelper.getHeadersInActiveFile().map((x, i) => ({
       value: excludeFormat(x.heading),
@@ -42,22 +44,25 @@ export class HeaderModal
 
     this.inputEl.addEventListener("input", () => {
       if (this.hitItems.length === 0) {
-        this.select(this.unsafeSelectedIndex);
+        this.select(this.unsafeSelectedIndex, this.floating);
         return;
       }
 
       const nextIndex =
         this.hitItems.find((x) => x.index >= this.unsafeSelectedIndex)?.index ??
         this.hitItems[0].index;
-      this.select(nextIndex);
+      this.select(nextIndex, this.floating);
     });
 
     this.bindHotKeys();
   }
 
-  select(index: number) {
+  select(index: number, preview: boolean = true) {
     this.chooser.setSelectedItem(index, true);
     this.unsafeSelectedIndex = index;
+    if (preview) {
+      this.appHelper.moveTo(this.items[this.unsafeSelectedIndex].position);
+    }
   }
 
   getNextSelectIndex(): number {
@@ -74,6 +79,10 @@ export class HeaderModal
 
   onOpen() {
     super.onOpen();
+    if (this.floating) {
+      fish(".modal-bg")?.addClass("another-quick-switcher__header__floating-modal-bg");
+      fish(".prompt")?.addClass("another-quick-switcher__header__floating-prompt");
+    }
 
     const leaf = this.appHelper.getMarkdownViewInActiveLeaf();
     if (!leaf || this.items.length === 0) {
@@ -96,11 +105,11 @@ export class HeaderModal
       (x) => x.position.start.offset > offset
     );
     if (firstOverIndex === -1) {
-      this.select(this.items.last()!.index);
+      this.select(this.items.last()!.index, this.floating);
     } else if (firstOverIndex === 0) {
-      this.select(0);
+      this.select(0, this.floating);
     } else {
-      this.select(firstOverIndex - 1);
+      this.select(firstOverIndex - 1, this.floating);
     }
   }
 
@@ -195,10 +204,10 @@ export class HeaderModal
       .forEach((x) => this.scope.unregister(x));
 
     const navigateNext = () => {
-      this.select(this.getNextSelectIndex());
+      this.select(this.getNextSelectIndex(), this.floating);
     };
     const navigatePrevious = () => {
-      this.select(this.getPreviousSelectIndex());
+      this.select(this.getPreviousSelectIndex(), this.floating);
     };
     const moveToNextHit = () => {
       if (this.hitItems.length === 1) {
@@ -212,7 +221,7 @@ export class HeaderModal
       const nextIndex =
         this.hitItems.find((x) => x.index > this.unsafeSelectedIndex)?.index ??
         this.hitItems[0].index;
-      this.select(nextIndex);
+      this.select(nextIndex, this.floating);
     };
     const moveToPreviousHit = () => {
       if (this.hitItems.length === 1) {
@@ -228,7 +237,7 @@ export class HeaderModal
       );
       const previousIndex =
         currentIndex === 0 ? this.hitItems.length - 1 : currentIndex - 1;
-      this.select(this.hitItems[previousIndex].index);
+      this.select(this.hitItems[previousIndex].index, this.floating);
     };
 
     this.scope.register([], "ArrowDown", () => {

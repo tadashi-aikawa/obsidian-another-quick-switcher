@@ -43,6 +43,17 @@
     flex: 1;
 }
 
+.another-quick-switcher__header__floating-modal-bg {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+.another-quick-switcher__header__floating-prompt {
+    width: 500px;
+    right: 30px;
+}
+.another-quick-switcher__header__floating-prompt .suggestion-item {
+    font-size: 90%;
+}
+
 .another-quick-switcher__item__title__header {
     line-height: 1.1em;
     display: list-item;
