@@ -80,8 +80,12 @@ export class HeaderModal
   onOpen() {
     super.onOpen();
     if (this.floating) {
-      fish(".modal-bg")?.addClass("another-quick-switcher__header__floating-modal-bg");
-      fish(".prompt")?.addClass("another-quick-switcher__header__floating-prompt");
+      fish(".modal-bg")?.addClass(
+        "another-quick-switcher__header__floating-modal-bg"
+      );
+      fish(".prompt")?.addClass(
+        "another-quick-switcher__header__floating-prompt"
+      );
     }
 
     const leaf = this.appHelper.getMarkdownViewInActiveLeaf();
@@ -105,11 +109,11 @@ export class HeaderModal
       (x) => x.position.start.offset > offset
     );
     if (firstOverIndex === -1) {
-      this.select(this.items.last()!.index, this.floating);
+      this.select(this.items.last()!.index), false;
     } else if (firstOverIndex === 0) {
-      this.select(0, this.floating);
+      this.select(0, false);
     } else {
-      this.select(firstOverIndex - 1, this.floating);
+      this.select(firstOverIndex - 1, false);
     }
   }
 
