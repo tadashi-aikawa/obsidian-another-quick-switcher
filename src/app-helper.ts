@@ -102,7 +102,7 @@ export class AppHelper {
 
     return [...links, ...embeds].find((x: LinkCache) => {
       const toLinkFilePath = this.unsafeApp.metadataCache.getFirstLinkpathDest(
-        x.link,
+        getLinkpath(x.link),
         file.path
       )?.path;
       return toLinkFilePath === linkFile.path;
