@@ -92,7 +92,9 @@ export class HeaderModal
       if (markdownView) {
         const windowWidth = this.app.workspace.containerEl.offsetWidth;
         const modalWidth = this.modalEl.offsetWidth;
-        const viewPadLeft = markdownView.containerEl.parentElement!.offsetLeft;
+        const viewPadLeft =
+          markdownView.containerEl.parentElement!.offsetLeft +
+          this.appHelper.getLeftSideBarWidth();
         const viewWidth = markdownView.containerEl.parentElement!.offsetWidth;
 
         const x = Math.min(

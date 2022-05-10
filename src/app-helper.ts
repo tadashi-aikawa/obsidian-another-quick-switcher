@@ -35,6 +35,25 @@ interface UnsafeAppInterface {
   };
 }
 
+interface UnSafeLayoutChild {
+  id: string;
+  type: "tabs";
+}
+interface UnSafeLayout {
+  id: string;
+  type: "split";
+  children: UnSafeLayoutChild[];
+  direction: "horizontal" | "vertical";
+  width: number;
+  collapsed?: boolean;
+}
+interface UnsafeLayouts {
+  active: string;
+  left: UnSafeLayout;
+  main: UnSafeLayout;
+  right: UnSafeLayout;
+}
+
 export type LeafType = "same" | "new" | "popup";
 type OpenMarkdownFileOption = {
   leaf: LeafType;
@@ -93,6 +112,18 @@ export class AppHelper {
     return this.unsafeApp.vault
       .getAllLoadedFiles()
       .filter((x) => x instanceof TFolder) as TFolder[];
+  }
+
+  getLayout(): UnsafeLayouts {
+    return this.unsafeApp.workspace.getLayout() as UnsafeLayouts;
+  }
+
+  getLeftSideBarWidth(): number {
+    return this.getLayout().left.collapsed ? 0 : this.getLayout().left.width;
+  }
+
+  getRightSideBarWidth(): number {
+    return this.getLayout().right.collapsed ? 0 : this.getLayout().right.width;
   }
 
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
