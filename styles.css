@@ -48,7 +48,6 @@
 }
 .another-quick-switcher__header__floating-prompt {
     width: 500px;
-    right: 30px;
 }
 .another-quick-switcher__header__floating-prompt .suggestion-item {
     font-size: 90%;

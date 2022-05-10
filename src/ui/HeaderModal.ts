@@ -79,27 +79,42 @@ export class HeaderModal
 
   onOpen() {
     super.onOpen();
+
     if (this.floating) {
       fish(".modal-bg")?.addClass(
         "another-quick-switcher__header__floating-modal-bg"
       );
-      fish(".prompt")?.addClass(
-        "another-quick-switcher__header__floating-prompt"
-      );
+
+      const promptEl = fish(".prompt");
+      promptEl?.addClass("another-quick-switcher__header__floating-prompt");
+
+      const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
+      if (markdownView) {
+        const windowWidth = this.app.workspace.containerEl.offsetWidth;
+        const modalWidth = this.modalEl.offsetWidth;
+        const viewPadLeft = markdownView.containerEl.parentElement!.offsetLeft;
+        const viewWidth = markdownView.containerEl.parentElement!.offsetWidth;
+
+        const x = Math.min(
+          viewPadLeft + viewWidth / 1.5,
+          windowWidth - modalWidth - 30
+        );
+        promptEl?.setAttribute("style", `left: ${x}px`);
+      }
     }
 
-    const leaf = this.appHelper.getMarkdownViewInActiveLeaf();
-    if (!leaf || this.items.length === 0) {
+    const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
+    if (!markdownView || this.items.length === 0) {
       return;
     }
 
-    const mode = leaf.getMode();
+    const mode = markdownView.getMode();
     const offset =
       mode === "source"
         ? this.appHelper.getCurrentOffset()
-        : leaf.editor.posToOffset({
+        : markdownView.editor.posToOffset({
             ch: 0,
-            line: leaf.previewMode.getScroll(),
+            line: markdownView.previewMode.getScroll(),
           });
     if (!offset) {
       return;
