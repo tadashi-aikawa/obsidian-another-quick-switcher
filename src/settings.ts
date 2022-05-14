@@ -10,6 +10,7 @@ export type HeaderSearchFeature = typeof headerSearchFeatureList[number];
 
 export interface Settings {
   showDirectory: boolean;
+  showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
   showExistingFilesOnly: boolean;
   maxNumberOfSuggestions: number;
@@ -35,6 +36,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   showDirectory: true,
+  showFullPathOfDirectory: false,
   showAliasesOnTop: false,
   showExistingFilesOnly: false,
   maxNumberOfSuggestions: 50,
@@ -77,9 +79,24 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         async (value) => {
           this.plugin.settings.showDirectory = value;
           await this.plugin.saveSettings();
+          this.display();
         }
       );
     });
+
+    if (this.plugin.settings.showDirectory) {
+      new Setting(containerEl)
+        .setName("Show full path of directory")
+        .addToggle((tc) => {
+          tc.setValue(this.plugin.settings.showFullPathOfDirectory).onChange(
+            async (value) => {
+              this.plugin.settings.showFullPathOfDirectory = value;
+              await this.plugin.saveSettings();
+              this.display();
+            }
+          );
+        });
+    }
 
     new Setting(containerEl).setName("Show aliases on top").addToggle((tc) => {
       tc.setValue(this.plugin.settings.showAliasesOnTop).onChange(

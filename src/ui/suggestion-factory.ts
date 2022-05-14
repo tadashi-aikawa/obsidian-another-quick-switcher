@@ -9,6 +9,7 @@ interface Elements {
 
 interface Options {
   showDirectory: boolean;
+  showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
 }
 
@@ -43,7 +44,10 @@ function createItemDiv(
       cls: "another-quick-switcher__item__directory",
     });
     directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
-    directoryDiv.appendText(` ${item.file.parent.name}`);
+    const text = options.showFullPathOfDirectory
+      ? item.file.parent.path
+      : item.file.parent.name;
+    directoryDiv.appendText(` ${text}`);
     entryDiv.appendChild(directoryDiv);
   }
 
