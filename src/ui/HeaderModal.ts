@@ -126,7 +126,7 @@ export class HeaderModal
       (x) => x.position.start.offset > offset
     );
     if (firstOverIndex === -1) {
-      this.select(this.items.last()!.index), false;
+      this.select(this.items.last()!.index, false);
     } else if (firstOverIndex === 0) {
       this.select(0, false);
     } else {
