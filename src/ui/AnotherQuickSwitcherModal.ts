@@ -10,14 +10,24 @@ import { Settings } from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
-import { fileNameRecentSort, normalSort, recentSort } from "../sorters";
+import {
+  fileNameRecentSort,
+  normalSort,
+  recentSort,
+  starRecentSort,
+} from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
 }
 
-export type Mode = "normal" | "recent" | "backlink" | "filename-recent";
+export type Mode =
+  | "normal"
+  | "recent"
+  | "backlink"
+  | "filename-recent"
+  | "star-recent";
 
 export class AnotherQuickSwitcherModal
   extends SuggestModal<SuggestionItem>
@@ -181,6 +191,9 @@ export class AnotherQuickSwitcherModal
         return _ignoreItems(
           this.settings.ignoreFilenameRecentPathPrefixPatterns
         );
+      case "star-recent":
+        // do nothing
+        return this.originItems;
       case "backlink":
         return _ignoreItems(this.settings.ignoreBackLinkPathPrefixPatterns);
     }
@@ -209,6 +222,8 @@ export class AnotherQuickSwitcherModal
       changeMode("recent", 3);
     } else if (query.startsWith(":f ")) {
       changeMode("filename-recent", 3);
+    } else if (query.startsWith(":s ")) {
+      changeMode("star-recent", 3);
     } else if (query.startsWith(":b ")) {
       changeMode("backlink", 3);
     } else {
@@ -241,10 +256,18 @@ export class AnotherQuickSwitcherModal
     }
 
     if (!query.trim()) {
-      return recentSort(this.ignoredItems, lastOpenFileIndexByPath).slice(
-        0,
-        this.settings.maxNumberOfSuggestions
-      );
+      switch (this.mode) {
+        case "star-recent":
+          return starRecentSort(
+            this.ignoredItems,
+            lastOpenFileIndexByPath
+          ).slice(0, this.settings.maxNumberOfSuggestions);
+        default:
+          return recentSort(this.ignoredItems, lastOpenFileIndexByPath).slice(
+            0,
+            this.settings.maxNumberOfSuggestions
+          );
+      }
     }
 
     const matchedSuggestions = this.ignoredItems
@@ -263,6 +286,9 @@ export class AnotherQuickSwitcherModal
         break;
       case "filename-recent":
         items = fileNameRecentSort(matchedSuggestions, lastOpenFileIndexByPath);
+        break;
+      case "star-recent":
+        items = starRecentSort(matchedSuggestions, lastOpenFileIndexByPath);
         break;
     }
 

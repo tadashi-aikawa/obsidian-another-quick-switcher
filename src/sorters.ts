@@ -93,6 +93,42 @@ export function fileNameRecentSort(
   });
 }
 
+export function starRecentSort(
+  items: SuggestionItem[],
+  lastOpenFileIndexByPath: { [path: string]: number }
+): SuggestionItem[] {
+  return items.sort((a, b) => {
+    let result: 0 | -1 | 1;
+
+    result = priorityToStar(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLastModified(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToPerfectWord(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToName(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    return 0;
+  });
+}
+
 function compare<T, U extends number | string>(
   a: T,
   b: T,
@@ -192,4 +228,8 @@ function priorityToLastModified(
   b: SuggestionItem
 ): 0 | -1 | 1 {
   return compare(a, b, (x) => x.file.stat.mtime, "desc");
+}
+
+function priorityToStar(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
+  return compare(a, b, (x) => Number(x.starred), "desc");
 }

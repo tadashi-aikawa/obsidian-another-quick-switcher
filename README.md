@@ -75,6 +75,22 @@ The difference with Recent Search is the sort priority order.
 | 2        | Last modified   | Last opened          |
 | 3        | -             | Last modified            |
 
+### Star Recent Search
+
+One of the following.
+
+- Run `Another Quick Switcher: Star recent search` on `Command palette`
+- Search query starts with `:s ` like `:s hoge`
+
+The difference with Recent Search is the sort priority order.
+
+| Priority | Recent Search | Star Recent Search |
+| -------- | ------------- | ------------------ |
+| 1        | Last opened   | **Starred**        |
+| 2        | Last modified | Last opened        |
+| 3        | -             | Last modified      |
+| 4        | -             | Filename matched   |
+
 ### Backlink Search
 
 One of the following.
