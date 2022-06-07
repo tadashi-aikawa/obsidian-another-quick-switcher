@@ -18,6 +18,7 @@ export interface SuggestionItem {
   phantom: boolean;
   starred: boolean;
   tokens: string[];
+  order?: number;
 }
 
 interface MatchQueryResult {

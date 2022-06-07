@@ -43,6 +43,12 @@
     flex: 1;
 }
 
+.another-quick-switcher__item__hot-key-guide {
+    padding-left: 5px;
+    font-size: 75%;
+    opacity: 0.7;
+}
+
 .another-quick-switcher__header__floating-modal-bg {
     background-color: rgba(0, 0, 0, 0.3);
 }

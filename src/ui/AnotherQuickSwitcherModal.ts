@@ -49,80 +49,7 @@ export class AnotherQuickSwitcherModal
     this.appHelper = new AppHelper(app);
     this.settings = settings;
 
-    this.setInstructions([
-      {
-        command: "[↑↓][ctrl/cmd n or p][ctrl/cmd j or k]",
-        purpose: "navigate",
-      },
-      { command: "[ctrl/cmd d]", purpose: "clear input" },
-      { command: "[tab]", purpose: "replace input" },
-      { command: "[↵]", purpose: "open" },
-      { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
-      { command: "[ctrl/cmd alt ↵]", purpose: "open in popup" },
-      { command: "[shift ↵]", purpose: "create" },
-      { command: "[ctrl/cmd shift ↵]", purpose: "create in new pane" },
-      { command: "[ctrl/cmd shift alt ↵]", purpose: "create in popup" },
-      { command: "[alt ↵]", purpose: "insert to editor" },
-      { command: "[esc]", purpose: "dismiss" },
-    ]);
-    this.scope.register(["Mod"], "Enter", () =>
-      this.chooser.useSelectedItem({ metaKey: true })
-    );
-    this.scope.register(["Alt"], "Enter", () =>
-      this.chooser.useSelectedItem({ altKey: true })
-    );
-    this.scope.register(["Mod", "Alt"], "Enter", () =>
-      this.chooser.useSelectedItem({ metaKey: true, altKey: true })
-    );
-
-    this.scope.register(["Shift"], "Enter", () => {
-      if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "same");
-      }
-    });
-    this.scope.register(["Shift", "Mod"], "Enter", () => {
-      if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "new");
-      }
-    });
-    this.scope.register(["Shift", "Mod", "Alt"], "Enter", () => {
-      if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "popup");
-      }
-    });
-
-    this.scope.register(["Mod"], "N", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
-    });
-    this.scope.register(["Mod"], "P", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-    });
-    this.scope.register(["Mod"], "J", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
-    });
-    this.scope.register(["Mod"], "K", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-    });
-
-    this.scope.register([], "Tab", (evt) => {
-      evt.preventDefault();
-
-      if (this.chooser.values) {
-        this.inputEl.value =
-          this.chooser.values[this.chooser.selectedItem].file.basename;
-        // Necessary to rerender suggestions
-        this.inputEl.dispatchEvent(new Event("input"));
-      }
-    });
-    this.scope.register(["Mod"], "D", () => {
-      this.inputEl.value = "";
-      // Necessary to rerender suggestions
-      this.inputEl.dispatchEvent(new Event("input"));
-    });
+    this.setHotKeys();
 
     const phantomItems = this.settings.showExistingFilesOnly
       ? []
@@ -252,21 +179,19 @@ export class AnotherQuickSwitcherModal
       this.showDebugLog(() =>
         buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
       );
-      return items;
+      return items.map((x, order) => ({ ...x, order }));
     }
 
     if (!query.trim()) {
       switch (this.mode) {
         case "star-recent":
-          return starRecentSort(
-            this.ignoredItems,
-            lastOpenFileIndexByPath
-          ).slice(0, this.settings.maxNumberOfSuggestions);
+          return starRecentSort(this.ignoredItems, lastOpenFileIndexByPath)
+            .slice(0, this.settings.maxNumberOfSuggestions)
+            .map((x, order) => ({ ...x, order }));
         default:
-          return recentSort(this.ignoredItems, lastOpenFileIndexByPath).slice(
-            0,
-            this.settings.maxNumberOfSuggestions
-          );
+          return recentSort(this.ignoredItems, lastOpenFileIndexByPath)
+            .slice(0, this.settings.maxNumberOfSuggestions)
+            .map((x, order) => ({ ...x, order }));
       }
     }
 
@@ -296,7 +221,9 @@ export class AnotherQuickSwitcherModal
       buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
     );
 
-    return items.slice(0, this.settings.maxNumberOfSuggestions);
+    return items
+      .slice(0, this.settings.maxNumberOfSuggestions)
+      .map((x, order) => ({ ...x, order }));
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
@@ -344,5 +271,91 @@ export class AnotherQuickSwitcherModal
     if (this.settings.showLogAboutPerformanceInConsole) {
       console.log(toMessage());
     }
+  }
+
+  private setHotKeys() {
+    this.setInstructions([
+      {
+        command: "[↑↓][ctrl/cmd n or p][ctrl/cmd j or k]",
+        purpose: "navigate",
+      },
+      { command: "[ctrl/cmd 1~9]", purpose: "open Nth" },
+      { command: "[ctrl/cmd d]", purpose: "clear input" },
+      { command: "[tab]", purpose: "replace input" },
+      { command: "[↵]", purpose: "open" },
+      { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
+      { command: "[ctrl/cmd alt ↵]", purpose: "open in popup" },
+      { command: "[shift ↵]", purpose: "create" },
+      { command: "[ctrl/cmd shift ↵]", purpose: "create in new pane" },
+      { command: "[ctrl/cmd shift alt ↵]", purpose: "create in popup" },
+      { command: "[alt ↵]", purpose: "insert to editor" },
+      { command: "[esc]", purpose: "dismiss" },
+    ]);
+
+    this.scope.register(["Mod"], "Enter", () =>
+      this.chooser.useSelectedItem({ metaKey: true })
+    );
+    this.scope.register(["Alt"], "Enter", () =>
+      this.chooser.useSelectedItem({ altKey: true })
+    );
+    this.scope.register(["Mod", "Alt"], "Enter", () =>
+      this.chooser.useSelectedItem({ metaKey: true, altKey: true })
+    );
+
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
+      this.scope.register(["Mod"], String(n), () => {
+        this.chooser.setSelectedItem(n - 1, true);
+        this.chooser.useSelectedItem({});
+      });
+    });
+
+    this.scope.register(["Shift"], "Enter", () => {
+      if (this.searchQuery) {
+        this.handleCreateNew(this.searchQuery, "same");
+      }
+    });
+    this.scope.register(["Shift", "Mod"], "Enter", () => {
+      if (this.searchQuery) {
+        this.handleCreateNew(this.searchQuery, "new");
+      }
+    });
+    this.scope.register(["Shift", "Mod", "Alt"], "Enter", () => {
+      if (this.searchQuery) {
+        this.handleCreateNew(this.searchQuery, "popup");
+      }
+    });
+
+    this.scope.register(["Mod"], "N", () => {
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown" })
+      );
+    });
+    this.scope.register(["Mod"], "P", () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+    });
+    this.scope.register(["Mod"], "J", () => {
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown" })
+      );
+    });
+    this.scope.register(["Mod"], "K", () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+    });
+
+    this.scope.register([], "Tab", (evt) => {
+      evt.preventDefault();
+
+      if (this.chooser.values) {
+        this.inputEl.value =
+          this.chooser.values[this.chooser.selectedItem].file.basename;
+        // Necessary to rerender suggestions
+        this.inputEl.dispatchEvent(new Event("input"));
+      }
+    });
+    this.scope.register(["Mod"], "D", () => {
+      this.inputEl.value = "";
+      // Necessary to rerender suggestions
+      this.inputEl.dispatchEvent(new Event("input"));
+    });
   }
 }
