@@ -39,11 +39,13 @@ function createItemDiv(
   });
   entryDiv.appendChild(titleDiv);
 
-  const hotKeyGuide = createSpan({
-    cls: "another-quick-switcher__item__hot-key-guide",
-    text: item.order! < 9 ? `[${item.order! + 1}]` : "",
-  });
-  titleDiv.appendChild(hotKeyGuide);
+  if (item.order! < 9) {
+    const hotKeyGuide = createSpan({
+      cls: "another-quick-switcher__item__hot-key-guide",
+      text: `${item.order! + 1}`,
+    });
+    titleDiv.appendChild(hotKeyGuide);
+  }
 
   if (options.showDirectory) {
     const directoryDiv = createDiv({
