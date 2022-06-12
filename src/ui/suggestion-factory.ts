@@ -11,6 +11,7 @@ interface Options {
   showDirectory: boolean;
   showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
+  hideGutterIcons: boolean,
 }
 
 function createItemDiv(
@@ -23,6 +24,7 @@ function createItemDiv(
       "another-quick-switcher__item",
       item.phantom ? "another-quick-switcher__phantom_item" : "",
       item.starred ? "another-quick-switcher__starred_item" : "",
+      options.hideGutterIcons ? "another-quick-switcher__gutter_hidden" : "",
     ],
   });
 

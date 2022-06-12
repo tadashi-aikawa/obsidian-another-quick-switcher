@@ -15,6 +15,7 @@ export interface Settings {
   showExistingFilesOnly: boolean;
   maxNumberOfSuggestions: number;
   normalizeAccentsAndDiacritics: boolean;
+  hideGutterIcons: boolean;
   // Normal search
   ignoreNormalPathPrefixPatterns: string;
   // Recent search
@@ -41,6 +42,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showExistingFilesOnly: false,
   maxNumberOfSuggestions: 50,
   normalizeAccentsAndDiacritics: false,
+  hideGutterIcons: false,
   // Normal search
   ignoreNormalPathPrefixPatterns: "",
   // Recent search
@@ -139,6 +141,17 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           this.plugin.settings.normalizeAccentsAndDiacritics
         ).onChange(async (value) => {
           this.plugin.settings.normalizeAccentsAndDiacritics = value;
+          await this.plugin.saveSettings();
+        });
+      });
+
+    new Setting(containerEl)
+      .setName("Hide gutter icons")
+      .addToggle((tc) => {
+        tc.setValue(
+          this.plugin.settings.hideGutterIcons
+        ).onChange(async (value) => {
+          this.plugin.settings.hideGutterIcons = value;
           await this.plugin.saveSettings();
         });
       });

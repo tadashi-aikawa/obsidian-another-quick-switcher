@@ -231,6 +231,7 @@ export class AnotherQuickSwitcherModal
       showDirectory: this.settings.showDirectory,
       showFullPathOfDirectory: this.settings.showFullPathOfDirectory,
       showAliasesOnTop: this.settings.showAliasesOnTop,
+      hideGutterIcons: this.settings.hideGutterIcons,
     });
 
     el.appendChild(itemDiv);
