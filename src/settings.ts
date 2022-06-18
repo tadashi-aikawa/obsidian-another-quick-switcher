@@ -16,6 +16,8 @@ export interface Settings {
   maxNumberOfSuggestions: number;
   normalizeAccentsAndDiacritics: boolean;
   hideGutterIcons: boolean;
+  // Hotkey in search dialog
+  userAltInsteadOfModForQuickResultSelection: boolean;
   // Normal search
   ignoreNormalPathPrefixPatterns: string;
   // Recent search
@@ -43,6 +45,7 @@ export const DEFAULT_SETTINGS: Settings = {
   maxNumberOfSuggestions: 50,
   normalizeAccentsAndDiacritics: false,
   hideGutterIcons: false,
+  userAltInsteadOfModForQuickResultSelection: false,
   // Normal search
   ignoreNormalPathPrefixPatterns: "",
   // Recent search
@@ -145,13 +148,27 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         });
       });
 
+    new Setting(containerEl).setName("Hide gutter icons").addToggle((tc) => {
+      tc.setValue(this.plugin.settings.hideGutterIcons).onChange(
+        async (value) => {
+          this.plugin.settings.hideGutterIcons = value;
+          await this.plugin.saveSettings();
+        }
+      );
+    });
+
+    containerEl.createEl("h4", { text: "Hot keys in dialog" });
+
     new Setting(containerEl)
-      .setName("Hide gutter icons")
+      .setName(
+        "Use `alt 1～9` instead of `ctrl/cmd 1～9` for quick result selection"
+      )
       .addToggle((tc) => {
         tc.setValue(
-          this.plugin.settings.hideGutterIcons
+          this.plugin.settings.userAltInsteadOfModForQuickResultSelection
         ).onChange(async (value) => {
-          this.plugin.settings.hideGutterIcons = value;
+          this.plugin.settings.userAltInsteadOfModForQuickResultSelection =
+            value;
           await this.plugin.saveSettings();
         });
       });

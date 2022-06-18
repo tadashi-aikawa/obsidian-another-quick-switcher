@@ -303,8 +303,11 @@ export class AnotherQuickSwitcherModal
       this.chooser.useSelectedItem({ metaKey: true, altKey: true })
     );
 
+    const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
+      ? "Alt"
+      : "Mod";
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
-      this.scope.register(["Mod"], String(n), () => {
+      this.scope.register([modifierKey], String(n), () => {
         this.chooser.setSelectedItem(n - 1, true);
         this.chooser.useSelectedItem({});
       });
