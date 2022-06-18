@@ -281,6 +281,11 @@ export class AppHelper {
     return this.unsafeApp.vault.adapter.exists(normalizedPath);
   }
 
+  isPopWindow(): boolean {
+    // XXX: Hacky implementation!!
+    return !fish(".modal-bg");
+  }
+
   private getPathToBeCreated(linkText: string): string {
     let linkPath = getLinkpath(linkText);
     if (extname(linkPath) !== ".md") {

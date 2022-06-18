@@ -17,6 +17,7 @@ import {
   starRecentSort,
 } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { excludeFormat } from "../utils/strings";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -57,6 +58,7 @@ export class AnotherQuickSwitcherModal
           file: x,
           aliases: [],
           tags: [],
+          headers: [],
           phantom: true,
           starred: false,
           matchResults: [],
@@ -82,6 +84,7 @@ export class AnotherQuickSwitcherModal
             ...(cache.tags ?? []).map((x) => x.tag),
             ...(parseFrontMatterTags(cache.frontmatter) ?? []),
           ]),
+          headers: (cache.headings ?? []).map((x) => excludeFormat(x.heading)),
           phantom: false,
           starred: x.path in starredPathMap,
           matchResults: [],
@@ -172,7 +175,12 @@ export class AnotherQuickSwitcherModal
       const items = this.ignoredItems
         .filter((x) => backlinksMap[activeFilePath]?.has(x.file.path))
         .map((x) =>
-          stampMatchResults(x, qs, this.settings.normalizeAccentsAndDiacritics)
+          stampMatchResults(
+            x,
+            qs,
+            this.settings.searchFromHeaders,
+            this.settings.normalizeAccentsAndDiacritics
+          )
         )
         .filter((x) => x.matchResults.every((x) => x.type !== "not found"))
         .slice(0, this.settings.maxNumberOfSuggestions);
@@ -197,7 +205,12 @@ export class AnotherQuickSwitcherModal
 
     const matchedSuggestions = this.ignoredItems
       .map((x) =>
-        stampMatchResults(x, qs, this.settings.normalizeAccentsAndDiacritics)
+        stampMatchResults(
+          x,
+          qs,
+          this.settings.searchFromHeaders,
+          this.settings.normalizeAccentsAndDiacritics
+        )
       )
       .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
 

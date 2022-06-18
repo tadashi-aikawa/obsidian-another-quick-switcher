@@ -138,6 +138,14 @@
     align-items: center;
     margin-right: 5px;
 }
+.another-quick-switcher__item__description__header {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 5px;
+}
+.another-quick-switcher__item__description__header__dimmed {
+    opacity: 0.5;
+}
 
 /*mobile*/
 
@@ -173,4 +181,9 @@
 .another-quick-switcher__settings__ignore_path_patterns {
     height: 120px;
     width: 500px;
+}
+
+.another-quick-switcher__settings__warning {
+    color: darkorange;
+    text-align: right;
 }

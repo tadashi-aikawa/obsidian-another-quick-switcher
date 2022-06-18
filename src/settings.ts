@@ -9,6 +9,7 @@ const headerSearchFeatureList = [
 export type HeaderSearchFeature = typeof headerSearchFeatureList[number];
 
 export interface Settings {
+  searchFromHeaders: boolean;
   showDirectory: boolean;
   showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
@@ -38,6 +39,7 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  searchFromHeaders: true,
   showDirectory: true,
   showFullPathOfDirectory: false,
   showAliasesOnTop: false,
@@ -78,6 +80,22 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     containerEl.createEl("h2", { text: "Another Quick Switcher - Settings" });
+
+    new Setting(containerEl).setName("Search from headers").addToggle((tc) => {
+      tc.setValue(this.plugin.settings.searchFromHeaders).onChange(
+        async (value) => {
+          this.plugin.settings.searchFromHeaders = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }
+      );
+    });
+    if (this.plugin.settings.searchFromHeaders) {
+      containerEl.createEl("div", {
+        text: "⚠ If enabled, it is about 2 times slower than disabled",
+        cls: "another-quick-switcher__settings__warning",
+      });
+    }
 
     new Setting(containerEl).setName("Show directory").addToggle((tc) => {
       tc.setValue(this.plugin.settings.showDirectory).onChange(
@@ -138,15 +156,21 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Normalize accents/diacritics")
-      .setDesc("⚠ If enabled, it is about 2 to 5 times slower than disabled")
       .addToggle((tc) => {
         tc.setValue(
           this.plugin.settings.normalizeAccentsAndDiacritics
         ).onChange(async (value) => {
           this.plugin.settings.normalizeAccentsAndDiacritics = value;
           await this.plugin.saveSettings();
+          this.display();
         });
       });
+    if (this.plugin.settings.normalizeAccentsAndDiacritics) {
+      containerEl.createEl("div", {
+        text: "⚠ If enabled, it is about 2 to 5 times slower than disabled",
+        cls: "another-quick-switcher__settings__warning",
+      });
+    }
 
     new Setting(containerEl).setName("Hide gutter icons").addToggle((tc) => {
       tc.setValue(this.plugin.settings.hideGutterIcons).onChange(

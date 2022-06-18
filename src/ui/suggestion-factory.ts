@@ -1,6 +1,6 @@
 import { SuggestionItem } from "../matcher";
-import { uniqFlatMap } from "../utils/collection-helper";
-import { ALIAS, FOLDER, TAG } from "./icons";
+import { count, uniq, uniqFlatMap } from "../utils/collection-helper";
+import { ALIAS, FOLDER, HEADER, TAG } from "./icons";
 
 interface Elements {
   itemDiv: HTMLDivElement;
@@ -11,7 +11,7 @@ interface Options {
   showDirectory: boolean;
   showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
-  hideGutterIcons: boolean,
+  hideGutterIcons: boolean;
 }
 
 function createItemDiv(
@@ -70,6 +70,8 @@ function createDescriptionDiv(
   item: SuggestionItem,
   aliases: string[],
   tags: string[],
+  countByHeader: { [header: string]: number },
+  headerResultsNum: number,
   options: Options
 ): Elements["descriptionDiv"] {
   const descriptionDiv = createDiv({
@@ -110,6 +112,32 @@ function createDescriptionDiv(
     descriptionDiv.appendChild(tagsDiv);
   }
 
+  if (Object.keys(countByHeader).length > 0) {
+    const headersDiv = createDiv({
+      cls: "another-quick-switcher__item__description",
+    });
+
+    Object.entries(countByHeader)
+      .map(([header, n]) => ({ header, n }))
+      .sort((a, b) => b.n - a.n)
+      .forEach(({ header, n }) => {
+        const headersSpan = createSpan({
+          cls: [
+            "another-quick-switcher__item__description__header",
+            n !== headerResultsNum
+              ? "another-quick-switcher__item__description__header__dimmed"
+              : "",
+          ],
+        });
+        headersSpan.insertAdjacentHTML("beforeend", HEADER);
+        headersSpan.appendChild(
+          createSpan({ text: header, attr: { style: "padding-left: 3px" } })
+        );
+        headersDiv.appendChild(headersSpan);
+      });
+    descriptionDiv.appendChild(headersDiv);
+  }
+
   return descriptionDiv;
 }
 
@@ -126,12 +154,27 @@ export function createElements(
     (x) => x.meta ?? []
   );
 
+  const headerResults = item.matchResults.filter(
+    (res) => res.type === "header"
+  );
+  const headerResultsNum = headerResults.length;
+  const countByHeader = count(
+    headerResults.flatMap((xs) => uniq(xs.meta ?? []))
+  );
+
   const itemDiv = createItemDiv(item, aliases, options);
 
-  if (aliases.length === 0 && tags.length === 0) {
+  if (aliases.length === 0 && tags.length === 0 && countByHeader === {}) {
     return { itemDiv };
   }
-  const descriptionDiv = createDescriptionDiv(item, aliases, tags, options);
+  const descriptionDiv = createDescriptionDiv(
+    item,
+    aliases,
+    tags,
+    countByHeader,
+    headerResultsNum,
+    options
+  );
 
   return {
     itemDiv,

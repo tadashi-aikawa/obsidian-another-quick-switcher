@@ -8,12 +8,14 @@ type MatchType =
   | "prefix-name"
   | "word-perfect"
   | "directory"
+  | "header"
   | "tag";
 
 export interface SuggestionItem {
   file: TFile;
   tags: string[];
   aliases: string[];
+  headers: string[];
   matchResults: MatchQueryResult[];
   phantom: boolean;
   starred: boolean;
@@ -31,6 +33,7 @@ interface MatchQueryResult {
 function matchQuery(
   item: SuggestionItem,
   query: string,
+  searchFromHeaders: boolean,
   isNormalizeAccentsDiacritics: boolean
 ): MatchQueryResult {
   // tag
@@ -91,6 +94,18 @@ function matchQuery(
     return { type: "directory", meta: [item.file.path] };
   }
 
+  if (searchFromHeaders) {
+    const headers = item.headers.filter((header) =>
+      smartIncludes(header, query, isNormalizeAccentsDiacritics)
+    );
+    if (headers.length > 0) {
+      return {
+        type: "header",
+        meta: headers,
+      };
+    }
+  }
+
   const tags = item.tags.filter((tag) =>
     smartIncludes(tag.slice(1), query, isNormalizeAccentsDiacritics)
   );
@@ -107,18 +122,27 @@ function matchQuery(
 function matchQueryAll(
   item: SuggestionItem,
   queries: string[],
+  searchFromHeaders: boolean,
   isNormalizeAccentsDiacritics: boolean
 ): MatchQueryResult[] {
-  return queries.map((q) => matchQuery(item, q, isNormalizeAccentsDiacritics));
+  return queries.map((q) =>
+    matchQuery(item, q, searchFromHeaders, isNormalizeAccentsDiacritics)
+  );
 }
 
 export function stampMatchResults(
   item: SuggestionItem,
   queries: string[],
+  searchFromHeaders: boolean,
   isNormalizeAccentsDiacritics: boolean
 ): SuggestionItem {
   return {
     ...item,
-    matchResults: matchQueryAll(item, queries, isNormalizeAccentsDiacritics),
+    matchResults: matchQueryAll(
+      item,
+      queries,
+      searchFromHeaders,
+      isNormalizeAccentsDiacritics
+    ),
   };
 }

@@ -39,6 +39,18 @@ export const keyBy = <T>(
     {} as { [key: string]: T }
   );
 
+export const count = (values: string[]): { [value: string]: number } => {
+  const ret: { [value: string]: number } = {};
+  for (const value of values) {
+    if (ret[value]) {
+      ret[value]++;
+    } else {
+      ret[value] = 1;
+    }
+  }
+  return ret;
+};
+
 export function flatten<T>(matrix: T[][]): T[] {
   return matrix.reduce((a, c) => [...a, ...c], []);
 }
@@ -49,6 +61,16 @@ export function uniq<T>(values: T[]): T[] {
 
 export function uniqFlatMap<T, U>(values: T[], mapper: (x: T) => U[]): U[] {
   return uniq(flatten(values.map(mapper)));
+}
+
+export function intersection<T>(matrix: T[][]): T[] {
+  return matrix.length === 0
+    ? []
+    : matrix.reduce((acc, xs) => acc.filter((x) => xs.includes(x)));
+}
+
+export function intersectionMap<T, U>(values: T[], mapper: (x: T) => U[]): U[] {
+  return intersection(values.map(mapper));
 }
 
 export const minBy = <T>(collection: T[], toNum: (t: T) => number) => {
