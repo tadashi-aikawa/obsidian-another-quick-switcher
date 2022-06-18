@@ -10,6 +10,7 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 - It can search backlinks and move them **without leaving from a keyboard** (`Backlink search`)
 - It can search **by tags** even if queries don't start with `#`
   - When you input queries start with `#`, It priors tag
+- It can search **from headers**
 - It can move a file to another folder (`Move file to another folder`)
 - It can search to **consider prefix emoji**
 - It **only searches Markdown files** except for the case of `Move file to another folder`
@@ -17,7 +18,6 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 - It shows file names and directory names separately
 
 At the moment, there are only a few options. However, if you would like to customize behavior, I will add options to make it better as well as I can :)
-
 
 ## 👥 For users
 
@@ -121,13 +121,15 @@ One of the following.
 
 ### Hotkeys on quick switcher
 
-⚠ `open in popup` and `create in popup` need the [Obsidian Hover Editor](https://github.com/nothingislost/obsidian-hover-editor) plugin. It doesn't support as an official feature, so there is a possibility that it will not to working someday.
+> **Warning**  
+> `open in popup` and `create in popup` need the [Obsidian Hover Editor](https://github.com/nothingislost/obsidian-hover-editor) plugin. It doesn't support as an official feature, so there is a possibility that it will not to working someday.
 
 | Key                       | Description               |
 | ------------------------- | ------------------------- |
 | `[↑↓]`                  | navigate                  |
 | `[ctrl/cmd n or p]`       | navigate (for emacs user) |
 | `[ctrl/cmd j or k]`       | navigate (for vimmer)     |
+| `[ctrl/cmd 1~9]`         | open selection     |
 | `[ctrl/cmd d]`            | clear input               |
 | `[tab]`                   | replace input             |
 | `[↵]`                    | open                      |
