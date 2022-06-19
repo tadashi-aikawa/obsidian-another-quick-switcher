@@ -1,4 +1,4 @@
-import { App, Pos, SuggestModal } from "obsidian";
+import {App, Platform, Pos, SuggestModal} from "obsidian";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { excludeFormat, smartIncludes } from "../utils/strings";
@@ -196,6 +196,10 @@ export class HeaderModal
   }
 
   bindHotKeys() {
+    let mod = 'ctrl';
+    if (Platform.isMacOS) {
+      mod = 'cmd';
+    }
     this.setInstructions([
       {
         command: "[↑↓]",
@@ -206,14 +210,14 @@ export class HeaderModal
         purpose: this.settings.headerSearchKeyBindTab,
       },
       {
-        command: "[ctrl/cmd j or k]",
+        command: `[${mod} j or k]`,
         purpose: this.settings.headerSearchKeyBindVim,
       },
       {
-        command: "[ctrl/cmd n or p]",
+        command: `[${mod} n or p]`,
         purpose: this.settings.headerSearchKeyBindEmacs,
       },
-      { command: "[ctrl/cmd d]", purpose: "clear input" },
+      { command: `[${mod} d]`, purpose: "clear input" },
       { command: "[↵]", purpose: "move to header" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
