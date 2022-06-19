@@ -3,6 +3,7 @@ import {
   Notice,
   parseFrontMatterAliases,
   parseFrontMatterTags,
+  Platform,
   SuggestModal,
 } from "obsidian";
 import { ignoreItems, keyBy, uniq } from "../utils/collection-helper";
@@ -288,20 +289,24 @@ export class AnotherQuickSwitcherModal
   }
 
   private setHotKeys() {
+    let mod = 'ctrl';
+    if (Platform.isMacOS) {
+      mod = 'cmd';
+    }
     this.setInstructions([
       {
-        command: "[↑↓][ctrl/cmd n or p][ctrl/cmd j or k]",
+        command: `[↑↓][${mod} n or p][${mod} j or k]`,
         purpose: "navigate",
       },
-      { command: "[ctrl/cmd 1~9]", purpose: "open Nth" },
-      { command: "[ctrl/cmd d]", purpose: "clear input" },
+      { command: `[${mod} 1~9]`, purpose: "open Nth" },
+      { command: `[${mod} d]`, purpose: "clear input" },
       { command: "[tab]", purpose: "replace input" },
       { command: "[↵]", purpose: "open" },
-      { command: "[ctrl/cmd ↵]", purpose: "open in new pane" },
-      { command: "[ctrl/cmd alt ↵]", purpose: "open in popup" },
+      { command: `[${mod} ↵]`, purpose: "open in new pane" },
+      { command: `[${mod} alt ↵]`, purpose: "open in popup" },
       { command: "[shift ↵]", purpose: "create" },
-      { command: "[ctrl/cmd shift ↵]", purpose: "create in new pane" },
-      { command: "[ctrl/cmd shift alt ↵]", purpose: "create in popup" },
+      { command: `[${mod} shift ↵]`, purpose: "create in new pane" },
+      { command: `[${mod} shift alt ↵]`, purpose: "create in popup" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
