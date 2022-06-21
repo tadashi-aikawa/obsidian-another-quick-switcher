@@ -123,6 +123,7 @@
 
 .another-quick-switcher__item__description {
     font-size: 0.75em;
+    padding-left: 10px;
     display: inline-block;
     /*noinspection CssUnresolvedCustomProperty*/
     color: var(--text-muted);

@@ -1,9 +1,10 @@
 import {
   App,
+  debounce,
+  Debouncer,
   Notice,
   parseFrontMatterAliases,
   parseFrontMatterTags,
-  Platform,
   SuggestModal,
 } from "obsidian";
 import { ignoreItems, keyBy, uniq } from "../utils/collection-helper";
@@ -45,6 +46,10 @@ export class AnotherQuickSwitcherModal
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
+
+  debounceGetSuggestions: Debouncer<
+    [string, (items: SuggestionItem[]) => void]
+  >;
 
   constructor(app: App, public initialMode: Mode, settings: Settings) {
     super(app);
@@ -98,6 +103,14 @@ export class AnotherQuickSwitcherModal
 
     this.originItems = [...markdownItems, ...phantomItems];
     this.ignoredItems = this.ignoreItems(initialMode);
+
+    this.debounceGetSuggestions = debounce(
+      (query: string, cb: (items: SuggestionItem[]) => void) => {
+        cb(this._getSuggestions(query));
+      },
+      this.settings.searchDelayMilliSeconds,
+      true
+    );
   }
 
   async handleCreateNew(searchQuery: string, leafType: LeafType) {
@@ -133,7 +146,19 @@ export class AnotherQuickSwitcherModal
     }
   }
 
-  getSuggestions(query: string): SuggestionItem[] {
+  getSuggestions(query: string): SuggestionItem[] | Promise<SuggestionItem[]> {
+    if (!query) {
+      return this._getSuggestions(query);
+    }
+
+    return new Promise((resolve) => {
+      this.debounceGetSuggestions(query, (items) => {
+        resolve(items);
+      });
+    });
+  }
+
+  _getSuggestions(query: string): SuggestionItem[] {
     const start = performance.now();
 
     let lastOpenFileIndexByPath: { [path: string]: number } = {};

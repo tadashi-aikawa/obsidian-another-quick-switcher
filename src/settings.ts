@@ -11,6 +11,7 @@ export type HeaderSearchFeature = typeof headerSearchFeatureList[number];
 export interface Settings {
   searchFromHeaders: boolean;
   searchByLinks: boolean;
+  searchDelayMilliSeconds: number;
   showDirectory: boolean;
   showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
@@ -42,6 +43,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   searchFromHeaders: true,
   searchByLinks: false,
+  searchDelayMilliSeconds: 100,
   showDirectory: true,
   showFullPathOfDirectory: false,
   showAliasesOnTop: false,
@@ -114,6 +116,20 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         cls: "another-quick-switcher__settings__warning",
       });
     }
+
+    new Setting(containerEl)
+      .setName("Search delay milli-seconds")
+      .setDesc("If keyboard operation is slow, try increasing the value")
+      .addSlider((sc) =>
+        sc
+          .setLimits(0, 1000, 10)
+          .setValue(this.plugin.settings.searchDelayMilliSeconds)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.searchDelayMilliSeconds = value;
+            await this.plugin.saveSettings();
+          })
+      );
 
     new Setting(containerEl).setName("Show directory").addToggle((tc) => {
       tc.setValue(this.plugin.settings.showDirectory).onChange(
