@@ -19,6 +19,7 @@ import {
 } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { excludeFormat } from "../utils/strings";
+import { MOD, quickResultSelectionModifier } from "src/keys";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -289,24 +290,24 @@ export class AnotherQuickSwitcherModal
   }
 
   private setHotKeys() {
-    let mod = 'ctrl';
-    if (Platform.isMacOS) {
-      mod = 'cmd';
-    }
+    const openNthMod = quickResultSelectionModifier(
+      this.settings.userAltInsteadOfModForQuickResultSelection
+    );
+
     this.setInstructions([
       {
-        command: `[↑↓][${mod} n or p][${mod} j or k]`,
+        command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
         purpose: "navigate",
       },
-      { command: `[${mod} 1~9]`, purpose: "open Nth" },
-      { command: `[${mod} d]`, purpose: "clear input" },
+      { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
+      { command: `[${MOD} d]`, purpose: "clear input" },
       { command: "[tab]", purpose: "replace input" },
       { command: "[↵]", purpose: "open" },
-      { command: `[${mod} ↵]`, purpose: "open in new pane" },
-      { command: `[${mod} alt ↵]`, purpose: "open in popup" },
+      { command: `[${MOD} ↵]`, purpose: "open in new pane" },
+      { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
       { command: "[shift ↵]", purpose: "create" },
-      { command: `[${mod} shift ↵]`, purpose: "create in new pane" },
-      { command: `[${mod} shift alt ↵]`, purpose: "create in popup" },
+      { command: `[${MOD} shift ↵]`, purpose: "create in new pane" },
+      { command: `[${MOD} shift alt ↵]`, purpose: "create in popup" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);

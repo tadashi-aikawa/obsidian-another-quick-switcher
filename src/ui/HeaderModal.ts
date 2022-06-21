@@ -3,6 +3,7 @@ import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { excludeFormat, smartIncludes } from "../utils/strings";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { MOD } from '../keys';
 
 interface SuggestionItem {
   value: string;
@@ -196,10 +197,6 @@ export class HeaderModal
   }
 
   bindHotKeys() {
-    let mod = 'ctrl';
-    if (Platform.isMacOS) {
-      mod = 'cmd';
-    }
     this.setInstructions([
       {
         command: "[↑↓]",
@@ -210,14 +207,14 @@ export class HeaderModal
         purpose: this.settings.headerSearchKeyBindTab,
       },
       {
-        command: `[${mod} j or k]`,
+        command: `[${MOD} j or k]`,
         purpose: this.settings.headerSearchKeyBindVim,
       },
       {
-        command: `[${mod} n or p]`,
+        command: `[${MOD} n or p]`,
         purpose: this.settings.headerSearchKeyBindEmacs,
       },
-      { command: `[${mod} d]`, purpose: "clear input" },
+      { command: `[${MOD} d]`, purpose: "clear input" },
       { command: "[↵]", purpose: "move to header" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
