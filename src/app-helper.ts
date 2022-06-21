@@ -311,7 +311,8 @@ export class AppHelper {
       case "folder":
         return `${this.unsafeApp.vault.config.newFileFolderPath}/${linkPath}`;
       default:
-        throw Error("Unexpected error: newFileLocation is invalid");
+        // Normally, same as the "root"
+        return `/${linkPath}`;
     }
   }
 
