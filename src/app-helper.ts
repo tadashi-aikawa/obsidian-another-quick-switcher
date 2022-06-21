@@ -307,7 +307,7 @@ export class AppHelper {
       case "root":
         return `/${linkPath}`;
       case "current":
-        return `${this.getActiveFile()?.parent.path}/${linkPath}`;
+        return `${this.getActiveFile()?.parent.path ?? ""}/${linkPath}`;
       case "folder":
         return `${this.unsafeApp.vault.config.newFileFolderPath}/${linkPath}`;
       default:
