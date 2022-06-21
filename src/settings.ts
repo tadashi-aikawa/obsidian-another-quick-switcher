@@ -10,6 +10,7 @@ export type HeaderSearchFeature = typeof headerSearchFeatureList[number];
 
 export interface Settings {
   searchFromHeaders: boolean;
+  searchByLinks: boolean;
   showDirectory: boolean;
   showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
@@ -40,6 +41,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   searchFromHeaders: true,
+  searchByLinks: false,
   showDirectory: true,
   showFullPathOfDirectory: false,
   showAliasesOnTop: false,
@@ -81,7 +83,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Another Quick Switcher - Settings" });
 
-    new Setting(containerEl).setName("Search from headers").addToggle((tc) => {
+    new Setting(containerEl).setName("Search by headers").addToggle((tc) => {
       tc.setValue(this.plugin.settings.searchFromHeaders).onChange(
         async (value) => {
           this.plugin.settings.searchFromHeaders = value;
@@ -92,7 +94,23 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     });
     if (this.plugin.settings.searchFromHeaders) {
       containerEl.createEl("div", {
-        text: "⚠ If enabled, it is about 2 times slower than disabled",
+        text: "⚠ If enabled, it is slower than disabled",
+        cls: "another-quick-switcher__settings__warning",
+      });
+    }
+
+    new Setting(containerEl).setName("Search by links").addToggle((tc) => {
+      tc.setValue(this.plugin.settings.searchByLinks).onChange(
+        async (value) => {
+          this.plugin.settings.searchByLinks = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }
+      );
+    });
+    if (this.plugin.settings.searchByLinks) {
+      containerEl.createEl("div", {
+        text: "⚠ If enabled, it is slower than disabled",
         cls: "another-quick-switcher__settings__warning",
       });
     }

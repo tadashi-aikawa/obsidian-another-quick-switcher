@@ -138,6 +138,11 @@
     align-items: center;
     margin-right: 5px;
 }
+.another-quick-switcher__item__description__link {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 5px;
+}
 .another-quick-switcher__item__description__header {
     display: inline-flex;
     align-items: center;

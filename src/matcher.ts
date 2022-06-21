@@ -9,6 +9,7 @@ type MatchType =
   | "word-perfect"
   | "directory"
   | "header"
+  | "link"
   | "tag";
 
 export interface SuggestionItem {
@@ -16,6 +17,7 @@ export interface SuggestionItem {
   tags: string[];
   aliases: string[];
   headers: string[];
+  links: string[];
   matchResults: MatchQueryResult[];
   phantom: boolean;
   starred: boolean;
@@ -33,7 +35,8 @@ interface MatchQueryResult {
 function matchQuery(
   item: SuggestionItem,
   query: string,
-  searchFromHeaders: boolean,
+  searchByHeaders: boolean,
+  searchByLinks: boolean,
   isNormalizeAccentsDiacritics: boolean
 ): MatchQueryResult {
   // tag
@@ -94,7 +97,7 @@ function matchQuery(
     return { type: "directory", meta: [item.file.path] };
   }
 
-  if (searchFromHeaders) {
+  if (searchByHeaders) {
     const headers = item.headers.filter((header) =>
       smartIncludes(header, query, isNormalizeAccentsDiacritics)
     );
@@ -102,6 +105,18 @@ function matchQuery(
       return {
         type: "header",
         meta: headers,
+      };
+    }
+  }
+
+  if (searchByLinks) {
+    const links = item.links.filter((link) =>
+      smartIncludes(link, query, isNormalizeAccentsDiacritics)
+    );
+    if (links.length > 0) {
+      return {
+        type: "link",
+        meta: links,
       };
     }
   }
@@ -122,18 +137,26 @@ function matchQuery(
 function matchQueryAll(
   item: SuggestionItem,
   queries: string[],
-  searchFromHeaders: boolean,
+  searchByHeaders: boolean,
+  searchByLinks: boolean,
   isNormalizeAccentsDiacritics: boolean
 ): MatchQueryResult[] {
   return queries.map((q) =>
-    matchQuery(item, q, searchFromHeaders, isNormalizeAccentsDiacritics)
+    matchQuery(
+      item,
+      q,
+      searchByHeaders,
+      searchByLinks,
+      isNormalizeAccentsDiacritics
+    )
   );
 }
 
 export function stampMatchResults(
   item: SuggestionItem,
   queries: string[],
-  searchFromHeaders: boolean,
+  searchByHeaders: boolean,
+  searchByLinks: boolean,
   isNormalizeAccentsDiacritics: boolean
 ): SuggestionItem {
   return {
@@ -141,7 +164,8 @@ export function stampMatchResults(
     matchResults: matchQueryAll(
       item,
       queries,
-      searchFromHeaders,
+      searchByHeaders,
+      searchByLinks,
       isNormalizeAccentsDiacritics
     ),
   };

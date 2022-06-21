@@ -1,6 +1,6 @@
 import { SuggestionItem } from "../matcher";
 import { count, uniq, uniqFlatMap } from "../utils/collection-helper";
-import { ALIAS, FOLDER, HEADER, TAG } from "./icons";
+import { ALIAS, FOLDER, HEADER, LINK, TAG } from "./icons";
 
 interface Elements {
   itemDiv: HTMLDivElement;
@@ -70,6 +70,7 @@ function createDescriptionDiv(
   item: SuggestionItem,
   aliases: string[],
   tags: string[],
+  links: string[],
   countByHeader: { [header: string]: number },
   headerResultsNum: number,
   options: Options
@@ -110,6 +111,23 @@ function createDescriptionDiv(
       tagsDiv.appendChild(tagsSpan);
     });
     descriptionDiv.appendChild(tagsDiv);
+  }
+
+  if (links.length > 0) {
+    const linksDiv = createDiv({
+      cls: "another-quick-switcher__item__description",
+    });
+    links.forEach((x) => {
+      const linksSpan = createSpan({
+        cls: "another-quick-switcher__item__description__link",
+      });
+      linksSpan.insertAdjacentHTML("beforeend", LINK);
+      linksSpan.appendChild(
+        createSpan({ text: x, attr: { style: "padding-left: 3px" } })
+      );
+      linksDiv.appendChild(linksSpan);
+    });
+    descriptionDiv.appendChild(linksDiv);
   }
 
   if (Object.keys(countByHeader).length > 0) {
@@ -153,6 +171,10 @@ export function createElements(
     item.matchResults.filter((res) => res.type === "tag"),
     (x) => x.meta ?? []
   );
+  const links = uniqFlatMap(
+    item.matchResults.filter((res) => res.type === "link"),
+    (x) => x.meta ?? []
+  );
 
   const headerResults = item.matchResults.filter(
     (res) => res.type === "header"
@@ -164,13 +186,19 @@ export function createElements(
 
   const itemDiv = createItemDiv(item, aliases, options);
 
-  if (aliases.length === 0 && tags.length === 0 && countByHeader === {}) {
+  if (
+    aliases.length === 0 &&
+    tags.length === 0 &&
+    links.length === 0 &&
+    countByHeader === {}
+  ) {
     return { itemDiv };
   }
   const descriptionDiv = createDescriptionDiv(
     item,
     aliases,
     tags,
+    links,
     countByHeader,
     headerResultsNum,
     options

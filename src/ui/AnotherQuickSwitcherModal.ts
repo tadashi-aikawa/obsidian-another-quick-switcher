@@ -61,6 +61,7 @@ export class AnotherQuickSwitcherModal
           aliases: [],
           tags: [],
           headers: [],
+          links: [],
           phantom: true,
           starred: false,
           matchResults: [],
@@ -87,6 +88,7 @@ export class AnotherQuickSwitcherModal
             ...(parseFrontMatterTags(cache.frontmatter) ?? []),
           ]),
           headers: (cache.headings ?? []).map((x) => excludeFormat(x.heading)),
+          links: uniq(cache.links?.map((x) => x.displayText ?? "") ?? []), //FIXME:
           phantom: false,
           starred: x.path in starredPathMap,
           matchResults: [],
@@ -181,6 +183,7 @@ export class AnotherQuickSwitcherModal
             x,
             qs,
             this.settings.searchFromHeaders,
+            this.settings.searchByLinks,
             this.settings.normalizeAccentsAndDiacritics
           )
         )
@@ -211,6 +214,7 @@ export class AnotherQuickSwitcherModal
           x,
           qs,
           this.settings.searchFromHeaders,
+          this.settings.searchByLinks,
           this.settings.normalizeAccentsAndDiacritics
         )
       )
