@@ -36,7 +36,7 @@ interface UnsafeAppInterface {
   };
   vault: Vault & {
     config: {
-      newFileLocation: "root" | "current" | "folder";
+      newFileLocation?: "root" | "current" | "folder";
       newFileFolderPath?: string;
     };
   };
