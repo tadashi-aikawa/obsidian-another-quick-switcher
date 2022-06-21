@@ -320,7 +320,6 @@ export class AppHelper {
     const linkPath = this.getPathToBeCreated(linkText);
 
     // @ts-ignore
-    // @ts-ignore
     return {
       path: linkPath,
       name: basename(linkPath),
