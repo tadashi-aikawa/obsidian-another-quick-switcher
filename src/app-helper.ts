@@ -8,6 +8,7 @@ import {
   Pos,
   TFile,
   TFolder,
+  Vault,
   WorkspaceLeaf,
 } from "obsidian";
 import { flatten, uniq } from "./utils/collection-helper";
@@ -31,6 +32,12 @@ interface UnsafeAppInterface {
           onShowCallback?: () => unknown
         ): WorkspaceLeaf;
       };
+    };
+  };
+  vault: Vault & {
+    config: {
+      newFileLocation: "root" | "current" | "folder";
+      newFileFolderPath?: string;
     };
   };
 }
@@ -296,8 +303,16 @@ export class AppHelper {
       return linkPath;
     }
 
-    const parent = this.unsafeApp.fileManager.getNewFileParent("").path;
-    return `${parent}/${linkPath}`;
+    switch (this.unsafeApp.vault.config.newFileLocation) {
+      case "root":
+        return `/${linkPath}`;
+      case "current":
+        return `${this.getActiveFile()?.parent.path}/${linkPath}`;
+      case "folder":
+        return `${this.unsafeApp.vault.config.newFileFolderPath}/${linkPath}`;
+      default:
+        throw Error("Unexpected error: newFileLocation is invalid");
+    }
   }
 
   // TODO: Use another interface instead of TFile
