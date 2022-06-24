@@ -14,6 +14,7 @@ import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
 import {
   fileNameRecentSort,
+  recommendedRecentSort,
   normalSort,
   recentSort,
   starRecentSort,
@@ -31,6 +32,7 @@ export type Mode =
   | "recent"
   | "backlink"
   | "filename-recent"
+  | "recommended-recent"
   | "star-recent";
 
 export class AnotherQuickSwitcherModal
@@ -135,6 +137,10 @@ export class AnotherQuickSwitcherModal
       case "recent":
         return _ignoreItems(this.settings.ignoreRecentPathPrefixPatterns);
       case "filename-recent":
+        return _ignoreItems(
+          this.settings.ignoreFilenameRecentPathPrefixPatterns
+        );
+      case "recommended-recent":
         return _ignoreItems(
           this.settings.ignoreFilenameRecentPathPrefixPatterns
         );
@@ -255,6 +261,12 @@ export class AnotherQuickSwitcherModal
         break;
       case "filename-recent":
         items = fileNameRecentSort(matchedSuggestions, lastOpenFileIndexByPath);
+        break;
+      case "recommended-recent":
+        items = recommendedRecentSort(
+          matchedSuggestions,
+          lastOpenFileIndexByPath
+        );
         break;
       case "star-recent":
         items = starRecentSort(matchedSuggestions, lastOpenFileIndexByPath);

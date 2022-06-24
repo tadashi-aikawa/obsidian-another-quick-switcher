@@ -93,6 +93,47 @@ export function fileNameRecentSort(
   });
 }
 
+export function recommendedRecentSort(
+  items: SuggestionItem[],
+  lastOpenFileIndexByPath: { [path: string]: number }
+): SuggestionItem[] {
+  return items.sort((a, b) => {
+    let result: 0 | -1 | 1;
+
+    result = priorityToName(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToTag(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToHeader(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLink(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
+    if (result !== 0) {
+      return result;
+    }
+
+    result = priorityToLastModified(a, b);
+    if (result !== 0) {
+      return result;
+    }
+
+    return 0;
+  });
+}
+
 export function starRecentSort(
   items: SuggestionItem[],
   lastOpenFileIndexByPath: { [path: string]: number }
@@ -181,7 +222,10 @@ function priorityToPrefixName(
   return compare(
     a,
     b,
-    (x) => x.matchResults.filter((x) => x.type === "prefix-name").length,
+    (x) =>
+      x.matchResults.filter((x) =>
+        ["prefix-name", "word-perfect"].includes(x.type)
+      ).length,
     "desc"
   );
 }
@@ -191,9 +235,36 @@ function priorityToName(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
     a,
     b,
     (x) =>
-      x.matchResults.filter(
-        (x) => x.type === "name" || x.type === "prefix-name"
+      x.matchResults.filter((x) =>
+        ["name", "prefix-name", "word-perfect"].includes(x.type)
       ).length,
+    "desc"
+  );
+}
+
+function priorityToTag(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
+  return compare(
+    a,
+    b,
+    (x) => x.matchResults.filter((x) => x.type === "tag").length,
+    "desc"
+  );
+}
+
+function priorityToHeader(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
+  return compare(
+    a,
+    b,
+    (x) => x.matchResults.filter((x) => x.type === "header").length,
+    "desc"
+  );
+}
+
+function priorityToLink(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
+  return compare(
+    a,
+    b,
+    (x) => x.matchResults.filter((x) => x.type === "link").length,
     "desc"
   );
 }

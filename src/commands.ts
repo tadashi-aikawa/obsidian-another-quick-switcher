@@ -45,6 +45,14 @@ export function createCommands(app: App, settings: Settings): Command[] {
       },
     },
     {
+      id: "recommended-recent-search",
+      name: "Recommended recent search",
+      hotkeys: [],
+      callback: () => {
+        showSearchDialog(app, "recommended-recent", settings);
+      },
+    },
+    {
       id: "recent-search",
       name: "Recent search",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "e" }],
