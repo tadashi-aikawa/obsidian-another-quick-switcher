@@ -1,9 +1,9 @@
 import { Plugin } from "obsidian";
 import { createCommands } from "./commands";
 import {
+  AnotherQuickSwitcherSettingTab,
   DEFAULT_SETTINGS,
   Settings,
-  AnotherQuickSwitcherSettingTab,
 } from "./settings";
 
 export default class AnotherQuickSwitcher extends Plugin {

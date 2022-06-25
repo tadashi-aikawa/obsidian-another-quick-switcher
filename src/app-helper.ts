@@ -9,6 +9,7 @@ import {
   TFile,
   TFolder,
   Vault,
+  Workspace,
   WorkspaceLeaf,
 } from "obsidian";
 import { flatten, uniq } from "./utils/collection-helper";
@@ -24,21 +25,14 @@ interface UnsafeAppInterface {
       };
     };
   };
-  plugins: {
-    plugins: {
-      "obsidian-hover-editor"?: {
-        spawnPopover(
-          initiatingEl?: HTMLElement,
-          onShowCallback?: () => unknown
-        ): WorkspaceLeaf;
-      };
-    };
-  };
   vault: Vault & {
     config: {
       newFileLocation?: "root" | "current" | "folder";
       newFileFolderPath?: string;
     };
+  };
+  workspace: Workspace & {
+    openPopoutLeaf(): WorkspaceLeaf;
   };
 }
 
@@ -61,7 +55,7 @@ interface UnsafeLayouts {
   right: UnSafeLayout;
 }
 
-export type LeafType = "same" | "new" | "popup";
+export type LeafType = "same" | "new" | "popout";
 type OpenMarkdownFileOption = {
   leaf: LeafType;
   offset: number;
@@ -224,16 +218,8 @@ export class AppHelper {
         leaf = this.unsafeApp.workspace.getLeaf(true);
         openFile(leaf);
         break;
-      case "popup":
-        const hoverEditorInstance =
-          this.unsafeApp.plugins.plugins["obsidian-hover-editor"];
-        if (hoverEditorInstance) {
-          leaf = hoverEditorInstance.spawnPopover(undefined, () => {
-            openFile(leaf);
-          });
-        } else {
-          openFile(this.unsafeApp.workspace.getLeaf());
-        }
+      case "popout":
+        openFile(this.unsafeApp.workspace.openPopoutLeaf());
         break;
     }
   }

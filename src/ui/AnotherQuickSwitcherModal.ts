@@ -319,7 +319,12 @@ export class AnotherQuickSwitcherModal
         : 0;
 
     this.appHelper.openMarkdownFile(fileToOpened, {
-      leaf: evt.metaKey && evt.altKey ? "popup" : evt.metaKey ? "new" : "same",
+      leaf:
+        evt.metaKey && (evt as KeyboardEvent).key === "m"
+          ? "popout"
+          : evt.metaKey
+          ? "new"
+          : "same",
       offset,
     });
   }
@@ -345,10 +350,10 @@ export class AnotherQuickSwitcherModal
       { command: "[tab]", purpose: "replace input" },
       { command: "[↵]", purpose: "open" },
       { command: `[${MOD} ↵]`, purpose: "open in new pane" },
-      { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
+      { command: `[${MOD} p]`, purpose: "open in new window" },
       { command: "[shift ↵]", purpose: "create" },
       { command: `[${MOD} shift ↵]`, purpose: "create in new pane" },
-      { command: `[${MOD} shift alt ↵]`, purpose: "create in popup" },
+      { command: `[${MOD} shift p]`, purpose: "create in new window" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
@@ -359,8 +364,8 @@ export class AnotherQuickSwitcherModal
     this.scope.register(["Alt"], "Enter", () =>
       this.chooser.useSelectedItem({ altKey: true })
     );
-    this.scope.register(["Mod", "Alt"], "Enter", () =>
-      this.chooser.useSelectedItem({ metaKey: true, altKey: true })
+    this.scope.register(["Mod"], "p", () =>
+      this.chooser.useSelectedItem({ metaKey: true, key: "m" })
     );
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
@@ -383,9 +388,9 @@ export class AnotherQuickSwitcherModal
         this.handleCreateNew(this.searchQuery, "new");
       }
     });
-    this.scope.register(["Shift", "Mod", "Alt"], "Enter", () => {
+    this.scope.register(["Shift", "Mod"], "p", () => {
       if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "popup");
+        this.handleCreateNew(this.searchQuery, "popout");
       }
     });
 
