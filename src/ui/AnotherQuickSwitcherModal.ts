@@ -320,7 +320,7 @@ export class AnotherQuickSwitcherModal
 
     this.appHelper.openMarkdownFile(fileToOpened, {
       leaf:
-        evt.metaKey && (evt as KeyboardEvent).key === "m"
+        evt.metaKey && (evt as KeyboardEvent).key === "o"
           ? "popout"
           : evt.metaKey
           ? "new"
@@ -350,10 +350,10 @@ export class AnotherQuickSwitcherModal
       { command: "[tab]", purpose: "replace input" },
       { command: "[↵]", purpose: "open" },
       { command: `[${MOD} ↵]`, purpose: "open in new pane" },
-      { command: `[${MOD} p]`, purpose: "open in new window" },
+      { command: `[${MOD} o]`, purpose: "open in new window" },
       { command: "[shift ↵]", purpose: "create" },
       { command: `[${MOD} shift ↵]`, purpose: "create in new pane" },
-      { command: `[${MOD} shift p]`, purpose: "create in new window" },
+      { command: `[${MOD} shift o]`, purpose: "create in new window" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
@@ -364,8 +364,8 @@ export class AnotherQuickSwitcherModal
     this.scope.register(["Alt"], "Enter", () =>
       this.chooser.useSelectedItem({ altKey: true })
     );
-    this.scope.register(["Mod"], "p", () =>
-      this.chooser.useSelectedItem({ metaKey: true, key: "m" })
+    this.scope.register(["Mod"], "o", () =>
+      this.chooser.useSelectedItem({ metaKey: true, key: "o" })
     );
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
@@ -388,7 +388,7 @@ export class AnotherQuickSwitcherModal
         this.handleCreateNew(this.searchQuery, "new");
       }
     });
-    this.scope.register(["Shift", "Mod"], "p", () => {
+    this.scope.register(["Shift", "Mod"], "o", () => {
       if (this.searchQuery) {
         this.handleCreateNew(this.searchQuery, "popout");
       }
