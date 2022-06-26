@@ -39,7 +39,11 @@ Before creating a pull request, please make an [issue] or a [discussion]😉
 
 ## ⌨️Features
 
-Below are the definitions of sort priorities.
+### 1‍⃣ File searches
+
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/file-searches.gif)
+
+File searches have many commands that have different sort priorities. Below are the definitions of sort priorities.
 
 | Name               | Description                                           |
 | ------------------ | ----------------------------------------------------- |
@@ -54,12 +58,9 @@ Below are the definitions of sort priorities.
 | Link match         | The internal link name in the file includes a query   |
 | Star               | The file has a star                                   |
 
-### File searches
-
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/file-searches.gif)
-
 #### Normal search
 
+`Sort priorities`
 1. `Perfect word match`
 2. `Prefix name match`
 3. `Name match`
@@ -69,6 +70,7 @@ Below are the definitions of sort priorities.
 
 #### Recommended recent search
 
+`Sort priorities`
 1. `Name match`
 2. `Tag match`
 3. `Header match`
@@ -78,11 +80,13 @@ Below are the definitions of sort priorities.
 
 #### Recent search
 
+`Sort priorities`
 1. `Last opened`
 2. `Last modified`
 
 #### Filename recent search
 
+`Sort priorities`
 1. `Perfect word match`
 2. `Name match`
 3. `Last opened`
@@ -90,17 +94,18 @@ Below are the definitions of sort priorities.
 
 #### Star Recent Search
 
+`Sort priorities`
 1. `Star`
 2. `Last opened`
 3. `Last modified`
 4. `Perfect word match`
 5. `Name match`
 
-### Backlink search
+### 2‍⃣ Backlink search
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink-search.gif)
 
-### Header floating search in file / Header search in file
+### 3‍⃣ Header floating search in file / Header search in file
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/header-floating-search-in-file.gif)
 
