@@ -27,7 +27,7 @@ At the moment, there are only a few options. However, if you would like to custo
 Please create a new [issue].
 
 ### Questions / Others
-~~~~
+
 Please create a new [discussion].
 
 ### Pull requests
