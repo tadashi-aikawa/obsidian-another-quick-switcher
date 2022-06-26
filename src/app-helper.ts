@@ -25,6 +25,16 @@ interface UnsafeAppInterface {
       };
     };
   };
+  plugins: {
+    plugins: {
+      "obsidian-hover-editor"?: {
+        spawnPopover(
+          initiatingEl?: HTMLElement,
+          onShowCallback?: () => unknown
+        ): WorkspaceLeaf;
+      };
+    };
+  };
   vault: Vault & {
     config: {
       newFileLocation?: "root" | "current" | "folder";
@@ -55,7 +65,7 @@ interface UnsafeLayouts {
   right: UnSafeLayout;
 }
 
-export type LeafType = "same" | "new" | "popout";
+export type LeafType = "same" | "new" | "popout" | "popup";
 type OpenMarkdownFileOption = {
   leaf: LeafType;
   offset: number;
@@ -220,6 +230,17 @@ export class AppHelper {
         break;
       case "popout":
         openFile(this.unsafeApp.workspace.openPopoutLeaf());
+        break;
+      case "popup":
+        const hoverEditorInstance =
+          this.unsafeApp.plugins.plugins["obsidian-hover-editor"];
+        if (hoverEditorInstance) {
+          leaf = hoverEditorInstance.spawnPopover(undefined, () => {
+            openFile(leaf);
+          });
+        } else {
+          openFile(this.unsafeApp.workspace.getLeaf());
+        }
         break;
     }
   }

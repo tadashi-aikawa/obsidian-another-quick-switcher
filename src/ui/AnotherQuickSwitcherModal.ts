@@ -322,6 +322,8 @@ export class AnotherQuickSwitcherModal
       leaf:
         evt.metaKey && (evt as KeyboardEvent).key === "o"
           ? "popout"
+          : evt.metaKey && evt.altKey
+          ? "popup"
           : evt.metaKey
           ? "new"
           : "same",
@@ -351,9 +353,11 @@ export class AnotherQuickSwitcherModal
       { command: "[↵]", purpose: "open" },
       { command: `[${MOD} ↵]`, purpose: "open in new pane" },
       { command: `[${MOD} o]`, purpose: "open in new window" },
+      { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
       { command: "[shift ↵]", purpose: "create" },
       { command: `[${MOD} shift ↵]`, purpose: "create in new pane" },
       { command: `[${MOD} shift o]`, purpose: "create in new window" },
+      { command: `[${MOD} shift alt ↵]`, purpose: "create in popup" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
@@ -366,6 +370,9 @@ export class AnotherQuickSwitcherModal
     );
     this.scope.register(["Mod"], "o", () =>
       this.chooser.useSelectedItem({ metaKey: true, key: "o" })
+    );
+    this.scope.register(["Mod", "Alt"], "Enter", () =>
+      this.chooser.useSelectedItem({ metaKey: true, altKey: true })
     );
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
@@ -391,6 +398,11 @@ export class AnotherQuickSwitcherModal
     this.scope.register(["Shift", "Mod"], "o", () => {
       if (this.searchQuery) {
         this.handleCreateNew(this.searchQuery, "popout");
+      }
+    });
+    this.scope.register(["Shift", "Mod", "Alt"], "Enter", () => {
+      if (this.searchQuery) {
+        this.handleCreateNew(this.searchQuery, "popup");
       }
     });
 
