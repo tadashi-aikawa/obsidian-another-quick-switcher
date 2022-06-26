@@ -5,6 +5,7 @@
 ![downloads](https://img.shields.io/github/downloads/tadashi-aikawa/obsidian-another-quick-switcher/total)
 
 This is an Obsidian plugin which is another choice of Quick switcher.
+
 - It can search **regardless of the appearance order of tokens**
 - It shows suggestions order by prioritizing both last opened time and modified time **even after typing** (`Recent search`)
 - It can search backlinks and move them **without leaving from a keyboard** (`Backlink search`)
@@ -26,7 +27,7 @@ At the moment, there are only a few options. However, if you would like to custo
 Please create a new [issue].
 
 ### Questions / Others
-
+~~~~
 Please create a new [discussion].
 
 ### Pull requests
@@ -36,110 +37,75 @@ Before creating a pull request, please make an [issue] or a [discussion]😉
 [issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
 [discussion]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/discussions
 
-
 ## ⌨️Features
 
-### Normal Search
+Below are the definitions of sort priorities.
 
-One of the following.
+| Name               | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| Perfect word match | A query matches perfectly with a word in the filename |
+| Prefix name match  | The filename starts with a query                      |
+| Name match         | The filename includes a query                         |
+| Length             | Length of the filename                                |
+| Last opened        | The time the file opened last                         |
+| Last modified      | The time the file modified last                       |
+| Tag match          | The tag name in the file includes a query             |
+| Header match       | The header name in the file includes a query          |
+| Link match         | The internal link name in the file includes a query   |
+| Star               | The file has a star                                   |
 
-- Run `Another Quick Switcher: Normal search` on `Command palette`
-- Push `Ctrl/Cmd + Shift + P` in the default case
-- Search query starts with `:n ` like `:n hoge`
+### File searches
 
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/normal.gif)
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/file-searches.gif)
 
-### Recent Search
+#### Normal search
 
-One of the following.
+1. `Perfect word match`
+2. `Prefix name match`
+3. `Name match`
+4. `Length`
+5. `Last opened`
+6. `Last modified`
 
-- Run `Another Quick Switcher: Recent search` on `Command palette`
-- Push `Ctrl/Cmd + Shift + E` in the default case
-- Search query starts with `:r ` like `:r hoge`
+#### Recommended recent search
 
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/recent.gif)
+1. `Name match`
+2. `Tag match`
+3. `Header match`
+4. `Link match`
+5. `Last opened`
+6. `Last modified`
 
-### Filename Recent Search
+#### Recent search
 
-One of the following.
+1. `Last opened`
+2. `Last modified`
 
-- Run `Another Quick Switcher: Filename recent search` on `Command palette`
-- Push `Ctrl/Cmd + Shift + F` in the default case
-- Search query starts with `:f ` like `:f hoge`
+#### Filename recent search
 
-The difference with Recent Search is the sort priority order.
+1. `Perfect word match`
+2. `Name match`
+3. `Last opened`
+4. `Last modified`
 
-| Priority | Recent Search | Filename Recent Search |
-| -------- | ------------- | ---------------------- |
-| 1        | Last opened | **Filename matched**   |
-| 2        | Last modified   | Last opened          |
-| 3        | -             | Last modified            |
+#### Star Recent Search
 
-### Star Recent Search
+1. `Star`
+2. `Last opened`
+3. `Last modified`
+4. `Perfect word match`
+5. `Name match`
 
-One of the following.
+### Backlink search
 
-- Run `Another Quick Switcher: Star recent search` on `Command palette`
-- Search query starts with `:s ` like `:s hoge`
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink-search.gif)
 
-The difference with Recent Search is the sort priority order.
+### Header floating search in file / Header search in file
 
-| Priority | Recent Search | Star Recent Search |
-| -------- | ------------- | ------------------ |
-| 1        | Last opened   | **Starred**        |
-| 2        | Last modified | Last opened        |
-| 3        | -             | Last modified      |
-| 4        | -             | Filename matched   |
-
-### Backlink Search
-
-One of the following.
-
-- Run `Another Quick Switcher: Backlink search` on `Command palette`
-- Push `Ctrl/Cmd + Shift + H` in the default case
-- Search query starts with `:b ` like `:b hoge`
-
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink.gif)
-
-### Header search in file
-
-Run `Another Quick Switcher: Header search in file` on `Command palette`.
-
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/header-in-file.gif)
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/header-floating-search-in-file.gif)
 
 - Show all headers even after filtering to retain file structures in the brain
 - Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab` as default
-
-### Move file to another folder
-
-One of the following.
-
-- Run `Another Quick Switcher: Move file to another folder` on `Command palette`
-- Push `Ctrl/Cmd + Shift + M` in the default case
-
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/move-to-folder.gif)
-
-### Hotkeys on quick switcher
-
-> **Warning**  
-> `open in popup` and `create in popup` need the [Obsidian Hover Editor](https://github.com/nothingislost/obsidian-hover-editor) plugin. It doesn't support as an official feature, so there is a possibility that it will not to working someday.
-
-| Key                       | Description               |
-| ------------------------- | ------------------------- |
-| `[↑↓]`                  | navigate                  |
-| `[ctrl/cmd n or p]`       | navigate (for emacs user) |
-| `[ctrl/cmd j or k]`       | navigate (for vimmer)     |
-| `[ctrl/cmd 1~9]`         | open selection     |
-| `[ctrl/cmd d]`            | clear input               |
-| `[tab]`                   | replace input             |
-| `[↵]`                    | open                      |
-| `[ctrl/cmd ↵]`           | open in new pane          |
-| `[ctrl/cmd alt ↵]`       | open in popup             |
-| `[shift ↵]`              | create                    |
-| `[ctrl/cmd shift ↵]`     | create in new pane        |
-| `[ctrl/cmd shift alt ↵]` | create in popup           |
-| `[alt ↵]`                | insert to editor          |
-| `[esc]`                   | dismiss                   |
 
 ## 📱 Mobile support
 
