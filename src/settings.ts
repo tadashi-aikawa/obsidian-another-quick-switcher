@@ -43,7 +43,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   searchFromHeaders: true,
   searchByLinks: false,
-  searchDelayMilliSeconds: 100,
+  searchDelayMilliSeconds: 0,
   showDirectory: true,
   showFullPathOfDirectory: false,
   showAliasesOnTop: false,
