@@ -213,8 +213,9 @@ export class AnotherQuickSwitcherModal
           stampMatchResults(
             x,
             qs,
-            this.settings.searchFromHeaders,
-            this.settings.searchByLinks,
+            false,
+            false,
+            false,
             this.settings.normalizeAccentsAndDiacritics
           )
         )
@@ -244,6 +245,7 @@ export class AnotherQuickSwitcherModal
         stampMatchResults(
           x,
           qs,
+          true,
           this.settings.searchFromHeaders,
           this.settings.searchByLinks,
           this.settings.normalizeAccentsAndDiacritics

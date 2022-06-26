@@ -35,12 +35,13 @@ interface MatchQueryResult {
 function matchQuery(
   item: SuggestionItem,
   query: string,
+  searchByTags: boolean,
   searchByHeaders: boolean,
   searchByLinks: boolean,
   isNormalizeAccentsDiacritics: boolean
 ): MatchQueryResult {
   // tag
-  if (query.startsWith("#")) {
+  if (searchByTags && query.startsWith("#")) {
     const tags = item.tags.filter((tag) =>
       smartIncludes(tag.slice(1), query.slice(1), isNormalizeAccentsDiacritics)
     );
@@ -121,14 +122,16 @@ function matchQuery(
     }
   }
 
-  const tags = item.tags.filter((tag) =>
-    smartIncludes(tag.slice(1), query, isNormalizeAccentsDiacritics)
-  );
-  if (tags.length > 0) {
-    return {
-      type: "tag",
-      meta: tags,
-    };
+  if (searchByTags) {
+    const tags = item.tags.filter((tag) =>
+      smartIncludes(tag.slice(1), query, isNormalizeAccentsDiacritics)
+    );
+    if (tags.length > 0) {
+      return {
+        type: "tag",
+        meta: tags,
+      };
+    }
   }
 
   return { type: "not found" };
@@ -137,6 +140,7 @@ function matchQuery(
 function matchQueryAll(
   item: SuggestionItem,
   queries: string[],
+  searchByTags: boolean,
   searchByHeaders: boolean,
   searchByLinks: boolean,
   isNormalizeAccentsDiacritics: boolean
@@ -145,6 +149,7 @@ function matchQueryAll(
     matchQuery(
       item,
       q,
+      searchByTags,
       searchByHeaders,
       searchByLinks,
       isNormalizeAccentsDiacritics
@@ -155,6 +160,7 @@ function matchQueryAll(
 export function stampMatchResults(
   item: SuggestionItem,
   queries: string[],
+  searchByTags: boolean,
   searchByHeaders: boolean,
   searchByLinks: boolean,
   isNormalizeAccentsDiacritics: boolean
@@ -164,6 +170,7 @@ export function stampMatchResults(
     matchResults: matchQueryAll(
       item,
       queries,
+      searchByTags,
       searchByHeaders,
       searchByLinks,
       isNormalizeAccentsDiacritics
