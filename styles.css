@@ -178,7 +178,7 @@
 }
 
 .is-mobile .another-quick-switcher__item__title {
-    display: block;
+    display: inline-block;
 }
 
 .is-mobile .another-quick-switcher__item__directory {
