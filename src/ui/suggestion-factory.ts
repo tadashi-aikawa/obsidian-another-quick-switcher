@@ -46,7 +46,7 @@ function createItemDiv(
       cls: "another-quick-switcher__item__hot-key-guide",
       text: `${item.order! + 1}`,
     });
-    titleDiv.appendChild(hotKeyGuide);
+    entryDiv.appendChild(hotKeyGuide);
   }
 
   if (options.showDirectory) {
