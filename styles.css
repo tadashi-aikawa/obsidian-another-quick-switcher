@@ -15,8 +15,9 @@
 .another-quick-switcher__item::before {
     filter: invert(0.5) hue-rotate(180deg);
     width: 16px;
+    height: 16px;
     height: 0;
-    margin-left: -22px;
+    margin-left: -20px;
     margin-right: 8px;
 }
 .another-quick-switcher__starred_item::before {
@@ -158,7 +159,9 @@
 
 .is-mobile .another-quick-switcher__item {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    padding-left: 25px;
 }
 
 .is-mobile .another-quick-switcher__item__icon {
