@@ -41,14 +41,6 @@ function createItemDiv(
   });
   entryDiv.appendChild(titleDiv);
 
-  if (item.order! < 9) {
-    const hotKeyGuide = createSpan({
-      cls: "another-quick-switcher__item__hot-key-guide",
-      text: `${item.order! + 1}`,
-    });
-    entryDiv.appendChild(hotKeyGuide);
-  }
-
   if (options.showDirectory) {
     const directoryDiv = createDiv({
       cls: "another-quick-switcher__item__directory",
@@ -59,6 +51,14 @@ function createItemDiv(
       : item.file.parent.name;
     directoryDiv.appendText(` ${text}`);
     entryDiv.appendChild(directoryDiv);
+  }
+
+  if (item.order! < 9) {
+    const hotKeyGuide = createSpan({
+      cls: "another-quick-switcher__item__hot-key-guide",
+      text: `${item.order! + 1}`,
+    });
+    entryDiv.appendChild(hotKeyGuide);
   }
 
   itemDiv.appendChild(entryDiv);
