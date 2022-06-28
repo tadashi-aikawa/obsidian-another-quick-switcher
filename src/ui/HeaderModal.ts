@@ -83,11 +83,11 @@ export class HeaderModal
     super.onOpen();
 
     if (this.floating) {
-      activeWindow
-        .fish(".modal-bg")
+      activeWindow.activeDocument
+        .querySelector(".modal-bg")
         ?.addClass("another-quick-switcher__header__floating-modal-bg");
 
-      const promptEl = activeWindow.fish(".prompt");
+      const promptEl = activeWindow.activeDocument.querySelector(".prompt");
       promptEl?.addClass("another-quick-switcher__header__floating-prompt");
 
       const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
