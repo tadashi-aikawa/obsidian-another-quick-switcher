@@ -293,10 +293,10 @@ export class AnotherQuickSwitcherModal
       hideGutterIcons: this.settings.hideGutterIcons,
     });
 
-    el.appendChild(itemDiv);
     if (descriptionDiv) {
-      el.appendChild(descriptionDiv);
+      itemDiv.appendChild(descriptionDiv);
     }
+    el.appendChild(itemDiv);
   }
 
   async onChooseSuggestion(
