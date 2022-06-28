@@ -1,9 +1,9 @@
-import {App, Platform, Pos, SuggestModal} from "obsidian";
+import { App, Platform, Pos, SuggestModal } from "obsidian";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { excludeFormat, smartIncludes } from "../utils/strings";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
-import { MOD } from '../keys';
+import { MOD } from "../keys";
 
 interface SuggestionItem {
   value: string;
@@ -30,6 +30,7 @@ export class HeaderModal
 
   constructor(app: App, settings: Settings, floating: boolean) {
     super(app);
+    this.limit = 1000;
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;

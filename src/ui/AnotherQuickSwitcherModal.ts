@@ -59,6 +59,7 @@ export class AnotherQuickSwitcherModal
     this.appHelper = new AppHelper(app);
     this.settings = settings;
 
+    this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotKeys();
 
     const phantomItems = this.settings.showExistingFilesOnly
