@@ -321,17 +321,23 @@ export class AnotherQuickSwitcherModal
           )
         : 0;
 
-    this.appHelper.openMarkdownFile(fileToOpened, {
-      leaf:
-        evt.metaKey && (evt as KeyboardEvent).key === "o"
-          ? "popout"
-          : evt.metaKey && evt.altKey
-          ? "popup"
-          : evt.metaKey
-          ? "new"
-          : "same",
-      offset,
-    });
+    let leaf: LeafType;
+    const key = (evt as KeyboardEvent).key;
+    if (evt.metaKey && key === "o") {
+      leaf = "popout";
+    } else if (evt.metaKey && evt.shiftKey && key === "-") {
+      leaf = "new-vertical";
+    } else if (evt.metaKey && !evt.shiftKey && key === "-") {
+      leaf = "new-horizontal";
+    } else if (evt.metaKey && evt.altKey) {
+      leaf = "popup";
+    } else if (evt.metaKey && !evt.altKey) {
+      leaf = "new";
+    } else {
+      leaf = "same";
+    }
+
+    this.appHelper.openMarkdownFile(fileToOpened, { leaf, offset });
   }
 
   private showDebugLog(toMessage: () => string) {
@@ -355,6 +361,8 @@ export class AnotherQuickSwitcherModal
       { command: "[tab]", purpose: "replace input" },
       { command: "[↵]", purpose: "open" },
       { command: `[${MOD} ↵]`, purpose: "open in new pane" },
+      { command: `[${MOD} -]`, purpose: "open in new pane (horizontal)" },
+      { command: `[${MOD} shift -]`, purpose: "open in new pane (vertical)" },
       { command: `[${MOD} o]`, purpose: "open in new window" },
       { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
       { command: "[shift ↵]", purpose: "create" },
@@ -371,6 +379,14 @@ export class AnotherQuickSwitcherModal
     this.scope.register(["Alt"], "Enter", () =>
       this.chooser.useSelectedItem({ altKey: true })
     );
+    this.scope.register(["Mod"], "-", () => {
+      this.chooser.useSelectedItem({ metaKey: true, key: "-" });
+      return false;
+    });
+    this.scope.register(["Mod", "Shift"], "-", () => {
+      this.chooser.useSelectedItem({ metaKey: true, shiftKey: true, key: "-" });
+      return false;
+    });
     this.scope.register(["Mod"], "o", () =>
       this.chooser.useSelectedItem({ metaKey: true, key: "o" })
     );

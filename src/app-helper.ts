@@ -65,7 +65,13 @@ interface UnsafeLayouts {
   right: UnSafeLayout;
 }
 
-export type LeafType = "same" | "new" | "popout" | "popup";
+export type LeafType =
+  | "same"
+  | "new"
+  | "new-vertical"
+  | "new-horizontal"
+  | "popout"
+  | "popup";
 type OpenMarkdownFileOption = {
   leaf: LeafType;
   offset: number;
@@ -226,6 +232,14 @@ export class AppHelper {
         break;
       case "new":
         leaf = this.unsafeApp.workspace.getLeaf(true);
+        openFile(leaf);
+        break;
+      case "new-horizontal":
+        leaf = this.unsafeApp.workspace.getLeaf(true, "horizontal");
+        openFile(leaf);
+        break;
+      case "new-vertical":
+        leaf = this.unsafeApp.workspace.getLeaf(true, "vertical");
         openFile(leaf);
         break;
       case "popout":
