@@ -13,6 +13,7 @@ export interface Settings {
   searchByLinks: boolean;
   searchDelayMilliSeconds: number;
   showDirectory: boolean;
+  showDirectoryAtNewLine: boolean;
   showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
   showExistingFilesOnly: boolean;
@@ -45,6 +46,7 @@ export const DEFAULT_SETTINGS: Settings = {
   searchByLinks: false,
   searchDelayMilliSeconds: 0,
   showDirectory: true,
+  showDirectoryAtNewLine: false,
   showFullPathOfDirectory: false,
   showAliasesOnTop: false,
   showExistingFilesOnly: false,
@@ -131,50 +133,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl).setName("Show directory").addToggle((tc) => {
-      tc.setValue(this.plugin.settings.showDirectory).onChange(
-        async (value) => {
-          this.plugin.settings.showDirectory = value;
-          await this.plugin.saveSettings();
-          this.display();
-        }
-      );
-    });
-
-    if (this.plugin.settings.showDirectory) {
-      new Setting(containerEl)
-        .setName("Show full path of directory")
-        .addToggle((tc) => {
-          tc.setValue(this.plugin.settings.showFullPathOfDirectory).onChange(
-            async (value) => {
-              this.plugin.settings.showFullPathOfDirectory = value;
-              await this.plugin.saveSettings();
-              this.display();
-            }
-          );
-        });
-    }
-
-    new Setting(containerEl).setName("Show aliases on top").addToggle((tc) => {
-      tc.setValue(this.plugin.settings.showAliasesOnTop).onChange(
-        async (value) => {
-          this.plugin.settings.showAliasesOnTop = value;
-          await this.plugin.saveSettings();
-        }
-      );
-    });
-
-    new Setting(containerEl)
-      .setName("Show existing files only")
-      .addToggle((tc) => {
-        tc.setValue(this.plugin.settings.showExistingFilesOnly).onChange(
-          async (value) => {
-            this.plugin.settings.showExistingFilesOnly = value;
-            await this.plugin.saveSettings();
-          }
-        );
-      });
-
     new Setting(containerEl)
       .setName("Max number of suggestions")
       .addSlider((sc) =>
@@ -206,6 +164,63 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       });
     }
 
+    containerEl.createEl("h3", { text: "👁Appearance" });
+
+    new Setting(containerEl).setName("Show directory").addToggle((tc) => {
+      tc.setValue(this.plugin.settings.showDirectory).onChange(
+        async (value) => {
+          this.plugin.settings.showDirectory = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }
+      );
+    });
+
+    if (this.plugin.settings.showDirectory) {
+      new Setting(containerEl)
+        .setName("Show directory at the new line")
+        .setClass("another-quick-switcher__settings__nested")
+        .addToggle((tc) => {
+          tc.setValue(this.plugin.settings.showDirectoryAtNewLine).onChange(
+            async (value) => {
+              this.plugin.settings.showDirectoryAtNewLine = value;
+              await this.plugin.saveSettings();
+            }
+          );
+        });
+      new Setting(containerEl)
+        .setName("Show full path of directory")
+        .setClass("another-quick-switcher__settings__nested")
+        .addToggle((tc) => {
+          tc.setValue(this.plugin.settings.showFullPathOfDirectory).onChange(
+            async (value) => {
+              this.plugin.settings.showFullPathOfDirectory = value;
+              await this.plugin.saveSettings();
+            }
+          );
+        });
+    }
+
+    new Setting(containerEl).setName("Show aliases on top").addToggle((tc) => {
+      tc.setValue(this.plugin.settings.showAliasesOnTop).onChange(
+        async (value) => {
+          this.plugin.settings.showAliasesOnTop = value;
+          await this.plugin.saveSettings();
+        }
+      );
+    });
+
+    new Setting(containerEl)
+      .setName("Show existing files only")
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.showExistingFilesOnly).onChange(
+          async (value) => {
+            this.plugin.settings.showExistingFilesOnly = value;
+            await this.plugin.saveSettings();
+          }
+        );
+      });
+
     new Setting(containerEl).setName("Hide gutter icons").addToggle((tc) => {
       tc.setValue(this.plugin.settings.hideGutterIcons).onChange(
         async (value) => {
@@ -215,7 +230,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       );
     });
 
-    containerEl.createEl("h4", { text: "Hot keys in dialog" });
+    containerEl.createEl("h3", { text: "⌨Hot keys in dialog" });
 
     new Setting(containerEl)
       .setName(

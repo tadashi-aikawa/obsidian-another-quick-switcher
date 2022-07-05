@@ -46,13 +46,14 @@
 
 .another-quick-switcher__item__title {
     flex: 1;
+    padding-right: 15px;
 }
 
 .another-quick-switcher__item__hot-key-guide::before {
     content: "[";
 }
 .another-quick-switcher__item__hot-key-guide {
-    padding-left: 5px;
+    padding: 0 8px;
     font-size: 75%;
     opacity: 0.7;
 }
@@ -117,7 +118,7 @@
     font-size: 0.75em;
     /*noinspection CssUnresolvedCustomProperty*/
     color: var(--text-muted);
-    padding-left: 15px;
+    padding-left: 5px;
 }
 
 .another-quick-switcher__item__descriptions {
@@ -196,4 +197,8 @@
 .another-quick-switcher__settings__warning {
     color: darkorange;
     text-align: right;
+}
+
+.another-quick-switcher__settings__nested {
+    padding-left: 30px;
 }

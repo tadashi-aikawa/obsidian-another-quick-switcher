@@ -288,6 +288,7 @@ export class AnotherQuickSwitcherModal
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
     const { itemDiv, descriptionDiv } = createElements(item, {
       showDirectory: this.settings.showDirectory,
+      showDirectoryAtNewLine: this.settings.showDirectoryAtNewLine,
       showFullPathOfDirectory: this.settings.showFullPathOfDirectory,
       showAliasesOnTop: this.settings.showAliasesOnTop,
       hideGutterIcons: this.settings.hideGutterIcons,

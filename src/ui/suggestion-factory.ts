@@ -9,6 +9,7 @@ interface Elements {
 
 interface Options {
   showDirectory: boolean;
+  showDirectoryAtNewLine: boolean;
   showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
   hideGutterIcons: boolean;
@@ -59,6 +60,12 @@ function createItemDiv(
       : item.file.parent.name;
     directoryDiv.appendText(` ${text}`);
     entryDiv.appendChild(directoryDiv);
+
+    if (options.showDirectoryAtNewLine) {
+      itemDiv.appendChild(entryDiv);
+      itemDiv.appendChild(directoryDiv);
+      return itemDiv;
+    }
   }
 
   itemDiv.appendChild(entryDiv);
