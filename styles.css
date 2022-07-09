@@ -203,3 +203,16 @@
 .another-quick-switcher__settings__nested {
     padding-left: 30px;
 }
+
+.another-quick-switcher__create_button {
+    /*noinspection CssUnresolvedCustomProperty*/
+    background-color: var(--interactive-accent);
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-on-accent);
+    width: 150px!important;
+    margin: 0 calc((100% - 150px)/2)!important;
+}
+.another-quick-switcher__create_button:hover {
+    /*noinspection CssUnresolvedCustomProperty*/
+    background-color: var(--interactive-accent-hover);
+}

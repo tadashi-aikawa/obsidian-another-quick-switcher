@@ -300,6 +300,19 @@ export class AnotherQuickSwitcherModal
     el.appendChild(itemDiv);
   }
 
+  onNoSuggestion() {
+    super.onNoSuggestion();
+
+    const createButton = createEl("button", {
+      text: "Create",
+      cls: "another-quick-switcher__create_button",
+    });
+    createButton.addEventListener("click", () => {
+      this.handleCreateNew(this.searchQuery, "same");
+    });
+    this.resultContainerEl.appendChild(createButton);
+  }
+
   async onChooseSuggestion(
     item: SuggestionItem,
     evt: MouseEvent | KeyboardEvent
