@@ -202,6 +202,7 @@ export class AppHelper {
       eState: {
         line,
       },
+      active: false,
     });
   }
 
