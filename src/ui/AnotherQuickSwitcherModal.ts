@@ -337,6 +337,17 @@ export class AnotherQuickSwitcherModal
 
     let leaf: LeafType;
     const key = (evt as KeyboardEvent).key;
+
+    if (evt.metaKey && key === "]") {
+      const urls = await this.appHelper.findExternalLinkUrls(fileToOpened);
+      if (urls.length > 0) {
+        activeWindow.open(urls[0]);
+      } else {
+        this.appHelper.openMarkdownFile(fileToOpened, { leaf: "same", offset });
+      }
+      return;
+    }
+
     if (evt.metaKey && key === "o") {
       leaf = "popout";
     } else if (evt.metaKey && evt.shiftKey && key === "-") {
@@ -383,6 +394,7 @@ export class AnotherQuickSwitcherModal
       { command: `[${MOD} shift ↵]`, purpose: "create in new pane" },
       { command: `[${MOD} shift o]`, purpose: "create in new window" },
       { command: `[${MOD} shift alt ↵]`, purpose: "create in popup" },
+      { command: `[${MOD} ]]`, purpose: "open first URL" },
       { command: "[alt ↵]", purpose: "insert to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
@@ -470,6 +482,10 @@ export class AnotherQuickSwitcherModal
       this.inputEl.value = "";
       // Necessary to rerender suggestions
       this.inputEl.dispatchEvent(new Event("input"));
+    });
+
+    this.scope.register(["Mod"], "]", () => {
+      this.chooser.useSelectedItem({ metaKey: true, key: "]" });
     });
   }
 }

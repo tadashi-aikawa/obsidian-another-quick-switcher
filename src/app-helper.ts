@@ -143,6 +143,12 @@ export class AppHelper {
     return this.getLayout().right.collapsed ? 0 : this.getLayout().right.width;
   }
 
+  async findExternalLinkUrls(file: TFile): Promise<string[]> {
+    const content = await this.unsafeApp.vault.read(file);
+    const matches = Array.from(content.matchAll(/https?:\/\/.+/g));
+    return matches.map((x) => x[0]);
+  }
+
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
     const fileCache = this.unsafeApp.metadataCache.getFileCache(file);
     const links = fileCache?.links ?? [];
