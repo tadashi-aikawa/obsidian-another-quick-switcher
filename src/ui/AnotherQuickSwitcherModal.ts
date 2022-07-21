@@ -81,6 +81,8 @@ export class AnotherQuickSwitcherModal
       (x) => x
     );
     const activeFilePath = app.workspace.getActiveFile()?.path;
+
+    const start = performance.now();
     const markdownItems = app.vault
       .getMarkdownFiles()
       .filter(
@@ -95,14 +97,21 @@ export class AnotherQuickSwitcherModal
             ...(cache.tags ?? []).map((x) => x.tag),
             ...(parseFrontMatterTags(cache.frontmatter) ?? []),
           ]),
-          headers: (cache.headings ?? []).map((x) => excludeFormat(x.heading)),
-          links: uniq(cache.links?.map((x) => x.displayText ?? "") ?? []), //FIXME:
+          headers: this.settings.searchFromHeaders
+            ? (cache.headings ?? []).map((x) => excludeFormat(x.heading))
+            : [],
+          links: this.settings.searchByLinks
+            ? uniq(cache.links?.map((x) => x.displayText ?? "") ?? [])
+            : [],
           phantom: false,
           starred: x.path in starredPathMap,
           matchResults: [],
           tokens: x.basename.split(" "),
         };
       });
+    this.showDebugLog(() =>
+      buildLogMessage(`Indexing markdown items: `, performance.now() - start)
+    );
 
     this.originItems = [...markdownItems, ...phantomItems];
     this.ignoredItems = this.ignoreItems(initialMode);
@@ -229,16 +238,24 @@ export class AnotherQuickSwitcherModal
     }
 
     if (!query.trim()) {
+      let results: SuggestionItem[];
       switch (this.mode) {
         case "star-recent":
-          return starRecentSort(this.ignoredItems, lastOpenFileIndexByPath)
+          results = starRecentSort(this.ignoredItems, lastOpenFileIndexByPath)
             .slice(0, this.settings.maxNumberOfSuggestions)
             .map((x, order) => ({ ...x, order }));
+          break;
         default:
-          return recentSort(this.ignoredItems, lastOpenFileIndexByPath)
+          results = recentSort(this.ignoredItems, lastOpenFileIndexByPath)
             .slice(0, this.settings.maxNumberOfSuggestions)
             .map((x, order) => ({ ...x, order }));
+          break;
       }
+
+      this.showDebugLog(() =>
+        buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
+      );
+      return results;
     }
 
     const matchedSuggestions = this.ignoredItems
