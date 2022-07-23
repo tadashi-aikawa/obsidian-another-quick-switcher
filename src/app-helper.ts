@@ -74,7 +74,8 @@ export type LeafType =
   | "popup";
 type OpenMarkdownFileOption = {
   leaf: LeafType;
-  offset: number;
+  offset?: number;
+  line?: number;
 };
 
 export class AppHelper {
@@ -212,9 +213,22 @@ export class AppHelper {
     });
   }
 
+  getMarkdownFileByPath(path: string): TFile | null {
+    if (!path.endsWith(".md")) {
+      return null;
+    }
+
+    const abstractFile = this.unsafeApp.vault.getAbstractFileByPath(path);
+    if (!abstractFile) {
+      return null;
+    }
+
+    return abstractFile as TFile;
+  }
+
   openMarkdownFile(file: TFile, option: Partial<OpenMarkdownFileOption> = {}) {
     const opt: OpenMarkdownFileOption = {
-      ...{ leaf: "same", offset: 0 },
+      ...{ leaf: "same" },
       ...option,
     };
 
@@ -225,8 +239,13 @@ export class AppHelper {
           this.unsafeApp.workspace.setActiveLeaf(leaf, true, true);
           const markdownView =
             this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
-          if (markdownView && opt.offset > 0) {
-            this.moveTo(opt.offset, markdownView.editor);
+          if (markdownView) {
+            if (opt.offset != null) {
+              this.moveTo(opt.offset, markdownView.editor);
+            } else if (opt.line != null) {
+              const p = { line: opt.line, offset: 0, col: 0 };
+              this.moveTo({ start: p, end: p });
+            }
           }
         });
     };

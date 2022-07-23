@@ -2,10 +2,12 @@ import {
   AnotherQuickSwitcherModal,
   Mode,
 } from "./ui/AnotherQuickSwitcherModal";
-import { App, Command } from "obsidian";
+import { App, Command, Notice, Platform } from "obsidian";
 import { Settings } from "./settings";
 import { MoveModal } from "./ui/MoveModal";
 import { HeaderModal } from "./ui/HeaderModal";
+import { GrepModal } from "./ui/GrepModal";
+import { existsRg } from "./utils/ripgrep";
 
 export function showSearchDialog(app: App, mode: Mode, settings: Settings) {
   const modal = new AnotherQuickSwitcherModal(app, mode, settings);
@@ -18,6 +20,25 @@ export function showMoveDialog(app: App, settings: Settings) {
   }
 
   const modal = new MoveModal(app, settings);
+  modal.open();
+}
+
+export async function showGrepDialog(app: App, settings: Settings) {
+  if (!Platform.isDesktop) {
+    // noinspection ObjectAllocationIgnored
+    new Notice("Grep is not supported on mobile.");
+    return;
+  }
+
+  if (!(await existsRg())) {
+    // noinspection ObjectAllocationIgnored
+    new Notice(
+      "You need to install ripgrep and enable it to call from anywhere."
+    );
+    return;
+  }
+
+  const modal = new GrepModal(app, settings);
   modal.open();
 }
 
@@ -116,6 +137,18 @@ export function createCommands(app: App, settings: Settings): Command[] {
           return Boolean(app.workspace.getActiveFile());
         }
         showMoveDialog(app, settings);
+      },
+    },
+    {
+      id: "grep",
+      name: "Grep",
+      hotkeys: [],
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return Platform.isDesktop;
+        }
+
+        showGrepDialog(app, settings);
       },
     },
   ];
