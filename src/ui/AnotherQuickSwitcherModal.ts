@@ -336,7 +336,14 @@ export class AnotherQuickSwitcherModal
   ): Promise<void> {
     let fileToOpened = item.file;
     if (evt.altKey && !evt.metaKey) {
-      this.appHelper.insertLinkToActiveFileBy(fileToOpened);
+      if (evt.shiftKey) {
+        this.chooser.values.forEach((x) => {
+          this.appHelper.insertLinkToActiveFileBy(x.file);
+          this.appHelper.insertStringToActiveFile("\n");
+        });
+      } else {
+        this.appHelper.insertLinkToActiveFileBy(fileToOpened);
+      }
       return;
     }
 
@@ -413,6 +420,7 @@ export class AnotherQuickSwitcherModal
       { command: `[${MOD} shift alt ↵]`, purpose: "create in popup" },
       { command: `[${MOD} ]]`, purpose: "open first URL" },
       { command: "[alt ↵]", purpose: "insert to editor" },
+      { command: "[alt shift ↵]", purpose: "insert all to editor" },
       { command: "[esc]", purpose: "dismiss" },
     ]);
 
@@ -421,6 +429,9 @@ export class AnotherQuickSwitcherModal
     );
     this.scope.register(["Alt"], "Enter", () =>
       this.chooser.useSelectedItem({ altKey: true })
+    );
+    this.scope.register(["Alt", "Shift"], "Enter", () =>
+      this.chooser.useSelectedItem({ altKey: true, shiftKey: true })
     );
     this.scope.register(["Mod"], "-", () => {
       this.chooser.useSelectedItem({ metaKey: true, key: "-" });

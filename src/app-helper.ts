@@ -301,6 +301,17 @@ export class AppHelper {
     ).map((x) => this.createPhantomFile(x));
   }
 
+  insertStringToActiveFile(str: string) {
+    const activeMarkdownView =
+      this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
+    if (!activeMarkdownView) {
+      return;
+    }
+
+    const editor = activeMarkdownView.editor;
+    editor.replaceSelection(str);
+  }
+
   insertLinkToActiveFileBy(file: TFile) {
     const activeMarkdownView =
       this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
