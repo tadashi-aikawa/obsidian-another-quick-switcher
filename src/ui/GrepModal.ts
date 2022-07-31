@@ -77,11 +77,12 @@ export class GrepModal extends SuggestModal<SuggestionItem> {
 
     const basePath: string = (this.app.vault.adapter as any).basePath;
     const rgResults = await rg(
-      query,
-      basePath,
       "-t",
       "md",
-      hasCapitalLetter ? "" : "-i"
+      hasCapitalLetter ? "" : "-i",
+      "--",
+      query,
+      basePath
     );
 
     const items = rgResults.map((x, order) => ({
