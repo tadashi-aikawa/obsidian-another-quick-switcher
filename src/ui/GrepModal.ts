@@ -73,6 +73,11 @@ export class GrepModal extends SuggestModal<SuggestionItem> {
   async _getSuggestions(query: string): Promise<SuggestionItem[]> {
     const start = performance.now();
 
+    const loadingEl = createSpan({
+      cls: "another-quick-switcher__header__floating-prompt__loading",
+    });
+    this.inputEl.after(loadingEl);
+
     const hasCapitalLetter = query.toLowerCase() !== query;
 
     const basePath: string = (this.app.vault.adapter as any).basePath;
@@ -102,6 +107,7 @@ export class GrepModal extends SuggestModal<SuggestionItem> {
       buildLogMessage(`getSuggestions: `, performance.now() - start)
     );
 
+    loadingEl.remove();
     return items;
   }
 
