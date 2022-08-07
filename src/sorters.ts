@@ -14,170 +14,52 @@ export const sortPriorityList = [
 ] as const;
 export type SortPriority = typeof sortPriorityList[number];
 
-export function normalSort(
-  items: SuggestionItem[],
+function getComparator(
+  priority: SortPriority
+): (
+  a: SuggestionItem,
+  b: SuggestionItem,
   lastOpenFileIndexByPath: { [path: string]: number }
-): SuggestionItem[] {
-  return items.sort((a, b) => {
-    let result: 0 | -1 | 1;
-
-    result = priorityToPerfectWord(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToPrefixName(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToName(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLength(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLastModified(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    return 0;
-  });
+) => 0 | -1 | 1 {
+  switch (priority) {
+    case "Header match":
+      return priorityToHeader;
+    case "Last modified":
+      return priorityToLastModified;
+    case "Last opened":
+      return priorityToLastOpened;
+    case "Length":
+      return priorityToLength;
+    case "Link match":
+      return priorityToLink;
+    case "Name match":
+      return priorityToName;
+    case "Perfect word match":
+      return priorityToPerfectWord;
+    case "Prefix name match":
+      return priorityToPrefixName;
+    case "Star":
+      return priorityToStar;
+    case "Tag match":
+      return priorityToTag;
+    default:
+      throw Error(`Unexpected priority: ${priority}`);
+  }
 }
 
-export function recentSort(
+export function sort(
   items: SuggestionItem[],
+  priorities: SortPriority[],
   lastOpenFileIndexByPath: { [path: string]: number }
 ): SuggestionItem[] {
   return items.sort((a, b) => {
     let result: 0 | -1 | 1;
 
-    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLastModified(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    return 0;
-  });
-}
-
-export function fileNameRecentSort(
-  items: SuggestionItem[],
-  lastOpenFileIndexByPath: { [path: string]: number }
-): SuggestionItem[] {
-  return items.sort((a, b) => {
-    let result: 0 | -1 | 1;
-
-    result = priorityToPerfectWord(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToName(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLastModified(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    return 0;
-  });
-}
-
-export function recommendedRecentSort(
-  items: SuggestionItem[],
-  lastOpenFileIndexByPath: { [path: string]: number }
-): SuggestionItem[] {
-  return items.sort((a, b) => {
-    let result: 0 | -1 | 1;
-
-    result = priorityToName(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToTag(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToHeader(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLink(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLastModified(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    return 0;
-  });
-}
-
-export function starRecentSort(
-  items: SuggestionItem[],
-  lastOpenFileIndexByPath: { [path: string]: number }
-): SuggestionItem[] {
-  return items.sort((a, b) => {
-    let result: 0 | -1 | 1;
-
-    result = priorityToStar(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLastOpened(a, b, lastOpenFileIndexByPath);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToLastModified(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToPerfectWord(a, b);
-    if (result !== 0) {
-      return result;
-    }
-
-    result = priorityToName(a, b);
-    if (result !== 0) {
-      return result;
+    for (const priority of priorities) {
+      result = getComparator(priority)(a, b, lastOpenFileIndexByPath);
+      if (result !== 0) {
+        return result;
+      }
     }
 
     return 0;

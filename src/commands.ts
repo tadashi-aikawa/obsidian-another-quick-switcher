@@ -1,9 +1,6 @@
-import {
-  AnotherQuickSwitcherModal,
-  Mode,
-} from "./ui/AnotherQuickSwitcherModal";
+import { AnotherQuickSwitcherModal } from "./ui/AnotherQuickSwitcherModal";
 import { App, Command, Notice, Platform } from "obsidian";
-import { Settings } from "./settings";
+import { SearchCommand, Settings } from "./settings";
 import { MoveModal } from "./ui/MoveModal";
 import { HeaderModal } from "./ui/HeaderModal";
 import { GrepModal } from "./ui/GrepModal";
@@ -11,8 +8,12 @@ import { existsRg } from "./utils/ripgrep";
 
 const SEARCH_COMMAND_PREFIX = "search-command";
 
-export function showSearchDialog(app: App, mode: Mode, settings: Settings) {
-  const modal = new AnotherQuickSwitcherModal(app, mode, settings);
+export function showSearchDialog(
+  app: App,
+  settings: Settings,
+  command: SearchCommand
+) {
+  const modal = new AnotherQuickSwitcherModal(app, settings, command);
   modal.open();
 }
 
@@ -60,46 +61,6 @@ export function showHeaderDialog(
 export function createCommands(app: App, settings: Settings): Command[] {
   return [
     {
-      id: "normal-search",
-      name: "Normal search",
-      hotkeys: [{ modifiers: ["Mod", "Shift"], key: "p" }],
-      callback: () => {
-        showSearchDialog(app, "normal", settings);
-      },
-    },
-    {
-      id: "recommended-recent-search",
-      name: "Recommended recent search",
-      hotkeys: [],
-      callback: () => {
-        showSearchDialog(app, "recommended-recent", settings);
-      },
-    },
-    {
-      id: "recent-search",
-      name: "Recent search",
-      hotkeys: [{ modifiers: ["Mod", "Shift"], key: "e" }],
-      callback: () => {
-        showSearchDialog(app, "recent", settings);
-      },
-    },
-    {
-      id: "filename-recent-search",
-      name: "Filename recent search",
-      hotkeys: [{ modifiers: ["Mod", "Shift"], key: "f" }],
-      callback: () => {
-        showSearchDialog(app, "filename-recent", settings);
-      },
-    },
-    {
-      id: "star-recent-search",
-      name: "Star recent search",
-      hotkeys: [],
-      callback: () => {
-        showSearchDialog(app, "star-recent", settings);
-      },
-    },
-    {
       id: "backlink-search",
       name: "Backlink search",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "h" }],
@@ -107,7 +68,15 @@ export function createCommands(app: App, settings: Settings): Command[] {
         if (checking) {
           return Boolean(app.workspace.getActiveFile());
         }
-        showSearchDialog(app, "backlink", settings);
+        showSearchDialog(app, settings, {
+          isBacklinkSearch: true,
+          // XXX: Below are ignored
+          name: "",
+          defaultInput: "",
+          commandPrefix: "",
+          sortPriorities: [],
+          ignorePathPrefixPatterns: [],
+        });
       },
     },
     {
@@ -159,7 +128,7 @@ export function createCommands(app: App, settings: Settings): Command[] {
         name: command.name,
         hotkeys: [],
         callback: () => {
-          showSearchDialog(app, "normal", settings);
+          showSearchDialog(app, settings, command);
         },
       };
     }),

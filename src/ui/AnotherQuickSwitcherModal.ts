@@ -8,17 +8,11 @@ import {
   SuggestModal,
 } from "obsidian";
 import { ignoreItems, keyBy, uniq } from "../utils/collection-helper";
-import { Settings } from "../settings";
+import { SearchCommand, Settings } from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
-import {
-  fileNameRecentSort,
-  recommendedRecentSort,
-  normalSort,
-  recentSort,
-  starRecentSort,
-} from "../sorters";
+import { sort } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { excludeFormat } from "../utils/strings";
 import { MOD, quickResultSelectionModifier } from "src/keys";
@@ -27,14 +21,6 @@ function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
 }
 
-export type Mode =
-  | "normal"
-  | "recent"
-  | "backlink"
-  | "filename-recent"
-  | "recommended-recent"
-  | "star-recent";
-
 export class AnotherQuickSwitcherModal
   extends SuggestModal<SuggestionItem>
   implements UnsafeModalInterface<SuggestionItem>
@@ -42,7 +28,6 @@ export class AnotherQuickSwitcherModal
   originItems: SuggestionItem[];
   ignoredItems: SuggestionItem[];
   appHelper: AppHelper;
-  mode: Mode;
   settings: Settings;
   searchQuery: string;
 
@@ -53,11 +38,16 @@ export class AnotherQuickSwitcherModal
     [string, (items: SuggestionItem[]) => void]
   >;
 
-  constructor(app: App, public initialMode: Mode, settings: Settings) {
+  command: SearchCommand;
+  initialCommand: SearchCommand;
+
+  constructor(app: App, settings: Settings, command: SearchCommand) {
     super(app);
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
+    this.initialCommand = command;
+    this.command = command;
 
     this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotKeys();
@@ -114,7 +104,7 @@ export class AnotherQuickSwitcherModal
     );
 
     this.originItems = [...markdownItems, ...phantomItems];
-    this.ignoredItems = this.ignoreItems(initialMode);
+    this.ignoredItems = this.ignoreItems(command);
 
     this.debounceGetSuggestions = debounce(
       (query: string, cb: (items: SuggestionItem[]) => void) => {
@@ -123,6 +113,13 @@ export class AnotherQuickSwitcherModal
       this.settings.searchDelayMilliSeconds,
       true
     );
+  }
+
+  onOpen() {
+    super.onOpen();
+    this.inputEl.value = this.command.defaultInput;
+    // Necessary to rerender suggestions
+    this.inputEl.dispatchEvent(new Event("input"));
   }
 
   async handleCreateNew(searchQuery: string, leafType: LeafType) {
@@ -137,33 +134,18 @@ export class AnotherQuickSwitcherModal
     this.close();
   }
 
-  ignoreItems(mode: Mode): SuggestionItem[] {
+  ignoreItems(command: SearchCommand): SuggestionItem[] {
     const _ignoreItems = (patterns: string): SuggestionItem[] =>
       ignoreItems(this.originItems, patterns, (x) => x.file.path);
 
-    switch (mode) {
-      case "normal":
-        return _ignoreItems(this.settings.ignoreNormalPathPrefixPatterns);
-      case "recent":
-        return _ignoreItems(this.settings.ignoreRecentPathPrefixPatterns);
-      case "filename-recent":
-        return _ignoreItems(
-          this.settings.ignoreFilenameRecentPathPrefixPatterns
-        );
-      case "recommended-recent":
-        return _ignoreItems(
-          this.settings.ignoreFilenameRecentPathPrefixPatterns
-        );
-      case "star-recent":
-        // do nothing
-        return this.originItems;
-      case "backlink":
-        return _ignoreItems(this.settings.ignoreBackLinkPathPrefixPatterns);
-    }
+    // TODO: refactoring
+    return command.isBacklinkSearch
+      ? _ignoreItems(this.settings.ignoreBackLinkPathPrefixPatterns)
+      : _ignoreItems(command.ignorePathPrefixPatterns.join("\n"));
   }
 
   getSuggestions(query: string): SuggestionItem[] | Promise<SuggestionItem[]> {
-    if (!query) {
+    if (!query || query === this.command.defaultInput) {
       return this._getSuggestions(query);
     }
 
@@ -182,34 +164,20 @@ export class AnotherQuickSwitcherModal
       lastOpenFileIndexByPath[v] = i;
     });
 
-    let searchQuery = query;
-    const changeMode = (mode: Mode, slice: number = 0) => {
-      if (this.mode !== mode) {
-        this.ignoredItems = this.ignoreItems(mode);
-      }
-      this.mode = mode;
-      searchQuery = query.slice(slice);
-    };
-    // noinspection IfStatementWithTooManyBranchesJS
-    if (query.startsWith(":n ")) {
-      changeMode("normal", 3);
-    } else if (query.startsWith(":r ")) {
-      changeMode("recent", 3);
-    } else if (query.startsWith(":f ")) {
-      changeMode("filename-recent", 3);
-    } else if (query.startsWith(":s ")) {
-      changeMode("star-recent", 3);
-    } else if (query.startsWith(":b ")) {
-      changeMode("backlink", 3);
+    const commandByPrefix = this.settings.searchCommands
+      .filter((x) => x.commandPrefix)
+      .find((x) => query.includes(x.commandPrefix));
+    if (commandByPrefix) {
+      this.command = commandByPrefix;
+      this.searchQuery = query.replace(commandByPrefix.commandPrefix, "");
     } else {
-      changeMode(this.initialMode);
+      this.command = this.initialCommand;
+      this.searchQuery = query;
     }
 
-    this.searchQuery = searchQuery;
+    const qs = this.searchQuery.split(" ").filter((x) => x);
 
-    const qs = searchQuery.split(" ").filter((x) => x);
-
-    if (this.mode === "backlink") {
+    if (this.command.isBacklinkSearch) {
       const activeFilePath = this.app.workspace.getActiveFile()?.path;
       if (!activeFilePath) {
         return [];
@@ -238,20 +206,13 @@ export class AnotherQuickSwitcherModal
     }
 
     if (!query.trim()) {
-      let results: SuggestionItem[];
-      switch (this.mode) {
-        case "star-recent":
-          results = starRecentSort(this.ignoredItems, lastOpenFileIndexByPath)
-            .slice(0, this.settings.maxNumberOfSuggestions)
-            .map((x, order) => ({ ...x, order }));
-          break;
-        default:
-          results = recentSort(this.ignoredItems, lastOpenFileIndexByPath)
-            .slice(0, this.settings.maxNumberOfSuggestions)
-            .map((x, order) => ({ ...x, order }));
-          break;
-      }
-
+      const results = sort(
+        this.ignoredItems,
+        ["Last opened", "Last modified"],
+        lastOpenFileIndexByPath
+      )
+        .slice(0, this.settings.maxNumberOfSuggestions)
+        .map((x, order) => ({ ...x, order }));
       this.showDebugLog(() =>
         buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
       );
@@ -271,27 +232,11 @@ export class AnotherQuickSwitcherModal
       )
       .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
 
-    let items: SuggestionItem[] = [];
-    switch (this.mode) {
-      case "normal":
-        items = normalSort(matchedSuggestions, lastOpenFileIndexByPath);
-        break;
-      case "recent":
-        items = recentSort(matchedSuggestions, lastOpenFileIndexByPath);
-        break;
-      case "filename-recent":
-        items = fileNameRecentSort(matchedSuggestions, lastOpenFileIndexByPath);
-        break;
-      case "recommended-recent":
-        items = recommendedRecentSort(
-          matchedSuggestions,
-          lastOpenFileIndexByPath
-        );
-        break;
-      case "star-recent":
-        items = starRecentSort(matchedSuggestions, lastOpenFileIndexByPath);
-        break;
-    }
+    const items = sort(
+      matchedSuggestions,
+      this.command.sortPriorities,
+      lastOpenFileIndexByPath
+    );
 
     this.showDebugLog(() =>
       buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
@@ -351,13 +296,12 @@ export class AnotherQuickSwitcherModal
       fileToOpened = await this.app.vault.create(item.file.path, "");
     }
 
-    const offset =
-      this.mode === "backlink"
-        ? this.appHelper.findFirstLinkOffset(
-            item.file,
-            this.app.workspace.getActiveFile()! // never undefined
-          )
-        : 0;
+    const offset = this.command.isBacklinkSearch
+      ? this.appHelper.findFirstLinkOffset(
+          item.file,
+          this.app.workspace.getActiveFile()! // never undefined
+        )
+      : 0;
 
     let leaf: LeafType;
     const key = (evt as KeyboardEvent).key;

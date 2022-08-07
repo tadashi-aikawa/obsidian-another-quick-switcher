@@ -12,9 +12,10 @@ export type HeaderSearchFeature = typeof headerSearchFeatureList[number];
 export interface SearchCommand {
   name: string;
   defaultInput: string;
-  modePrefix: string;
-  sortPriority: SortPriority[];
+  commandPrefix: string;
+  sortPriorities: SortPriority[];
   ignorePathPrefixPatterns: string[];
+  isBacklinkSearch: boolean;
 }
 
 export interface Settings {
@@ -33,12 +34,6 @@ export interface Settings {
   searchCommands: SearchCommand[];
   // Hotkey in search dialog
   userAltInsteadOfModForQuickResultSelection: boolean;
-  // Normal search
-  ignoreNormalPathPrefixPatterns: string;
-  // Recent search
-  ignoreRecentPathPrefixPatterns: string;
-  // File name recent search
-  ignoreFilenameRecentPathPrefixPatterns: string;
   // Back link search
   ignoreBackLinkPathPrefixPatterns: string;
   // Header search in file
@@ -68,26 +63,52 @@ export const DEFAULT_SETTINGS: Settings = {
   // Searches
   searchCommands: [
     {
-      name: "Custom command 1",
+      name: "Recommended search",
       defaultInput: "",
-      modePrefix: "",
-      sortPriority: ["Name match", "Tag match"],
+      commandPrefix: "",
+      sortPriorities: [
+        "Name match",
+        "Tag match",
+        "Header match",
+        "Link match",
+        "Last opened",
+        "Last modified",
+      ],
       ignorePathPrefixPatterns: [],
+      isBacklinkSearch: false,
     },
     {
-      name: "Custom command 2",
+      name: "Title search",
       defaultInput: "",
-      modePrefix: "r",
-      sortPriority: ["Last opened", "Last modified"],
+      commandPrefix: ":t ",
+      sortPriorities: [
+        "Perfect word match",
+        "Prefix name match",
+        "Name match",
+        "Length",
+        "Last opened",
+        "Last modified",
+      ],
       ignorePathPrefixPatterns: [],
+      isBacklinkSearch: false,
+    },
+    {
+      name: "Recent search",
+      defaultInput: "",
+      commandPrefix: ":r ",
+      sortPriorities: ["Last opened", "Last modified"],
+      ignorePathPrefixPatterns: [],
+      isBacklinkSearch: false,
+    },
+    {
+      name: "Star search",
+      defaultInput: "",
+      commandPrefix: ":s ",
+      sortPriorities: ["Star", "Last opened", "Last modified"],
+      ignorePathPrefixPatterns: [],
+      isBacklinkSearch: false,
     },
   ],
-  // Normal search
-  ignoreNormalPathPrefixPatterns: "",
-  // Recent search
-  ignoreRecentPathPrefixPatterns: "",
-  // File name recent search
-  ignoreFilenameRecentPathPrefixPatterns: "",
   // Back link search
   ignoreBackLinkPathPrefixPatterns: "",
   // Header search in file
@@ -120,7 +141,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addHotKeysInDialogSettings(containerEl);
     this.addSearchSettings(containerEl);
     // TODO: remove
-    this.addOldSearchesSettings(containerEl);
+    this.addBacklinkSearchesSettings(containerEl);
     this.addHeaderSearchSettings(containerEl);
     this.addMoveSettings(containerEl);
 
@@ -327,29 +348,27 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       new Setting(div)
         .setName("Default input")
         .setDesc("Default input strings when it opens the dialog")
-        .addText((tc) => {
-          const el = tc
+        .addText((tc) =>
+          tc
             .setValue(command.defaultInput)
             .setPlaceholder("(ex: #todo )")
             .onChange(async (value) => {
               this.plugin.settings.searchCommands[i].defaultInput = value;
-            });
-          return el;
-        });
+            })
+        );
       new Setting(div)
-        .setName("Mode prefix")
+        .setName("Command prefix")
         .setDesc(
-          "If it sets 'r', a query starts with ':r' means that search as this command"
+          "For example, if it sets ':r ', a query starts with ':r ' means that search as this command"
         )
-        .addText((tc) => {
-          const el = tc
-            .setValue(command.modePrefix)
-            .setPlaceholder("(ex: r)")
+        .addText((tc) =>
+          tc
+            .setValue(command.commandPrefix)
+            .setPlaceholder("(ex: :r )")
             .onChange(async (value) => {
-              this.plugin.settings.searchCommands[i].modePrefix = value;
-            });
-          return el;
-        });
+              this.plugin.settings.searchCommands[i].commandPrefix = value;
+            })
+        );
 
       const df = document.createDocumentFragment();
       df.append(
@@ -366,10 +385,10 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         .addTextArea((tc) => {
           const el = tc
             .setPlaceholder("Sort priority")
-            .setValue(command.sortPriority.join("\n"))
+            .setValue(command.sortPriorities.join("\n"))
             .onChange(async (value) => {
               const priorities = value.split("\n");
-              this.plugin.settings.searchCommands[i].sortPriority =
+              this.plugin.settings.searchCommands[i].sortPriorities =
                 priorities as SortPriority[];
             });
           el.inputEl.addClass(
@@ -400,13 +419,14 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         btn
           .setButtonText("Add a command")
           .setCta()
-          .onClick(async (ev) => {
+          .onClick(async (_) => {
             this.plugin.settings.searchCommands.push({
               name: "",
               defaultInput: "",
-              modePrefix: "",
-              sortPriority: [],
+              commandPrefix: "",
+              sortPriorities: [],
               ignorePathPrefixPatterns: [],
+              isBacklinkSearch: false,
             });
             this.display();
           });
@@ -420,9 +440,10 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
               this.plugin.settings.searchCommands.filter((x) => x.name);
 
             const invalidValues = this.plugin.settings.searchCommands
-              .flatMap((x) => x.sortPriority)
+              .flatMap((x) => x.sortPriorities)
               .filter((x) => !sortPriorityList.includes(x as SortPriority));
             if (invalidValues.length > 0) {
+              // noinspection ObjectAllocationIgnored
               new Notice(
                 `
 Invalid sort priorities:
@@ -436,8 +457,28 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             await this.plugin.saveSettings();
             this.display();
             this.plugin.reloadCommands();
+            // noinspection ObjectAllocationIgnored
             new Notice("Save and reload commands");
           });
+      });
+  }
+
+  private addBacklinkSearchesSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "👀 Backlink search" });
+
+    new Setting(containerEl)
+      .setName("Ignore prefix path patterns for Backlink search")
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("Prefix match patterns")
+          .setValue(this.plugin.settings.ignoreBackLinkPathPrefixPatterns)
+          .onChange(async (value) => {
+            this.plugin.settings.ignoreBackLinkPathPrefixPatterns = value;
+            await this.plugin.saveSettings();
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__ignore_path_patterns";
+        return el;
       });
   }
 
@@ -526,77 +567,6 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           this.plugin.settings.showLogAboutPerformanceInConsole = value;
           await this.plugin.saveSettings();
         });
-      });
-  }
-
-  // deprecated
-  private addOldSearchesSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "🔍 Normal search" });
-
-    new Setting(containerEl)
-      .setName("Ignore prefix path patterns for Normal search")
-      .addTextArea((tc) => {
-        const el = tc
-          .setPlaceholder("Prefix match patterns")
-          .setValue(this.plugin.settings.ignoreNormalPathPrefixPatterns)
-          .onChange(async (value) => {
-            this.plugin.settings.ignoreNormalPathPrefixPatterns = value;
-            await this.plugin.saveSettings();
-          });
-        el.inputEl.className =
-          "another-quick-switcher__settings__ignore_path_patterns";
-        return el;
-      });
-
-    containerEl.createEl("h3", { text: "⏱ Recent search" });
-
-    new Setting(containerEl)
-      .setName("Ignore prefix path patterns for Recent search")
-      .addTextArea((tc) => {
-        const el = tc
-          .setPlaceholder("Prefix match patterns")
-          .setValue(this.plugin.settings.ignoreRecentPathPrefixPatterns)
-          .onChange(async (value) => {
-            this.plugin.settings.ignoreRecentPathPrefixPatterns = value;
-            await this.plugin.saveSettings();
-          });
-        el.inputEl.className =
-          "another-quick-switcher__settings__ignore_path_patterns";
-        return el;
-      });
-
-    containerEl.createEl("h3", { text: "⏱ Filename recent search" });
-
-    new Setting(containerEl)
-      .setName("Ignore prefix path patterns for Filename Recent search")
-      .addTextArea((tc) => {
-        const el = tc
-          .setPlaceholder("Prefix match patterns")
-          .setValue(this.plugin.settings.ignoreFilenameRecentPathPrefixPatterns)
-          .onChange(async (value) => {
-            this.plugin.settings.ignoreFilenameRecentPathPrefixPatterns = value;
-            await this.plugin.saveSettings();
-          });
-        el.inputEl.className =
-          "another-quick-switcher__settings__ignore_path_patterns";
-        return el;
-      });
-
-    containerEl.createEl("h3", { text: "👀 Backlink search" });
-
-    new Setting(containerEl)
-      .setName("Ignore prefix path patterns for Backlink search")
-      .addTextArea((tc) => {
-        const el = tc
-          .setPlaceholder("Prefix match patterns")
-          .setValue(this.plugin.settings.ignoreBackLinkPathPrefixPatterns)
-          .onChange(async (value) => {
-            this.plugin.settings.ignoreBackLinkPathPrefixPatterns = value;
-            await this.plugin.saveSettings();
-          });
-        el.inputEl.className =
-          "another-quick-switcher__settings__ignore_path_patterns";
-        return el;
       });
   }
 }
