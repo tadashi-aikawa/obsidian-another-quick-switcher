@@ -1,6 +1,7 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import AnotherQuickSwitcher from "./main";
 import { mirrorMap } from "./utils/collection-helper";
+import { deprecate } from "util";
 
 const headerSearchFeatureList = [
   "navigate",
@@ -87,6 +88,18 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Another Quick Switcher - Settings" });
 
+    this.addGeneralSettings(containerEl);
+    this.addAppearanceSettings(containerEl);
+    this.addHotKeysInDialogSettings(containerEl);
+    // TODO: remove
+    this.addOldSearchesSettings(containerEl);
+    this.addHeaderSearchSettings(containerEl);
+    this.addMoveSettings(containerEl);
+
+    this.addDebugSettings(containerEl);
+  }
+
+  private addGeneralSettings(containerEl: HTMLElement) {
     new Setting(containerEl).setName("Search by headers").addToggle((tc) => {
       tc.setValue(this.plugin.settings.searchFromHeaders).onChange(
         async (value) => {
@@ -163,7 +176,9 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         cls: "another-quick-switcher__settings__warning",
       });
     }
+  }
 
+  private addAppearanceSettings(containerEl: HTMLElement) {
     containerEl.createEl("h3", { text: "👁Appearance" });
 
     new Setting(containerEl).setName("Show directory").addToggle((tc) => {
@@ -229,7 +244,9 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         }
       );
     });
+  }
 
+  private addHotKeysInDialogSettings(containerEl: HTMLElement) {
     containerEl.createEl("h3", { text: "⌨Hot keys in dialog" });
 
     new Setting(containerEl)
@@ -245,7 +262,98 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
       });
+  }
 
+  private addHeaderSearchSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "📰 Header search in file" });
+
+    containerEl.createEl("h4", { text: "Hot keys in dialog" });
+
+    new Setting(containerEl).setName("↑↓").addDropdown((tc) =>
+      tc
+        .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
+        .setValue(this.plugin.settings.headerSearchKeyBindArrowUpDown)
+        .onChange(async (value) => {
+          this.plugin.settings.headerSearchKeyBindArrowUpDown =
+            value as HeaderSearchFeature;
+          await this.plugin.saveSettings();
+        })
+    );
+    new Setting(containerEl).setName("Tab / Shift+Tab").addDropdown((tc) =>
+      tc
+        .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
+        .setValue(this.plugin.settings.headerSearchKeyBindTab)
+        .onChange(async (value) => {
+          this.plugin.settings.headerSearchKeyBindTab =
+            value as HeaderSearchFeature;
+          await this.plugin.saveSettings();
+        })
+    );
+    new Setting(containerEl)
+      .setName("Ctrl+J / Ctrl+K (for Vimmer)")
+      .addDropdown((tc) =>
+        tc
+          .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
+          .setValue(this.plugin.settings.headerSearchKeyBindVim)
+          .onChange(async (value) => {
+            this.plugin.settings.headerSearchKeyBindVim =
+              value as HeaderSearchFeature;
+            await this.plugin.saveSettings();
+          })
+      );
+    new Setting(containerEl)
+      .setName("Ctrl+N / Ctrl+P (for Emacs user)")
+      .addDropdown((tc) =>
+        tc
+          .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
+          .setValue(this.plugin.settings.headerSearchKeyBindEmacs)
+          .onChange(async (value) => {
+            this.plugin.settings.headerSearchKeyBindEmacs =
+              value as HeaderSearchFeature;
+            await this.plugin.saveSettings();
+          })
+      );
+  }
+
+  private addMoveSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "📁 Move file to another folder" });
+
+    new Setting(containerEl)
+      .setName("Ignore prefix path patterns for Move file to another folder")
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("Prefix match patterns")
+          .setValue(
+            this.plugin.settings.ignoreMoveFileToAnotherFolderPrefixPatterns
+          )
+          .onChange(async (value) => {
+            this.plugin.settings.ignoreMoveFileToAnotherFolderPrefixPatterns =
+              value;
+            await this.plugin.saveSettings();
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__ignore_path_patterns";
+        return el;
+      });
+  }
+
+  private addDebugSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "Debug" });
+
+    new Setting(containerEl)
+      .setName("Show log about performance in a console")
+      .addToggle((tc) => {
+        tc.setValue(
+          this.plugin.settings.showLogAboutPerformanceInConsole
+        ).onChange(async (value) => {
+          this.plugin.settings.showLogAboutPerformanceInConsole = value;
+          await this.plugin.saveSettings();
+        });
+      });
+  }
+
+  // deprecated
+  private addOldSearchesSettings(containerEl: HTMLElement) {
     containerEl.createEl("h3", { text: "🔍 Normal search" });
 
     new Setting(containerEl)
@@ -312,88 +420,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         el.inputEl.className =
           "another-quick-switcher__settings__ignore_path_patterns";
         return el;
-      });
-
-    containerEl.createEl("h3", { text: "📰 Header search in file" });
-
-    containerEl.createEl("h4", { text: "Hot keys in dialog" });
-
-    new Setting(containerEl).setName("↑↓").addDropdown((tc) =>
-      tc
-        .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
-        .setValue(this.plugin.settings.headerSearchKeyBindArrowUpDown)
-        .onChange(async (value) => {
-          this.plugin.settings.headerSearchKeyBindArrowUpDown =
-            value as HeaderSearchFeature;
-          await this.plugin.saveSettings();
-        })
-    );
-    new Setting(containerEl).setName("Tab / Shift+Tab").addDropdown((tc) =>
-      tc
-        .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
-        .setValue(this.plugin.settings.headerSearchKeyBindTab)
-        .onChange(async (value) => {
-          this.plugin.settings.headerSearchKeyBindTab =
-            value as HeaderSearchFeature;
-          await this.plugin.saveSettings();
-        })
-    );
-    new Setting(containerEl)
-      .setName("Ctrl+J / Ctrl+K (for Vimmer)")
-      .addDropdown((tc) =>
-        tc
-          .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
-          .setValue(this.plugin.settings.headerSearchKeyBindVim)
-          .onChange(async (value) => {
-            this.plugin.settings.headerSearchKeyBindVim =
-              value as HeaderSearchFeature;
-            await this.plugin.saveSettings();
-          })
-      );
-    new Setting(containerEl)
-      .setName("Ctrl+N / Ctrl+P (for Emacs user)")
-      .addDropdown((tc) =>
-        tc
-          .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
-          .setValue(this.plugin.settings.headerSearchKeyBindEmacs)
-          .onChange(async (value) => {
-            this.plugin.settings.headerSearchKeyBindEmacs =
-              value as HeaderSearchFeature;
-            await this.plugin.saveSettings();
-          })
-      );
-
-    containerEl.createEl("h3", { text: "📁 Move file to another folder" });
-
-    new Setting(containerEl)
-      .setName("Ignore prefix path patterns for Move file to another folder")
-      .addTextArea((tc) => {
-        const el = tc
-          .setPlaceholder("Prefix match patterns")
-          .setValue(
-            this.plugin.settings.ignoreMoveFileToAnotherFolderPrefixPatterns
-          )
-          .onChange(async (value) => {
-            this.plugin.settings.ignoreMoveFileToAnotherFolderPrefixPatterns =
-              value;
-            await this.plugin.saveSettings();
-          });
-        el.inputEl.className =
-          "another-quick-switcher__settings__ignore_path_patterns";
-        return el;
-      });
-
-    containerEl.createEl("h3", { text: "Debug" });
-
-    new Setting(containerEl)
-      .setName("Show log about performance in a console")
-      .addToggle((tc) => {
-        tc.setValue(
-          this.plugin.settings.showLogAboutPerformanceInConsole
-        ).onChange(async (value) => {
-          this.plugin.settings.showLogAboutPerformanceInConsole = value;
-          await this.plugin.saveSettings();
-        });
       });
   }
 }
