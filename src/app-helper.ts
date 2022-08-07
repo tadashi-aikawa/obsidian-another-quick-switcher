@@ -25,6 +25,10 @@ interface UnsafeAppInterface {
       };
     };
   };
+  commands: {
+    removeCommand(id: string): void;
+    commands: { [commandId: string]: any };
+  };
   plugins: {
     plugins: {
       "obsidian-hover-editor"?: {
@@ -349,6 +353,16 @@ export class AppHelper {
   isPopWindow(): boolean {
     // XXX: Hacky implementation!!
     return !fish(".modal-bg");
+  }
+
+  removeCommand(commandId: string) {
+    this.unsafeApp.commands.removeCommand(commandId);
+  }
+
+  getCommandIds(manifestId: string): string[] {
+    return Object.keys(this.unsafeApp.commands.commands).filter((x) =>
+      x.startsWith(manifestId)
+    );
   }
 
   private getPathToBeCreated(linkText: string): string {

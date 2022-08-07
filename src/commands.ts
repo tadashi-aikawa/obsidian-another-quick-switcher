@@ -9,6 +9,8 @@ import { HeaderModal } from "./ui/HeaderModal";
 import { GrepModal } from "./ui/GrepModal";
 import { existsRg } from "./utils/ripgrep";
 
+const SEARCH_COMMAND_PREFIX = "search-command";
+
 export function showSearchDialog(app: App, mode: Mode, settings: Settings) {
   const modal = new AnotherQuickSwitcherModal(app, mode, settings);
   modal.open();
@@ -151,5 +153,15 @@ export function createCommands(app: App, settings: Settings): Command[] {
         showGrepDialog(app, settings);
       },
     },
+    ...settings.searchCommands.map((command) => {
+      return {
+        id: `${SEARCH_COMMAND_PREFIX}_${command.name}`,
+        name: command.name,
+        hotkeys: [],
+        callback: () => {
+          showSearchDialog(app, "normal", settings);
+        },
+      };
+    }),
   ];
 }

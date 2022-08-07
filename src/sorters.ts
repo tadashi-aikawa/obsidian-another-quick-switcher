@@ -1,5 +1,19 @@
 import { SuggestionItem } from "./matcher";
 
+export const sortPriorityList = [
+  "Header match",
+  "Last modified",
+  "Last opened",
+  "Length",
+  "Link match",
+  "Name match",
+  "Perfect word match",
+  "Prefix name match",
+  "Star",
+  "Tag match",
+] as const;
+export type SortPriority = typeof sortPriorityList[number];
+
 export function normalSort(
   items: SuggestionItem[],
   lastOpenFileIndexByPath: { [path: string]: number }

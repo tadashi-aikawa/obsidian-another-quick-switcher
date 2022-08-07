@@ -1,13 +1,21 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import AnotherQuickSwitcher from "./main";
 import { mirrorMap } from "./utils/collection-helper";
-import { deprecate } from "util";
+import { SortPriority, sortPriorityList } from "./sorters";
 
 const headerSearchFeatureList = [
   "navigate",
   "move to next/previous hit",
 ] as const;
 export type HeaderSearchFeature = typeof headerSearchFeatureList[number];
+
+export interface SearchCommand {
+  name: string;
+  defaultInput: string;
+  modePrefix: string;
+  sortPriority: SortPriority[];
+  ignorePathPrefixPatterns: string[];
+}
 
 export interface Settings {
   searchFromHeaders: boolean;
@@ -21,6 +29,8 @@ export interface Settings {
   maxNumberOfSuggestions: number;
   normalizeAccentsAndDiacritics: boolean;
   hideGutterIcons: boolean;
+  // Searches
+  searchCommands: SearchCommand[];
   // Hotkey in search dialog
   userAltInsteadOfModForQuickResultSelection: boolean;
   // Normal search
@@ -55,6 +65,23 @@ export const DEFAULT_SETTINGS: Settings = {
   normalizeAccentsAndDiacritics: false,
   hideGutterIcons: false,
   userAltInsteadOfModForQuickResultSelection: false,
+  // Searches
+  searchCommands: [
+    {
+      name: "Custom command 1",
+      defaultInput: "",
+      modePrefix: "",
+      sortPriority: ["Name match", "Tag match"],
+      ignorePathPrefixPatterns: [],
+    },
+    {
+      name: "Custom command 2",
+      defaultInput: "",
+      modePrefix: "r",
+      sortPriority: ["Last opened", "Last modified"],
+      ignorePathPrefixPatterns: [],
+    },
+  ],
   // Normal search
   ignoreNormalPathPrefixPatterns: "",
   // Recent search
@@ -91,6 +118,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addGeneralSettings(containerEl);
     this.addAppearanceSettings(containerEl);
     this.addHotKeysInDialogSettings(containerEl);
+    this.addSearchSettings(containerEl);
     // TODO: remove
     this.addOldSearchesSettings(containerEl);
     this.addHeaderSearchSettings(containerEl);
@@ -261,6 +289,155 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             value;
           await this.plugin.saveSettings();
         });
+      });
+  }
+
+  private addSearchSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "🔍 Search commands" });
+
+    this.plugin.settings.searchCommands.forEach((command, i) => {
+      const div = createDiv({
+        cls: "another-quick-switcher__settings__search-command",
+      });
+      containerEl.append(div);
+
+      new Setting(div)
+        .setClass("another-quick-switcher__settings__search-command__header")
+        .setHeading()
+        .addText((tc) => {
+          const el = tc
+            .setPlaceholder("Command name")
+            .setValue(command.name)
+            .onChange(async (value) => {
+              this.plugin.settings.searchCommands[i].name = value;
+            });
+          el.inputEl.setAttribute("style", "text-align: left");
+          return el;
+        })
+        .addExtraButton((btn) => {
+          btn
+            .setTooltip("Delete a command")
+            .setIcon("cross")
+            .onClick(() => {
+              this.plugin.settings.searchCommands.remove(command);
+              this.display();
+            });
+          return btn;
+        });
+      new Setting(div)
+        .setName("Default input")
+        .setDesc("Default input strings when it opens the dialog")
+        .addText((tc) => {
+          const el = tc
+            .setValue(command.defaultInput)
+            .setPlaceholder("(ex: #todo )")
+            .onChange(async (value) => {
+              this.plugin.settings.searchCommands[i].defaultInput = value;
+            });
+          return el;
+        });
+      new Setting(div)
+        .setName("Mode prefix")
+        .setDesc(
+          "If it sets 'r', a query starts with ':r' means that search as this command"
+        )
+        .addText((tc) => {
+          const el = tc
+            .setValue(command.modePrefix)
+            .setPlaceholder("(ex: r)")
+            .onChange(async (value) => {
+              this.plugin.settings.searchCommands[i].modePrefix = value;
+            });
+          return el;
+        });
+
+      const df = document.createDocumentFragment();
+      df.append(
+        "Valid sort priorities refer to ",
+        createEl("a", {
+          text: "README",
+          href: "https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/blob/master/README.md#%EF%B8%8Ffeatures",
+        })
+      );
+
+      new Setting(div)
+        .setName("Sort priorities")
+        .setDesc(df)
+        .addTextArea((tc) => {
+          const el = tc
+            .setPlaceholder("Sort priority")
+            .setValue(command.sortPriority.join("\n"))
+            .onChange(async (value) => {
+              const priorities = value.split("\n");
+              this.plugin.settings.searchCommands[i].sortPriority =
+                priorities as SortPriority[];
+            });
+          el.inputEl.addClass(
+            "another-quick-switcher__settings__search-command__sort-priority"
+          );
+          return el;
+        });
+
+      new Setting(div)
+        .setName("Ignore prefix path patterns")
+        .addTextArea((tc) => {
+          const el = tc
+            .setPlaceholder("Notes/Private")
+            .setValue(command.ignorePathPrefixPatterns.join("\n"))
+            .onChange(async (value) => {
+              this.plugin.settings.searchCommands[i].ignorePathPrefixPatterns =
+                value.split("\n");
+            });
+          el.inputEl.className =
+            "another-quick-switcher__settings__ignore_path_patterns";
+
+          return el;
+        });
+    });
+
+    new Setting(containerEl)
+      .addButton((btn) => {
+        btn
+          .setButtonText("Add a command")
+          .setCta()
+          .onClick(async (ev) => {
+            this.plugin.settings.searchCommands.push({
+              name: "",
+              defaultInput: "",
+              modePrefix: "",
+              sortPriority: [],
+              ignorePathPrefixPatterns: [],
+            });
+            this.display();
+          });
+      })
+      .addButton((btn) => {
+        btn
+          .setButtonText("Save")
+          .setCta()
+          .onClick(async (_) => {
+            this.plugin.settings.searchCommands =
+              this.plugin.settings.searchCommands.filter((x) => x.name);
+
+            const invalidValues = this.plugin.settings.searchCommands
+              .flatMap((x) => x.sortPriority)
+              .filter((x) => !sortPriorityList.includes(x as SortPriority));
+            if (invalidValues.length > 0) {
+              new Notice(
+                `
+Invalid sort priorities:
+${invalidValues.map((x) => `- ${x}`).join("\n")}
+`.trim(),
+                0
+              );
+              return;
+            }
+
+            await this.plugin.saveSettings();
+            this.display();
+            this.plugin.reloadCommands();
+            new Notice("Save and reload commands");
+          });
       });
   }
 
