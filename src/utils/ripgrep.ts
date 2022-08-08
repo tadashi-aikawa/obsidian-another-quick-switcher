@@ -31,7 +31,7 @@ export interface MatchResult {
 
 export async function existsRg(): Promise<boolean> {
   return new Promise((resolve, _) => {
-    execFile("rgg", ["--version"], (error, _stdout, _stderr) => {
+    execFile("rg", ["--version"], (error, _stdout, _stderr) => {
       if (error) {
         console.dir(error);
       }
