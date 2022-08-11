@@ -106,7 +106,7 @@ export class HeaderModal
 
         const left = Math.min(
           windowWidth - modalWidth - 30,
-          leafX + leafWidth - modalWidth / 1.5
+          leafX + leafWidth / 1.5
         );
         const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
 
