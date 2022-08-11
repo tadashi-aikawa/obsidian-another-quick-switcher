@@ -1,4 +1,4 @@
-import { App, Platform, Pos, SuggestModal } from "obsidian";
+import { App, Pos, SuggestModal } from "obsidian";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { excludeFormat, smartIncludes } from "../utils/strings";

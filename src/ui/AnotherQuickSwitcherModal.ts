@@ -16,6 +16,7 @@ import { sort } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { excludeFormat } from "../utils/strings";
 import { MOD, quickResultSelectionModifier } from "src/keys";
+import { SEARCH } from "./icons";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -40,6 +41,9 @@ export class AnotherQuickSwitcherModal
 
   command: SearchCommand;
   initialCommand: SearchCommand;
+
+  searchCommandEl?: HTMLDivElement;
+  defaultInputEl?: HTMLDivElement;
 
   constructor(app: App, settings: Settings, command: SearchCommand) {
     super(app);
@@ -115,13 +119,6 @@ export class AnotherQuickSwitcherModal
     );
   }
 
-  onOpen() {
-    super.onOpen();
-    this.inputEl.value = this.command.defaultInput;
-    // Necessary to rerender suggestions
-    this.inputEl.dispatchEvent(new Event("input"));
-  }
-
   async handleCreateNew(searchQuery: string, leafType: LeafType) {
     const file = await this.appHelper.createMarkdown(this.searchQuery);
     if (!file) {
@@ -166,14 +163,37 @@ export class AnotherQuickSwitcherModal
 
     const commandByPrefix = this.settings.searchCommands
       .filter((x) => x.commandPrefix)
-      .find((x) => query.includes(x.commandPrefix));
-    if (commandByPrefix) {
-      this.command = commandByPrefix;
-      this.searchQuery = query.replace(commandByPrefix.commandPrefix, "");
-    } else {
-      this.command = this.initialCommand;
-      this.searchQuery = query;
+      .find((x) => query.startsWith(x.commandPrefix));
+
+    if (
+      (commandByPrefix || this.initialCommand !== this.command) &&
+      commandByPrefix !== this.command
+    ) {
+      this.showDebugLog(() => `beforeCommand: ${this.command.name}`);
+      this.command = commandByPrefix ?? this.initialCommand;
+      this.ignoredItems = this.ignoreItems(this.command);
+      this.showDebugLog(() => `afterCommand: ${this.command.name}`);
     }
+    this.searchQuery = query.startsWith(this.command.commandPrefix)
+      ? query.replace(this.command.commandPrefix, "")
+      : query;
+    if (this.command.defaultInput) {
+      this.searchQuery = `${this.command.defaultInput}${this.searchQuery}`;
+    }
+
+    this.searchCommandEl?.remove();
+    this.defaultInputEl?.remove();
+    this.searchCommandEl = createDiv({
+      cls: "another-quick-switcher__status__search-command",
+    });
+    this.searchCommandEl.insertAdjacentHTML("beforeend", SEARCH);
+    this.searchCommandEl.appendText(this.command.name);
+    this.defaultInputEl = createDiv({
+      text: this.command.defaultInput,
+      cls: "another-quick-switcher__status__default-input",
+    });
+    this.inputEl.before(this.searchCommandEl);
+    this.inputEl.before(this.defaultInputEl);
 
     const qs = this.searchQuery.split(" ").filter((x) => x);
 
@@ -205,16 +225,22 @@ export class AnotherQuickSwitcherModal
       return items.map((x, order) => ({ ...x, order }));
     }
 
-    if (!query.trim()) {
+    if (!this.searchQuery.trim()) {
       const results = sort(
         this.ignoredItems,
-        ["Last opened", "Last modified"],
+        this.command.sortPriorities.filter((x) =>
+          ["Last opened", "Last modified", "Star"].includes(x)
+        ),
         lastOpenFileIndexByPath
       )
         .slice(0, this.settings.maxNumberOfSuggestions)
         .map((x, order) => ({ ...x, order }));
+
       this.showDebugLog(() =>
-        buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
+        buildLogMessage(
+          `Get suggestions: ${this.searchQuery} (${this.command.name})`,
+          performance.now() - start
+        )
       );
       return results;
     }
@@ -239,7 +265,10 @@ export class AnotherQuickSwitcherModal
     );
 
     this.showDebugLog(() =>
-      buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
+      buildLogMessage(
+        `Get suggestions: ${this.searchQuery} (${this.command.name})`,
+        performance.now() - start
+      )
     );
 
     return items

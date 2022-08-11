@@ -395,7 +395,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         .setDesc(df)
         .addTextArea((tc) => {
           const el = tc
-            .setPlaceholder("Sort priority")
+            .setPlaceholder("")
             .setValue(command.sortPriorities.join("\n"))
             .onChange(async (value) => {
               const priorities = value.split("\n");
@@ -412,7 +412,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         .setName("Ignore prefix path patterns")
         .addTextArea((tc) => {
           const el = tc
-            .setPlaceholder("Notes/Private")
+            .setPlaceholder("(ex: Notes/Private)")
             .setValue(command.ignorePathPrefixPatterns.join("\n"))
             .onChange(async (value) => {
               this.plugin.settings.searchCommands[i].ignorePathPrefixPatterns =

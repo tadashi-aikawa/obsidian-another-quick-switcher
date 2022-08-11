@@ -85,6 +85,23 @@
     top: 20px;
 }
 
+.another-quick-switcher__status__search-command {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    font-size: 85%;
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-mute);
+    margin: 0 5px;
+}
+.another-quick-switcher__status__default-input {
+    font-size: 85%;
+    position: absolute;
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-muted);
+    right: 35px;
+    top: 43px;
+}
 .another-quick-switcher__item__title__header {
     line-height: 1.1em;
     display: list-item;
