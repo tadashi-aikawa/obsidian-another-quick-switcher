@@ -91,23 +91,26 @@ export class HeaderModal
       promptEl?.addClass("another-quick-switcher__header__floating-prompt");
 
       const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
+
       if (markdownView) {
-        const windowWidth = this.app.workspace.containerEl.offsetWidth;
+        const windowWidth = activeWindow.innerWidth;
+        const windowHeight = activeWindow.innerHeight;
         const modalWidth = this.modalEl.offsetWidth;
+        const modalHeight = this.modalEl.offsetHeight;
+        const {
+          x: leafX,
+          y: leafY,
+          width: leafWidth,
+        } = markdownView.containerEl.getBoundingClientRect();
+        const { y: promptY } = promptEl!.getBoundingClientRect();
 
-        const viewPadLeft =
-          markdownView.containerEl.parentElement!.offsetLeft +
-          (this.appHelper.isPopWindow()
-            ? 0
-            : this.appHelper.getLeftSideBarWidth());
-
-        const viewWidth = markdownView.containerEl.parentElement!.offsetWidth;
-
-        const x = Math.min(
-          viewPadLeft + viewWidth / 1.5,
-          windowWidth - modalWidth - 30
+        const left = Math.min(
+          windowWidth - modalWidth - 30,
+          leafX + leafWidth - modalWidth / 1.5
         );
-        promptEl?.setAttribute("style", `left: ${x}px`);
+        const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
+
+        promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);
       }
     }
 
