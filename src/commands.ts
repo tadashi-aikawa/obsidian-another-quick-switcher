@@ -70,6 +70,11 @@ export function createCommands(app: App, settings: Settings): Command[] {
         }
         showSearchDialog(app, settings, {
           isBacklinkSearch: true,
+          searchBy: {
+            tag: false,
+            header: false,
+            link: false,
+          },
           // XXX: Below are ignored
           name: "",
           defaultInput: "",

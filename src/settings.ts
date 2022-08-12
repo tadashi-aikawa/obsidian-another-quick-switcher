@@ -11,6 +11,11 @@ export type HeaderSearchFeature = typeof headerSearchFeatureList[number];
 
 export interface SearchCommand {
   name: string;
+  searchBy: {
+    tag: boolean;
+    header: boolean;
+    link: boolean;
+  };
   defaultInput: string;
   commandPrefix: string;
   sortPriorities: SortPriority[];
@@ -19,8 +24,6 @@ export interface SearchCommand {
 }
 
 export interface Settings {
-  searchFromHeaders: boolean;
-  searchByLinks: boolean;
   searchDelayMilliSeconds: number;
   showDirectory: boolean;
   showDirectoryAtNewLine: boolean;
@@ -47,9 +50,13 @@ export interface Settings {
   showLogAboutPerformanceInConsole: boolean;
 }
 
+const defaultSearchBy = () => ({
+  tag: true,
+  link: true,
+  header: true,
+});
+
 export const DEFAULT_SETTINGS: Settings = {
-  searchFromHeaders: true,
-  searchByLinks: false,
   searchDelayMilliSeconds: 0,
   showDirectory: true,
   showDirectoryAtNewLine: false,
@@ -64,6 +71,7 @@ export const DEFAULT_SETTINGS: Settings = {
   searchCommands: [
     {
       name: "Recommended search",
+      searchBy: defaultSearchBy(),
       defaultInput: "",
       commandPrefix: "",
       sortPriorities: [
@@ -83,6 +91,7 @@ export const DEFAULT_SETTINGS: Settings = {
     },
     {
       name: "Recent search",
+      searchBy: defaultSearchBy(),
       defaultInput: "",
       commandPrefix: ":r ",
       sortPriorities: [
@@ -98,6 +107,11 @@ export const DEFAULT_SETTINGS: Settings = {
     },
     {
       name: "Title search",
+      searchBy: {
+        tag: false,
+        link: false,
+        header: false,
+      },
       defaultInput: "",
       commandPrefix: ":t ",
       sortPriorities: [
@@ -113,6 +127,11 @@ export const DEFAULT_SETTINGS: Settings = {
     },
     {
       name: "Star search",
+      searchBy: {
+        tag: true,
+        link: false,
+        header: false,
+      },
       defaultInput: "",
       commandPrefix: ":s ",
       sortPriorities: ["Star", "Last opened", "Last modified"],
@@ -160,38 +179,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   }
 
   private addGeneralSettings(containerEl: HTMLElement) {
-    new Setting(containerEl).setName("Search by headers").addToggle((tc) => {
-      tc.setValue(this.plugin.settings.searchFromHeaders).onChange(
-        async (value) => {
-          this.plugin.settings.searchFromHeaders = value;
-          await this.plugin.saveSettings();
-          this.display();
-        }
-      );
-    });
-    if (this.plugin.settings.searchFromHeaders) {
-      containerEl.createEl("div", {
-        text: "⚠ If enabled, it is slower than disabled",
-        cls: "another-quick-switcher__settings__warning",
-      });
-    }
-
-    new Setting(containerEl).setName("Search by links").addToggle((tc) => {
-      tc.setValue(this.plugin.settings.searchByLinks).onChange(
-        async (value) => {
-          this.plugin.settings.searchByLinks = value;
-          await this.plugin.saveSettings();
-          this.display();
-        }
-      );
-    });
-    if (this.plugin.settings.searchByLinks) {
-      containerEl.createEl("div", {
-        text: "⚠ If enabled, it is slower than disabled",
-        cls: "another-quick-switcher__settings__warning",
-      });
-    }
-
     new Setting(containerEl)
       .setName("Search delay milli-seconds")
       .setDesc("If keyboard operation is slow, try increasing the value")
@@ -356,6 +343,43 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             });
           return btn;
         });
+
+      // For beta users
+      this.plugin.settings.searchCommands[i].searchBy ??= defaultSearchBy();
+      const cmd = this.plugin.settings.searchCommands[i];
+
+      new Setting(div)
+        .setName("Search by")
+        .addButton((bc) => {
+          const toggle = () =>
+            cmd.searchBy!.tag ? bc.setCta() : bc.removeCta();
+          bc.setButtonText("Tag").onClick(async () => {
+            cmd.searchBy!.tag = !cmd.searchBy!.tag;
+            toggle();
+          });
+          toggle();
+          return bc;
+        })
+        .addButton((bc) => {
+          const toggle = () =>
+            cmd.searchBy!.header ? bc.setCta() : bc.removeCta();
+          bc.setButtonText("Header").onClick(async () => {
+            cmd.searchBy!.header = !cmd.searchBy!.header;
+            toggle();
+          });
+          toggle();
+          return bc;
+        })
+        .addButton((bc) => {
+          const toggle = () =>
+            cmd.searchBy!.link ? bc.setCta() : bc.removeCta();
+          bc.setButtonText("Link").onClick(async () => {
+            cmd.searchBy!.link = !cmd.searchBy!.link;
+            toggle();
+          });
+          toggle();
+          return bc;
+        });
       new Setting(div)
         .setName("Default input")
         .setDesc("Default input strings when it opens the dialog")
@@ -433,6 +457,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           .onClick(async (_) => {
             this.plugin.settings.searchCommands.push({
               name: "",
+              searchBy: defaultSearchBy(),
               defaultInput: "",
               commandPrefix: "",
               sortPriorities: [],

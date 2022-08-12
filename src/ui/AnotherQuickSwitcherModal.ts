@@ -16,7 +16,7 @@ import { sort } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { excludeFormat } from "../utils/strings";
 import { MOD, quickResultSelectionModifier } from "src/keys";
-import { SEARCH } from "./icons";
+import { HEADER, LINK, SEARCH, TAG } from "./icons";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -27,6 +27,7 @@ export class AnotherQuickSwitcherModal
   implements UnsafeModalInterface<SuggestionItem>
 {
   originItems: SuggestionItem[];
+  phantomItems: SuggestionItem[];
   ignoredItems: SuggestionItem[];
   appHelper: AppHelper;
   settings: Settings;
@@ -56,7 +57,7 @@ export class AnotherQuickSwitcherModal
     this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotKeys();
 
-    const phantomItems = this.settings.showExistingFilesOnly
+    this.phantomItems = this.settings.showExistingFilesOnly
       ? []
       : this.appHelper.searchPhantomFiles().map((x) => ({
           file: x,
@@ -70,6 +71,18 @@ export class AnotherQuickSwitcherModal
           tokens: x.basename.split(" "),
         }));
 
+    this.indexingItems();
+
+    this.debounceGetSuggestions = debounce(
+      (query: string, cb: (items: SuggestionItem[]) => void) => {
+        cb(this._getSuggestions(query));
+      },
+      this.settings.searchDelayMilliSeconds,
+      true
+    );
+  }
+
+  indexingItems() {
     const starredPathMap = keyBy(
       this.appHelper.getStarredFilePaths(),
       (x) => x
@@ -87,14 +100,16 @@ export class AnotherQuickSwitcherModal
         return {
           file: x,
           aliases: parseFrontMatterAliases(cache.frontmatter) ?? [],
-          tags: uniq([
-            ...(cache.tags ?? []).map((x) => x.tag),
-            ...(parseFrontMatterTags(cache.frontmatter) ?? []),
-          ]),
-          headers: this.settings.searchFromHeaders
+          tags: this.command.searchBy.tag
+            ? uniq([
+                ...(cache.tags ?? []).map((x) => x.tag),
+                ...(parseFrontMatterTags(cache.frontmatter) ?? []),
+              ])
+            : [],
+          headers: this.command.searchBy.header
             ? (cache.headings ?? []).map((x) => excludeFormat(x.heading))
             : [],
-          links: this.settings.searchByLinks
+          links: this.command.searchBy.link
             ? uniq(cache.links?.map((x) => x.displayText ?? "") ?? [])
             : [],
           phantom: false,
@@ -107,16 +122,8 @@ export class AnotherQuickSwitcherModal
       buildLogMessage(`Indexing markdown items: `, performance.now() - start)
     );
 
-    this.originItems = [...markdownItems, ...phantomItems];
-    this.ignoredItems = this.ignoreItems(command);
-
-    this.debounceGetSuggestions = debounce(
-      (query: string, cb: (items: SuggestionItem[]) => void) => {
-        cb(this._getSuggestions(query));
-      },
-      this.settings.searchDelayMilliSeconds,
-      true
-    );
+    this.originItems = [...markdownItems, ...this.phantomItems];
+    this.ignoredItems = this.ignoreItems(this.command);
   }
 
   async handleCreateNew(searchQuery: string, leafType: LeafType) {
@@ -171,7 +178,7 @@ export class AnotherQuickSwitcherModal
     ) {
       this.showDebugLog(() => `beforeCommand: ${this.command.name}`);
       this.command = commandByPrefix ?? this.initialCommand;
-      this.ignoredItems = this.ignoreItems(this.command);
+      this.indexingItems(); // slow?
       this.showDebugLog(() => `afterCommand: ${this.command.name}`);
     }
     this.searchQuery = query.startsWith(this.command.commandPrefix)
@@ -183,11 +190,22 @@ export class AnotherQuickSwitcherModal
 
     this.searchCommandEl?.remove();
     this.defaultInputEl?.remove();
+
     this.searchCommandEl = createDiv({
       cls: "another-quick-switcher__status__search-command",
     });
     this.searchCommandEl.insertAdjacentHTML("beforeend", SEARCH);
-    this.searchCommandEl.appendText(this.command.name);
+    this.searchCommandEl.appendText(`${this.command.name} ... `);
+    if (this.command.searchBy.tag) {
+      this.searchCommandEl.insertAdjacentHTML("beforeend", TAG);
+    }
+    if (this.command.searchBy.header) {
+      this.searchCommandEl.insertAdjacentHTML("beforeend", HEADER);
+    }
+    if (this.command.searchBy.link) {
+      this.searchCommandEl.insertAdjacentHTML("beforeend", LINK);
+    }
+
     this.defaultInputEl = createDiv({
       text: this.command.defaultInput,
       cls: "another-quick-switcher__status__default-input",
@@ -250,9 +268,9 @@ export class AnotherQuickSwitcherModal
         stampMatchResults(
           x,
           qs,
-          true,
-          this.settings.searchFromHeaders,
-          this.settings.searchByLinks,
+          this.command.searchBy.tag,
+          this.command.searchBy.header,
+          this.command.searchBy.link,
           this.settings.normalizeAccentsAndDiacritics
         )
       )
