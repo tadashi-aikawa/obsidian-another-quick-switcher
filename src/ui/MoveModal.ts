@@ -1,5 +1,5 @@
 import { App, SuggestModal, TFolder } from "obsidian";
-import { ignoreItems, sorter } from "../utils/collection-helper";
+import { excludeItems, sorter } from "../utils/collection-helper";
 import { FOLDER } from "./icons";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
@@ -105,9 +105,9 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
         folder: x,
       }));
 
-    this.ignoredItems = ignoreItems(
+    this.ignoredItems = excludeItems(
       this.originItems,
-      this.settings.ignoreMoveFileToAnotherFolderPrefixPatterns,
+      this.settings.ignoreMoveFileToAnotherFolderPrefixPatterns.split("\n"),
       (x) => x.folder.path
     );
   }

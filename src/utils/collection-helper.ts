@@ -78,15 +78,24 @@ export const minBy = <T>(collection: T[], toNum: (t: T) => number) => {
   return collection.reduce(select);
 };
 
-export function ignoreItems<T>(
+export function includeItems<T>(
   items: T[],
-  patternsSeparatedLineBreak: string,
+  patterns: string[],
   toPath: (t: T) => string
 ): T[] {
-  const ps = patternsSeparatedLineBreak.split("\n").filter((x) => x);
-  return ps.length === 0
+  return patterns.length === 0
     ? items
-    : items.filter((x: T) => !ps.some((p) => toPath(x).startsWith(p)));
+    : items.filter((x: T) => patterns.some((p) => toPath(x).startsWith(p)));
+}
+
+export function excludeItems<T>(
+  items: T[],
+  patterns: string[],
+  toPath: (t: T) => string
+): T[] {
+  return patterns.length === 0
+    ? items
+    : items.filter((x: T) => !patterns.some((p) => toPath(x).startsWith(p)));
 }
 
 export function mirrorMap<T>(

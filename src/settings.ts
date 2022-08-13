@@ -19,7 +19,8 @@ export interface SearchCommand {
   defaultInput: string;
   commandPrefix: string;
   sortPriorities: SortPriority[];
-  ignorePathPrefixPatterns: string[];
+  includePrefixPathPatterns?: string[];
+  excludePrefixPathPatterns?: string[];
   isBacklinkSearch: boolean;
 }
 
@@ -86,7 +87,6 @@ export const DEFAULT_SETTINGS: Settings = {
         "Last opened",
         "Last modified",
       ],
-      ignorePathPrefixPatterns: [],
       isBacklinkSearch: false,
     },
     {
@@ -102,7 +102,6 @@ export const DEFAULT_SETTINGS: Settings = {
         "Last opened",
         "Last modified",
       ],
-      ignorePathPrefixPatterns: [],
       isBacklinkSearch: false,
     },
     {
@@ -122,7 +121,6 @@ export const DEFAULT_SETTINGS: Settings = {
         "Last opened",
         "Last modified",
       ],
-      ignorePathPrefixPatterns: [],
       isBacklinkSearch: false,
     },
     {
@@ -135,7 +133,6 @@ export const DEFAULT_SETTINGS: Settings = {
       defaultInput: "",
       commandPrefix: ":s ",
       sortPriorities: ["Star", "Last opened", "Last modified"],
-      ignorePathPrefixPatterns: [],
       isBacklinkSearch: false,
     },
   ],
@@ -315,6 +312,8 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     containerEl.createEl("h3", { text: "🔍 Search commands" });
 
     this.plugin.settings.searchCommands.forEach((command, i) => {
+      const cmd = this.plugin.settings.searchCommands[i];
+
       const div = createDiv({
         cls: "another-quick-switcher__settings__search-command",
       });
@@ -344,10 +343,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           return btn;
         });
 
-      // For beta users
       this.plugin.settings.searchCommands[i].searchBy ??= defaultSearchBy();
-      const cmd = this.plugin.settings.searchCommands[i];
-
       new Setting(div)
         .setName("Search by")
         .addButton((bc) => {
@@ -432,18 +428,43 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           return el;
         });
 
+      this.plugin.settings.searchCommands[i].includePrefixPathPatterns ??= [];
       new Setting(div)
-        .setName("Ignore prefix path patterns")
+        .setName("Include prefix path patterns")
+        .setDesc(
+          "If set, only files whose paths start with one of the patterns will be suggested."
+        )
         .addTextArea((tc) => {
           const el = tc
             .setPlaceholder("(ex: Notes/Private)")
-            .setValue(command.ignorePathPrefixPatterns.join("\n"))
+            .setValue(command.includePrefixPathPatterns!.join("\n"))
             .onChange(async (value) => {
-              this.plugin.settings.searchCommands[i].ignorePathPrefixPatterns =
-                value.split("\n");
+              this.plugin.settings.searchCommands[i].includePrefixPathPatterns =
+                value.split("\n").filter((x) => x);
             });
           el.inputEl.className =
-            "another-quick-switcher__settings__ignore_path_patterns";
+            "another-quick-switcher__settings__include_path_patterns";
+
+          return el;
+        });
+
+      this.plugin.settings.searchCommands[i].excludePrefixPathPatterns ??= [];
+      new Setting(div)
+        .setName("Exclude prefix path patterns")
+        .setDesc(
+          "If set, files whose paths start with one of the patterns will not be suggested."
+        )
+
+        .addTextArea((tc) => {
+          const el = tc
+            .setPlaceholder("(ex: Notes/Private)")
+            .setValue(command.excludePrefixPathPatterns!.join("\n"))
+            .onChange(async (value) => {
+              this.plugin.settings.searchCommands[i].excludePrefixPathPatterns =
+                value.split("\n").filter((x) => x);
+            });
+          el.inputEl.className =
+            "another-quick-switcher__settings__exclude_path_patterns";
 
           return el;
         });
@@ -461,7 +482,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
               defaultInput: "",
               commandPrefix: "",
               sortPriorities: [],
-              ignorePathPrefixPatterns: [],
               isBacklinkSearch: false,
             });
             this.display();

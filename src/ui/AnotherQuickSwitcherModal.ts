@@ -7,7 +7,12 @@ import {
   parseFrontMatterTags,
   SuggestModal,
 } from "obsidian";
-import { ignoreItems, keyBy, uniq } from "../utils/collection-helper";
+import {
+  excludeItems,
+  includeItems,
+  keyBy,
+  uniq,
+} from "../utils/collection-helper";
 import { SearchCommand, Settings } from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
@@ -123,7 +128,7 @@ export class AnotherQuickSwitcherModal
     );
 
     this.originItems = [...markdownItems, ...this.phantomItems];
-    this.ignoredItems = this.ignoreItems(this.command);
+    this.ignoredItems = this.prefilterItems(this.command);
   }
 
   async handleCreateNew(searchQuery: string, leafType: LeafType) {
@@ -138,14 +143,30 @@ export class AnotherQuickSwitcherModal
     this.close();
   }
 
-  ignoreItems(command: SearchCommand): SuggestionItem[] {
-    const _ignoreItems = (patterns: string): SuggestionItem[] =>
-      ignoreItems(this.originItems, patterns, (x) => x.file.path);
+  prefilterItems(command: SearchCommand): SuggestionItem[] {
+    const filterItems = (
+      includePatterns: string[],
+      excludePatterns: string[]
+    ): SuggestionItem[] => {
+      let items = this.originItems;
+      if (includePatterns.length > 0) {
+        items = includeItems(items, includePatterns, (x) => x.file.path);
+      }
+      if (excludePatterns.length > 0) {
+        items = excludeItems(items, excludePatterns, (x) => x.file.path);
+      }
+      return items;
+    };
 
-    // TODO: refactoring
     return command.isBacklinkSearch
-      ? _ignoreItems(this.settings.ignoreBackLinkPathPrefixPatterns)
-      : _ignoreItems(command.ignorePathPrefixPatterns.join("\n"));
+      ? filterItems(
+          [],
+          this.settings.ignoreBackLinkPathPrefixPatterns.split("\n")
+        )
+      : filterItems(
+          command.includePrefixPathPatterns ?? [],
+          command.excludePrefixPathPatterns ?? []
+        );
   }
 
   getSuggestions(query: string): SuggestionItem[] | Promise<SuggestionItem[]> {
