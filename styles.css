@@ -95,6 +95,14 @@
     margin: 0 5px;
 }
 .another-quick-switcher__status__default-input {
+    display: flex;
+    align-items: center;
+    font-size: 80%;
+    margin: 5px 0 0 20px;
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-muted);
+}
+.another-quick-switcher__status__count-input {
     font-size: 85%;
     position: absolute;
     /*noinspection CssUnresolvedCustomProperty*/

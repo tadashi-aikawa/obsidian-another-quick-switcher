@@ -21,7 +21,7 @@ import { sort } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { excludeFormat } from "../utils/strings";
 import { MOD, quickResultSelectionModifier } from "src/keys";
-import { HEADER, LINK, SEARCH, TAG } from "./icons";
+import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -50,6 +50,7 @@ export class AnotherQuickSwitcherModal
 
   searchCommandEl?: HTMLDivElement;
   defaultInputEl?: HTMLDivElement;
+  countInputEl?: HTMLDivElement;
 
   constructor(app: App, settings: Settings, command: SearchCommand) {
     super(app);
@@ -211,6 +212,7 @@ export class AnotherQuickSwitcherModal
 
     this.searchCommandEl?.remove();
     this.defaultInputEl?.remove();
+    this.countInputEl?.remove();
 
     this.searchCommandEl = createDiv({
       cls: "another-quick-switcher__status__search-command",
@@ -226,13 +228,16 @@ export class AnotherQuickSwitcherModal
     if (this.command.searchBy.link) {
       this.searchCommandEl.insertAdjacentHTML("beforeend", LINK);
     }
-
-    this.defaultInputEl = createDiv({
-      text: this.command.defaultInput,
-      cls: "another-quick-switcher__status__default-input",
-    });
     this.inputEl.before(this.searchCommandEl);
-    this.inputEl.before(this.defaultInputEl);
+
+    if (this.command.defaultInput) {
+      this.defaultInputEl = createDiv({
+        text: this.searchQuery,
+        cls: "another-quick-switcher__status__default-input",
+      });
+      this.defaultInputEl.insertAdjacentHTML("afterbegin", FILTER);
+      this.resultContainerEl.before(this.defaultInputEl);
+    }
 
     const qs = this.searchQuery.split(" ").filter((x) => x);
 
@@ -309,6 +314,15 @@ export class AnotherQuickSwitcherModal
         performance.now() - start
       )
     );
+
+    this.countInputEl = createDiv({
+      text: `${Math.min(
+        items.length,
+        this.settings.maxNumberOfSuggestions
+      )} / ${items.length}`,
+      cls: "another-quick-switcher__status__count-input",
+    });
+    this.inputEl.before(this.countInputEl);
 
     return items
       .slice(0, this.settings.maxNumberOfSuggestions)
