@@ -91,7 +91,7 @@
     align-items: center;
     font-size: 85%;
     /*noinspection CssUnresolvedCustomProperty*/
-    color: var(--text-mute);
+    color: var(--text-muted);
     margin: 0 5px;
 }
 .another-quick-switcher__status__default-input {
@@ -308,9 +308,26 @@
     width: 28px;
     height: 28px;
 }
+.another-quick-switcher__settings__search-command__search-by-button_enabled {
+    /*noinspection CssUnresolvedCustomProperty*/
+}
+.another-quick-switcher__settings__search-command__search-by-button_disabled {
+    /*noinspection CssUnresolvedCustomProperty*/
+    opacity: 0.2;
+}
+.is-mobile .another-quick-switcher__settings__search-command__search-by-button {
+    margin: 0 3px!important
+}
 
 .another-quick-switcher__settings__search-command__sort-priority {
    height: 240px;
+}
+
+.is-mobile .another-quick-switcher__settings__search-command__add-button {
+    margin: 0 3px!important
+}
+.is-mobile .another-quick-switcher__settings__search-command__save-button {
+    margin: 0 3px!important
 }
 
 .another-quick-switcher__create_button {

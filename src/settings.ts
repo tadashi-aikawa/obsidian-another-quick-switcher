@@ -345,10 +345,15 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     });
 
     new Setting(containerEl)
+      .setHeading()
       .addButton((btn) => {
         btn
-          .setButtonText("Add a command")
+          .setButtonText("Add")
+          .setTooltip("Add a new command")
           .setCta()
+          .setClass(
+            "another-quick-switcher__settings__search-command__add-button"
+          )
           .onClick(async (_) => {
             this.plugin.settings.searchCommands.push({
               name: "",
@@ -366,8 +371,14 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       })
       .addButton((btn) => {
         btn
-          .setButtonText("Save new/renamed/deleted commands")
+          .setButtonText("Save")
+          .setTooltip(
+            "It should click when creating new commands, renaming existed commands, or deleting existed commands"
+          )
           .setCta()
+          .setClass(
+            "another-quick-switcher__settings__search-command__save-button"
+          )
           .onClick(async (_) => {
             this.plugin.settings.searchCommands =
               this.plugin.settings.searchCommands.filter((x) => x.name);
@@ -449,38 +460,66 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       return;
     }
 
+    const buttonClass =
+      "another-quick-switcher__settings__search-command__search-by-button";
+    const buttonEnabledClass =
+      "another-quick-switcher__settings__search-command__search-by-button_enabled";
+    const buttonDisabledClass =
+      "another-quick-switcher__settings__search-command__search-by-button_disabled";
     new Setting(div)
       .setName("Search by")
       .addButton((bc) => {
-        const toggle = () =>
-          command.searchBy!.tag ? bc.setCta() : bc.removeCta();
-        bc.setButtonText("Tag").onClick(async () => {
-          command.searchBy!.tag = !command.searchBy!.tag;
-          toggle();
-        });
-        toggle();
+        const coloring = () => {
+          bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
+          bc.buttonEl.addClass(
+            command.searchBy!.tag ? buttonEnabledClass : buttonDisabledClass
+          );
+        };
+
+        bc.setButtonText("Tag")
+          .setClass(buttonClass)
+          .onClick(async () => {
+            command.searchBy!.tag = !command.searchBy!.tag;
+            coloring();
+          });
+        coloring();
         return bc;
       })
       .addButton((bc) => {
-        const toggle = () =>
-          command.searchBy!.header ? bc.setCta() : bc.removeCta();
-        bc.setButtonText("Header").onClick(async () => {
-          command.searchBy!.header = !command.searchBy!.header;
-          toggle();
-        });
-        toggle();
+        const coloring = () => {
+          bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
+          bc.buttonEl.addClass(
+            command.searchBy!.header ? buttonEnabledClass : buttonDisabledClass
+          );
+        };
+
+        bc.setButtonText("Header")
+          .setClass(buttonClass)
+          .onClick(async () => {
+            command.searchBy!.header = !command.searchBy!.header;
+            coloring();
+          });
+        coloring();
         return bc;
       })
       .addButton((bc) => {
-        const toggle = () =>
-          command.searchBy!.link ? bc.setCta() : bc.removeCta();
-        bc.setButtonText("Link").onClick(async () => {
-          command.searchBy!.link = !command.searchBy!.link;
-          toggle();
-        });
-        toggle();
+        const coloring = () => {
+          bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
+          bc.buttonEl.addClass(
+            command.searchBy!.link ? buttonEnabledClass : buttonDisabledClass
+          );
+        };
+
+        bc.setButtonText("Link")
+          .setClass(buttonClass)
+          .onClick(async () => {
+            command.searchBy!.link = !command.searchBy!.link;
+            coloring();
+          });
+        coloring();
         return bc;
       });
+
     new Setting(div)
       .setName("Default input")
       .setDesc("Default input strings when it opens the dialog")
@@ -492,6 +531,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             command.defaultInput = value;
           })
       );
+
     new Setting(div)
       .setName("Command prefix")
       .setDesc(
