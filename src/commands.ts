@@ -80,6 +80,9 @@ export function createCommands(app: App, settings: Settings): Command[] {
           defaultInput: "",
           commandPrefix: "",
           sortPriorities: [],
+          includePrefixPathPatterns: [],
+          excludePrefixPathPatterns: [],
+          expand: true,
         });
       },
     },

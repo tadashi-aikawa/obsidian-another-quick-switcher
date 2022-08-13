@@ -165,8 +165,8 @@ export class AnotherQuickSwitcherModal
           this.settings.ignoreBackLinkPathPrefixPatterns.split("\n")
         )
       : filterItems(
-          command.includePrefixPathPatterns ?? [],
-          command.excludePrefixPathPatterns ?? []
+          command.includePrefixPathPatterns,
+          command.excludePrefixPathPatterns
         );
   }
 

@@ -19,9 +19,10 @@ export interface SearchCommand {
   defaultInput: string;
   commandPrefix: string;
   sortPriorities: SortPriority[];
-  includePrefixPathPatterns?: string[];
-  excludePrefixPathPatterns?: string[];
+  includePrefixPathPatterns: string[];
+  excludePrefixPathPatterns: string[];
   isBacklinkSearch: boolean;
+  expand: boolean;
 }
 
 export interface Settings {
@@ -87,6 +88,9 @@ export const DEFAULT_SETTINGS: Settings = {
         "Last opened",
         "Last modified",
       ],
+      includePrefixPathPatterns: [],
+      excludePrefixPathPatterns: [],
+      expand: true,
       isBacklinkSearch: false,
     },
     {
@@ -102,6 +106,9 @@ export const DEFAULT_SETTINGS: Settings = {
         "Last opened",
         "Last modified",
       ],
+      includePrefixPathPatterns: [],
+      excludePrefixPathPatterns: [],
+      expand: false,
       isBacklinkSearch: false,
     },
     {
@@ -121,6 +128,9 @@ export const DEFAULT_SETTINGS: Settings = {
         "Last opened",
         "Last modified",
       ],
+      includePrefixPathPatterns: [],
+      excludePrefixPathPatterns: [],
+      expand: false,
       isBacklinkSearch: false,
     },
     {
@@ -133,6 +143,9 @@ export const DEFAULT_SETTINGS: Settings = {
       defaultInput: "",
       commandPrefix: ":s ",
       sortPriorities: ["Star", "Last opened", "Last modified"],
+      includePrefixPathPatterns: [],
+      excludePrefixPathPatterns: [],
+      expand: false,
       isBacklinkSearch: false,
     },
   ],
@@ -163,6 +176,8 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Another Quick Switcher - Settings" });
 
+    this.fillEmptyRequiredValues();
+
     this.addGeneralSettings(containerEl);
     this.addAppearanceSettings(containerEl);
     this.addHotKeysInDialogSettings(containerEl);
@@ -173,6 +188,17 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addMoveSettings(containerEl);
 
     this.addDebugSettings(containerEl);
+  }
+
+  private fillEmptyRequiredValues() {
+    this.plugin.settings.searchCommands.forEach((_, i) => {
+      const command = this.plugin.settings.searchCommands[i];
+
+      command.searchBy ??= defaultSearchBy();
+      command.includePrefixPathPatterns ??= [];
+      command.excludePrefixPathPatterns ??= [];
+      command.expand ??= true;
+    });
   }
 
   private addGeneralSettings(containerEl: HTMLElement) {
@@ -311,163 +337,11 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   private addSearchSettings(containerEl: HTMLElement) {
     containerEl.createEl("h3", { text: "🔍 Search commands" });
 
-    this.plugin.settings.searchCommands.forEach((command, i) => {
-      const cmd = this.plugin.settings.searchCommands[i];
-
-      const div = createDiv({
-        cls: "another-quick-switcher__settings__search-command",
-      });
-      containerEl.append(div);
-
-      new Setting(div)
-        .setClass("another-quick-switcher__settings__search-command__header")
-        .setHeading()
-        .addText((tc) => {
-          const el = tc
-            .setPlaceholder("Command name")
-            .setValue(command.name)
-            .onChange(async (value) => {
-              this.plugin.settings.searchCommands[i].name = value;
-            });
-          el.inputEl.setAttribute("style", "text-align: left");
-          return el;
-        })
-        .addExtraButton((btn) => {
-          btn
-            .setTooltip("Delete a command")
-            .setIcon("cross")
-            .onClick(() => {
-              this.plugin.settings.searchCommands.remove(command);
-              this.display();
-            });
-          return btn;
-        });
-
-      this.plugin.settings.searchCommands[i].searchBy ??= defaultSearchBy();
-      new Setting(div)
-        .setName("Search by")
-        .addButton((bc) => {
-          const toggle = () =>
-            cmd.searchBy!.tag ? bc.setCta() : bc.removeCta();
-          bc.setButtonText("Tag").onClick(async () => {
-            cmd.searchBy!.tag = !cmd.searchBy!.tag;
-            toggle();
-          });
-          toggle();
-          return bc;
-        })
-        .addButton((bc) => {
-          const toggle = () =>
-            cmd.searchBy!.header ? bc.setCta() : bc.removeCta();
-          bc.setButtonText("Header").onClick(async () => {
-            cmd.searchBy!.header = !cmd.searchBy!.header;
-            toggle();
-          });
-          toggle();
-          return bc;
-        })
-        .addButton((bc) => {
-          const toggle = () =>
-            cmd.searchBy!.link ? bc.setCta() : bc.removeCta();
-          bc.setButtonText("Link").onClick(async () => {
-            cmd.searchBy!.link = !cmd.searchBy!.link;
-            toggle();
-          });
-          toggle();
-          return bc;
-        });
-      new Setting(div)
-        .setName("Default input")
-        .setDesc("Default input strings when it opens the dialog")
-        .addText((tc) =>
-          tc
-            .setValue(command.defaultInput)
-            .setPlaceholder("(ex: #todo )")
-            .onChange(async (value) => {
-              this.plugin.settings.searchCommands[i].defaultInput = value;
-            })
-        );
-      new Setting(div)
-        .setName("Command prefix")
-        .setDesc(
-          "For example, if it sets ':r ', a query starts with ':r ' means that search as this command"
-        )
-        .addText((tc) =>
-          tc
-            .setValue(command.commandPrefix)
-            .setPlaceholder("(ex: :r )")
-            .onChange(async (value) => {
-              this.plugin.settings.searchCommands[i].commandPrefix = value;
-            })
-        );
-
-      const df = document.createDocumentFragment();
-      df.append(
-        "Valid sort priorities refer to ",
-        createEl("a", {
-          text: "README",
-          href: "https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/blob/master/README.md#%EF%B8%8Ffeatures",
-        })
+    this.plugin.settings.searchCommands.forEach((_, i) => {
+      this.addSearchCommandSetting(
+        containerEl,
+        this.plugin.settings.searchCommands[i]
       );
-
-      new Setting(div)
-        .setName("Sort priorities")
-        .setDesc(df)
-        .addTextArea((tc) => {
-          const el = tc
-            .setPlaceholder("")
-            .setValue(command.sortPriorities.join("\n"))
-            .onChange(async (value) => {
-              const priorities = value.split("\n");
-              this.plugin.settings.searchCommands[i].sortPriorities =
-                priorities as SortPriority[];
-            });
-          el.inputEl.addClass(
-            "another-quick-switcher__settings__search-command__sort-priority"
-          );
-          return el;
-        });
-
-      this.plugin.settings.searchCommands[i].includePrefixPathPatterns ??= [];
-      new Setting(div)
-        .setName("Include prefix path patterns")
-        .setDesc(
-          "If set, only files whose paths start with one of the patterns will be suggested."
-        )
-        .addTextArea((tc) => {
-          const el = tc
-            .setPlaceholder("(ex: Notes/Private)")
-            .setValue(command.includePrefixPathPatterns!.join("\n"))
-            .onChange(async (value) => {
-              this.plugin.settings.searchCommands[i].includePrefixPathPatterns =
-                value.split("\n").filter((x) => x);
-            });
-          el.inputEl.className =
-            "another-quick-switcher__settings__include_path_patterns";
-
-          return el;
-        });
-
-      this.plugin.settings.searchCommands[i].excludePrefixPathPatterns ??= [];
-      new Setting(div)
-        .setName("Exclude prefix path patterns")
-        .setDesc(
-          "If set, files whose paths start with one of the patterns will not be suggested."
-        )
-
-        .addTextArea((tc) => {
-          const el = tc
-            .setPlaceholder("(ex: Notes/Private)")
-            .setValue(command.excludePrefixPathPatterns!.join("\n"))
-            .onChange(async (value) => {
-              this.plugin.settings.searchCommands[i].excludePrefixPathPatterns =
-                value.split("\n").filter((x) => x);
-            });
-          el.inputEl.className =
-            "another-quick-switcher__settings__exclude_path_patterns";
-
-          return el;
-        });
     });
 
     new Setting(containerEl)
@@ -482,6 +356,9 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
               defaultInput: "",
               commandPrefix: "",
               sortPriorities: [],
+              includePrefixPathPatterns: [],
+              excludePrefixPathPatterns: [],
+              expand: true,
               isBacklinkSearch: false,
             });
             this.display();
@@ -489,7 +366,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       })
       .addButton((btn) => {
         btn
-          .setButtonText("Save")
+          .setButtonText("Save new/renamed/deleted commands")
           .setCta()
           .onClick(async (_) => {
             this.plugin.settings.searchCommands =
@@ -516,6 +393,184 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             // noinspection ObjectAllocationIgnored
             new Notice("Save and reload commands");
           });
+      });
+  }
+
+  private addSearchCommandSetting(
+    containerEl: HTMLElement,
+    command: SearchCommand
+  ) {
+    const div = createDiv({
+      cls: "another-quick-switcher__settings__search-command",
+    });
+    containerEl.append(div);
+
+    new Setting(div)
+      .setClass("another-quick-switcher__settings__search-command__header")
+      .setHeading()
+      .addText((tc) => {
+        const el = tc
+          .setPlaceholder("Command name")
+          .setValue(command.name)
+          .onChange(async (value) => {
+            command.name = value;
+          });
+        el.inputEl.setAttribute("style", "text-align: left");
+        return el;
+      })
+      .addExtraButton((btn) => {
+        btn
+          .setTooltip("Delete a command (!! it will never be restored !!)")
+          .setIcon("trash-2")
+          .onClick(() => {
+            this.plugin.settings.searchCommands.remove(command);
+            this.display();
+          });
+        btn.extraSettingsEl.addClass(
+          "another-quick-switcher__settings__search-command__header__delete"
+        );
+        return btn;
+      })
+      .addExtraButton((btn) => {
+        btn
+          .setIcon(command.expand ? "chevron-up" : "chevron-down")
+          .setTooltip(command.expand ? "fold" : "unfold")
+          .onClick(() => {
+            command.expand = !command.expand;
+            this.display();
+          });
+        btn.extraSettingsEl.addClass(
+          "another-quick-switcher__settings__search-command__header__fold-button"
+        );
+        return btn;
+      });
+
+    if (!command.expand) {
+      return;
+    }
+
+    new Setting(div)
+      .setName("Search by")
+      .addButton((bc) => {
+        const toggle = () =>
+          command.searchBy!.tag ? bc.setCta() : bc.removeCta();
+        bc.setButtonText("Tag").onClick(async () => {
+          command.searchBy!.tag = !command.searchBy!.tag;
+          toggle();
+        });
+        toggle();
+        return bc;
+      })
+      .addButton((bc) => {
+        const toggle = () =>
+          command.searchBy!.header ? bc.setCta() : bc.removeCta();
+        bc.setButtonText("Header").onClick(async () => {
+          command.searchBy!.header = !command.searchBy!.header;
+          toggle();
+        });
+        toggle();
+        return bc;
+      })
+      .addButton((bc) => {
+        const toggle = () =>
+          command.searchBy!.link ? bc.setCta() : bc.removeCta();
+        bc.setButtonText("Link").onClick(async () => {
+          command.searchBy!.link = !command.searchBy!.link;
+          toggle();
+        });
+        toggle();
+        return bc;
+      });
+    new Setting(div)
+      .setName("Default input")
+      .setDesc("Default input strings when it opens the dialog")
+      .addText((tc) =>
+        tc
+          .setValue(command.defaultInput)
+          .setPlaceholder("(ex: #todo )")
+          .onChange(async (value) => {
+            command.defaultInput = value;
+          })
+      );
+    new Setting(div)
+      .setName("Command prefix")
+      .setDesc(
+        "For example, if it sets ':r ', a query starts with ':r ' means that search as this command"
+      )
+      .addText((tc) =>
+        tc
+          .setValue(command.commandPrefix)
+          .setPlaceholder("(ex: :r )")
+          .onChange(async (value) => {
+            command.commandPrefix = value;
+          })
+      );
+
+    const df = document.createDocumentFragment();
+    df.append(
+      "Valid sort priorities refer to ",
+      createEl("a", {
+        text: "README",
+        href: "https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/blob/master/README.md#%EF%B8%8Ffeatures",
+      })
+    );
+
+    new Setting(div)
+      .setName("Sort priorities")
+      .setDesc(df)
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("")
+          .setValue(command.sortPriorities.join("\n"))
+          .onChange(async (value) => {
+            const priorities = value.split("\n");
+            command.sortPriorities = priorities as SortPriority[];
+          });
+        el.inputEl.addClass(
+          "another-quick-switcher__settings__search-command__sort-priority"
+        );
+        return el;
+      });
+
+    new Setting(div)
+      .setName("Include prefix path patterns")
+      .setDesc(
+        "If set, only files whose paths start with one of the patterns will be suggested."
+      )
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("(ex: Notes/Private)")
+          .setValue(command.includePrefixPathPatterns!.join("\n"))
+          .onChange(async (value) => {
+            command.includePrefixPathPatterns = value
+              .split("\n")
+              .filter((x) => x);
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__include_path_patterns";
+
+        return el;
+      });
+
+    new Setting(div)
+      .setName("Exclude prefix path patterns")
+      .setDesc(
+        "If set, files whose paths start with one of the patterns will not be suggested."
+      )
+
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("(ex: Notes/Private)")
+          .setValue(command.excludePrefixPathPatterns!.join("\n"))
+          .onChange(async (value) => {
+            command.excludePrefixPathPatterns = value
+              .split("\n")
+              .filter((x) => x);
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__exclude_path_patterns";
+
+        return el;
       });
   }
 

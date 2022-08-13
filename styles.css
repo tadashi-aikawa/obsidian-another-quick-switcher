@@ -281,21 +281,32 @@
     /*noinspection CssUnresolvedCustomProperty*/
     border: solid 1px var(--text-muted);
     border-radius: 10px;
-    padding: 30px 30px 0 30px;
+    padding: 20px 25px 0 20px;
     margin: 15px;
 }
 
 .another-quick-switcher__settings__search-command__header .setting-item-control {
     justify-content: left;
-    /*noinspection CssUnresolvedCustomProperty*/
-    border-bottom: solid 2px var(--text-muted);
-    padding-bottom: 10px;
+    padding-bottom: 20px;
 }
 
 .another-quick-switcher__settings__search-command__header .setting-item-control:before {
     content: "⌨";
     font-size: 28px;
     margin-right: 8px;
+}
+
+.another-quick-switcher__settings__search-command__header__delete > svg {
+    width: 24px;
+    height: 24px;
+}
+
+.another-quick-switcher__settings__search-command__header__fold-button {
+    margin-left: auto;
+}
+.another-quick-switcher__settings__search-command__header__fold-button > svg {
+    width: 28px;
+    height: 28px;
 }
 
 .another-quick-switcher__settings__search-command__sort-priority {
