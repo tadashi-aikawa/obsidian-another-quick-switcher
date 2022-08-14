@@ -215,34 +215,7 @@ export class AnotherQuickSwitcherModal
       this.searchQuery = `${this.command.defaultInput}${this.searchQuery}`;
     }
 
-    this.searchCommandEl?.remove();
-    this.defaultInputEl?.remove();
-    this.countInputEl?.remove();
-
-    this.searchCommandEl = createDiv({
-      cls: "another-quick-switcher__status__search-command",
-    });
-    this.searchCommandEl.insertAdjacentHTML("beforeend", SEARCH);
-    this.searchCommandEl.appendText(`${this.command.name} ... `);
-    if (this.command.searchBy.tag) {
-      this.searchCommandEl.insertAdjacentHTML("beforeend", TAG);
-    }
-    if (this.command.searchBy.header) {
-      this.searchCommandEl.insertAdjacentHTML("beforeend", HEADER);
-    }
-    if (this.command.searchBy.link) {
-      this.searchCommandEl.insertAdjacentHTML("beforeend", LINK);
-    }
-    this.inputEl.before(this.searchCommandEl);
-
-    if (this.command.defaultInput) {
-      this.defaultInputEl = createDiv({
-        text: this.searchQuery,
-        cls: "another-quick-switcher__status__default-input",
-      });
-      this.defaultInputEl.insertAdjacentHTML("afterbegin", FILTER);
-      this.resultContainerEl.before(this.defaultInputEl);
-    }
+    this.renderInputComponent();
 
     const qs = this.searchQuery.split(" ").filter((x) => x);
 
@@ -332,6 +305,37 @@ export class AnotherQuickSwitcherModal
     return items
       .slice(0, this.settings.maxNumberOfSuggestions)
       .map((x, order) => ({ ...x, order }));
+  }
+
+  renderInputComponent() {
+    this.searchCommandEl?.remove();
+    this.defaultInputEl?.remove();
+    this.countInputEl?.remove();
+
+    this.searchCommandEl = createDiv({
+      cls: "another-quick-switcher__status__search-command",
+    });
+    this.searchCommandEl.insertAdjacentHTML("beforeend", SEARCH);
+    this.searchCommandEl.appendText(`${this.command.name} ... `);
+    if (this.command.searchBy.tag) {
+      this.searchCommandEl.insertAdjacentHTML("beforeend", TAG);
+    }
+    if (this.command.searchBy.header) {
+      this.searchCommandEl.insertAdjacentHTML("beforeend", HEADER);
+    }
+    if (this.command.searchBy.link) {
+      this.searchCommandEl.insertAdjacentHTML("beforeend", LINK);
+    }
+    this.inputEl.before(this.searchCommandEl);
+
+    if (this.command.defaultInput) {
+      this.defaultInputEl = createDiv({
+        text: this.searchQuery,
+        cls: "another-quick-switcher__status__default-input",
+      });
+      this.defaultInputEl.insertAdjacentHTML("afterbegin", FILTER);
+      this.resultContainerEl.before(this.defaultInputEl);
+    }
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
