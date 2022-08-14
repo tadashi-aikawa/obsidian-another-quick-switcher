@@ -1,17 +1,18 @@
-import {
-  App,
-  debounce,
-  Debouncer,
-  normalizePath,
-  SuggestModal,
-  TFile,
-} from "obsidian";
+import { App, normalizePath, SuggestModal, TFile } from "obsidian";
 import { Settings } from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { rg } from "../utils/ripgrep";
 import { MOD, quickResultSelectionModifier } from "../keys";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
+
+let globalInternalStorage: {
+  items: SuggestionItem[];
+  selected?: number;
+} = {
+  items: [],
+  selected: undefined,
+};
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -32,32 +33,30 @@ interface SuggestionItem {
   }[];
 }
 
-export class GrepModal extends SuggestModal<SuggestionItem> {
+export class GrepModal
+  extends SuggestModal<SuggestionItem>
+  implements UnsafeModalInterface<SuggestionItem>
+{
   appHelper: AppHelper;
   settings: Settings;
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
   currentQuery: string;
+  suggestions: SuggestionItem[];
+  triggerManually: boolean;
 
-  debounceGetSuggestions: Debouncer<
-    [string, (items: SuggestionItem[]) => void]
-  >;
+  countInputEl?: HTMLDivElement;
 
   constructor(app: App, settings: Settings) {
     super(app);
+    this.emptyStateText = "Search around the vault by TAB key";
+    this.suggestions = globalInternalStorage.items;
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
     this.limit = 255;
 
     this.setHotKeys();
-    this.debounceGetSuggestions = debounce(
-      async (query: string, cb: (items: SuggestionItem[]) => void) => {
-        cb(await this._getSuggestions(query));
-      },
-      250,
-      true
-    );
   }
 
   onOpen() {
@@ -68,15 +67,28 @@ export class GrepModal extends SuggestModal<SuggestionItem> {
 
     const promptEl = activeWindow.activeDocument.querySelector(".prompt");
     promptEl?.addClass("another-quick-switcher__grep__floating-prompt");
+    window.setTimeout(() => {
+      if (globalInternalStorage.selected != null) {
+        this.chooser.setSelectedItem(globalInternalStorage.selected!, true);
+      }
+    }, 0);
   }
 
-  async _getSuggestions(query: string): Promise<SuggestionItem[]> {
+  onClose() {
+    super.onClose();
+    globalInternalStorage.items = this.suggestions;
+    globalInternalStorage.selected = this.chooser.selectedItem;
+  }
+
+  async searchSuggestions(query: string): Promise<SuggestionItem[]> {
     const start = performance.now();
 
-    const loadingEl = createSpan({
-      cls: "another-quick-switcher__header__floating-prompt__loading",
+    this.countInputEl?.remove();
+    this.countInputEl = createDiv({
+      text: "searching...",
+      cls: "another-quick-switcher__grep__count-input",
     });
-    this.inputEl.after(loadingEl);
+    this.inputEl.before(this.countInputEl);
 
     const hasCapitalLetter = query.toLowerCase() !== query;
 
@@ -107,21 +119,26 @@ export class GrepModal extends SuggestModal<SuggestionItem> {
       buildLogMessage(`getSuggestions: `, performance.now() - start)
     );
 
-    loadingEl.remove();
     return items;
   }
 
   async getSuggestions(query: string): Promise<SuggestionItem[]> {
     this.currentQuery = query;
-    if (!query) {
-      return [];
+    if (this.triggerManually) {
+      this.triggerManually = false;
+      this.suggestions = await this.searchSuggestions(query);
     }
 
-    return new Promise((resolve) => {
-      this.debounceGetSuggestions(query, (items) => {
-        resolve(items);
-      });
+    this.countInputEl?.remove();
+    this.countInputEl = createDiv({
+      text: `${Math.min(this.suggestions.length, this.limit)} / ${
+        this.suggestions.length
+      }`,
+      cls: "another-quick-switcher__grep__count-input",
     });
+    this.inputEl.before(this.countInputEl);
+
+    return this.suggestions;
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
@@ -302,6 +319,13 @@ export class GrepModal extends SuggestModal<SuggestionItem> {
       this.appHelper.openMarkdownFile(item.file, {
         line: item.lineNumber - 1,
       });
+    });
+
+    this.scope.register([], "Tab", () => {
+      this.triggerManually = true;
+      // Necessary to rerender suggestions
+      this.inputEl.dispatchEvent(new Event("input"));
+      return false;
     });
   }
 }
