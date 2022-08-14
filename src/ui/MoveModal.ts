@@ -135,7 +135,10 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
     const itemDiv = createDiv({
-      cls: "another-quick-switcher__item",
+      cls: [
+        "another-quick-switcher__item",
+        "another-quick-switcher__directory_item",
+      ],
     });
 
     const entryDiv = createDiv({
@@ -154,12 +157,6 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
     directoryDiv.appendText(` ${item.folder.parent.name}`);
     entryDiv.appendChild(directoryDiv);
-
-    const prefixIcon = createSpan({
-      cls: "another-quick-switcher__item__icon",
-    });
-    prefixIcon.insertAdjacentHTML("beforeend", FOLDER);
-    itemDiv.appendChild(prefixIcon);
 
     itemDiv.appendChild(entryDiv);
 
