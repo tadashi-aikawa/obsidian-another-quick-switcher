@@ -227,22 +227,24 @@ export class GrepModal extends SuggestModal<SuggestionItem> {
       this.settings.userAltInsteadOfModForQuickResultSelection
     );
 
-    this.setInstructions([
-      {
-        command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
-        purpose: "navigate",
-      },
-      { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
-      { command: `[${MOD} d]`, purpose: "clear input" },
-      { command: "[↵]", purpose: "open" },
-      { command: `[${MOD} ↵]`, purpose: "open in new pane" },
-      { command: `[${MOD} -]`, purpose: "open in new pane (horizontal)" },
-      { command: `[${MOD} shift -]`, purpose: "open in new pane (vertical)" },
-      { command: `[${MOD} o]`, purpose: "open in new window" },
-      { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
-      { command: `[${MOD} ,]`, purpose: "preview" },
-      { command: "[esc]", purpose: "dismiss" },
-    ]);
+    if (!this.settings.hideHotkeyGuides) {
+      this.setInstructions([
+        {
+          command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
+          purpose: "navigate",
+        },
+        { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
+        { command: `[${MOD} d]`, purpose: "clear input" },
+        { command: "[↵]", purpose: "open" },
+        { command: `[${MOD} ↵]`, purpose: "open in new pane" },
+        { command: `[${MOD} -]`, purpose: "open in new pane (horizontal)" },
+        { command: `[${MOD} shift -]`, purpose: "open in new pane (vertical)" },
+        { command: `[${MOD} o]`, purpose: "open in new window" },
+        { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
+        { command: `[${MOD} ,]`, purpose: "preview" },
+        { command: "[esc]", purpose: "dismiss" },
+      ]);
+    }
 
     this.scope.register(["Mod"], "Enter", () =>
       this.chooser.useSelectedItem({ metaKey: true })

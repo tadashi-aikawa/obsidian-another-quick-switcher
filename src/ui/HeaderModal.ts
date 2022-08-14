@@ -201,27 +201,29 @@ export class HeaderModal
   }
 
   bindHotKeys() {
-    this.setInstructions([
-      {
-        command: "[↑↓]",
-        purpose: this.settings.headerSearchKeyBindArrowUpDown,
-      },
-      {
-        command: "[tab or shift tab]",
-        purpose: this.settings.headerSearchKeyBindTab,
-      },
-      {
-        command: `[${MOD} j or k]`,
-        purpose: this.settings.headerSearchKeyBindVim,
-      },
-      {
-        command: `[${MOD} n or p]`,
-        purpose: this.settings.headerSearchKeyBindEmacs,
-      },
-      { command: `[${MOD} d]`, purpose: "clear input" },
-      { command: "[↵]", purpose: "move to header" },
-      { command: "[esc]", purpose: "dismiss" },
-    ]);
+    if (!this.settings.hideHotkeyGuides) {
+      this.setInstructions([
+        {
+          command: "[↑↓]",
+          purpose: this.settings.headerSearchKeyBindArrowUpDown,
+        },
+        {
+          command: "[tab or shift tab]",
+          purpose: this.settings.headerSearchKeyBindTab,
+        },
+        {
+          command: `[${MOD} j or k]`,
+          purpose: this.settings.headerSearchKeyBindVim,
+        },
+        {
+          command: `[${MOD} n or p]`,
+          purpose: this.settings.headerSearchKeyBindEmacs,
+        },
+        { command: `[${MOD} d]`, purpose: "clear input" },
+        { command: "[↵]", purpose: "move to header" },
+        { command: "[esc]", purpose: "dismiss" },
+      ]);
+    }
 
     this.scope.register(["Mod"], "D", () => {
       this.inputEl.value = "";

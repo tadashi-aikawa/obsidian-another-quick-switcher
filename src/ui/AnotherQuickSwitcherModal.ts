@@ -431,29 +431,31 @@ export class AnotherQuickSwitcherModal
       this.settings.userAltInsteadOfModForQuickResultSelection
     );
 
-    this.setInstructions([
-      {
-        command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
-        purpose: "navigate",
-      },
-      { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
-      { command: `[${MOD} d]`, purpose: "clear input" },
-      { command: "[tab]", purpose: "replace input" },
-      { command: "[↵]", purpose: "open" },
-      { command: `[${MOD} ↵]`, purpose: "open in new pane" },
-      { command: `[${MOD} -]`, purpose: "open in new pane (horizontal)" },
-      { command: `[${MOD} shift -]`, purpose: "open in new pane (vertical)" },
-      { command: `[${MOD} o]`, purpose: "open in new window" },
-      { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
-      { command: "[shift ↵]", purpose: "create" },
-      { command: `[${MOD} shift ↵]`, purpose: "create in new pane" },
-      { command: `[${MOD} shift o]`, purpose: "create in new window" },
-      { command: `[${MOD} shift alt ↵]`, purpose: "create in popup" },
-      { command: `[${MOD} ]]`, purpose: "open first URL" },
-      { command: "[alt ↵]", purpose: "insert to editor" },
-      { command: "[alt shift ↵]", purpose: "insert all to editor" },
-      { command: "[esc]", purpose: "dismiss" },
-    ]);
+    if (!this.settings.hideHotkeyGuides) {
+      this.setInstructions([
+        {
+          command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
+          purpose: "navigate",
+        },
+        { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
+        { command: `[${MOD} d]`, purpose: "clear input" },
+        { command: "[tab]", purpose: "replace input" },
+        { command: "[↵]", purpose: "open" },
+        { command: `[${MOD} ↵]`, purpose: "open in new pane" },
+        { command: `[${MOD} -]`, purpose: "open in new pane (horizontal)" },
+        { command: `[${MOD} shift -]`, purpose: "open in new pane (vertical)" },
+        { command: `[${MOD} o]`, purpose: "open in new window" },
+        { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
+        { command: "[shift ↵]", purpose: "create" },
+        { command: `[${MOD} shift ↵]`, purpose: "create in new pane" },
+        { command: `[${MOD} shift o]`, purpose: "create in new window" },
+        { command: `[${MOD} shift alt ↵]`, purpose: "create in popup" },
+        { command: `[${MOD} ]]`, purpose: "open first URL" },
+        { command: "[alt ↵]", purpose: "insert to editor" },
+        { command: "[alt shift ↵]", purpose: "insert all to editor" },
+        { command: "[esc]", purpose: "dismiss" },
+      ]);
+    }
 
     this.scope.register(["Mod"], "Enter", () =>
       this.chooser.useSelectedItem({ metaKey: true })

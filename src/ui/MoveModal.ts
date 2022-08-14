@@ -92,11 +92,13 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     this.appHelper = new AppHelper(app);
     this.settings = settings;
 
-    this.setInstructions([
-      { command: "[↑↓]", purpose: "navigate" },
-      { command: "[↵]", purpose: "move to" },
-      { command: "[esc]", purpose: "dismiss" },
-    ]);
+    if (!this.settings.hideHotkeyGuides) {
+      this.setInstructions([
+        { command: "[↑↓]", purpose: "navigate" },
+        { command: "[↵]", purpose: "move to" },
+        { command: "[esc]", purpose: "dismiss" },
+      ]);
+    }
 
     this.originItems = this.appHelper
       .getFolders()

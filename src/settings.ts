@@ -36,6 +36,7 @@ export interface Settings {
   showAliasesOnTop: boolean;
   showExistingFilesOnly: boolean;
   hideGutterIcons: boolean;
+  hideHotkeyGuides: boolean;
   // Hotkey in search dialog
   userAltInsteadOfModForQuickResultSelection: boolean;
   // Searches
@@ -70,6 +71,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showAliasesOnTop: false,
   showExistingFilesOnly: false,
   hideGutterIcons: false,
+  hideHotkeyGuides: false,
   // Hot keys in dialog
   userAltInsteadOfModForQuickResultSelection: false,
   // Searches
@@ -193,7 +195,12 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addDebugSettings(containerEl);
   }
 
+  /**
+   * For backward compatibilities
+   */
   private fillEmptyRequiredValues() {
+    this.plugin.settings.hideHotkeyGuides ??= false;
+
     this.plugin.settings.searchCommands.forEach((_, i) => {
       const command = this.plugin.settings.searchCommands[i];
 
@@ -313,6 +320,15 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       tc.setValue(this.plugin.settings.hideGutterIcons).onChange(
         async (value) => {
           this.plugin.settings.hideGutterIcons = value;
+          await this.plugin.saveSettings();
+        }
+      );
+    });
+
+    new Setting(containerEl).setName("Hide hotkey guides").addToggle((tc) => {
+      tc.setValue(this.plugin.settings.hideHotkeyGuides).onChange(
+        async (value) => {
+          this.plugin.settings.hideHotkeyGuides = value;
           await this.plugin.saveSettings();
         }
       );
