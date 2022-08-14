@@ -2,6 +2,7 @@ import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import AnotherQuickSwitcher from "./main";
 import { mirrorMap } from "./utils/collection-helper";
 import { SortPriority, sortPriorityList } from "./sorters";
+import { smartLineBreakSplit } from "./utils/strings";
 
 const headerSearchFeatureList = [
   "navigate",
@@ -42,14 +43,14 @@ export interface Settings {
   // Searches
   searchCommands: SearchCommand[];
   // Back link search
-  ignoreBackLinkPathPrefixPatterns: string;
+  backLinkExcludePrefixPathPatterns: string[];
   // Header search in file
   headerSearchKeyBindArrowUpDown: HeaderSearchFeature;
   headerSearchKeyBindTab: HeaderSearchFeature;
   headerSearchKeyBindVim: HeaderSearchFeature;
   headerSearchKeyBindEmacs: HeaderSearchFeature;
   // Move file to another folder
-  ignoreMoveFileToAnotherFolderPrefixPatterns: string;
+  moveFileExcludePrefixPathPatterns: string[];
   // debug
   showLogAboutPerformanceInConsole: boolean;
 }
@@ -155,14 +156,14 @@ export const DEFAULT_SETTINGS: Settings = {
     },
   ],
   // Back link search
-  ignoreBackLinkPathPrefixPatterns: "",
+  backLinkExcludePrefixPathPatterns: [],
   // Header search in file
   headerSearchKeyBindArrowUpDown: "navigate",
   headerSearchKeyBindTab: "move to next/previous hit",
   headerSearchKeyBindVim: "navigate",
   headerSearchKeyBindEmacs: "navigate",
   // Move file to another folder
-  ignoreMoveFileToAnotherFolderPrefixPatterns: "",
+  moveFileExcludePrefixPathPatterns: [],
   // debug
   showLogAboutPerformanceInConsole: false,
 };
@@ -200,6 +201,8 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
    */
   private fillEmptyRequiredValues() {
     this.plugin.settings.hideHotkeyGuides ??= false;
+    this.plugin.settings.backLinkExcludePrefixPathPatterns ??= [];
+    this.plugin.settings.moveFileExcludePrefixPathPatterns ??= [];
 
     this.plugin.settings.searchCommands.forEach((_, i) => {
       const command = this.plugin.settings.searchCommands[i];
@@ -582,7 +585,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setPlaceholder("")
           .setValue(command.sortPriorities.join("\n"))
           .onChange(async (value) => {
-            const priorities = value.split("\n");
+            const priorities = smartLineBreakSplit(value);
             command.sortPriorities = priorities as SortPriority[];
           });
         el.inputEl.addClass(
@@ -601,9 +604,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setPlaceholder("(ex: Notes/Private)")
           .setValue(command.includePrefixPathPatterns!.join("\n"))
           .onChange(async (value) => {
-            command.includePrefixPathPatterns = value
-              .split("\n")
-              .filter((x) => x);
+            command.includePrefixPathPatterns = smartLineBreakSplit(value);
           });
         el.inputEl.className =
           "another-quick-switcher__settings__include_path_patterns";
@@ -622,9 +623,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setPlaceholder("(ex: Notes/Private)")
           .setValue(command.excludePrefixPathPatterns!.join("\n"))
           .onChange(async (value) => {
-            command.excludePrefixPathPatterns = value
-              .split("\n")
-              .filter((x) => x);
+            command.excludePrefixPathPatterns = smartLineBreakSplit(value);
           });
         el.inputEl.className =
           "another-quick-switcher__settings__exclude_path_patterns";
@@ -637,13 +636,19 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     containerEl.createEl("h3", { text: "👀 Backlink search" });
 
     new Setting(containerEl)
-      .setName("Ignore prefix path patterns for Backlink search")
+      .setName('Exclude prefix path patterns for "Backlink search"')
+      .setDesc(
+        "If set, files whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks"
+      )
       .addTextArea((tc) => {
         const el = tc
           .setPlaceholder("Prefix match patterns")
-          .setValue(this.plugin.settings.ignoreBackLinkPathPrefixPatterns)
+          .setValue(
+            this.plugin.settings.backLinkExcludePrefixPathPatterns.join("\n")
+          )
           .onChange(async (value) => {
-            this.plugin.settings.ignoreBackLinkPathPrefixPatterns = value;
+            this.plugin.settings.backLinkExcludePrefixPathPatterns =
+              smartLineBreakSplit(value);
             await this.plugin.saveSettings();
           });
         el.inputEl.className =
@@ -707,16 +712,19 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     containerEl.createEl("h3", { text: "📁 Move file to another folder" });
 
     new Setting(containerEl)
-      .setName("Ignore prefix path patterns for Move file to another folder")
+      .setName('Exclude prefix path patterns for "Move file to another folder"')
+      .setDesc(
+        "If set, folders whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks"
+      )
       .addTextArea((tc) => {
         const el = tc
           .setPlaceholder("Prefix match patterns")
           .setValue(
-            this.plugin.settings.ignoreMoveFileToAnotherFolderPrefixPatterns
+            this.plugin.settings.moveFileExcludePrefixPathPatterns.join("\n")
           )
           .onChange(async (value) => {
-            this.plugin.settings.ignoreMoveFileToAnotherFolderPrefixPatterns =
-              value;
+            this.plugin.settings.moveFileExcludePrefixPathPatterns =
+              smartLineBreakSplit(value);
             await this.plugin.saveSettings();
           });
         el.inputEl.className =

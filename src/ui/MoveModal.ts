@@ -82,7 +82,7 @@ function stampMatchType(
 
 export class MoveModal extends SuggestModal<SuggestionItem> {
   originItems: SuggestionItem[];
-  ignoredItems: SuggestionItem[];
+  filteredItems: SuggestionItem[];
   appHelper: AppHelper;
   settings: Settings;
 
@@ -107,9 +107,9 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
         folder: x,
       }));
 
-    this.ignoredItems = excludeItems(
+    this.filteredItems = excludeItems(
       this.originItems,
-      this.settings.ignoreMoveFileToAnotherFolderPrefixPatterns.split("\n"),
+      this.settings.moveFileExcludePrefixPathPatterns,
       (x) => x.folder.path
     );
   }
@@ -117,7 +117,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
   getSuggestions(query: string): SuggestionItem[] {
     const qs = query.split(" ").filter((x) => x);
 
-    return this.ignoredItems
+    return this.filteredItems
       .map((x) =>
         stampMatchType(x, qs, this.settings.normalizeAccentsAndDiacritics)
       )

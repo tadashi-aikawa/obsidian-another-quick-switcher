@@ -161,10 +161,7 @@ export class AnotherQuickSwitcherModal
 
     const currentDirPath = this.appHelper.getActiveFile()?.parent.path ?? "";
     return command.isBacklinkSearch
-      ? filterItems(
-          [],
-          this.settings.ignoreBackLinkPathPrefixPatterns.split("\n")
-        )
+      ? filterItems([], this.settings.backLinkExcludePrefixPathPatterns)
       : filterItems(
           command.includePrefixPathPatterns.map((p) =>
             p.replace(/<current_dir>/g, currentDirPath)

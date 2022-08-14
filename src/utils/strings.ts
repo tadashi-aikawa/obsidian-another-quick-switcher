@@ -69,3 +69,9 @@ export function excludeFormat(text: string): string {
     .replace(/_([^_]+)_/g, "$1")
     .replace(/<[^>]+>([^<]+)<\/[^>]+>/g, "$1");
 }
+
+export function smartLineBreakSplit(text: string): string[] {
+  return text
+    .split("\n")
+    .filter((x) => x)
+}
