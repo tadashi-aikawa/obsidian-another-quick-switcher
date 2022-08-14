@@ -27,18 +27,19 @@ export interface SearchCommand {
 
 export interface Settings {
   searchDelayMilliSeconds: number;
+  maxNumberOfSuggestions: number;
+  normalizeAccentsAndDiacritics: boolean;
+  // Appearance
   showDirectory: boolean;
   showDirectoryAtNewLine: boolean;
   showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
   showExistingFilesOnly: boolean;
-  maxNumberOfSuggestions: number;
-  normalizeAccentsAndDiacritics: boolean;
   hideGutterIcons: boolean;
-  // Searches
-  searchCommands: SearchCommand[];
   // Hotkey in search dialog
   userAltInsteadOfModForQuickResultSelection: boolean;
+  // Searches
+  searchCommands: SearchCommand[];
   // Back link search
   ignoreBackLinkPathPrefixPatterns: string;
   // Header search in file
@@ -60,14 +61,16 @@ const defaultSearchBy = () => ({
 
 export const DEFAULT_SETTINGS: Settings = {
   searchDelayMilliSeconds: 0,
+  maxNumberOfSuggestions: 50,
+  normalizeAccentsAndDiacritics: false,
+  // Appearance
   showDirectory: true,
   showDirectoryAtNewLine: false,
   showFullPathOfDirectory: false,
   showAliasesOnTop: false,
   showExistingFilesOnly: false,
-  maxNumberOfSuggestions: 50,
-  normalizeAccentsAndDiacritics: false,
   hideGutterIcons: false,
+  // Hot keys in dialog
   userAltInsteadOfModForQuickResultSelection: false,
   // Searches
   searchCommands: [
