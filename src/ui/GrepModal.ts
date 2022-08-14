@@ -43,19 +43,23 @@ export class GrepModal
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
   currentQuery: string;
   suggestions: SuggestionItem[];
-  triggerManually: boolean;
 
+  clonedInputEl: HTMLInputElement;
+  clonedInputElKeyupEventListener: (
+    this: HTMLInputElement,
+    ev: HTMLElementEventMap["keyup"]
+  ) => any;
   countInputEl?: HTMLDivElement;
 
   constructor(app: App, settings: Settings) {
     super(app);
-    this.emptyStateText = "Search around the vault by TAB key";
     this.suggestions = globalInternalStorage.items;
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
     this.limit = 255;
 
+    this.setPlaceholder("Search around the vault by TAB key");
     this.setHotKeys();
   }
 
@@ -78,6 +82,10 @@ export class GrepModal
     super.onClose();
     globalInternalStorage.items = this.suggestions;
     globalInternalStorage.selected = this.chooser.selectedItem;
+    this.clonedInputEl.removeEventListener(
+      "keyup",
+      this.clonedInputElKeyupEventListener
+    );
   }
 
   async searchSuggestions(query: string): Promise<SuggestionItem[]> {
@@ -88,7 +96,7 @@ export class GrepModal
       text: "searching...",
       cls: "another-quick-switcher__grep__count-input",
     });
-    this.inputEl.before(this.countInputEl);
+    this.clonedInputEl.before(this.countInputEl);
 
     const hasCapitalLetter = query.toLowerCase() !== query;
 
@@ -123,20 +131,18 @@ export class GrepModal
   }
 
   async getSuggestions(query: string): Promise<SuggestionItem[]> {
-    this.currentQuery = query;
-    if (this.triggerManually) {
-      this.triggerManually = false;
+    if (query) {
       this.suggestions = await this.searchSuggestions(query);
-    }
 
-    this.countInputEl?.remove();
-    this.countInputEl = createDiv({
-      text: `${Math.min(this.suggestions.length, this.limit)} / ${
-        this.suggestions.length
-      }`,
-      cls: "another-quick-switcher__grep__count-input",
-    });
-    this.inputEl.before(this.countInputEl);
+      this.countInputEl?.remove();
+      this.countInputEl = createDiv({
+        text: `${Math.min(this.suggestions.length, this.limit)} / ${
+          this.suggestions.length
+        }`,
+        cls: "another-quick-switcher__grep__count-input",
+      });
+      this.clonedInputEl.before(this.countInputEl);
+    }
 
     return this.suggestions;
   }
@@ -246,6 +252,7 @@ export class GrepModal
 
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
+        { command: "[tab]", purpose: "search" },
         {
           command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
           purpose: "navigate",
@@ -309,9 +316,9 @@ export class GrepModal
     });
 
     this.scope.register(["Mod"], "D", () => {
-      this.inputEl.value = "";
+      this.clonedInputEl.value = "";
       // Necessary to rerender suggestions
-      this.inputEl.dispatchEvent(new Event("input"));
+      this.clonedInputEl.dispatchEvent(new Event("input"));
     });
 
     this.scope.register(["Mod"], ",", () => {
@@ -321,11 +328,25 @@ export class GrepModal
       });
     });
 
+    // XXX: This is a hack to avoid default input events
     this.scope.register([], "Tab", () => {
-      this.triggerManually = true;
-      // Necessary to rerender suggestions
-      this.inputEl.dispatchEvent(new Event("input"));
       return false;
     });
+
+    this.clonedInputEl = this.inputEl.cloneNode(true) as HTMLInputElement;
+    this.inputEl.parentNode?.replaceChild(this.clonedInputEl, this.inputEl);
+    this.clonedInputElKeyupEventListener = (evt: KeyboardEvent) => {
+      const keyEvent = evt as KeyboardEvent;
+      if (keyEvent.code === "Tab") {
+        this.currentQuery = this.clonedInputEl!.value;
+        this.inputEl.value = this.currentQuery;
+        // Necessary to rerender suggestions
+        this.inputEl.dispatchEvent(new Event("input"));
+      }
+    };
+    this.clonedInputEl.addEventListener(
+      "keyup",
+      this.clonedInputElKeyupEventListener
+    );
   }
 }
