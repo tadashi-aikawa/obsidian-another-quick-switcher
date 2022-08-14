@@ -316,7 +316,12 @@ export class AnotherQuickSwitcherModal
       cls: "another-quick-switcher__status__search-command",
     });
     this.searchCommandEl.insertAdjacentHTML("beforeend", SEARCH);
-    this.searchCommandEl.appendText(`${this.command.name} ... `);
+
+    if (this.command.isBacklinkSearch) {
+      this.searchCommandEl.appendText(`Backlink search`);
+    } else {
+      this.searchCommandEl.appendText(`${this.command.name} ... `);
+    }
     if (this.command.searchBy.tag) {
       this.searchCommandEl.insertAdjacentHTML("beforeend", TAG);
     }
