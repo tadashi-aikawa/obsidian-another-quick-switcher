@@ -159,14 +159,19 @@ export class AnotherQuickSwitcherModal
       return items;
     };
 
+    const currentDirPath = this.appHelper.getActiveFile()?.parent.path ?? "";
     return command.isBacklinkSearch
       ? filterItems(
           [],
           this.settings.ignoreBackLinkPathPrefixPatterns.split("\n")
         )
       : filterItems(
-          command.includePrefixPathPatterns,
-          command.excludePrefixPathPatterns
+          command.includePrefixPathPatterns.map((p) =>
+            p.replace(/<current_dir>/g, currentDirPath)
+          ),
+          command.excludePrefixPathPatterns.map((p) =>
+            p.replace(/<current_dir>/g, currentDirPath)
+          )
         );
   }
 

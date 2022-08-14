@@ -575,7 +575,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(div)
       .setName("Include prefix path patterns")
       .setDesc(
-        "If set, only files whose paths start with one of the patterns will be suggested."
+        "If set, only files whose paths start with one of the patterns will be suggested. It can set multi patterns by line breaks. <current_dir> means current directory."
       )
       .addTextArea((tc) => {
         const el = tc
@@ -595,7 +595,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(div)
       .setName("Exclude prefix path patterns")
       .setDesc(
-        "If set, files whose paths start with one of the patterns will not be suggested."
+        "If set, files whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks. <current_dir> means current directory."
       )
 
       .addTextArea((tc) => {
