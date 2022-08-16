@@ -59,7 +59,7 @@ You can use the following names as a `Sort priorities`.
 | Last modified      | The time the file modified last                       |
 | Star               | The file has a star                                   |
 
-> **warning**
+> **Warning**
 > Please forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
 > ![](demo/save-button.png)
 
