@@ -37,11 +37,12 @@ You can download from `Community plugins` in Obsidian settings.
 
 ### 1‍⃣ Custom searches
 
-![](demo/custom-searches.gif)
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/custom-searches.gif)
+
 
 Custom searches enables you to create your original search commands.
 
-![](demo/search-commands-setting.png)
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/search-commands-setting.png)
 
 You can use the following names as a `Sort priorities`.
 
@@ -77,7 +78,7 @@ You can use the following names as a `Sort priorities`.
 
 This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) that can call from anywhere. In other words, the `rg --version` command must be in a state to succeed everywhere.
 
-![](demo/grep.gif)
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/grep.gif)
 
 - `TAB`: Search (not realtime)
 - `Ctrl+,`: preview
