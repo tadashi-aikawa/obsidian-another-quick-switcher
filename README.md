@@ -60,7 +60,7 @@ You can use the following names as a `Sort priorities`.
 | Star               | The file has a star                                   |
 
 > **Warning**
-> Please forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
+> Please don't forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
 > ![](demo/save-button.png)
 
 ### 2‍⃣ Backlink search
