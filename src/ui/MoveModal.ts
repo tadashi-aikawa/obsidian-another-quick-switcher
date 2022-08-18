@@ -4,6 +4,7 @@ import { FOLDER } from "./icons";
 import { Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
+import { MOD } from "../keys";
 
 interface SuggestionItem {
   folder: TFolder;
@@ -92,13 +93,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     this.appHelper = new AppHelper(app);
     this.settings = settings;
 
-    if (!this.settings.hideHotkeyGuides) {
-      this.setInstructions([
-        { command: "[↑↓]", purpose: "navigate" },
-        { command: "[↵]", purpose: "move to" },
-        { command: "[esc]", purpose: "dismiss" },
-      ]);
-    }
+    this.setHotKeys();
 
     this.originItems = this.appHelper
       .getFolders()
@@ -173,5 +168,35 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
       activeFile,
       `${item.folder.path}/${activeFile.name}`
     );
+  }
+
+  private setHotKeys() {
+    if (!this.settings.hideHotkeyGuides) {
+      this.setInstructions([
+        {
+          command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
+          purpose: "navigate",
+        },
+        { command: "[↵]", purpose: "move to" },
+        { command: "[esc]", purpose: "dismiss" },
+      ]);
+    }
+
+    this.scope.register(["Mod"], "N", () => {
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown" })
+      );
+    });
+    this.scope.register(["Mod"], "P", () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+    });
+    this.scope.register(["Mod"], "J", () => {
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown" })
+      );
+    });
+    this.scope.register(["Mod"], "K", () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+    });
   }
 }
