@@ -395,7 +395,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         btn
           .setButtonText("Save")
           .setTooltip(
-            "It should click when creating new commands, renaming existed commands, or deleting existed commands"
+            "You must click this button to save settings before closing Obsidian"
           )
           .setCta()
           .setClass(
