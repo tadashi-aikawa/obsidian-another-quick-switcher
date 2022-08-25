@@ -394,7 +394,7 @@ export class AnotherQuickSwitcherModal
           item.file,
           this.app.workspace.getActiveFile()! // never undefined
         )
-      : 0;
+      : undefined;
 
     let leaf: LeafType;
     const key = (evt as KeyboardEvent).key;
