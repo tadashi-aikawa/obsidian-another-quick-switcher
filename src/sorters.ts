@@ -11,6 +11,7 @@ export const sortPriorityList = [
   "Prefix name match",
   "Star",
   "Tag match",
+  "Alphabetical",
 ] as const;
 export type SortPriority = typeof sortPriorityList[number];
 
@@ -42,6 +43,8 @@ function getComparator(
       return priorityToStar;
     case "Tag match":
       return priorityToTag;
+    case "Alphabetical":
+      return priorityToAlphabetical;
     default:
       throw Error(`Unexpected priority: ${priority}`);
   }
@@ -199,4 +202,16 @@ function priorityToLastModified(
 
 function priorityToStar(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
   return compare(a, b, (x) => Number(x.starred), "desc");
+}
+
+function priorityToAlphabetical(
+  a: SuggestionItem,
+  b: SuggestionItem
+): 0 | -1 | 1 {
+  return compare(
+    a,
+    b,
+    (x) => (x.matchResults[0].alias ? x.matchResults[0].alias : x.file.name),
+    "asc"
+  );
 }
