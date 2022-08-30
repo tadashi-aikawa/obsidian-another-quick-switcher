@@ -350,7 +350,7 @@ export class AnotherQuickSwitcherModal
       hideGutterIcons: this.settings.hideGutterIcons,
     });
 
-    if (descriptionDiv) {
+    if (descriptionDiv?.hasChildNodes()) {
       itemDiv.appendChild(descriptionDiv);
     }
     el.appendChild(itemDiv);
