@@ -187,6 +187,10 @@ export class GrepModal
       }
     }
 
+    const descriptionsDiv = createDiv({
+      cls: "another-quick-switcher__item__descriptions",
+    });
+
     const descriptionDiv = createDiv({
       cls: "another-quick-switcher__item__description",
     });
@@ -207,7 +211,8 @@ export class GrepModal
       text: restLine,
     });
 
-    itemDiv.appendChild(descriptionDiv);
+    descriptionsDiv.appendChild(descriptionDiv);
+    itemDiv.appendChild(descriptionsDiv);
 
     el.appendChild(itemDiv);
   }
