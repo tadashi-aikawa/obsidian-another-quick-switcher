@@ -22,7 +22,7 @@
     "@types/node": "^18.0.0",
     "babel-jest": "^28.1.1",
     "jest": "^28.1.1",
-    "obsidian": "^0.15.4",
+    "obsidian": "^0.16.0",
     "prettier": "^2.7.1",
     "rollup": "^2.75.6",
     "tslib": "^2.4.0",

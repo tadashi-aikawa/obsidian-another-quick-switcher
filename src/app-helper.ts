@@ -265,11 +265,11 @@ export class AppHelper {
         openFile(leaf);
         break;
       case "new-horizontal":
-        leaf = this.unsafeApp.workspace.getLeaf(true, "horizontal");
+        leaf = this.unsafeApp.workspace.getLeaf("split", "horizontal");
         openFile(leaf);
         break;
       case "new-vertical":
-        leaf = this.unsafeApp.workspace.getLeaf(true, "vertical");
+        leaf = this.unsafeApp.workspace.getLeaf("split", "vertical");
         openFile(leaf);
         break;
       case "popout":

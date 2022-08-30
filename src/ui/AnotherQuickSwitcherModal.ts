@@ -42,7 +42,7 @@ export class AnotherQuickSwitcherModal
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   debounceGetSuggestions: Debouncer<
-    [string, (items: SuggestionItem[]) => void]
+    [string, (items: SuggestionItem[]) => void], void
   >;
 
   command: SearchCommand;
