@@ -225,15 +225,15 @@
 
 .another-quick-switcher__settings__ignore_path_patterns {
     height: 120px;
-    width: 500px;
+    width: 300px;
 }
 .another-quick-switcher__settings__include_path_patterns {
     height: 120px;
-    width: 500px;
+    width: 300px;
 }
 .another-quick-switcher__settings__exclude_path_patterns {
     height: 120px;
-    width: 500px;
+    width: 300px;
 }
 
 .another-quick-switcher__settings__warning {
