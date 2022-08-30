@@ -73,7 +73,7 @@ export class GrepModal
     promptEl?.addClass("another-quick-switcher__grep__floating-prompt");
     window.setTimeout(() => {
       if (globalInternalStorage.selected != null) {
-        this.chooser.setSelectedItem(globalInternalStorage.selected!, true);
+        this.chooser.setSelectedItem(globalInternalStorage.selected!);
       }
     }, 0);
   }
@@ -292,8 +292,8 @@ export class GrepModal
       ? "Alt"
       : "Mod";
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
-      this.scope.register([modifierKey], String(n), () => {
-        this.chooser.setSelectedItem(n - 1, true);
+      this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
+        this.chooser.setSelectedItem(n - 1, evt, true);
         this.chooser.useSelectedItem({});
       });
     });

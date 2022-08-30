@@ -44,23 +44,31 @@ export class HeaderModal
       index: i,
     }));
 
-    this.inputEl.addEventListener("input", () => {
+    this.inputEl.addEventListener("input", (evt) => {
+      const unsafeEvt = evt as KeyboardEvent;
+
       if (this.hitItems.length === 0) {
-        this.select(this.unsafeSelectedIndex, this.floating);
+        this.select(this.unsafeSelectedIndex, unsafeEvt, this.floating);
         return;
       }
 
       const nextIndex =
         this.hitItems.find((x) => x.index >= this.unsafeSelectedIndex)?.index ??
         this.hitItems[0].index;
-      this.select(nextIndex, this.floating);
+      this.select(nextIndex, unsafeEvt, this.floating);
     });
 
     this.bindHotKeys();
   }
 
-  select(index: number, preview: boolean = true) {
-    this.chooser.setSelectedItem(index, true);
+  select(index: number, evt?: KeyboardEvent, preview: boolean = true) {
+    this.chooser.setSelectedItem(index, evt);
+    this.chooser.suggestions[index].scrollIntoView({
+      behavior: "auto",
+      block: "center",
+      inline: "center",
+    });
+
     this.unsafeSelectedIndex = index;
     if (preview) {
       this.appHelper.moveTo(this.items[this.unsafeSelectedIndex].position);
@@ -134,12 +142,13 @@ export class HeaderModal
     const firstOverIndex = this.items.findIndex(
       (x) => x.position.start.offset > offset
     );
+
     if (firstOverIndex === -1) {
-      this.select(this.items.last()!.index, false);
+      this.select(this.items.last()!.index);
     } else if (firstOverIndex === 0) {
-      this.select(0, false);
+      this.select(0);
     } else {
-      this.select(firstOverIndex - 1, false);
+      this.select(firstOverIndex - 1);
     }
   }
 
@@ -235,32 +244,32 @@ export class HeaderModal
       .filter((x) => ["ArrowDown", "ArrowUp"].includes(x.key!))
       .forEach((x) => this.scope.unregister(x));
 
-    const navigateNext = () => {
-      this.select(this.getNextSelectIndex(), this.floating);
+    const navigateNext = (evt: KeyboardEvent) => {
+      this.select(this.getNextSelectIndex(), evt, this.floating);
     };
-    const navigatePrevious = () => {
-      this.select(this.getPreviousSelectIndex(), this.floating);
+    const navigatePrevious = (evt: KeyboardEvent) => {
+      this.select(this.getPreviousSelectIndex(), evt, this.floating);
     };
-    const moveToNextHit = () => {
+    const moveToNextHit = (evt: KeyboardEvent) => {
       if (this.hitItems.length === 1) {
         return;
       }
       if (this.hitItems.length === 0) {
-        navigateNext();
+        navigateNext(evt);
         return;
       }
 
       const nextIndex =
         this.hitItems.find((x) => x.index > this.unsafeSelectedIndex)?.index ??
         this.hitItems[0].index;
-      this.select(nextIndex, this.floating);
+      this.select(nextIndex, evt, this.floating);
     };
-    const moveToPreviousHit = () => {
+    const moveToPreviousHit = (evt: KeyboardEvent) => {
       if (this.hitItems.length === 1) {
         return;
       }
       if (this.hitItems.length === 0) {
-        navigatePrevious();
+        navigatePrevious(evt);
         return;
       }
 
@@ -269,53 +278,53 @@ export class HeaderModal
       );
       const previousIndex =
         currentIndex === 0 ? this.hitItems.length - 1 : currentIndex - 1;
-      this.select(this.hitItems[previousIndex].index, this.floating);
+      this.select(this.hitItems[previousIndex].index, evt, this.floating);
     };
 
-    this.scope.register([], "ArrowDown", () => {
+    this.scope.register([], "ArrowDown", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindArrowUpDown === "navigate"
         ? navigateNext
-        : moveToNextHit)();
+        : moveToNextHit)(evt);
     });
-    this.scope.register([], "ArrowUp", () => {
+    this.scope.register([], "ArrowUp", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindArrowUpDown === "navigate"
         ? navigatePrevious
-        : moveToPreviousHit)();
+        : moveToPreviousHit)(evt);
     });
 
-    this.scope.register(["Mod"], "J", () => {
+    this.scope.register(["Mod"], "J", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindVim === "navigate"
         ? navigateNext
-        : moveToNextHit)();
+        : moveToNextHit)(evt);
     });
-    this.scope.register(["Mod"], "K", () => {
+    this.scope.register(["Mod"], "K", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindVim === "navigate"
         ? navigatePrevious
-        : moveToPreviousHit)();
+        : moveToPreviousHit)(evt);
     });
 
-    this.scope.register(["Mod"], "N", () => {
+    this.scope.register(["Mod"], "N", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindEmacs === "navigate"
         ? navigateNext
-        : moveToNextHit)();
+        : moveToNextHit)(evt);
     });
-    this.scope.register(["Mod"], "P", () => {
+    this.scope.register(["Mod"], "P", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindEmacs === "navigate"
         ? navigatePrevious
-        : moveToPreviousHit)();
+        : moveToPreviousHit)(evt);
     });
 
     this.scope.register([], "Tab", (evt) => {
       evt.preventDefault();
       (this.settings.headerSearchKeyBindTab === "navigate"
         ? navigateNext
-        : moveToNextHit)();
+        : moveToNextHit)(evt);
     });
     this.scope.register(["Shift"], "Tab", (evt) => {
       evt.preventDefault();
       (this.settings.headerSearchKeyBindTab === "navigate"
         ? navigatePrevious
-        : moveToPreviousHit)();
+        : moveToPreviousHit)(evt);
     });
   }
 }

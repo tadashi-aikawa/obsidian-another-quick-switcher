@@ -42,7 +42,8 @@ export class AnotherQuickSwitcherModal
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   debounceGetSuggestions: Debouncer<
-    [string, (items: SuggestionItem[]) => void], void
+    [string, (items: SuggestionItem[]) => void],
+    void
   >;
 
   command: SearchCommand;
@@ -491,8 +492,8 @@ export class AnotherQuickSwitcherModal
       ? "Alt"
       : "Mod";
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
-      this.scope.register([modifierKey], String(n), () => {
-        this.chooser.setSelectedItem(n - 1, true);
+      this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
+        this.chooser.setSelectedItem(n - 1, evt);
         this.chooser.useSelectedItem({});
       });
     });
