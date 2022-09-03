@@ -35,7 +35,7 @@ You can download from `Community plugins` in Obsidian settings.
 
 ## ⌨️Features
 
-### 1‍⃣ Custom searches
+### 1. Custom searches
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/custom-searches.gif)
 
@@ -46,37 +46,46 @@ Custom searches enables you to create your original search commands.
 
 You can use the following names as a `Sort priorities`.
 
-| Name                 | Description                                           |
-| -------------------- | ----------------------------------------------------- |
-| Perfect word match   | A query matches perfectly with a word in the filename |
-| Prefix name match    | The filename starts with a query                      |
-| Name match           | The filename includes a query                         |
-| Tag match            | The tag name in the file includes a query             |
-| Header match         | The header name in the file includes a query          |
-| Link match           | The internal link name in the file includes a query   |
-| Length               | Length of the filename or alias                       |
-| Last opened          | The time the file opened last                         |
-| Last modified        | The time the file modified last                       |
-| Star                 | The file has a star                                   |
-| Alphabetical         | Filename or alias order by alphabetically ascend      |
-| Alphabetical reverse | Filename or alias order by alphabetically descend     |
-~~~~
+| Name                  | Description                                           |
+| --------------------- | ----------------------------------------------------- |
+| Perfect word match    | A query matches perfectly with a word in the filename |
+| Prefix name match     | The filename starts with a query                      |
+| Name match            | The filename includes a query                         |
+| Tag match             | The tag name in the file includes a query             |
+| Header match          | The header name in the file includes a query          |
+| Link match            | The internal link name in the file includes a query   |
+| Length                | Length of the filename or alias                       |
+| Last opened           | The time the file opened last                         |
+| Last modified         | The time the file modified last                       |
+| Star                  | The file has a star                                   |
+| Alphabetical          | Filename or alias order by alphabetically ascend      |
+
 > **Warning**
 > Please don't forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
 > ![](demo/save-button.png)
 
-### 2‍⃣ Backlink search
+#### Only v7.0.0-beta
+
+| Name                  | Description                                           |
+| --------------------- | ----------------------------------------------------- |
+| Alphabetical reverse  | Filename or alias order by alphabetically descend     |
+| (Tags split by comma) | The file has specific tags                            |
+
+> **Note**
+> Examples of `(Tags spit by comma)` are `#hoge`, `#hoge,#huga`, and so on.
+
+### 2. Backlink search
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink-search.gif)
 
-### 3‍⃣ Header floating search in file / Header search in file
+### 3. Header floating search in file / Header search in file
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/header-floating-search-in-file.gif)
 
 - Show all headers even after filtering to retain file structures in the brain
 - Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab` as default
 
-### 4️⃣ Grep
+~~~~### 4. Grep
 
 This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) that can call from anywhere. In other words, the `rg --version` command must be in a state to succeed everywhere.
 

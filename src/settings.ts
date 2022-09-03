@@ -1,7 +1,7 @@
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import AnotherQuickSwitcher from "./main";
 import { mirrorMap } from "./utils/collection-helper";
-import { SortPriority, sortPriorityList } from "./sorters";
+import { regardAsSortPriority, SortPriority } from "./sorters";
 import { smartLineBreakSplit } from "./utils/strings";
 
 const headerSearchFeatureList = [
@@ -407,7 +407,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
             const invalidValues = this.plugin.settings.searchCommands
               .flatMap((x) => x.sortPriorities)
-              .filter((x) => !sortPriorityList.includes(x as SortPriority));
+              .filter((x) => !regardAsSortPriority(x));
             if (invalidValues.length > 0) {
               // noinspection ObjectAllocationIgnored
               new Notice(

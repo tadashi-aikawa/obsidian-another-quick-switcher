@@ -1,4 +1,5 @@
 import { SuggestionItem } from "./matcher";
+import { intersection } from "./utils/collection-helper";
 
 export const sortPriorityList = [
   "Header match",
@@ -14,19 +15,26 @@ export const sortPriorityList = [
   "Alphabetical",
   "Alphabetical reverse",
 ] as const;
-export type SortPriority = typeof sortPriorityList[number];
+export type SortPriority = typeof sortPriorityList[number] | `#${string}`;
+export function regardAsSortPriority(x: string) {
+  return (
+    sortPriorityList.includes(x as any) ||
+    x.split(",").every((y) => y.startsWith("#"))
+  );
+}
 
 export function filterNoQueryPriorities(
   priorities: SortPriority[]
 ): SortPriority[] {
-  return priorities.filter((x) =>
-    [
-      "Last opened",
-      "Last modified",
-      "Star",
-      "Alphabetical",
-      "Alphabetical reverse",
-    ].includes(x)
+  return priorities.filter(
+    (x) =>
+      [
+        "Last opened",
+        "Last modified",
+        "Star",
+        "Alphabetical",
+        "Alphabetical reverse",
+      ].includes(x) || x.startsWith("#")
   );
 }
 
@@ -63,7 +71,13 @@ function getComparator(
     case "Alphabetical reverse":
       return priorityToAlphabeticalReverse;
     default:
-      throw new ExhaustiveError(priority);
+      if (priority.startsWith("#")) {
+        const tags = priority.split(",");
+        return (a: SuggestionItem, b: SuggestionItem) =>
+          priorityToTags(a, b, tags);
+      }
+      // XXX: xox
+      throw new ExhaustiveError(priority as never);
   }
 }
 
@@ -72,11 +86,13 @@ export function sort(
   priorities: SortPriority[],
   lastOpenFileIndexByPath: { [path: string]: number }
 ): SuggestionItem[] {
+  const comparators = priorities.map(getComparator);
+
   return items.sort((a, b) => {
     let result: 0 | -1 | 1;
 
-    for (const priority of priorities) {
-      result = getComparator(priority)(a, b, lastOpenFileIndexByPath);
+    for (const comparator of comparators) {
+      result = comparator(a, b, lastOpenFileIndexByPath);
       if (result !== 0) {
         return result;
       }
@@ -243,4 +259,12 @@ function priorityToAlphabeticalReverse(
     (x) => (x.matchResults[0]?.alias ? x.matchResults[0].alias : x.file.name),
     "desc"
   );
+}
+
+function priorityToTags(
+  a: SuggestionItem,
+  b: SuggestionItem,
+  tags: string[]
+): 0 | -1 | 1 {
+  return compare(a, b, (x) => intersection([tags, x.tags]).length, "desc");
 }
