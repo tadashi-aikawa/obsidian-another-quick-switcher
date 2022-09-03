@@ -46,7 +46,7 @@ function getComparator(
     case "Alphabetical":
       return priorityToAlphabetical;
     default:
-      throw Error(`Unexpected priority: ${priority}`);
+      throw new ExhaustiveError(priority);
   }
 }
 

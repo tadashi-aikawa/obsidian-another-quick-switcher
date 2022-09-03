@@ -286,6 +286,8 @@ export class AppHelper {
           openFile(this.unsafeApp.workspace.getLeaf());
         }
         break;
+      default:
+        throw new ExhaustiveError(opt.leaf);
     }
   }
 
