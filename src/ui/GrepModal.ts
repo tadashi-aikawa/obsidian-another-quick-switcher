@@ -225,21 +225,21 @@ export class GrepModal
     const key = (evt as KeyboardEvent).key;
 
     if (evt.metaKey && key === "o") {
-      leaf = "popout";
+      leaf = "new-window";
     } else if (evt.metaKey && evt.shiftKey && key === "-") {
-      leaf = "new-vertical";
+      leaf = "new-pane-vertical";
     } else if (evt.metaKey && !evt.shiftKey && key === "-") {
-      leaf = "new-horizontal";
+      leaf = "new-pane-horizontal";
     } else if (evt.metaKey && evt.altKey) {
       leaf = "popup";
     } else if (evt.metaKey && !evt.altKey) {
-      leaf = "new";
+      leaf = "new-tab";
     } else {
-      leaf = "same";
+      leaf = "same-tab";
     }
 
     this.appHelper.openMarkdownFile(item.file, {
-      leaf,
+      leaf: leaf,
       line: item.lineNumber - 1,
     });
   }

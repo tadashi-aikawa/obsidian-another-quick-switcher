@@ -70,12 +70,12 @@ interface UnsafeLayouts {
 }
 
 export type LeafType =
-  | "same"
-  | "new"
-  | "new-vertical"
-  | "new-horizontal"
-  | "new-background"
-  | "popout"
+  | "same-tab"
+  | "new-tab"
+  | "new-tab-background"
+  | "new-pane-vertical"
+  | "new-pane-horizontal"
+  | "new-window"
   | "popup";
 type OpenMarkdownFileOption = {
   leaf: LeafType;
@@ -233,7 +233,7 @@ export class AppHelper {
 
   openMarkdownFile(file: TFile, option: Partial<OpenMarkdownFileOption> = {}) {
     const opt: OpenMarkdownFileOption = {
-      ...{ leaf: "same" },
+      ...{ leaf: "same-tab" },
       ...option,
     };
 
@@ -259,27 +259,27 @@ export class AppHelper {
 
     let leaf: WorkspaceLeaf;
     switch (opt.leaf) {
-      case "same":
+      case "same-tab":
         leaf = this.unsafeApp.workspace.getLeaf();
         openFile(leaf);
         break;
-      case "new":
+      case "new-tab":
         leaf = this.unsafeApp.workspace.getLeaf(true);
         openFile(leaf);
         break;
-      case "new-background":
+      case "new-tab-background":
         leaf = this.unsafeApp.workspace.getLeaf(true);
         openFile(leaf, true);
         break;
-      case "new-horizontal":
+      case "new-pane-horizontal":
         leaf = this.unsafeApp.workspace.getLeaf("split", "horizontal");
         openFile(leaf);
         break;
-      case "new-vertical":
+      case "new-pane-vertical":
         leaf = this.unsafeApp.workspace.getLeaf("split", "vertical");
         openFile(leaf);
         break;
-      case "popout":
+      case "new-window":
         openFile(this.unsafeApp.workspace.openPopoutLeaf());
         break;
       case "popup":

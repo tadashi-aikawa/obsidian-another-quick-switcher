@@ -362,7 +362,7 @@ export class AnotherQuickSwitcherModal
       cls: "another-quick-switcher__create_button",
     });
     createButton.addEventListener("click", () => {
-      this.handleCreateNew(this.searchQuery, "same");
+      this.handleCreateNew(this.searchQuery, "same-tab");
     });
     this.resultContainerEl.appendChild(createButton);
   }
@@ -403,26 +403,29 @@ export class AnotherQuickSwitcherModal
       if (urls.length > 0) {
         activeWindow.open(urls[0]);
       } else {
-        this.appHelper.openMarkdownFile(fileToOpened, { leaf: "same", offset });
+        this.appHelper.openMarkdownFile(fileToOpened, {
+          leaf: "same-tab",
+          offset,
+        });
       }
       return;
     }
 
     if (evt.metaKey && key === "o") {
-      leaf = "popout";
+      leaf = "new-window";
     } else if (evt.metaKey && evt.shiftKey && key === "-") {
-      leaf = "new-vertical";
+      leaf = "new-pane-vertical";
     } else if (evt.metaKey && !evt.shiftKey && key === "-") {
-      leaf = "new-horizontal";
+      leaf = "new-pane-horizontal";
     } else if (evt.metaKey && evt.altKey) {
       leaf = "popup";
     } else if (evt.metaKey && !evt.altKey) {
-      leaf = "new";
+      leaf = "new-tab";
     } else {
-      leaf = "same";
+      leaf = "same-tab";
     }
 
-    this.appHelper.openMarkdownFile(fileToOpened, { leaf, offset });
+    this.appHelper.openMarkdownFile(fileToOpened, { leaf: leaf, offset });
   }
 
   private showDebugLog(toMessage: () => string) {
@@ -499,17 +502,17 @@ export class AnotherQuickSwitcherModal
 
     this.scope.register(["Shift"], "Enter", () => {
       if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "same");
+        this.handleCreateNew(this.searchQuery, "same-tab");
       }
     });
     this.scope.register(["Shift", "Mod"], "Enter", () => {
       if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "new");
+        this.handleCreateNew(this.searchQuery, "new-tab");
       }
     });
     this.scope.register(["Shift", "Mod"], "o", () => {
       if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "popout");
+        this.handleCreateNew(this.searchQuery, "new-window");
       }
     });
     this.scope.register(["Shift", "Mod", "Alt"], "Enter", () => {
@@ -523,7 +526,9 @@ export class AnotherQuickSwitcherModal
         .slice()
         .reverse()
         .forEach((x) =>
-          this.appHelper.openMarkdownFile(x.file, { leaf: "new-background" })
+          this.appHelper.openMarkdownFile(x.file, {
+            leaf: "new-tab-background",
+          })
         );
     });
 
