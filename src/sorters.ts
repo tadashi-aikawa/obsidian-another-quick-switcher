@@ -12,6 +12,7 @@ export const sortPriorityList = [
   "Star",
   "Tag match",
   "Alphabetical",
+  "Alphabetical reverse",
 ] as const;
 export type SortPriority = typeof sortPriorityList[number];
 
@@ -19,7 +20,13 @@ export function filterNoQueryPriorities(
   priorities: SortPriority[]
 ): SortPriority[] {
   return priorities.filter((x) =>
-    ["Last opened", "Last modified", "Star", "Alphabetical"].includes(x)
+    [
+      "Last opened",
+      "Last modified",
+      "Star",
+      "Alphabetical",
+      "Alphabetical reverse",
+    ].includes(x)
   );
 }
 
@@ -53,6 +60,8 @@ function getComparator(
       return priorityToTag;
     case "Alphabetical":
       return priorityToAlphabetical;
+    case "Alphabetical reverse":
+      return priorityToAlphabeticalReverse;
     default:
       throw new ExhaustiveError(priority);
   }
@@ -221,5 +230,17 @@ function priorityToAlphabetical(
     b,
     (x) => (x.matchResults[0]?.alias ? x.matchResults[0].alias : x.file.name),
     "asc"
+  );
+}
+
+function priorityToAlphabeticalReverse(
+  a: SuggestionItem,
+  b: SuggestionItem
+): 0 | -1 | 1 {
+  return compare(
+    a,
+    b,
+    (x) => (x.matchResults[0]?.alias ? x.matchResults[0].alias : x.file.name),
+    "desc"
   );
 }
