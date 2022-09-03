@@ -74,6 +74,7 @@ export type LeafType =
   | "new"
   | "new-vertical"
   | "new-horizontal"
+  | "new-background"
   | "popout"
   | "popup";
 type OpenMarkdownFileOption = {
@@ -236,11 +237,13 @@ export class AppHelper {
       ...option,
     };
 
-    const openFile = (leaf: WorkspaceLeaf) => {
+    const openFile = (leaf: WorkspaceLeaf, background = false) => {
       leaf
-        .openFile(file, this.unsafeApp.workspace.activeLeaf?.getViewState())
+        .openFile(file, {
+          ...this.unsafeApp.workspace.activeLeaf?.getViewState(),
+          active: !background,
+        })
         .then(() => {
-          this.unsafeApp.workspace.setActiveLeaf(leaf, true, true);
           const markdownView =
             this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
           if (markdownView) {
@@ -263,6 +266,10 @@ export class AppHelper {
       case "new":
         leaf = this.unsafeApp.workspace.getLeaf(true);
         openFile(leaf);
+        break;
+      case "new-background":
+        leaf = this.unsafeApp.workspace.getLeaf(true);
+        openFile(leaf, true);
         break;
       case "new-horizontal":
         leaf = this.unsafeApp.workspace.getLeaf("split", "horizontal");

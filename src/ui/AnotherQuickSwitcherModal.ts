@@ -455,6 +455,7 @@ export class AnotherQuickSwitcherModal
         { command: `[${MOD} shift ↵]`, purpose: "create in new tab" },
         { command: `[${MOD} shift o]`, purpose: "create in new window" },
         { command: `[${MOD} shift alt ↵]`, purpose: "create in popup" },
+        { command: `[${MOD} shift alt o]`, purpose: "open all in new tabs" },
         { command: `[${MOD} ]]`, purpose: "open first URL" },
         { command: "[alt ↵]", purpose: "insert to editor" },
         { command: "[alt shift ↵]", purpose: "insert all to editor" },
@@ -515,6 +516,15 @@ export class AnotherQuickSwitcherModal
       if (this.searchQuery) {
         this.handleCreateNew(this.searchQuery, "popup");
       }
+    });
+    this.scope.register(["Shift", "Mod", "Alt"], "o", () => {
+      this.close();
+      this.chooser.values
+        .slice()
+        .reverse()
+        .forEach((x) =>
+          this.appHelper.openMarkdownFile(x.file, { leaf: "new-background" })
+        );
     });
 
     this.scope.register(["Mod"], "N", () => {
