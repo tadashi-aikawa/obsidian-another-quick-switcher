@@ -327,7 +327,11 @@ export class GrepModal
     });
 
     this.scope.register(["Mod"], ",", () => {
-      const item = this.chooser.values[this.chooser.selectedItem];
+      const item = this.chooser.values?.[this.chooser.selectedItem];
+      if (!item) {
+        return;
+      }
+
       this.appHelper.openMarkdownFile(item.file, {
         line: item.lineNumber - 1,
       });

@@ -5,7 +5,7 @@ import { KeymapEventHandler, Scope } from "obsidian";
 export interface UnsafeModalInterface<SuggestionItem> {
   scope: Scope & { keys: (KeymapEventHandler & { func: CallableFunction })[] };
   chooser: {
-    values: SuggestionItem[];
+    values: SuggestionItem[] | null;
     selectedItem: number;
     setSelectedItem(
       item: number,

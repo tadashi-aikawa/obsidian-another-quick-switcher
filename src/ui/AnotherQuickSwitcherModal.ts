@@ -133,16 +133,24 @@ export class AnotherQuickSwitcherModal
     this.ignoredItems = this.prefilterItems(this.command);
   }
 
-  async handleCreateNew(searchQuery: string, leafType: LeafType) {
+  async handleCreateNew(
+    searchQuery: string,
+    leafType: LeafType
+  ): Promise<boolean> {
+    if (!searchQuery) {
+      return true;
+    }
+
     const file = await this.appHelper.createMarkdown(this.searchQuery);
     if (!file) {
       // noinspection ObjectAllocationIgnored
       new Notice("This file already exists.");
-      return;
+      return true;
     }
 
-    this.appHelper.openMarkdownFile(file, { leaf: leafType });
     this.close();
+    this.appHelper.openMarkdownFile(file, { leaf: leafType });
+    return false;
   }
 
   prefilterItems(command: SearchCommand): SuggestionItem[] {
@@ -361,29 +369,19 @@ export class AnotherQuickSwitcherModal
       text: "Create",
       cls: "another-quick-switcher__create_button",
     });
-    createButton.addEventListener("click", () => {
-      this.handleCreateNew(this.searchQuery, "same-tab");
-    });
+    createButton.addEventListener("click", () =>
+      this.handleCreateNew(this.searchQuery, "same-tab")
+    );
     this.resultContainerEl.appendChild(createButton);
   }
 
-  async onChooseSuggestion(
-    item: SuggestionItem,
-    evt: MouseEvent | KeyboardEvent
-  ): Promise<void> {
-    let fileToOpened = item.file;
-    if (evt.altKey && !evt.metaKey) {
-      if (evt.shiftKey) {
-        this.chooser.values.forEach((x) => {
-          this.appHelper.insertLinkToActiveFileBy(x.file);
-          this.appHelper.insertStringToActiveFile("\n");
-        });
-      } else {
-        this.appHelper.insertLinkToActiveFileBy(fileToOpened);
-      }
-      return;
+  async chooseCurrentSuggestion(leaf: LeafType): Promise<boolean> {
+    const item = this.chooser.values?.[this.chooser.selectedItem];
+    if (!item) {
+      return true;
     }
 
+    let fileToOpened = item.file;
     if (item.phantom) {
       fileToOpened = await this.app.vault.create(item.file.path, "");
     }
@@ -395,37 +393,17 @@ export class AnotherQuickSwitcherModal
         )
       : undefined;
 
-    let leaf: LeafType;
-    const key = (evt as KeyboardEvent).key;
-
-    if (evt.metaKey && key === "]") {
-      const urls = await this.appHelper.findExternalLinkUrls(fileToOpened);
-      if (urls.length > 0) {
-        activeWindow.open(urls[0]);
-      } else {
-        this.appHelper.openMarkdownFile(fileToOpened, {
-          leaf: "same-tab",
-          offset,
-        });
-      }
-      return;
-    }
-
-    if (evt.metaKey && key === "o") {
-      leaf = "new-window";
-    } else if (evt.metaKey && evt.shiftKey && key === "-") {
-      leaf = "new-pane-vertical";
-    } else if (evt.metaKey && !evt.shiftKey && key === "-") {
-      leaf = "new-pane-horizontal";
-    } else if (evt.metaKey && evt.altKey) {
-      leaf = "popup";
-    } else if (evt.metaKey && !evt.altKey) {
-      leaf = "new-tab";
-    } else {
-      leaf = "same-tab";
-    }
-
+    this.close();
     this.appHelper.openMarkdownFile(fileToOpened, { leaf: leaf, offset });
+
+    return false;
+  }
+
+  async onChooseSuggestion(
+    item: SuggestionItem,
+    evt: MouseEvent | KeyboardEvent
+  ): Promise<any> {
+    await this.chooseCurrentSuggestion("same-tab");
   }
 
   private showDebugLog(toMessage: () => string) {
@@ -467,27 +445,37 @@ export class AnotherQuickSwitcherModal
     }
 
     this.scope.register(["Mod"], "Enter", () =>
-      this.chooser.useSelectedItem({ metaKey: true })
+      this.chooseCurrentSuggestion("new-tab")
     );
-    this.scope.register(["Alt"], "Enter", () =>
-      this.chooser.useSelectedItem({ altKey: true })
-    );
-    this.scope.register(["Alt", "Shift"], "Enter", () =>
-      this.chooser.useSelectedItem({ altKey: true, shiftKey: true })
-    );
-    this.scope.register(["Mod"], "-", () => {
-      this.chooser.useSelectedItem({ metaKey: true, key: "-" });
+    this.scope.register(["Alt"], "Enter", () => {
+      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
+      if (!file) {
+        return;
+      }
+
+      this.close();
+      this.appHelper.insertLinkToActiveFileBy(file);
       return false;
     });
-    this.scope.register(["Mod", "Shift"], "-", () => {
-      this.chooser.useSelectedItem({ metaKey: true, shiftKey: true, key: "-" });
+    this.scope.register(["Alt", "Shift"], "Enter", () => {
+      this.close();
+      this.chooser.values?.forEach((x) => {
+        this.appHelper.insertLinkToActiveFileBy(x.file);
+        this.appHelper.insertStringToActiveFile("\n");
+      });
       return false;
     });
+    this.scope.register(["Mod"], "-", () =>
+      this.chooseCurrentSuggestion("new-pane-horizontal")
+    );
+    this.scope.register(["Mod", "Shift"], "-", () =>
+      this.chooseCurrentSuggestion("new-pane-vertical")
+    );
     this.scope.register(["Mod"], "o", () =>
-      this.chooser.useSelectedItem({ metaKey: true, key: "o" })
+      this.chooseCurrentSuggestion("new-window")
     );
     this.scope.register(["Mod", "Alt"], "Enter", () =>
-      this.chooser.useSelectedItem({ metaKey: true, altKey: true })
+      this.chooseCurrentSuggestion("popup")
     );
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
@@ -496,32 +484,28 @@ export class AnotherQuickSwitcherModal
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
       this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
         this.chooser.setSelectedItem(n - 1, evt);
-        this.chooser.useSelectedItem({});
+        return this.chooseCurrentSuggestion("same-tab");
       });
     });
 
-    this.scope.register(["Shift"], "Enter", () => {
-      if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "same-tab");
-      }
-    });
-    this.scope.register(["Shift", "Mod"], "Enter", () => {
-      if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "new-tab");
-      }
-    });
-    this.scope.register(["Shift", "Mod"], "o", () => {
-      if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "new-window");
-      }
-    });
-    this.scope.register(["Shift", "Mod", "Alt"], "Enter", () => {
-      if (this.searchQuery) {
-        this.handleCreateNew(this.searchQuery, "popup");
-      }
-    });
+    this.scope.register(["Shift"], "Enter", () =>
+      this.handleCreateNew(this.searchQuery, "same-tab")
+    );
+    this.scope.register(["Shift", "Mod"], "Enter", () =>
+      this.handleCreateNew(this.searchQuery, "new-tab")
+    );
+    this.scope.register(["Shift", "Mod"], "o", () =>
+      this.handleCreateNew(this.searchQuery, "new-window")
+    );
+    this.scope.register(["Shift", "Mod", "Alt"], "Enter", () =>
+      this.handleCreateNew(this.searchQuery, "popup")
+    );
     this.scope.register(["Shift", "Mod", "Alt"], "o", () => {
       this.close();
+      if (this.chooser.values == null) {
+        return;
+      }
+
       this.chooser.values
         .slice()
         .reverse()
@@ -565,8 +549,25 @@ export class AnotherQuickSwitcherModal
       this.inputEl.dispatchEvent(new Event("input"));
     });
 
-    this.scope.register(["Mod"], "]", () => {
-      this.chooser.useSelectedItem({ metaKey: true, key: "]" });
+    this.scope.register(["Mod"], "]", async () => {
+      const fileToOpened =
+        this.chooser.values?.[this.chooser.selectedItem]?.file;
+      if (!fileToOpened) {
+        return false;
+      }
+
+      this.close();
+
+      const urls = await this.appHelper.findExternalLinkUrls(fileToOpened);
+      if (urls.length > 0) {
+        activeWindow.open(urls[0]);
+      } else {
+        this.appHelper.openMarkdownFile(fileToOpened, {
+          leaf: "same-tab",
+        });
+      }
+
+      return false;
     });
   }
 }
