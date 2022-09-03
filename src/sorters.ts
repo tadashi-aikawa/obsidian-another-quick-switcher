@@ -15,6 +15,14 @@ export const sortPriorityList = [
 ] as const;
 export type SortPriority = typeof sortPriorityList[number];
 
+export function filterNoQueryPriorities(
+  priorities: SortPriority[]
+): SortPriority[] {
+  return priorities.filter((x) =>
+    ["Last opened", "Last modified", "Star", "Alphabetical"].includes(x)
+  );
+}
+
 function getComparator(
   priority: SortPriority
 ): (
@@ -211,7 +219,7 @@ function priorityToAlphabetical(
   return compare(
     a,
     b,
-    (x) => (x.matchResults[0].alias ? x.matchResults[0].alias : x.file.name),
+    (x) => (x.matchResults[0]?.alias ? x.matchResults[0].alias : x.file.name),
     "asc"
   );
 }

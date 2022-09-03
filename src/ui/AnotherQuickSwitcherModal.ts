@@ -17,7 +17,7 @@ import { SearchCommand, Settings } from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
-import { sort } from "../sorters";
+import { filterNoQueryPriorities, sort } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { excludeFormat } from "../utils/strings";
 import { MOD, quickResultSelectionModifier } from "src/keys";
@@ -248,9 +248,7 @@ export class AnotherQuickSwitcherModal
     if (!this.searchQuery.trim()) {
       const results = sort(
         this.ignoredItems,
-        this.command.sortPriorities.filter((x) =>
-          ["Last opened", "Last modified", "Star"].includes(x)
-        ),
+        filterNoQueryPriorities(this.command.sortPriorities),
         lastOpenFileIndexByPath
       )
         .slice(0, this.settings.maxNumberOfSuggestions)
