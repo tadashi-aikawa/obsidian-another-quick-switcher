@@ -85,7 +85,7 @@ You can use the following names as a `Sort priorities`.
 - Show all headers even after filtering to retain file structures in the brain
 - Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab` as default
 
-~~~~### 4. Grep
+### 4. Grep
 
 This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) that can call from anywhere. In other words, the `rg --version` command must be in a state to succeed everywhere.
 
@@ -98,7 +98,25 @@ This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) that can 
 
 ## For users who use earlier than v6.0.0
 
-v6.0.0 has some breaking changes related to settings.
+v6.0.0 has some breaking changes related to commands and settings.
+
+### Commands
+
+These commands were removed or renamed command ids.
+
+1. Normal search
+2. Recommended recent search
+3. Recent search
+4. Filename recent search
+5. Star Recent Search
+
+If you want to use commands precisely the same as before, please look to the old [README](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/blob/c54890d2375a556031a0c69256624eb0fe42e266/README.md#1%E2%83%A3-file-searches) and set the priorities as the same.
+
+> **Note**
+> Example for "Normal search"
+> ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/v6.0.0-migration.png)
+
+### Settings
 
 |                            Before                             |                              After                               |
 | ------------------------------------------------------------- | ---------------------------------------------------------------- |
