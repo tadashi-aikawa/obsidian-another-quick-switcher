@@ -154,10 +154,7 @@ function priorityToPrefixName(
   return compare(
     a,
     b,
-    (x) =>
-      x.matchResults.filter((x) =>
-        ["prefix-name", "word-perfect"].includes(x.type)
-      ).length,
+    (x) => x.matchResults.filter((x) => x.type === "prefix-name").length,
     "desc"
   );
 }
@@ -166,10 +163,7 @@ function priorityToName(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
   return compare(
     a,
     b,
-    (x) =>
-      x.matchResults.filter((x) =>
-        ["name", "prefix-name", "word-perfect"].includes(x.type)
-      ).length,
+    (x) => x.matchResults.filter((x) => x.type === "name").length,
     "desc"
   );
 }
