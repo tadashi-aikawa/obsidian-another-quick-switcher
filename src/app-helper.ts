@@ -151,7 +151,7 @@ export class AppHelper {
 
   async findExternalLinkUrls(file: TFile): Promise<string[]> {
     const content = await this.unsafeApp.vault.read(file);
-    const matches = Array.from(content.matchAll(/https?:\/\/.+/g));
+    const matches = Array.from(content.matchAll(/https?:\/\/[^ \n)]+/g));
     return matches.map((x) => x[0]);
   }
 
