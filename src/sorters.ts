@@ -142,7 +142,10 @@ function priorityToPerfectWord(
     a,
     b,
     (x: SuggestionItem) =>
-      x.matchResults.filter((x) => x.type === "word-perfect").length,
+      x.matchResults
+        .filter((x) => x.type === "word-perfect")
+        .map((x) => x.query)
+        .unique().length,
     "desc"
   );
 }
@@ -154,7 +157,11 @@ function priorityToPrefixName(
   return compare(
     a,
     b,
-    (x) => x.matchResults.filter((x) => x.type === "prefix-name").length,
+    (x) =>
+      x.matchResults
+        .filter((x) => x.type === "prefix-name")
+        .map((x) => x.query)
+        .unique().length,
     "desc"
   );
 }
@@ -163,7 +170,11 @@ function priorityToName(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
   return compare(
     a,
     b,
-    (x) => x.matchResults.filter((x) => x.type === "name").length,
+    (x) =>
+      x.matchResults
+        .filter((x) => x.type === "name")
+        .map((x) => x.query)
+        .unique().length,
     "desc"
   );
 }
@@ -172,7 +183,11 @@ function priorityToTag(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
   return compare(
     a,
     b,
-    (x) => x.matchResults.filter((x) => x.type === "tag").length,
+    (x) =>
+      x.matchResults
+        .filter((x) => x.type === "tag")
+        .map((x) => x.query)
+        .unique().length,
     "desc"
   );
 }
@@ -181,7 +196,11 @@ function priorityToHeader(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
   return compare(
     a,
     b,
-    (x) => x.matchResults.filter((x) => x.type === "header").length,
+    (x) =>
+      x.matchResults
+        .filter((x) => x.type === "header")
+        .map((x) => x.query)
+        .unique().length,
     "desc"
   );
 }
@@ -190,7 +209,11 @@ function priorityToLink(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
   return compare(
     a,
     b,
-    (x) => x.matchResults.filter((x) => x.type === "link").length,
+    (x) =>
+      x.matchResults
+        .filter((x) => x.type === "link")
+        .map((x) => x.query)
+        .unique().length,
     "desc"
   );
 }

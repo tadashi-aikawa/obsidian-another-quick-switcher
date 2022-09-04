@@ -28,7 +28,7 @@ export interface SuggestionItem {
 interface MatchQueryResult {
   type: MatchType;
   alias?: string;
-  hitWord?: string;
+  query: string;
   meta?: string[];
 }
 
@@ -49,17 +49,19 @@ function matchQuery(
       {
         type: tags.length > 0 ? "tag" : "not found",
         meta: tags,
+        query,
       },
     ];
   }
 
   const qs = query.split("/");
   const file = qs.pop()!;
-  const includeDir = qs.every((dir) =>
+  const dirs = qs;
+  const includeDir = dirs.every((dir) =>
     smartIncludes(item.file.parent.path, dir, isNormalizeAccentsDiacritics)
   );
   if (!includeDir) {
-    return [{ type: "not found" }];
+    return [{ type: "not found", query }];
   }
 
   let results: MatchQueryResult[] = [];
@@ -67,11 +69,11 @@ function matchQuery(
   if (
     item.tokens.some((t) => smartEquals(t, file, isNormalizeAccentsDiacritics))
   ) {
-    results.push({ type: "word-perfect", meta: [item.file.name] });
+    results.push({ type: "word-perfect", meta: [item.file.name], query });
   }
 
   if (smartStartsWith(item.file.name, file, isNormalizeAccentsDiacritics)) {
-    results.push({ type: "prefix-name", meta: [item.file.name] });
+    results.push({ type: "prefix-name", meta: [item.file.name], query });
   }
   const prefixNameMatchedAliases = item.aliases.filter((x) =>
     smartStartsWith(x, file, isNormalizeAccentsDiacritics)
@@ -81,11 +83,12 @@ function matchQuery(
       type: "prefix-name",
       meta: prefixNameMatchedAliases,
       alias: minBy(prefixNameMatchedAliases, (x) => x.length),
+      query,
     });
   }
 
   if (smartIncludes(item.file.name, file, isNormalizeAccentsDiacritics)) {
-    results.push({ type: "name", meta: [item.file.name] });
+    results.push({ type: "name", meta: [item.file.name], query });
   }
   const nameMatchedAliases = item.aliases.filter((x) =>
     smartIncludes(x, file, isNormalizeAccentsDiacritics)
@@ -95,11 +98,12 @@ function matchQuery(
       type: "name",
       meta: nameMatchedAliases,
       alias: minBy(nameMatchedAliases, (x) => x.length),
+      query,
     });
   }
 
-  if (smartIncludes(item.file.path, file, isNormalizeAccentsDiacritics)) {
-    results.push({ type: "directory", meta: [item.file.path] });
+  if (smartIncludes(dirs.join("/"), file, isNormalizeAccentsDiacritics)) {
+    results.push({ type: "directory", meta: [item.file.path], query });
   }
 
   if (searchByHeaders) {
@@ -110,6 +114,7 @@ function matchQuery(
       results.push({
         type: "header",
         meta: headers,
+        query,
       });
     }
   }
@@ -122,6 +127,7 @@ function matchQuery(
       results.push({
         type: "link",
         meta: links,
+        query,
       });
     }
   }
@@ -134,11 +140,12 @@ function matchQuery(
       results.push({
         type: "tag",
         meta: tags,
+        query,
       });
     }
   }
 
-  return results.length === 0 ? [{ type: "not found" }] : results;
+  return results.length === 0 ? [{ type: "not found", query }] : results;
 }
 
 function matchQueryAll(

@@ -77,8 +77,9 @@ function createDescriptionDiv(
   item: SuggestionItem,
   aliases: string[],
   tags: string[],
-  links: string[],
+  countByLink: { [link: string]: number },
   countByHeader: { [header: string]: number },
+  linkResultsNum: number,
   headerResultsNum: number,
   options: Options
 ): Elements["descriptionDiv"] {
@@ -120,20 +121,29 @@ function createDescriptionDiv(
     descriptionDiv.appendChild(tagsDiv);
   }
 
-  if (links.length > 0) {
+  if (Object.keys(countByLink).length > 0) {
     const linksDiv = createDiv({
       cls: "another-quick-switcher__item__description",
     });
-    links.forEach((x) => {
-      const linksSpan = createSpan({
-        cls: "another-quick-switcher__item__description__link",
+
+    Object.entries(countByLink)
+      .map(([link, n]) => ({ link, n }))
+      .sort((a, b) => b.n - a.n)
+      .forEach(({ link, n }) => {
+        const linkSpan = createSpan({
+          cls: [
+            "another-quick-switcher__item__description__link",
+            n !== linkResultsNum
+              ? "another-quick-switcher__item__description__link__dimmed"
+              : "",
+          ],
+        });
+        linkSpan.insertAdjacentHTML("beforeend", LINK);
+        linkSpan.appendChild(
+          createSpan({ text: link, attr: { style: "padding-left: 3px" } })
+        );
+        linksDiv.appendChild(linkSpan);
       });
-      linksSpan.insertAdjacentHTML("beforeend", LINK);
-      linksSpan.appendChild(
-        createSpan({ text: x, attr: { style: "padding-left: 3px" } })
-      );
-      linksDiv.appendChild(linksSpan);
-    });
     descriptionDiv.appendChild(linksDiv);
   }
 
@@ -178,10 +188,10 @@ export function createElements(
     item.matchResults.filter((res) => res.type === "tag"),
     (x) => x.meta ?? []
   );
-  const links = uniqFlatMap(
-    item.matchResults.filter((res) => res.type === "link"),
-    (x) => x.meta ?? []
-  );
+
+  const linkResults = item.matchResults.filter((res) => res.type === "link");
+  const linkResultsNum = linkResults.length;
+  const countByLink = count(linkResults.flatMap((xs) => uniq(xs.meta ?? [])));
 
   const headerResults = item.matchResults.filter(
     (res) => res.type === "header"
@@ -196,7 +206,7 @@ export function createElements(
   if (
     aliases.length === 0 &&
     tags.length === 0 &&
-    links.length === 0 &&
+    countByLink === {} &&
     countByHeader === {}
   ) {
     return { itemDiv };
@@ -205,8 +215,9 @@ export function createElements(
     item,
     aliases,
     tags,
-    links,
+    countByLink,
     countByHeader,
+    linkResultsNum,
     headerResultsNum,
     options
   );

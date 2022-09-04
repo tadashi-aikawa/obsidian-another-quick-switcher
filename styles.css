@@ -211,6 +211,10 @@
     margin-right: 5px;
 }
 
+.another-quick-switcher__item__description__link__dimmed {
+    opacity: 0.5;
+}
+
 .another-quick-switcher__item__description__header {
     display: inline-flex;
     align-items: center;
