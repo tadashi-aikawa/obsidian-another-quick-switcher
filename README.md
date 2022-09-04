@@ -44,6 +44,8 @@ Custom searches enables you to create your original search commands.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/search-commands-setting.png)
 
+#### Sort priorities
+
 You can use the following names as a `Sort priorities`.
 
 | Name                  | Description                                           |
