@@ -573,7 +573,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       "Valid sort priorities refer to ",
       createEl("a", {
         text: "README",
-        href: "https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/blob/master/README.md#%EF%B8%8Ffeatures",
+        href: "https://github.com/tadashi-aikawa/obsidian-another-quick-switcher#sort-priorities",
       })
     );
 
