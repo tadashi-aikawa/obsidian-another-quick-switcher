@@ -1,5 +1,6 @@
 import { SuggestionItem } from "./matcher";
 import { intersection } from "./utils/collection-helper";
+import { excludeEmoji } from "./utils/strings";
 
 export const sortPriorityList = [
   "Header match",
@@ -225,7 +226,7 @@ function priorityToLength(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
     (x) =>
       x.matchResults[0].alias
         ? x.matchResults[0].alias.length
-        : x.file.name.length,
+        : x.file.basename.length,
     "asc"
   );
 }
@@ -254,28 +255,27 @@ function priorityToStar(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
   return compare(a, b, (x) => Number(x.starred), "desc");
 }
 
+const toComparedAlphabetical = (item: SuggestionItem): string =>
+  excludeEmoji(item.matchResults[0]?.alias ?? item.file.basename);
+
 function priorityToAlphabetical(
   a: SuggestionItem,
   b: SuggestionItem
 ): 0 | -1 | 1 {
-  return compare(
-    a,
-    b,
-    (x) => (x.matchResults[0]?.alias ? x.matchResults[0].alias : x.file.name),
-    "asc"
-  );
+  return toComparedAlphabetical(a).localeCompare(toComparedAlphabetical(b)) as
+    | 0
+    | -1
+    | 1;
 }
 
 function priorityToAlphabeticalReverse(
   a: SuggestionItem,
   b: SuggestionItem
 ): 0 | -1 | 1 {
-  return compare(
-    a,
-    b,
-    (x) => (x.matchResults[0]?.alias ? x.matchResults[0].alias : x.file.name),
-    "desc"
-  );
+  return toComparedAlphabetical(b).localeCompare(toComparedAlphabetical(a)) as
+    | 0
+    | -1
+    | 1;
 }
 
 function priorityToTags(

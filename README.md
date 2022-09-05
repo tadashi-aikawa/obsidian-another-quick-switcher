@@ -48,19 +48,19 @@ Custom searches enables you to create your original search commands.
 
 You can use the following names as a `Sort priorities`.
 
-| Name                  | Description                                           |
-| --------------------- | ----------------------------------------------------- |
-| Perfect word match    | A query matches perfectly with a word in the filename |
-| Prefix name match     | The filename starts with a query                      |
-| Name match            | The filename includes a query                         |
-| Tag match             | The tag name in the file includes a query             |
-| Header match          | The header name in the file includes a query          |
-| Link match            | The internal link name in the file includes a query   |
-| Length                | Length of the filename or alias                       |
-| Last opened           | The time the file opened last                         |
-| Last modified         | The time the file modified last                       |
-| Star                  | The file has a star                                   |
-| Alphabetical          | Filename or alias order by alphabetically ascend      |
+| Name               | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| Perfect word match | A query matches perfectly with a word in the file name |
+| Prefix name match  | The file name or alias starts with a query             |
+| Name match         | The file name or alias includes a query                |
+| Tag match          | The tag name in the file includes a query              |
+| Header match       | The header name in the file includes a query           |
+| Link match         | The internal link name in the file includes a query    |
+| Length             | Length of the file name or alias                       |
+| Last opened        | The time the file opened last                          |
+| Last modified      | The time the file modified last                        |
+| Star               | The file has a star                                    |
+| Alphabetical       | File name or alias order by alphabetically ascend      |
 
 > **Warning**
 > Please don't forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
@@ -68,10 +68,10 @@ You can use the following names as a `Sort priorities`.
 
 #### Only v7.0.0-beta
 
-| Name                  | Description                                           |
-| --------------------- | ----------------------------------------------------- |
-| Alphabetical reverse  | Filename or alias order by alphabetically descend     |
-| (Tags split by comma) | The file has specific tags                            |
+| Name                  | Description                                        |
+| --------------------- |----------------------------------------------------|
+| Alphabetical reverse  | File name or alias order by alphabetically descend |
+| (Tags split by comma) | The file has specific tags                         |
 
 > **Note**
 > Examples of `(Tags spit by comma)` are `#hoge`, `#hoge,#huga`, and so on.
