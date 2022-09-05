@@ -56,9 +56,9 @@ export interface Settings {
 }
 
 const defaultSearchBy = () => ({
-  tag: true,
-  link: true,
-  header: true,
+  tag: false,
+  link: false,
+  header: false,
 });
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -86,7 +86,7 @@ export const DEFAULT_SETTINGS: Settings = {
       },
       defaultInput: "",
       commandPrefix: "",
-      sortPriorities: ["Name match", "Star", "Last opened", "Last modified"],
+      sortPriorities: ["Name match", "Last opened", "Last modified"],
       includePrefixPathPatterns: [],
       excludePrefixPathPatterns: [],
       expand: true,
@@ -94,7 +94,11 @@ export const DEFAULT_SETTINGS: Settings = {
     },
     {
       name: "Landmark search",
-      searchBy: defaultSearchBy(),
+      searchBy: {
+        tag: true,
+        link: true,
+        header: true,
+      },
       defaultInput: "",
       commandPrefix: ":l ",
       sortPriorities: [
@@ -123,6 +127,24 @@ export const DEFAULT_SETTINGS: Settings = {
       sortPriorities: [
         "Prefix name match",
         "Alphabetical",
+        "Last opened",
+        "Last modified",
+      ],
+      includePrefixPathPatterns: [],
+      excludePrefixPathPatterns: [],
+      expand: false,
+      isBacklinkSearch: false,
+    },{
+      name: "Star search",
+      searchBy: {
+        tag: false,
+        link: false,
+        header: false,
+      },
+      defaultInput: "",
+      commandPrefix: ":s ",
+      sortPriorities: [
+        "Star",
         "Last opened",
         "Last modified",
       ],
