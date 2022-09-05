@@ -55,10 +55,20 @@ export interface Settings {
   showLogAboutPerformanceInConsole: boolean;
 }
 
-const defaultSearchBy = () => ({
-  tag: false,
-  link: false,
-  header: false,
+export const createDefaultSearchCommand = (): SearchCommand => ({
+  name: "",
+  searchBy: {
+    tag: false,
+    link: false,
+    header: false,
+  },
+  defaultInput: "",
+  commandPrefix: "",
+  sortPriorities: [],
+  includePrefixPathPatterns: [],
+  excludePrefixPathPatterns: [],
+  expand: true,
+  isBacklinkSearch: false,
 });
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -134,7 +144,8 @@ export const DEFAULT_SETTINGS: Settings = {
       excludePrefixPathPatterns: [],
       expand: false,
       isBacklinkSearch: false,
-    },{
+    },
+    {
       name: "Star search",
       searchBy: {
         tag: false,
@@ -143,11 +154,7 @@ export const DEFAULT_SETTINGS: Settings = {
       },
       defaultInput: "",
       commandPrefix: ":s ",
-      sortPriorities: [
-        "Star",
-        "Last opened",
-        "Last modified",
-      ],
+      sortPriorities: ["Star", "Last opened", "Last modified"],
       includePrefixPathPatterns: [],
       excludePrefixPathPatterns: [],
       expand: false,
@@ -181,8 +188,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Another Quick Switcher - Settings" });
 
-    this.fillEmptyRequiredValues();
-
     this.addGeneralSettings(containerEl);
     this.addAppearanceSettings(containerEl);
     this.addHotKeysInDialogSettings(containerEl);
@@ -193,24 +198,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addMoveSettings(containerEl);
 
     this.addDebugSettings(containerEl);
-  }
-
-  /**
-   * For backward compatibilities
-   */
-  private fillEmptyRequiredValues() {
-    this.plugin.settings.hideHotkeyGuides ??= false;
-    this.plugin.settings.backLinkExcludePrefixPathPatterns ??= [];
-    this.plugin.settings.moveFileExcludePrefixPathPatterns ??= [];
-
-    this.plugin.settings.searchCommands.forEach((_, i) => {
-      const command = this.plugin.settings.searchCommands[i];
-
-      command.searchBy ??= defaultSearchBy();
-      command.includePrefixPathPatterns ??= [];
-      command.excludePrefixPathPatterns ??= [];
-      command.expand ??= true;
-    });
   }
 
   private addGeneralSettings(containerEl: HTMLElement) {
@@ -376,17 +363,9 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             "another-quick-switcher__settings__search-command__add-button"
           )
           .onClick(async (_) => {
-            this.plugin.settings.searchCommands.push({
-              name: "",
-              searchBy: defaultSearchBy(),
-              defaultInput: "",
-              commandPrefix: "",
-              sortPriorities: [],
-              includePrefixPathPatterns: [],
-              excludePrefixPathPatterns: [],
-              expand: true,
-              isBacklinkSearch: false,
-            });
+            this.plugin.settings.searchCommands.push(
+              createDefaultSearchCommand()
+            );
             this.display();
           });
       })

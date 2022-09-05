@@ -2,10 +2,12 @@ import { Plugin } from "obsidian";
 import { createCommands, showSearchDialog } from "./commands";
 import {
   AnotherQuickSwitcherSettingTab,
+  createDefaultSearchCommand,
   DEFAULT_SETTINGS,
   Settings,
 } from "./settings";
 import { AppHelper } from "./app-helper";
+import merge from "ts-deepmerge";
 
 export default class AnotherQuickSwitcher extends Plugin {
   settings: Settings;
@@ -24,8 +26,22 @@ export default class AnotherQuickSwitcher extends Plugin {
     createCommands(this.app, this.settings).forEach((x) => this.addCommand(x));
   }
 
-  async loadSettings() {
-    this.settings = { ...DEFAULT_SETTINGS, ...(await this.loadData()) };
+  async loadSettings(): Promise<void> {
+    const currentSettings = await this.loadData();
+    this.settings = merge.withOptions(
+      { mergeArrays: false },
+      DEFAULT_SETTINGS,
+      currentSettings ?? {}
+    );
+    this.settings.searchCommands.forEach((_, i) => {
+      this.settings.searchCommands[i] = merge.withOptions(
+        { mergeArrays: false },
+        createDefaultSearchCommand(),
+        {
+          ...this.settings.searchCommands[i],
+        }
+      );
+    });
   }
 
   async saveSettings() {

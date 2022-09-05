@@ -30,5 +30,8 @@
   },
   "volta": {
     "node": "16.13.0"
+  },
+  "dependencies": {
+    "ts-deepmerge": "^3.0.0"
   }
 }
