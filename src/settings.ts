@@ -88,18 +88,38 @@ export const DEFAULT_SETTINGS: Settings = {
   // Searches
   searchCommands: [
     {
-      name: "Recommended search",
+      name: "Recent search",
       searchBy: {
         tag: true,
         header: false,
         link: false,
       },
       defaultInput: "",
-      commandPrefix: "",
+      commandPrefix: ":e ",
       sortPriorities: ["Name match", "Last opened", "Last modified"],
       includePrefixPathPatterns: [],
       excludePrefixPathPatterns: [],
       expand: true,
+      isBacklinkSearch: false,
+    },
+    {
+      name: "File name search",
+      searchBy: {
+        tag: false,
+        link: false,
+        header: false,
+      },
+      defaultInput: "",
+      commandPrefix: ":f ",
+      sortPriorities: [
+        "Prefix name match",
+        "Alphabetical",
+        "Last opened",
+        "Last modified",
+      ],
+      includePrefixPathPatterns: [],
+      excludePrefixPathPatterns: [],
+      expand: false,
       isBacklinkSearch: false,
     },
     {
@@ -117,26 +137,6 @@ export const DEFAULT_SETTINGS: Settings = {
         "Tag match",
         "Header match",
         "Link match",
-        "Last opened",
-        "Last modified",
-      ],
-      includePrefixPathPatterns: [],
-      excludePrefixPathPatterns: [],
-      expand: false,
-      isBacklinkSearch: false,
-    },
-    {
-      name: "Title search",
-      searchBy: {
-        tag: false,
-        link: false,
-        header: false,
-      },
-      defaultInput: "",
-      commandPrefix: ":t ",
-      sortPriorities: [
-        "Prefix name match",
-        "Alphabetical",
         "Last opened",
         "Last modified",
       ],
