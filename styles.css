@@ -238,6 +238,11 @@
     width: 300px;
 }
 
+.another-quick-switcher__settings__danger .setting-item-name {
+    color: red;
+    font-weight: bold;
+}
+
 .another-quick-switcher__settings__warning {
     color: darkorange;
     text-align: right;

@@ -71,6 +71,82 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   isBacklinkSearch: false,
 });
 
+export const createPreSettingSearchCommands = (): SearchCommand[] => [
+  {
+    name: "Recent search",
+    searchBy: {
+      tag: true,
+      header: false,
+      link: false,
+    },
+    defaultInput: "",
+    commandPrefix: ":e ",
+    sortPriorities: ["Name match", "Last opened", "Last modified"],
+    includePrefixPathPatterns: [],
+    excludePrefixPathPatterns: [],
+    expand: true,
+    isBacklinkSearch: false,
+  },
+  {
+    name: "File name search",
+    searchBy: {
+      tag: false,
+      link: false,
+      header: false,
+    },
+    defaultInput: "",
+    commandPrefix: ":f ",
+    sortPriorities: [
+      "Prefix name match",
+      "Alphabetical",
+      "Last opened",
+      "Last modified",
+    ],
+    includePrefixPathPatterns: [],
+    excludePrefixPathPatterns: [],
+    expand: false,
+    isBacklinkSearch: false,
+  },
+  {
+    name: "Landmark search",
+    searchBy: {
+      tag: true,
+      link: true,
+      header: true,
+    },
+    defaultInput: "",
+    commandPrefix: ":l ",
+    sortPriorities: [
+      "Prefix name match",
+      "Name match",
+      "Tag match",
+      "Header match",
+      "Link match",
+      "Last opened",
+      "Last modified",
+    ],
+    includePrefixPathPatterns: [],
+    excludePrefixPathPatterns: [],
+    expand: false,
+    isBacklinkSearch: false,
+  },
+  {
+    name: "Star search",
+    searchBy: {
+      tag: false,
+      link: false,
+      header: false,
+    },
+    defaultInput: "",
+    commandPrefix: ":s ",
+    sortPriorities: ["Star", "Last opened", "Last modified"],
+    includePrefixPathPatterns: [],
+    excludePrefixPathPatterns: [],
+    expand: false,
+    isBacklinkSearch: false,
+  },
+];
+
 export const DEFAULT_SETTINGS: Settings = {
   searchDelayMilliSeconds: 0,
   maxNumberOfSuggestions: 50,
@@ -86,81 +162,7 @@ export const DEFAULT_SETTINGS: Settings = {
   // Hot keys in dialog
   userAltInsteadOfModForQuickResultSelection: false,
   // Searches
-  searchCommands: [
-    {
-      name: "Recent search",
-      searchBy: {
-        tag: true,
-        header: false,
-        link: false,
-      },
-      defaultInput: "",
-      commandPrefix: ":e ",
-      sortPriorities: ["Name match", "Last opened", "Last modified"],
-      includePrefixPathPatterns: [],
-      excludePrefixPathPatterns: [],
-      expand: true,
-      isBacklinkSearch: false,
-    },
-    {
-      name: "File name search",
-      searchBy: {
-        tag: false,
-        link: false,
-        header: false,
-      },
-      defaultInput: "",
-      commandPrefix: ":f ",
-      sortPriorities: [
-        "Prefix name match",
-        "Alphabetical",
-        "Last opened",
-        "Last modified",
-      ],
-      includePrefixPathPatterns: [],
-      excludePrefixPathPatterns: [],
-      expand: false,
-      isBacklinkSearch: false,
-    },
-    {
-      name: "Landmark search",
-      searchBy: {
-        tag: true,
-        link: true,
-        header: true,
-      },
-      defaultInput: "",
-      commandPrefix: ":l ",
-      sortPriorities: [
-        "Prefix name match",
-        "Name match",
-        "Tag match",
-        "Header match",
-        "Link match",
-        "Last opened",
-        "Last modified",
-      ],
-      includePrefixPathPatterns: [],
-      excludePrefixPathPatterns: [],
-      expand: false,
-      isBacklinkSearch: false,
-    },
-    {
-      name: "Star search",
-      searchBy: {
-        tag: false,
-        link: false,
-        header: false,
-      },
-      defaultInput: "",
-      commandPrefix: ":s ",
-      sortPriorities: ["Star", "Last opened", "Last modified"],
-      includePrefixPathPatterns: [],
-      excludePrefixPathPatterns: [],
-      expand: false,
-      isBacklinkSearch: false,
-    },
-  ],
+  searchCommands: createPreSettingSearchCommands(),
   // Back link search
   backLinkExcludePrefixPathPatterns: [],
   // Header search in file
@@ -175,6 +177,7 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   plugin: AnotherQuickSwitcher;
+  resetLock = true;
 
   constructor(app: App, plugin: AnotherQuickSwitcher) {
     super(app, plugin);
@@ -404,6 +407,38 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             // noinspection ObjectAllocationIgnored
             new Notice("Save and reload commands");
           });
+      });
+
+    new Setting(containerEl)
+      .setName("Reset all search commands")
+      .setClass("another-quick-switcher__settings__danger")
+      .setDesc(
+        "It means your customized commands will be removed. If you reset unintentionally, you can restore the search commands by closing settings and Obsidian immediately, then restart Obsidian."
+      )
+      .addToggle((cb) => {
+        cb.setValue(this.resetLock).onChange((lock) => {
+          this.resetLock = lock;
+          this.display();
+        });
+        if (this.resetLock) {
+          cb.setTooltip(
+            "Turn off the lock, if you want to reset all search commands"
+          );
+        }
+      })
+      .addButton((btn) => {
+        btn
+          .setButtonText("Reset")
+          .setTooltip("Reset all search commands!!")
+          .setDisabled(this.resetLock)
+          .onClick(() => {
+            this.plugin.settings.searchCommands =
+              createPreSettingSearchCommands();
+            this.display();
+          });
+        if (!this.resetLock) {
+          btn.setCta();
+        }
       });
   }
 
