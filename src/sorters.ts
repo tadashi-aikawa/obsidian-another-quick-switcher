@@ -6,8 +6,8 @@ export const sortPriorityList = [
   "Header match",
   "Last modified",
   "Last opened",
-  "Created",
-  "Created reverse",
+  "Created earliest",
+  "Created latest",
   "Length",
   "Link match",
   "Name match",
@@ -34,8 +34,8 @@ export function filterNoQueryPriorities(
       [
         "Last opened",
         "Last modified",
-        "Created",
-        "Created reverse",
+        "Created earliest",
+        "Created latest",
         "Star",
         "Alphabetical",
         "Alphabetical reverse",
@@ -57,10 +57,10 @@ function getComparator(
       return priorityToLastModified;
     case "Last opened":
       return priorityToLastOpened;
-    case "Created":
-      return priorityToCreated;
-    case "Created reverse":
-      return priorityToCreatedReverse;
+    case "Created latest":
+      return priorityToCreatedLatest;
+    case "Created earliest":
+      return priorityToCreatedEarliest;
     case "Length":
       return priorityToLength;
     case "Link match":
@@ -259,11 +259,14 @@ function priorityToLastModified(
   return compare(a, b, (x) => x.file.stat.mtime, "desc");
 }
 
-function priorityToCreated(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
+function priorityToCreatedLatest(
+  a: SuggestionItem,
+  b: SuggestionItem
+): 0 | -1 | 1 {
   return compare(a, b, (x) => x.file.stat.ctime, "desc");
 }
 
-function priorityToCreatedReverse(
+function priorityToCreatedEarliest(
   a: SuggestionItem,
   b: SuggestionItem
 ): 0 | -1 | 1 {
