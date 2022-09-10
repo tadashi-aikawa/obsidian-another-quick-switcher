@@ -102,7 +102,9 @@ function matchQuery(
     });
   }
 
-  if (smartIncludes(dirs.join("/"), file, isNormalizeAccentsDiacritics)) {
+  if (
+    smartIncludes(item.file.parent.path, query, isNormalizeAccentsDiacritics)
+  ) {
     results.push({ type: "directory", meta: [item.file.path], query });
   }
 
