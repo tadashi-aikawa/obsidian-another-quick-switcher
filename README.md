@@ -69,8 +69,10 @@ You can use the following names as a `Sort priorities`.
 #### Only v7.0.0-beta
 
 | Name                  | Description                                        |
-| --------------------- |----------------------------------------------------|
+| --------------------- | -------------------------------------------------- |
 | Alphabetical reverse  | File name or alias order by alphabetically descend |
+| Created latest        | File creation date from the latest to the earliest |
+| Created earliest      | File creation date from the earliest to the latest |
 | (Tags split by comma) | The file has specific tags                         |
 
 > **Note**

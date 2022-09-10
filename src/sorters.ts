@@ -6,6 +6,8 @@ export const sortPriorityList = [
   "Header match",
   "Last modified",
   "Last opened",
+  "Created",
+  "Created reverse",
   "Length",
   "Link match",
   "Name match",
@@ -32,6 +34,8 @@ export function filterNoQueryPriorities(
       [
         "Last opened",
         "Last modified",
+        "Created",
+        "Created reverse",
         "Star",
         "Alphabetical",
         "Alphabetical reverse",
@@ -53,6 +57,10 @@ function getComparator(
       return priorityToLastModified;
     case "Last opened":
       return priorityToLastOpened;
+    case "Created":
+      return priorityToCreated;
+    case "Created reverse":
+      return priorityToCreatedReverse;
     case "Length":
       return priorityToLength;
     case "Link match":
@@ -249,6 +257,23 @@ function priorityToLastModified(
   b: SuggestionItem
 ): 0 | -1 | 1 {
   return compare(a, b, (x) => x.file.stat.mtime, "desc");
+}
+
+function priorityToCreated(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
+  return compare(a, b, (x) => x.file.stat.ctime, "desc");
+}
+
+function priorityToCreatedReverse(
+  a: SuggestionItem,
+  b: SuggestionItem
+): 0 | -1 | 1 {
+  // ctime === 0 means Phantom files
+  return compare(
+    a,
+    b,
+    (x) => x.file.stat.ctime || Number.MAX_SAFE_INTEGER,
+    "asc"
+  );
 }
 
 function priorityToStar(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
