@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky install",
+    "pre:commit": "tsc -noEmit -skipLibCheck && npm run test"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +17,7 @@
     "builtin-modules": "^3.3.0",
     "esbuild": "^0.15.7",
     "esbuild-jest": "^0.5.0",
+    "husky": "^8.0.1",
     "jest": "^29.0.3",
     "obsidian": "^0.16.0",
     "prettier": "^2.7.1",
