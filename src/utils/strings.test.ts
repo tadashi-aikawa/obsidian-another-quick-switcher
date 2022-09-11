@@ -7,6 +7,7 @@ import {
   smartIncludes,
   smartStartsWith,
 } from "./strings";
+import { describe, expect, test } from "@jest/globals";
 
 describe.each`
   text        | expected
@@ -47,7 +48,7 @@ describe.each`
   });
 });
 
-describe.each`
+describe.each<{ text: string; query: string; expected: boolean }>`
   text            | query      | expected
   ${"abcd"}       | ${"bc"}    | ${true}
   ${"abcd"}       | ${"BC"}    | ${true}
@@ -63,7 +64,7 @@ describe.each`
   });
 });
 
-describe.each`
+describe.each<{ text: string; query: string; expected: boolean }>`
   text            | query      | expected
   ${"abcd"}       | ${"ab"}    | ${true}
   ${"abcd"}       | ${"AB"}    | ${true}
@@ -83,7 +84,7 @@ describe.each`
   });
 });
 
-describe.each`
+describe.each<{ text: string; query: string; expected: boolean }>`
   text            | query      | expected
   ${"abcd"}       | ${"ab"}    | ${false}
   ${"abcd"}       | ${"AB"}    | ${false}

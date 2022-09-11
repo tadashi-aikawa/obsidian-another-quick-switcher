@@ -1,6 +1,7 @@
 import { basename, dirname, extname } from "./path";
+import { describe, expect, test } from "@jest/globals";
 
-describe.each`
+describe.each<{ path: string; ext?: string; expected: string }>`
   path               | ext          | expected
   ${"a\\b\\c.txt"}   | ${undefined} | ${"c.txt"}
   ${"a/b/c.txt"}     | ${undefined} | ${"c.txt"}
