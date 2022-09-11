@@ -14,6 +14,7 @@ import {
 } from "obsidian";
 import { flatten, uniq } from "./utils/collection-helper";
 import { basename, dirname, extname } from "./utils/path";
+import { ExhaustiveError } from "./errors";
 
 interface UnsafeAppInterface {
   internalPlugins: {

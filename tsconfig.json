@@ -11,8 +11,9 @@
     "strictPropertyInitialization": false,
     "moduleResolution": "node",
     "importHelpers": true,
+    "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es5", "scripthost", "es2020"]
+    "lib": ["dom", "es5", "es6", "es7"]
   },
   "include": ["**/*.ts"]
 }

@@ -206,8 +206,8 @@ export function createElements(
   if (
     aliases.length === 0 &&
     tags.length === 0 &&
-    countByLink === {} &&
-    countByHeader === {}
+    countByLink == {} &&
+    countByHeader == {}
   ) {
     return { itemDiv };
   }
