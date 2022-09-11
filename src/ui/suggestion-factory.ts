@@ -206,8 +206,8 @@ export function createElements(
   if (
     aliases.length === 0 &&
     tags.length === 0 &&
-    countByLink == {} &&
-    countByHeader == {}
+    Object.keys(countByLink).length == 0 &&
+    Object.keys(countByHeader).length == 0
   ) {
     return { itemDiv };
   }
