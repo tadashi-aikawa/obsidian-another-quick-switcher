@@ -3,6 +3,7 @@ import { App, Command, Notice, Platform } from "obsidian";
 import { SearchCommand, Settings } from "./settings";
 import { MoveModal } from "./ui/MoveModal";
 import { HeaderModal } from "./ui/HeaderModal";
+import { LinkModal } from "./ui/LinkModal";
 import { GrepModal } from "./ui/GrepModal";
 import { existsRg } from "./utils/ripgrep";
 
@@ -58,6 +59,20 @@ export function showHeaderDialog(
   modal.open();
 }
 
+
+export function showLinkDialog(
+  app: App,
+  settings: Settings,
+  floating: boolean
+) {
+  if (!app.workspace.getActiveFile()) {
+    return;
+  }
+
+  const modal = new LinkModal(app, settings, floating);
+  modal.open();
+}
+
 export function createCommands(app: App, settings: Settings): Command[] {
   return [
     {
@@ -104,6 +119,26 @@ export function createCommands(app: App, settings: Settings): Command[] {
           return Boolean(app.workspace.getActiveFile());
         }
         showHeaderDialog(app, settings, true);
+      },
+    },
+    {
+      id: "link-search-in-file",
+      name: "link search in file",
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return Boolean(app.workspace.getActiveFile());
+        }
+        showLinkDialog(app, settings, false);
+      },
+    },
+    {
+      id: "link-floating-search-in-file",
+      name: "link floating search in file",
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return Boolean(app.workspace.getActiveFile());
+        }
+        showLinkDialog(app, settings, true);
       },
     },
     {

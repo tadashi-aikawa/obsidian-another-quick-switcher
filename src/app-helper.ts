@@ -132,6 +132,17 @@ export class AppHelper {
     );
   }
 
+  getOutgoingLinksInActiveFile(): LinkCache[] {
+    const activeFile = this.getActiveFile();
+    if (!activeFile) {
+      return [];
+    }
+
+    return (
+      this.unsafeApp.metadataCache.getFileCache(activeFile)?.links ?? []
+    );
+  }
+
   getFolders(): TFolder[] {
     return this.unsafeApp.vault
       .getAllLoadedFiles()
