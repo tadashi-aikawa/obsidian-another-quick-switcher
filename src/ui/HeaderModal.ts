@@ -238,6 +238,7 @@ export class HeaderModal
       this.inputEl.value = "";
       // Necessary to rerender suggestions
       this.inputEl.dispatchEvent(new Event("input"));
+      return false;
     });
 
     this.scope.keys
@@ -285,33 +286,39 @@ export class HeaderModal
       (this.settings.headerSearchKeyBindArrowUpDown === "navigate"
         ? navigateNext
         : moveToNextHit)(evt);
+      return false;
     });
     this.scope.register([], "ArrowUp", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindArrowUpDown === "navigate"
         ? navigatePrevious
         : moveToPreviousHit)(evt);
+      return false;
     });
 
     this.scope.register(["Mod"], "J", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindVim === "navigate"
         ? navigateNext
         : moveToNextHit)(evt);
+      return false;
     });
     this.scope.register(["Mod"], "K", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindVim === "navigate"
         ? navigatePrevious
         : moveToPreviousHit)(evt);
+      return false;
     });
 
     this.scope.register(["Mod"], "N", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindEmacs === "navigate"
         ? navigateNext
         : moveToNextHit)(evt);
+      return false;
     });
     this.scope.register(["Mod"], "P", (evt: KeyboardEvent) => {
       (this.settings.headerSearchKeyBindEmacs === "navigate"
         ? navigatePrevious
         : moveToPreviousHit)(evt);
+      return false;
     });
 
     this.scope.register([], "Tab", (evt) => {
@@ -319,12 +326,14 @@ export class HeaderModal
       (this.settings.headerSearchKeyBindTab === "navigate"
         ? navigateNext
         : moveToNextHit)(evt);
+      return false;
     });
     this.scope.register(["Shift"], "Tab", (evt) => {
       evt.preventDefault();
       (this.settings.headerSearchKeyBindTab === "navigate"
         ? navigatePrevious
         : moveToPreviousHit)(evt);
+      return false;
     });
   }
 }

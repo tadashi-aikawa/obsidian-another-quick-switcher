@@ -186,17 +186,21 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
       document.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown" })
       );
+      return false;
     });
     this.scope.register(["Mod"], "P", () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+      return false;
     });
     this.scope.register(["Mod"], "J", () => {
       document.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown" })
       );
+      return false;
     });
     this.scope.register(["Mod"], "K", () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+      return false;
     });
   }
 }

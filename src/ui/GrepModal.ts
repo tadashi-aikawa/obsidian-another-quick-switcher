@@ -275,9 +275,10 @@ export class GrepModal
       ]);
     }
 
-    this.scope.register(["Mod"], "Enter", () =>
-      this.chooser.useSelectedItem({ metaKey: true })
-    );
+    this.scope.register(["Mod"], "Enter", () => {
+      this.chooser.useSelectedItem({ metaKey: true });
+      return false;
+    });
     this.scope.register(["Mod"], "-", () => {
       this.chooser.useSelectedItem({ metaKey: true, key: "-" });
       return false;
@@ -286,12 +287,14 @@ export class GrepModal
       this.chooser.useSelectedItem({ metaKey: true, shiftKey: true, key: "-" });
       return false;
     });
-    this.scope.register(["Mod"], "o", () =>
-      this.chooser.useSelectedItem({ metaKey: true, key: "o" })
-    );
-    this.scope.register(["Mod", "Alt"], "Enter", () =>
-      this.chooser.useSelectedItem({ metaKey: true, altKey: true })
-    );
+    this.scope.register(["Mod"], "o", () => {
+      this.chooser.useSelectedItem({ metaKey: true, key: "o" });
+      return false;
+    });
+    this.scope.register(["Mod", "Alt"], "Enter", () => {
+      this.chooser.useSelectedItem({ metaKey: true, altKey: true });
+      return false;
+    });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
@@ -300,6 +303,7 @@ export class GrepModal
       this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
         this.chooser.setSelectedItem(n - 1, evt, true);
         this.chooser.useSelectedItem({});
+        return false;
       });
     });
 
@@ -307,34 +311,40 @@ export class GrepModal
       document.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown" })
       );
+      return false;
     });
     this.scope.register(["Mod"], "P", () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+      return false;
     });
     this.scope.register(["Mod"], "J", () => {
       document.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown" })
       );
+      return false;
     });
     this.scope.register(["Mod"], "K", () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+      return false;
     });
 
     this.scope.register(["Mod"], "D", () => {
       this.clonedInputEl.value = "";
       // Necessary to rerender suggestions
       this.clonedInputEl.dispatchEvent(new Event("input"));
+      return false;
     });
 
     this.scope.register(["Mod"], ",", () => {
       const item = this.chooser.values?.[this.chooser.selectedItem];
       if (!item) {
-        return;
+        return false;
       }
 
       this.appHelper.openMarkdownFile(item.file, {
         line: item.lineNumber - 1,
       });
+      return false;
     });
 
     // XXX: This is a hack to avoid default input events

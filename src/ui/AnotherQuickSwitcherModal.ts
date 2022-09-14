@@ -375,10 +375,10 @@ export class AnotherQuickSwitcherModal
     this.resultContainerEl.appendChild(createButton);
   }
 
-  async chooseCurrentSuggestion(leaf: LeafType): Promise<boolean> {
+  async chooseCurrentSuggestion(leaf: LeafType): Promise<void> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
     if (!item) {
-      return true;
+      return;
     }
 
     let fileToOpened = item.file;
@@ -395,8 +395,6 @@ export class AnotherQuickSwitcherModal
 
     this.close();
     this.appHelper.openMarkdownFile(fileToOpened, { leaf: leaf, offset });
-
-    return false;
   }
 
   async onChooseSuggestion(
@@ -444,9 +442,11 @@ export class AnotherQuickSwitcherModal
       ]);
     }
 
-    this.scope.register(["Mod"], "Enter", () =>
-      this.chooseCurrentSuggestion("new-tab")
-    );
+    this.scope.register(["Mod"], "Enter", () => {
+      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+      this.chooseCurrentSuggestion("new-tab");
+      return false;
+    });
     this.scope.register(["Alt"], "Enter", () => {
       const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
       if (!file) {
@@ -465,18 +465,26 @@ export class AnotherQuickSwitcherModal
       });
       return false;
     });
-    this.scope.register(["Mod"], "-", () =>
-      this.chooseCurrentSuggestion("new-pane-horizontal")
-    );
-    this.scope.register(["Mod", "Shift"], "-", () =>
-      this.chooseCurrentSuggestion("new-pane-vertical")
-    );
-    this.scope.register(["Mod"], "o", () =>
-      this.chooseCurrentSuggestion("new-window")
-    );
-    this.scope.register(["Mod", "Alt"], "Enter", () =>
-      this.chooseCurrentSuggestion("popup")
-    );
+    this.scope.register(["Mod"], "-", () => {
+      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+      this.chooseCurrentSuggestion("new-pane-horizontal");
+      return false;
+    });
+    this.scope.register(["Mod", "Shift"], "-", () => {
+      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+      this.chooseCurrentSuggestion("new-pane-vertical");
+      return false;
+    });
+    this.scope.register(["Mod"], "o", () => {
+      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+      this.chooseCurrentSuggestion("new-window");
+      return false;
+    });
+    this.scope.register(["Mod", "Alt"], "Enter", () => {
+      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+      this.chooseCurrentSuggestion("popup");
+      return false;
+    });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
@@ -484,7 +492,9 @@ export class AnotherQuickSwitcherModal
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
       this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
         this.chooser.setSelectedItem(n - 1, evt);
-        return this.chooseCurrentSuggestion("same-tab");
+        // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+        this.chooseCurrentSuggestion("same-tab");
+        return false;
       });
     });
 
