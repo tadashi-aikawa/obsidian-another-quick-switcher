@@ -1,10 +1,10 @@
 import { App, SuggestModal, TFolder } from "obsidian";
 import { excludeItems, sorter } from "../utils/collection-helper";
 import { FOLDER } from "./icons";
-import { Settings } from "../settings";
+import { Hotkeys, Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
-import { MOD } from "../keys";
+import { createInstructions } from "../keys";
 
 interface SuggestionItem {
   folder: TFolder;
@@ -93,7 +93,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     this.appHelper = new AppHelper(app);
     this.settings = settings;
 
-    this.setHotKeys();
+    this.setHotkeys();
 
     this.originItems = this.appHelper
       .getFolders()
@@ -170,37 +170,37 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     );
   }
 
-  private setHotKeys() {
+  private registerKeys(
+    key: keyof Hotkeys["move"],
+    handler: () => void | Promise<void>
+  ) {
+    this.settings.hotkeys.move[key]?.forEach((x) => {
+      this.scope.register(x.modifiers, x.key, (evt) => {
+        evt.preventDefault();
+        handler();
+        return false;
+      });
+    });
+  }
+
+  private setHotkeys() {
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
-        {
-          command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
-          purpose: "navigate",
-        },
         { command: "[↵]", purpose: "move to" },
-        { command: "[esc]", purpose: "dismiss" },
+        { command: `[↑]`, purpose: "up" },
+        { command: `[↓]`, purpose: "down" },
+        ...createInstructions(this.settings.hotkeys.move),
+        { command: "[Esc]", purpose: "dismiss" },
       ]);
     }
 
-    this.scope.register(["Mod"], "N", () => {
+    this.registerKeys("up", () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+    });
+    this.registerKeys("down", () => {
       document.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown" })
       );
-      return false;
-    });
-    this.scope.register(["Mod"], "P", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-      return false;
-    });
-    this.scope.register(["Mod"], "J", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
-      return false;
-    });
-    this.scope.register(["Mod"], "K", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-      return false;
     });
   }
 }

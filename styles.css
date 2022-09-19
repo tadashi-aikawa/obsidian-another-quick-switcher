@@ -252,6 +252,16 @@
     padding-left: 30px;
 }
 
+.another-quick-switcher__settings__dialog-hotkey {
+    padding: 1rem 0;
+    /*noinspection CssUnresolvedCustomProperty*/
+    border-top: 1px solid var(--background-modifier-border)
+}
+
+.another-quick-switcher__settings__dialog-hotkey-item {
+    padding-left: 2rem;
+}
+
 .another-quick-switcher__settings__search-command {
     /*noinspection CssUnresolvedCustomProperty*/
     border: solid 1px var(--text-muted);

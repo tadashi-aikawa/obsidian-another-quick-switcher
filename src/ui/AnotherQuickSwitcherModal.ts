@@ -13,14 +13,14 @@ import {
   keyBy,
   uniq,
 } from "../utils/collection-helper";
-import { SearchCommand, Settings } from "../settings";
+import { Hotkeys, SearchCommand, Settings } from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
 import { filterNoQueryPriorities, sort } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { excludeFormat } from "../utils/strings";
-import { MOD, quickResultSelectionModifier } from "src/keys";
+import { createInstructions, quickResultSelectionModifier } from "src/keys";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
 
 function buildLogMessage(message: string, msec: number) {
@@ -62,7 +62,7 @@ export class AnotherQuickSwitcherModal
     this.command = command;
 
     this.limit = this.settings.maxNumberOfSuggestions;
-    this.setHotKeys();
+    this.setHotkeys();
 
     this.phantomItems = this.settings.showExistingFilesOnly
       ? []
@@ -410,107 +410,74 @@ export class AnotherQuickSwitcherModal
     }
   }
 
-  private setHotKeys() {
+  private registerKeys(
+    key: keyof Hotkeys["main"],
+    handler: () => void | Promise<void>
+  ) {
+    this.settings.hotkeys.main[key]?.forEach((x) => {
+      this.scope.register(x.modifiers, x.key, (evt) => {
+        evt.preventDefault();
+        handler();
+        return false;
+      });
+    });
+  }
+
+  private setHotkeys() {
     const openNthMod = quickResultSelectionModifier(
       this.settings.userAltInsteadOfModForQuickResultSelection
     );
 
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
-        {
-          command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
-          purpose: "navigate",
-        },
-        { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
-        { command: `[${MOD} d]`, purpose: "clear input" },
-        { command: "[tab]", purpose: "replace input" },
         { command: "[↵]", purpose: "open" },
-        { command: `[${MOD} ↵]`, purpose: "open in new tab" },
-        { command: `[${MOD} -]`, purpose: "open in new pane (horizontal)" },
-        { command: `[${MOD} shift -]`, purpose: "open in new pane (vertical)" },
-        { command: `[${MOD} o]`, purpose: "open in new window" },
-        { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
-        { command: "[shift ↵]", purpose: "create" },
-        { command: `[${MOD} shift ↵]`, purpose: "create in new tab" },
-        { command: `[${MOD} shift o]`, purpose: "create in new window" },
-        { command: `[${MOD} shift alt ↵]`, purpose: "create in popup" },
-        { command: `[${MOD} shift alt o]`, purpose: "open all in new tabs" },
-        { command: `[${MOD} ]]`, purpose: "open first URL" },
-        { command: "[alt ↵]", purpose: "insert to editor" },
-        { command: "[alt shift ↵]", purpose: "insert all to editor" },
-        { command: "[esc]", purpose: "dismiss" },
+        { command: `[↑]`, purpose: "up" },
+        { command: `[↓]`, purpose: "down" },
+        { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
+        ...createInstructions(this.settings.hotkeys.main),
+        { command: "[Esc]", purpose: "dismiss" },
       ]);
     }
 
-    this.scope.register(["Mod"], "Enter", () => {
-      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
-      this.chooseCurrentSuggestion("new-tab");
-      return false;
+    this.registerKeys("up", () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
     });
-    this.scope.register(["Alt"], "Enter", () => {
-      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
-      if (!file) {
-        return;
+    this.registerKeys("down", () => {
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown" })
+      );
+    });
+
+    this.registerKeys("clear input", () => {
+      this.inputEl.value = "";
+      // Necessary to rerender suggestions
+      this.inputEl.dispatchEvent(new Event("input"));
+    });
+    this.registerKeys("replace input", () => {
+      if (this.chooser.values) {
+        this.inputEl.value =
+          this.chooser.values[this.chooser.selectedItem].file.basename;
+        // Necessary to rerender suggestions
+        this.inputEl.dispatchEvent(new Event("input"));
       }
+    });
 
-      this.close();
-      this.appHelper.insertLinkToActiveFileBy(file);
-      return false;
+    this.registerKeys("open in new tab", () => {
+      this.chooseCurrentSuggestion("new-tab");
     });
-    this.scope.register(["Alt", "Shift"], "Enter", () => {
-      this.close();
-      this.chooser.values?.forEach((x) => {
-        this.appHelper.insertLinkToActiveFileBy(x.file);
-        this.appHelper.insertStringToActiveFile("\n");
-      });
-      return false;
-    });
-    this.scope.register(["Mod"], "-", () => {
-      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+    this.registerKeys("open in new pane (horizontal)", () => {
       this.chooseCurrentSuggestion("new-pane-horizontal");
-      return false;
     });
-    this.scope.register(["Mod", "Shift"], "-", () => {
-      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+    this.registerKeys("open in new pane (vertical)", () => {
       this.chooseCurrentSuggestion("new-pane-vertical");
-      return false;
     });
-    this.scope.register(["Mod"], "o", () => {
-      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+    this.registerKeys("open in new window", () => {
       this.chooseCurrentSuggestion("new-window");
-      return false;
     });
-    this.scope.register(["Mod", "Alt"], "Enter", () => {
-      // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+    this.registerKeys("open in popup", () => {
       this.chooseCurrentSuggestion("popup");
-      return false;
     });
-
-    const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
-      ? "Alt"
-      : "Mod";
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
-      this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
-        this.chooser.setSelectedItem(n - 1, evt);
-        // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
-        this.chooseCurrentSuggestion("same-tab");
-        return false;
-      });
-    });
-
-    this.scope.register(["Shift"], "Enter", () =>
-      this.handleCreateNew(this.searchQuery, "same-tab")
-    );
-    this.scope.register(["Shift", "Mod"], "Enter", () =>
-      this.handleCreateNew(this.searchQuery, "new-tab")
-    );
-    this.scope.register(["Shift", "Mod"], "o", () =>
-      this.handleCreateNew(this.searchQuery, "new-window")
-    );
-    this.scope.register(["Shift", "Mod", "Alt"], "Enter", () =>
-      this.handleCreateNew(this.searchQuery, "popup")
-    );
-    this.scope.register(["Shift", "Mod", "Alt"], "o", () => {
+    this.registerKeys("open all in new tabs", () => {
       this.close();
       if (this.chooser.values == null) {
         return;
@@ -526,44 +493,24 @@ export class AnotherQuickSwitcherModal
         );
     });
 
-    this.scope.register(["Mod"], "N", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
+    this.registerKeys("create", () => {
+      this.handleCreateNew(this.searchQuery, "same-tab");
     });
-    this.scope.register(["Mod"], "P", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+    this.registerKeys("create in new tab", () => {
+      this.handleCreateNew(this.searchQuery, "new-tab");
     });
-    this.scope.register(["Mod"], "J", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
+    this.registerKeys("create in new window", () => {
+      this.handleCreateNew(this.searchQuery, "new-window");
     });
-    this.scope.register(["Mod"], "K", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+    this.registerKeys("create in new popup", () => {
+      this.handleCreateNew(this.searchQuery, "popup");
     });
 
-    this.scope.register([], "Tab", (evt) => {
-      evt.preventDefault();
-
-      if (this.chooser.values) {
-        this.inputEl.value =
-          this.chooser.values[this.chooser.selectedItem].file.basename;
-        // Necessary to rerender suggestions
-        this.inputEl.dispatchEvent(new Event("input"));
-      }
-    });
-    this.scope.register(["Mod"], "D", () => {
-      this.inputEl.value = "";
-      // Necessary to rerender suggestions
-      this.inputEl.dispatchEvent(new Event("input"));
-    });
-
-    this.scope.register(["Mod"], "]", async () => {
+    this.registerKeys("open first URL", async () => {
       const fileToOpened =
         this.chooser.values?.[this.chooser.selectedItem]?.file;
       if (!fileToOpened) {
-        return false;
+        return;
       }
 
       this.close();
@@ -576,8 +523,35 @@ export class AnotherQuickSwitcherModal
           leaf: "same-tab",
         });
       }
+    });
 
-      return false;
+    this.registerKeys("insert to editor", () => {
+      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
+      if (!file) {
+        return;
+      }
+
+      this.close();
+      this.appHelper.insertLinkToActiveFileBy(file);
+    });
+    this.registerKeys("insert all to editor", () => {
+      this.close();
+      this.chooser.values?.forEach((x) => {
+        this.appHelper.insertLinkToActiveFileBy(x.file);
+        this.appHelper.insertStringToActiveFile("\n");
+      });
+    });
+
+    const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
+      ? "Alt"
+      : "Mod";
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
+      this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
+        this.chooser.setSelectedItem(n - 1, evt);
+        // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
+        this.chooseCurrentSuggestion("same-tab");
+        return false;
+      });
     });
   }
 }

@@ -1,4 +1,4 @@
-import { count, intersection } from "./collection-helper";
+import { count, equalsAsSet, intersection } from "./collection-helper";
 import { describe, expect, test } from "@jest/globals";
 
 describe.each<{ values: number[][]; expected: number[] }>`
@@ -20,5 +20,19 @@ describe.each<{ values: string[]; expected: { [x: string]: number } }>`
 `("count", ({ values, expected }) => {
   test(`count(${values}) = ${expected}`, () => {
     expect(count(values)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{ ary1: string[]; ary2: string[]; expected: boolean }>`
+  ary1      | ary2      | expected
+  ${[1]}    | ${[1]}    | ${true}
+  ${[1, 2]} | ${[1, 2]} | ${true}
+  ${[1, 2]} | ${[2, 1]} | ${true}
+  ${[]}     | ${[]}     | ${true}
+  ${[1]}    | ${[2]}    | ${false}
+  ${[1, 2]} | ${[2, 2]} | ${false}
+`("equalsAsSet", ({ ary1, ary2, expected }) => {
+  test(`equalsAsSet(${ary1}, ${ary2}) = ${expected}`, () => {
+    expect(equalsAsSet(ary1, ary2)).toStrictEqual(expected);
   });
 });

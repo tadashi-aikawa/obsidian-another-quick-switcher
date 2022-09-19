@@ -1,9 +1,9 @@
 import { App, Pos, SuggestModal } from "obsidian";
-import { Settings } from "../settings";
+import { Hotkeys, Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { excludeFormat, smartIncludes } from "../utils/strings";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
-import { MOD } from "../keys";
+import { createInstructions } from "../keys";
 
 interface SuggestionItem {
   value: string;
@@ -58,7 +58,7 @@ export class HeaderModal
       this.select(nextIndex, unsafeEvt, this.floating);
     });
 
-    this.bindHotKeys();
+    this.setHotkeys();
   }
 
   select(index: number, evt?: KeyboardEvent, preview: boolean = true) {
@@ -209,41 +209,29 @@ export class HeaderModal
     this.appHelper.moveTo(item.position);
   }
 
-  bindHotKeys() {
+  private registerKeys(
+    key: keyof Hotkeys["header"],
+    handler: (evt: KeyboardEvent) => void | Promise<void>
+  ) {
+    this.settings.hotkeys.header[key]?.forEach((x) => {
+      this.scope.register(x.modifiers, x.key, (evt) => {
+        evt.preventDefault();
+        handler(evt);
+        return false;
+      });
+    });
+  }
+
+  setHotkeys() {
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
-        {
-          command: "[↑↓]",
-          purpose: this.settings.headerSearchKeyBindArrowUpDown,
-        },
-        {
-          command: "[tab or shift tab]",
-          purpose: this.settings.headerSearchKeyBindTab,
-        },
-        {
-          command: `[${MOD} j or k]`,
-          purpose: this.settings.headerSearchKeyBindVim,
-        },
-        {
-          command: `[${MOD} n or p]`,
-          purpose: this.settings.headerSearchKeyBindEmacs,
-        },
-        { command: `[${MOD} d]`, purpose: "clear input" },
         { command: "[↵]", purpose: "move to header" },
-        { command: "[esc]", purpose: "dismiss" },
+        { command: `[↑]`, purpose: "up" },
+        { command: `[↓]`, purpose: "down" },
+        ...createInstructions(this.settings.hotkeys.header),
+        { command: "[Esc]", purpose: "dismiss" },
       ]);
     }
-
-    this.scope.register(["Mod"], "D", () => {
-      this.inputEl.value = "";
-      // Necessary to rerender suggestions
-      this.inputEl.dispatchEvent(new Event("input"));
-      return false;
-    });
-
-    this.scope.keys
-      .filter((x) => ["ArrowDown", "ArrowUp"].includes(x.key!))
-      .forEach((x) => this.scope.unregister(x));
 
     const navigateNext = (evt: KeyboardEvent) => {
       this.select(this.getNextSelectIndex(), evt, this.floating);
@@ -282,58 +270,37 @@ export class HeaderModal
       this.select(this.hitItems[previousIndex].index, evt, this.floating);
     };
 
-    this.scope.register([], "ArrowDown", (evt: KeyboardEvent) => {
-      (this.settings.headerSearchKeyBindArrowUpDown === "navigate"
-        ? navigateNext
-        : moveToNextHit)(evt);
-      return false;
-    });
-    this.scope.register([], "ArrowUp", (evt: KeyboardEvent) => {
-      (this.settings.headerSearchKeyBindArrowUpDown === "navigate"
-        ? navigatePrevious
-        : moveToPreviousHit)(evt);
-      return false;
-    });
-
-    this.scope.register(["Mod"], "J", (evt: KeyboardEvent) => {
-      (this.settings.headerSearchKeyBindVim === "navigate"
-        ? navigateNext
-        : moveToNextHit)(evt);
-      return false;
-    });
-    this.scope.register(["Mod"], "K", (evt: KeyboardEvent) => {
-      (this.settings.headerSearchKeyBindVim === "navigate"
-        ? navigatePrevious
-        : moveToPreviousHit)(evt);
-      return false;
-    });
-
-    this.scope.register(["Mod"], "N", (evt: KeyboardEvent) => {
-      (this.settings.headerSearchKeyBindEmacs === "navigate"
-        ? navigateNext
-        : moveToNextHit)(evt);
-      return false;
-    });
-    this.scope.register(["Mod"], "P", (evt: KeyboardEvent) => {
-      (this.settings.headerSearchKeyBindEmacs === "navigate"
-        ? navigatePrevious
-        : moveToPreviousHit)(evt);
-      return false;
-    });
-
-    this.scope.register([], "Tab", (evt) => {
+    // Unregister default arrows behavior
+    this.scope.keys
+      .filter((x) => ["ArrowDown", "ArrowUp"].includes(x.key!))
+      .forEach((x) => this.scope.unregister(x));
+    this.scope.register([], "ArrowUp", (evt) => {
       evt.preventDefault();
-      (this.settings.headerSearchKeyBindTab === "navigate"
-        ? navigateNext
-        : moveToNextHit)(evt);
+      navigatePrevious(evt);
       return false;
     });
-    this.scope.register(["Shift"], "Tab", (evt) => {
+    this.scope.register([], "ArrowDown", (evt) => {
       evt.preventDefault();
-      (this.settings.headerSearchKeyBindTab === "navigate"
-        ? navigatePrevious
-        : moveToPreviousHit)(evt);
+      navigateNext(evt);
       return false;
+    });
+
+    this.registerKeys("up", (evt) => {
+      navigatePrevious(evt);
+    });
+    this.registerKeys("down", (evt) => {
+      navigateNext(evt);
+    });
+    this.registerKeys("clear input", () => {
+      this.inputEl.value = "";
+      // Necessary to rerender suggestions
+      this.inputEl.dispatchEvent(new InputEvent("input"));
+    });
+    this.registerKeys("move to next hit", (evt) => {
+      moveToNextHit(evt);
+    });
+    this.registerKeys("move to previous hit", (evt) => {
+      moveToPreviousHit(evt);
     });
   }
 }

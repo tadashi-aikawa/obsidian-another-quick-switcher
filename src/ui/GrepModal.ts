@@ -1,8 +1,12 @@
 import { App, normalizePath, SuggestModal, TFile } from "obsidian";
-import { Settings } from "../settings";
+import { Hotkeys, Settings } from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { rg } from "../utils/ripgrep";
-import { MOD, quickResultSelectionModifier } from "../keys";
+import {
+  createInstructions,
+  equalsAsHotkey,
+  quickResultSelectionModifier,
+} from "../keys";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 
@@ -60,7 +64,7 @@ export class GrepModal
     this.limit = 255;
 
     this.setPlaceholder("Search around the vault by TAB key");
-    this.setHotKeys();
+    this.setHotkeys();
   }
 
   onOpen() {
@@ -217,31 +221,24 @@ export class GrepModal
     el.appendChild(itemDiv);
   }
 
-  async onChooseSuggestion(
-    item: SuggestionItem,
-    evt: MouseEvent | KeyboardEvent
-  ): Promise<void> {
-    let leaf: LeafType;
-    const key = (evt as KeyboardEvent).key;
-
-    if (evt.metaKey && key === "o") {
-      leaf = "new-window";
-    } else if (evt.metaKey && evt.shiftKey && key === "-") {
-      leaf = "new-pane-vertical";
-    } else if (evt.metaKey && !evt.shiftKey && key === "-") {
-      leaf = "new-pane-horizontal";
-    } else if (evt.metaKey && evt.altKey) {
-      leaf = "popup";
-    } else if (evt.metaKey && !evt.altKey) {
-      leaf = "new-tab";
-    } else {
-      leaf = "same-tab";
+  async chooseCurrentSuggestion(leaf: LeafType): Promise<void> {
+    const item = this.chooser.values?.[this.chooser.selectedItem];
+    if (!item) {
+      return;
     }
 
+    this.close();
     this.appHelper.openMarkdownFile(item.file, {
       leaf: leaf,
       line: item.lineNumber - 1,
     });
+  }
+
+  async onChooseSuggestion(
+    item: SuggestionItem,
+    evt: MouseEvent | KeyboardEvent
+  ): Promise<void> {
+    await this.chooseCurrentSuggestion("same-tab");
   }
 
   private showDebugLog(toMessage: () => string) {
@@ -250,50 +247,98 @@ export class GrepModal
     }
   }
 
-  private setHotKeys() {
+  private registerKeys(
+    key: keyof Hotkeys["grep"],
+    handler: () => void | Promise<void>
+  ) {
+    this.settings.hotkeys.grep[key]?.forEach((x) => {
+      this.scope.register(x.modifiers, x.key, (evt) => {
+        evt.preventDefault();
+        handler();
+        return false;
+      });
+    });
+  }
+
+  private setHotkeys() {
     const openNthMod = quickResultSelectionModifier(
       this.settings.userAltInsteadOfModForQuickResultSelection
     );
 
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
-        { command: "[tab]", purpose: "search" },
-        {
-          command: `[↑↓][${MOD} n or p][${MOD} j or k]`,
-          purpose: "navigate",
-        },
-        { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
-        { command: `[${MOD} d]`, purpose: "clear input" },
         { command: "[↵]", purpose: "open" },
-        { command: `[${MOD} ↵]`, purpose: "open in new pane" },
-        { command: `[${MOD} -]`, purpose: "open in new pane (horizontal)" },
-        { command: `[${MOD} shift -]`, purpose: "open in new pane (vertical)" },
-        { command: `[${MOD} o]`, purpose: "open in new window" },
-        { command: `[${MOD} alt ↵]`, purpose: "open in popup" },
-        { command: `[${MOD} ,]`, purpose: "preview" },
+        { command: `[↑]`, purpose: "up" },
+        { command: `[↓]`, purpose: "down" },
+        { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
+        ...createInstructions(this.settings.hotkeys.grep),
         { command: "[esc]", purpose: "dismiss" },
       ]);
     }
 
-    this.scope.register(["Mod"], "Enter", () => {
-      this.chooser.useSelectedItem({ metaKey: true });
-      return false;
+    // XXX: This is a hack to avoid default input events
+    this.clonedInputEl = this.inputEl.cloneNode(true) as HTMLInputElement;
+    this.inputEl.parentNode?.replaceChild(this.clonedInputEl, this.inputEl);
+    this.clonedInputElKeyupEventListener = (evt: KeyboardEvent) => {
+      const keyEvent = evt as KeyboardEvent;
+      const hotkey = this.settings.hotkeys.grep.search[0];
+      if (!hotkey) {
+        return;
+      }
+
+      if (equalsAsHotkey(hotkey, keyEvent)) {
+        evt.preventDefault();
+        this.currentQuery = this.clonedInputEl!.value;
+        this.inputEl.value = this.currentQuery;
+        // Necessary to rerender suggestions
+        this.inputEl.dispatchEvent(new Event("input"));
+      }
+    };
+    this.clonedInputEl.addEventListener(
+      "keydown",
+      this.clonedInputElKeyupEventListener
+    );
+
+    this.registerKeys("up", () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
     });
-    this.scope.register(["Mod"], "-", () => {
-      this.chooser.useSelectedItem({ metaKey: true, key: "-" });
-      return false;
+    this.registerKeys("down", () => {
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown" })
+      );
     });
-    this.scope.register(["Mod", "Shift"], "-", () => {
-      this.chooser.useSelectedItem({ metaKey: true, shiftKey: true, key: "-" });
-      return false;
+
+    this.registerKeys("clear input", () => {
+      this.clonedInputEl.value = "";
+      // Necessary to rerender suggestions
+      this.clonedInputEl.dispatchEvent(new InputEvent("input"));
     });
-    this.scope.register(["Mod"], "o", () => {
-      this.chooser.useSelectedItem({ metaKey: true, key: "o" });
-      return false;
+
+    this.registerKeys("open in new tab", () => {
+      this.chooseCurrentSuggestion("new-tab");
     });
-    this.scope.register(["Mod", "Alt"], "Enter", () => {
-      this.chooser.useSelectedItem({ metaKey: true, altKey: true });
-      return false;
+    this.registerKeys("open in new pane (horizontal)", () => {
+      this.chooseCurrentSuggestion("new-pane-horizontal");
+    });
+    this.registerKeys("open in new pane (vertical)", () => {
+      this.chooseCurrentSuggestion("new-pane-vertical");
+    });
+    this.registerKeys("open in new window", () => {
+      this.chooseCurrentSuggestion("new-window");
+    });
+    this.registerKeys("open in popup", () => {
+      this.chooseCurrentSuggestion("popup");
+    });
+
+    this.registerKeys("preview", () => {
+      const item = this.chooser.values?.[this.chooser.selectedItem];
+      if (!item) {
+        return;
+      }
+
+      this.appHelper.openMarkdownFile(item.file, {
+        line: item.lineNumber - 1,
+      });
     });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
@@ -306,66 +351,5 @@ export class GrepModal
         return false;
       });
     });
-
-    this.scope.register(["Mod"], "N", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
-      return false;
-    });
-    this.scope.register(["Mod"], "P", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-      return false;
-    });
-    this.scope.register(["Mod"], "J", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
-      return false;
-    });
-    this.scope.register(["Mod"], "K", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-      return false;
-    });
-
-    this.scope.register(["Mod"], "D", () => {
-      this.clonedInputEl.value = "";
-      // Necessary to rerender suggestions
-      this.clonedInputEl.dispatchEvent(new Event("input"));
-      return false;
-    });
-
-    this.scope.register(["Mod"], ",", () => {
-      const item = this.chooser.values?.[this.chooser.selectedItem];
-      if (!item) {
-        return false;
-      }
-
-      this.appHelper.openMarkdownFile(item.file, {
-        line: item.lineNumber - 1,
-      });
-      return false;
-    });
-
-    // XXX: This is a hack to avoid default input events
-    this.scope.register([], "Tab", () => {
-      return false;
-    });
-
-    this.clonedInputEl = this.inputEl.cloneNode(true) as HTMLInputElement;
-    this.inputEl.parentNode?.replaceChild(this.clonedInputEl, this.inputEl);
-    this.clonedInputElKeyupEventListener = (evt: KeyboardEvent) => {
-      const keyEvent = evt as KeyboardEvent;
-      if (keyEvent.code === "Tab") {
-        this.currentQuery = this.clonedInputEl!.value;
-        this.inputEl.value = this.currentQuery;
-        // Necessary to rerender suggestions
-        this.inputEl.dispatchEvent(new Event("input"));
-      }
-    };
-    this.clonedInputEl.addEventListener(
-      "keyup",
-      this.clonedInputElKeyupEventListener
-    );
   }
 }

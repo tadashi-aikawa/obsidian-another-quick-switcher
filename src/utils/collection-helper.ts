@@ -98,9 +98,6 @@ export function excludeItems<T>(
     : items.filter((x: T) => !patterns.some((p) => toPath(x).startsWith(p)));
 }
 
-export function mirrorMap<T>(
-  collection: T[],
-  toValue: (t: T) => string
-): { [key: string]: string } {
-  return collection.reduce((p, c) => ({ ...p, [toValue(c)]: toValue(c) }), {});
+export function equalsAsSet(ary1: string[], ary2: string[]): boolean {
+  return [...ary1].sort().join() === [...ary2].sort().join();
 }

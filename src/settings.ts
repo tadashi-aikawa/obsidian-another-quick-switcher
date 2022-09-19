@@ -1,8 +1,8 @@
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import AnotherQuickSwitcher from "./main";
-import { mirrorMap } from "./utils/collection-helper";
 import { regardAsSortPriority, SortPriority } from "./sorters";
 import { smartLineBreakSplit } from "./utils/strings";
+import { Hotkey, hotkey2String, string2Hotkey } from "./keys";
 
 const headerSearchFeatureList = [
   "navigate",
@@ -26,6 +26,51 @@ export interface SearchCommand {
   expand: boolean;
 }
 
+export interface Hotkeys {
+  main: {
+    up: Hotkey[];
+    down: Hotkey[];
+    "clear input": Hotkey[];
+    "replace input": Hotkey[];
+    "open in new tab": Hotkey[];
+    "open in new pane (horizontal)": Hotkey[];
+    "open in new pane (vertical)": Hotkey[];
+    "open in new window": Hotkey[];
+    "open in popup": Hotkey[];
+    "open all in new tabs": Hotkey[];
+    create: Hotkey[];
+    "create in new tab": Hotkey[];
+    "create in new window": Hotkey[];
+    "create in new popup": Hotkey[];
+    "open first URL": Hotkey[];
+    "insert to editor": Hotkey[];
+    "insert all to editor": Hotkey[];
+  };
+  move: {
+    up: Hotkey[];
+    down: Hotkey[];
+  };
+  header: {
+    up: Hotkey[];
+    down: Hotkey[];
+    "clear input": Hotkey[];
+    "move to next hit": Hotkey[];
+    "move to previous hit": Hotkey[];
+  };
+  grep: {
+    search: Hotkey[];
+    up: Hotkey[];
+    down: Hotkey[];
+    "clear input": Hotkey[];
+    "open in new tab": Hotkey[];
+    "open in new pane (horizontal)": Hotkey[];
+    "open in new pane (vertical)": Hotkey[];
+    "open in new window": Hotkey[];
+    "open in popup": Hotkey[];
+    preview: Hotkey[];
+  };
+}
+
 export interface Settings {
   searchDelayMilliSeconds: number;
   maxNumberOfSuggestions: number;
@@ -40,20 +85,61 @@ export interface Settings {
   hideHotkeyGuides: boolean;
   // Hotkey in search dialog
   userAltInsteadOfModForQuickResultSelection: boolean;
+  hotkeys: Hotkeys;
   // Searches
   searchCommands: SearchCommand[];
   // Back link search
   backLinkExcludePrefixPathPatterns: string[];
-  // Header search in file
-  headerSearchKeyBindArrowUpDown: HeaderSearchFeature;
-  headerSearchKeyBindTab: HeaderSearchFeature;
-  headerSearchKeyBindVim: HeaderSearchFeature;
-  headerSearchKeyBindEmacs: HeaderSearchFeature;
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
   // debug
   showLogAboutPerformanceInConsole: boolean;
 }
+
+const createDefaultHotkeys = (): Hotkeys => ({
+  main: {
+    up: [{ modifiers: ["Mod"], key: "p" }],
+    down: [{ modifiers: ["Mod"], key: "n" }],
+    "clear input": [{ modifiers: ["Mod"], key: "d" }],
+    "replace input": [{ modifiers: [], key: "Tab" }],
+    "open in new tab": [{ modifiers: ["Mod"], key: "Enter" }],
+    "open in new pane (horizontal)": [{ modifiers: ["Mod"], key: "-" }],
+    "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
+    "open in new window": [{ modifiers: ["Mod"], key: "o" }],
+    "open in popup": [],
+    "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
+    create: [{ modifiers: ["Shift"], key: "Enter" }],
+    "create in new tab": [{ modifiers: ["Mod", "Shift"], key: "Enter" }],
+    "create in new window": [{ modifiers: ["Mod", "Shift"], key: "o" }],
+    "create in new popup": [],
+    "open first URL": [{ modifiers: ["Mod"], key: "]" }],
+    "insert to editor": [{ modifiers: ["Alt"], key: "Enter" }],
+    "insert all to editor": [{ modifiers: ["Alt", "Shift"], key: "Enter" }],
+  },
+  move: {
+    up: [{ modifiers: ["Mod"], key: "p" }],
+    down: [{ modifiers: ["Mod"], key: "n" }],
+  },
+  header: {
+    up: [{ modifiers: ["Mod"], key: "p" }],
+    down: [{ modifiers: ["Mod"], key: "n" }],
+    "clear input": [{ modifiers: ["Mod"], key: "d" }],
+    "move to next hit": [{ modifiers: [], key: "Tab" }],
+    "move to previous hit": [{ modifiers: ["Shift"], key: "Tab" }],
+  },
+  grep: {
+    search: [{ modifiers: [], key: "Tab" }],
+    up: [{ modifiers: ["Mod"], key: "p" }],
+    down: [{ modifiers: ["Mod"], key: "n" }],
+    "clear input": [{ modifiers: ["Mod"], key: "d" }],
+    "open in new tab": [{ modifiers: ["Mod"], key: "Enter" }],
+    "open in new pane (horizontal)": [{ modifiers: ["Mod"], key: "-" }],
+    "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
+    "open in new window": [{ modifiers: ["Mod"], key: "o" }],
+    "open in popup": [],
+    preview: [{ modifiers: ["Mod"], key: "," }],
+  },
+});
 
 export const createDefaultSearchCommand = (): SearchCommand => ({
   name: "",
@@ -161,15 +247,11 @@ export const DEFAULT_SETTINGS: Settings = {
   hideHotkeyGuides: false,
   // Hot keys in dialog
   userAltInsteadOfModForQuickResultSelection: false,
+  hotkeys: createDefaultHotkeys(),
   // Searches
   searchCommands: createPreSettingSearchCommands(),
   // Back link search
   backLinkExcludePrefixPathPatterns: [],
-  // Header search in file
-  headerSearchKeyBindArrowUpDown: "navigate",
-  headerSearchKeyBindTab: "move to next/previous hit",
-  headerSearchKeyBindVim: "navigate",
-  headerSearchKeyBindEmacs: "navigate",
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
   // debug
@@ -178,6 +260,12 @@ export const DEFAULT_SETTINGS: Settings = {
 export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   plugin: AnotherQuickSwitcher;
   resetLock = true;
+  hotkeyExpandedStatus: Record<keyof Hotkeys, boolean> = {
+    main: false,
+    move: false,
+    header: false,
+    grep: false,
+  };
 
   constructor(app: App, plugin: AnotherQuickSwitcher) {
     super(app, plugin);
@@ -197,7 +285,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addSearchSettings(containerEl);
     // TODO: remove
     this.addBacklinkSearchesSettings(containerEl);
-    this.addHeaderSearchSettings(containerEl);
     this.addMoveSettings(containerEl);
 
     this.addDebugSettings(containerEl);
@@ -343,6 +430,95 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
       });
+
+    const addHotkeyItems = (dialogKey: keyof Hotkeys, div: HTMLDivElement) => {
+      if (!this.hotkeyExpandedStatus[dialogKey]) {
+        return;
+      }
+
+      const addHotKeyItem = (name: string, command: string) => {
+        new Setting(div)
+          .setName(name)
+          .setClass("another-quick-switcher__settings__dialog-hotkey-item")
+          .addText((cb) => {
+            const dialog = this.plugin.settings.hotkeys[dialogKey] as {
+              [key: string]: Hotkey[];
+            };
+            return cb
+              .setValue(hotkey2String(dialog[command][0]))
+              .onChange(async (value: string) => {
+                const hk = string2Hotkey(value);
+                dialog[command] = hk ? [hk] : [];
+                await this.plugin.saveSettings();
+              });
+          });
+      };
+
+      Object.keys(this.plugin.settings.hotkeys[dialogKey]).forEach(
+        (k: string) => {
+          addHotKeyItem(k, k as keyof Hotkeys[keyof Hotkeys]);
+        }
+      );
+    };
+
+    const addHotkeysForDialog = (
+      dialogKey: keyof Hotkeys,
+      dialogName: string
+    ) => {
+      const div = createDiv({
+        cls: "another-quick-switcher__settings__dialog-hotkey",
+      });
+      containerEl.append(div);
+
+      const li = createEl("li");
+      li.append(
+        "You can know the keycode at ",
+        createEl("a", {
+          text: "keycode.info",
+          href: "https://keycode.info/",
+        }),
+        ". (Press any key and show 'event.key')"
+      );
+
+      const ul = createEl("ul");
+      ul.createEl("li", {
+        text: "'Ctrl a' means pressing the Ctrl key and the A key.",
+      });
+      ul.createEl("li", {
+        text: "Use 'Mod' instead of 'Ctrl' on Windows or 'Cmd' on macOS.",
+      });
+      ul.append(li);
+
+      const df = document.createDocumentFragment();
+      df.append(ul);
+
+      new Setting(div)
+        .setHeading()
+        .setName(dialogName)
+        .setDesc(df)
+        .addExtraButton((btn) =>
+          btn
+            .setIcon(
+              this.hotkeyExpandedStatus[dialogKey]
+                ? "chevron-up"
+                : "chevron-down"
+            )
+            .setTooltip(
+              this.hotkeyExpandedStatus[dialogKey] ? "fold" : "unfold"
+            )
+            .onClick(() => {
+              this.hotkeyExpandedStatus[dialogKey] =
+                !this.hotkeyExpandedStatus[dialogKey];
+              this.display();
+            })
+        );
+      addHotkeyItems(dialogKey, div);
+    };
+
+    addHotkeysForDialog("main", "Main dialog");
+    addHotkeysForDialog("move", "Move dialog");
+    addHotkeysForDialog("header", "Header dialog");
+    addHotkeysForDialog("grep", "Grep dialog");
   }
 
   private addSearchSettings(containerEl: HTMLElement) {
@@ -668,57 +844,6 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           "another-quick-switcher__settings__ignore_path_patterns";
         return el;
       });
-  }
-
-  private addHeaderSearchSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "📰 Header search in file" });
-
-    containerEl.createEl("h4", { text: "Hot keys in dialog" });
-
-    new Setting(containerEl).setName("↑↓").addDropdown((tc) =>
-      tc
-        .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
-        .setValue(this.plugin.settings.headerSearchKeyBindArrowUpDown)
-        .onChange(async (value) => {
-          this.plugin.settings.headerSearchKeyBindArrowUpDown =
-            value as HeaderSearchFeature;
-          await this.plugin.saveSettings();
-        })
-    );
-    new Setting(containerEl).setName("Tab / Shift+Tab").addDropdown((tc) =>
-      tc
-        .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
-        .setValue(this.plugin.settings.headerSearchKeyBindTab)
-        .onChange(async (value) => {
-          this.plugin.settings.headerSearchKeyBindTab =
-            value as HeaderSearchFeature;
-          await this.plugin.saveSettings();
-        })
-    );
-    new Setting(containerEl)
-      .setName("Ctrl+J / Ctrl+K (for Vimmer)")
-      .addDropdown((tc) =>
-        tc
-          .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
-          .setValue(this.plugin.settings.headerSearchKeyBindVim)
-          .onChange(async (value) => {
-            this.plugin.settings.headerSearchKeyBindVim =
-              value as HeaderSearchFeature;
-            await this.plugin.saveSettings();
-          })
-      );
-    new Setting(containerEl)
-      .setName("Ctrl+N / Ctrl+P (for Emacs user)")
-      .addDropdown((tc) =>
-        tc
-          .addOptions(mirrorMap<string>([...headerSearchFeatureList], (x) => x))
-          .setValue(this.plugin.settings.headerSearchKeyBindEmacs)
-          .onChange(async (value) => {
-            this.plugin.settings.headerSearchKeyBindEmacs =
-              value as HeaderSearchFeature;
-            await this.plugin.saveSettings();
-          })
-      );
   }
 
   private addMoveSettings(containerEl: HTMLElement) {
