@@ -114,6 +114,8 @@ These commands were removed or renamed command ids.
 4. Filename recent search
 5. Star Recent Search
 
+In other words, **It is necessary to reconfigure hotkey settings and other plugin settings**.
+
 If you want to use commands precisely the same as before, please look to the old [README](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/blob/c54890d2375a556031a0c69256624eb0fe42e266/README.md#1%E2%83%A3-file-searches) and set the priorities as the same.
 
 > **Note**
