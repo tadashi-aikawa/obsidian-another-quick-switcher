@@ -159,6 +159,14 @@ export class AnotherQuickSwitcherModal
       excludePatterns: string[]
     ): SuggestionItem[] => {
       let items = this.originItems;
+      if (command.searchTarget === "backlink") {
+        const backlinksMap = this.appHelper.createBacklinksMap();
+        items = items.filter((x) =>
+          backlinksMap[this.appHelper.getActiveFile()?.path ?? ""]?.has(
+            x.file.path
+          )
+        );
+      }
       if (includePatterns.length > 0) {
         items = includeItems(items, includePatterns, (x) => x.file.path);
       }
@@ -169,16 +177,14 @@ export class AnotherQuickSwitcherModal
     };
 
     const currentDirPath = this.appHelper.getActiveFile()?.parent.path ?? "";
-    return command.isBacklinkSearch
-      ? filterItems([], this.settings.backLinkExcludePrefixPathPatterns)
-      : filterItems(
-          command.includePrefixPathPatterns.map((p) =>
-            p.replace(/<current_dir>/g, currentDirPath)
-          ),
-          command.excludePrefixPathPatterns.map((p) =>
-            p.replace(/<current_dir>/g, currentDirPath)
-          )
-        );
+    return filterItems(
+      command.includePrefixPathPatterns.map((p) =>
+        p.replace(/<current_dir>/g, currentDirPath)
+      ),
+      command.excludePrefixPathPatterns.map((p) =>
+        p.replace(/<current_dir>/g, currentDirPath)
+      )
+    );
   }
 
   getSuggestions(query: string): SuggestionItem[] | Promise<SuggestionItem[]> {
@@ -225,68 +231,35 @@ export class AnotherQuickSwitcherModal
 
     const qs = this.searchQuery.split(" ").filter((x) => x);
 
-    if (this.command.isBacklinkSearch) {
-      const activeFilePath = this.app.workspace.getActiveFile()?.path;
-      if (!activeFilePath) {
-        return [];
-      }
+    if (
+      this.command.searchTarget === "backlink" &&
+      !this.app.workspace.getActiveFile()?.path
+    ) {
+      return [];
+    }
 
-      // ✨ If I can use MetadataCache.getBacklinksForFile, I would like to use it instead of original createBacklinksMap :)
-      const backlinksMap = this.appHelper.createBacklinksMap();
-      const items = this.ignoredItems
-        .filter((x) => backlinksMap[activeFilePath]?.has(x.file.path))
-        .map((x) =>
-          stampMatchResults(
-            x,
-            qs,
-            false,
-            false,
-            false,
-            this.settings.normalizeAccentsAndDiacritics
+    const isQueryEmpty = !this.searchQuery.trim();
+
+    const matchedSuggestions = isQueryEmpty
+      ? this.ignoredItems
+      : this.ignoredItems
+          .map((x) =>
+            stampMatchResults(
+              x,
+              qs,
+              this.command.searchBy.tag,
+              this.command.searchBy.header,
+              this.command.searchBy.link,
+              this.settings.normalizeAccentsAndDiacritics
+            )
           )
-        )
-        .filter((x) => x.matchResults.every((x) => x.type !== "not found"))
-        .slice(0, this.settings.maxNumberOfSuggestions);
-      this.showDebugLog(() =>
-        buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
-      );
-      return items.map((x, order) => ({ ...x, order }));
-    }
-
-    if (!this.searchQuery.trim()) {
-      const results = sort(
-        this.ignoredItems,
-        filterNoQueryPriorities(this.command.sortPriorities),
-        lastOpenFileIndexByPath
-      )
-        .slice(0, this.settings.maxNumberOfSuggestions)
-        .map((x, order) => ({ ...x, order }));
-
-      this.showDebugLog(() =>
-        buildLogMessage(
-          `Get suggestions: ${this.searchQuery} (${this.command.name})`,
-          performance.now() - start
-        )
-      );
-      return results;
-    }
-
-    const matchedSuggestions = this.ignoredItems
-      .map((x) =>
-        stampMatchResults(
-          x,
-          qs,
-          this.command.searchBy.tag,
-          this.command.searchBy.header,
-          this.command.searchBy.link,
-          this.settings.normalizeAccentsAndDiacritics
-        )
-      )
-      .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
+          .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
 
     const items = sort(
       matchedSuggestions,
-      this.command.sortPriorities,
+      isQueryEmpty
+        ? filterNoQueryPriorities(this.command.sortPriorities)
+        : this.command.sortPriorities,
       lastOpenFileIndexByPath
     );
 
@@ -321,11 +294,8 @@ export class AnotherQuickSwitcherModal
     });
     this.searchCommandEl.insertAdjacentHTML("beforeend", SEARCH);
 
-    if (this.command.isBacklinkSearch) {
-      this.searchCommandEl.appendText(`Backlink search`);
-    } else {
-      this.searchCommandEl.appendText(`${this.command.name} ... `);
-    }
+    this.searchCommandEl.appendText(`${this.command.name} ... `);
+
     if (this.command.searchBy.tag) {
       this.searchCommandEl.insertAdjacentHTML("beforeend", TAG);
     }
@@ -386,12 +356,13 @@ export class AnotherQuickSwitcherModal
       fileToOpened = await this.app.vault.create(item.file.path, "");
     }
 
-    const offset = this.command.isBacklinkSearch
-      ? this.appHelper.findFirstLinkOffset(
-          item.file,
-          this.app.workspace.getActiveFile()! // never undefined
-        )
-      : undefined;
+    const offset =
+      this.command.searchTarget === "backlink"
+        ? this.appHelper.findFirstLinkOffset(
+            item.file,
+            this.app.workspace.getActiveFile()! // never undefined
+          )
+        : undefined;
 
     this.close();
     this.appHelper.openMarkdownFile(fileToOpened, { leaf: leaf, offset });

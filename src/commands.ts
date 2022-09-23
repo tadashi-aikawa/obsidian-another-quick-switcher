@@ -61,32 +61,6 @@ export function showHeaderDialog(
 export function createCommands(app: App, settings: Settings): Command[] {
   return [
     {
-      id: "backlink-search",
-      name: "Backlink search",
-      hotkeys: [{ modifiers: ["Mod", "Shift"], key: "h" }],
-      checkCallback: (checking: boolean) => {
-        if (checking) {
-          return Boolean(app.workspace.getActiveFile());
-        }
-        showSearchDialog(app, settings, {
-          isBacklinkSearch: true,
-          searchBy: {
-            tag: false,
-            header: false,
-            link: false,
-          },
-          // XXX: Below are ignored
-          name: "",
-          defaultInput: "",
-          commandPrefix: "",
-          sortPriorities: [],
-          includePrefixPathPatterns: [],
-          excludePrefixPathPatterns: [],
-          expand: true,
-        });
-      },
-    },
-    {
       id: "header-search-in-file",
       name: "Header search in file",
       checkCallback: (checking: boolean) => {

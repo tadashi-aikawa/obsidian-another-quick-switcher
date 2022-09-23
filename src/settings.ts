@@ -3,12 +3,10 @@ import AnotherQuickSwitcher from "./main";
 import { regardAsSortPriority, SortPriority } from "./sorters";
 import { smartLineBreakSplit } from "./utils/strings";
 import { Hotkey, hotkey2String, string2Hotkey } from "./keys";
+import { mirror } from "./utils/collection-helper";
 
-const headerSearchFeatureList = [
-  "navigate",
-  "move to next/previous hit",
-] as const;
-export type HeaderSearchFeature = typeof headerSearchFeatureList[number];
+const searchTargetList = ["markdown", "backlink"] as const;
+export type SearchTarget = typeof searchTargetList[number];
 
 export interface SearchCommand {
   name: string;
@@ -17,12 +15,12 @@ export interface SearchCommand {
     header: boolean;
     link: boolean;
   };
+  searchTarget: SearchTarget;
   defaultInput: string;
   commandPrefix: string;
   sortPriorities: SortPriority[];
   includePrefixPathPatterns: string[];
   excludePrefixPathPatterns: string[];
-  isBacklinkSearch: boolean;
   expand: boolean;
 }
 
@@ -88,8 +86,6 @@ export interface Settings {
   hotkeys: Hotkeys;
   // Searches
   searchCommands: SearchCommand[];
-  // Back link search
-  backLinkExcludePrefixPathPatterns: string[];
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
   // debug
@@ -148,13 +144,13 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
     link: false,
     header: false,
   },
+  searchTarget: "markdown",
   defaultInput: "",
   commandPrefix: "",
   sortPriorities: [],
   includePrefixPathPatterns: [],
   excludePrefixPathPatterns: [],
   expand: true,
-  isBacklinkSearch: false,
 });
 
 export const createPreSettingSearchCommands = (): SearchCommand[] => [
@@ -165,13 +161,13 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: false,
       link: false,
     },
+    searchTarget: "markdown",
     defaultInput: "",
     commandPrefix: ":e ",
     sortPriorities: ["Name match", "Last opened", "Last modified"],
     includePrefixPathPatterns: [],
     excludePrefixPathPatterns: [],
     expand: true,
-    isBacklinkSearch: false,
   },
   {
     name: "File name search",
@@ -180,6 +176,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: false,
       header: false,
     },
+
+    searchTarget: "markdown",
     defaultInput: "",
     commandPrefix: ":f ",
     sortPriorities: [
@@ -191,7 +189,6 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     includePrefixPathPatterns: [],
     excludePrefixPathPatterns: [],
     expand: false,
-    isBacklinkSearch: false,
   },
   {
     name: "Landmark search",
@@ -200,6 +197,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: true,
       header: true,
     },
+    searchTarget: "markdown",
     defaultInput: "",
     commandPrefix: ":l ",
     sortPriorities: [
@@ -214,7 +212,6 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     includePrefixPathPatterns: [],
     excludePrefixPathPatterns: [],
     expand: false,
-    isBacklinkSearch: false,
   },
   {
     name: "Star search",
@@ -223,13 +220,28 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: false,
       header: false,
     },
+    searchTarget: "markdown",
     defaultInput: "",
     commandPrefix: ":s ",
     sortPriorities: ["Star", "Last opened", "Last modified"],
     includePrefixPathPatterns: [],
     excludePrefixPathPatterns: [],
     expand: false,
-    isBacklinkSearch: false,
+  },
+  {
+    name: "Backlink search",
+    searchBy: {
+      tag: false,
+      link: false,
+      header: false,
+    },
+    searchTarget: "backlink",
+    defaultInput: "",
+    commandPrefix: "",
+    sortPriorities: ["Last opened", "Last modified"],
+    includePrefixPathPatterns: [],
+    excludePrefixPathPatterns: [],
+    expand: false,
   },
 ];
 
@@ -250,8 +262,6 @@ export const DEFAULT_SETTINGS: Settings = {
   hotkeys: createDefaultHotkeys(),
   // Searches
   searchCommands: createPreSettingSearchCommands(),
-  // Back link search
-  backLinkExcludePrefixPathPatterns: [],
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
   // debug
@@ -283,8 +293,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addAppearanceSettings(containerEl);
     this.addHotKeysInDialogSettings(containerEl);
     this.addSearchSettings(containerEl);
-    // TODO: remove
-    this.addBacklinkSearchesSettings(containerEl);
     this.addMoveSettings(containerEl);
 
     this.addDebugSettings(containerEl);
@@ -731,6 +739,14 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         return bc;
       });
 
+    new Setting(div).setName("Search target").addDropdown((dc) => {
+      dc.addOptions(mirror([...searchTargetList]))
+        .setValue(command.searchTarget)
+        .onChange(async (value) => {
+          command.searchTarget = value as SearchTarget;
+        });
+    });
+
     new Setting(div)
       .setName("Default input")
       .setDesc("Default input strings when it opens the dialog")
@@ -817,31 +833,6 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         el.inputEl.className =
           "another-quick-switcher__settings__exclude_path_patterns";
 
-        return el;
-      });
-  }
-
-  private addBacklinkSearchesSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "👀 Backlink search" });
-
-    new Setting(containerEl)
-      .setName('Exclude prefix path patterns for "Backlink search"')
-      .setDesc(
-        "If set, files whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks"
-      )
-      .addTextArea((tc) => {
-        const el = tc
-          .setPlaceholder("Prefix match patterns")
-          .setValue(
-            this.plugin.settings.backLinkExcludePrefixPathPatterns.join("\n")
-          )
-          .onChange(async (value) => {
-            this.plugin.settings.backLinkExcludePrefixPathPatterns =
-              smartLineBreakSplit(value);
-            await this.plugin.saveSettings();
-          });
-        el.inputEl.className =
-          "another-quick-switcher__settings__ignore_path_patterns";
         return el;
       });
   }
