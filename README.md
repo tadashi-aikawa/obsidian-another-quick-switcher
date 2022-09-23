@@ -29,13 +29,13 @@ Before creating a pull request, please make an [issue] or a [discussion]😉
 [issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
 [discussion]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/discussions
 
-## ⏬ Install
+### ⏬ Install
 
 You can download from `Community plugins` in Obsidian settings.
 
-## ⌨️Features
+### ⌨️Features
 
-### 1. Custom searches
+#### 1. Custom searches
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/custom-searches.gif)
 
@@ -44,99 +44,94 @@ Custom searches enables you to create your original search commands.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/search-commands-setting.png)
 
-#### Sort priorities
+##### Sort priorities
 
 You can use the following names as a `Sort priorities`.
 
-| Name               | Description                                            |
-| ------------------ | ------------------------------------------------------ |
-| Perfect word match | A query matches perfectly with a word in the file name |
-| Prefix name match  | The file name or alias starts with a query             |
-| Name match         | The file name or alias includes a query                |
-| Tag match          | The tag name in the file includes a query              |
-| Header match       | The header name in the file includes a query           |
-| Link match         | The internal link name in the file includes a query    |
-| Length             | Length of the file name or alias                       |
-| Last opened        | The time the file opened last                          |
-| Last modified      | The time the file modified last                        |
-| Star               | The file has a star                                    |
-| Alphabetical       | File name or alias order by alphabetically ascend      |
+| Name                  | Description                                            | Since |
+| --------------------- | ------------------------------------------------------ | ----- |
+| Perfect word match    | A query matches perfectly with a word in the file name | 6.0.0 |
+| Prefix name match     | The file name or alias starts with a query             | 6.0.0 |
+| Name match            | The file name or alias includes a query                | 6.0.0 |
+| Tag match             | The tag name in the file includes a query              | 6.0.0 |
+| Header match          | The header name in the file includes a query           | 6.0.0 |
+| Link match            | The internal link name in the file includes a query    | 6.0.0 |
+| Length                | Length of the file name or alias                       | 6.0.0 |
+| Last opened           | The time the file opened last                          | 6.0.0 |
+| Last modified         | The time the file modified last                        | 6.0.0 |
+| Star                  | The file has a star                                    | 6.0.0 |
+| Alphabetical          | File name or alias order by alphabetically ascend      | 6.2.0 |
+| Alphabetical reverse  | File name or alias order by alphabetically descend     | 7.0.0 |
+| Created latest        | File creation date from the latest to the earliest     | 7.0.0 |
+| Created earliest      | File creation date from the earliest to the latest     | 7.0.0 |
+| (Tags split by comma) | The file has specific tags                             | 7.0.0 |
 
 > **Warning**
 > Please don't forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
 > ![](demo/save-button.png)
 
-#### Only v7.0.0-beta
-
-| Name                  | Description                                        |
-| --------------------- | -------------------------------------------------- |
-| Alphabetical reverse  | File name or alias order by alphabetically descend |
-| Created latest        | File creation date from the latest to the earliest |
-| Created earliest      | File creation date from the earliest to the latest |
-| (Tags split by comma) | The file has specific tags                         |
-
 > **Note**
 > Examples of `(Tags spit by comma)` are `#hoge`, `#hoge,#huga`, and so on.
 
-### 2. Backlink search
+##### Preset search commands
 
-![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink-search.gif)
+<details>
+  <summary>Recent search</summary>
+  <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/recent-search-setting.png" alt="recent search" />
+</details>
 
-### 3. Header floating search in file / Header search in file
+<details>
+  <summary>File name search</summary>
+  <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/file-name-search-setting.png" alt="file name search" />
+</details>
+
+<details>
+  <summary>Landmark search</summary>
+  <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/landmark-search-setting.png" alt="landmark search" />
+</details>
+
+<details>
+  <summary>Star search</summary>
+  <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/star-search-setting.png" alt="star search" />
+</details>
+
+<details>
+  <summary>Backlink search</summary>
+  <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink-search-setting.png" alt="backlink search" />
+</details>
+
+
+#### 2. Header floating search in file / Header search in file
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/header-floating-search-in-file.gif)
 
 - Show all headers even after filtering to retain file structures in the brain
 - Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab` as default
 
-### 4. Grep
+#### 3. Grep
 
 This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) that can call from anywhere. In other words, the `rg --version` command must be in a state to succeed everywhere.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/grep.gif)
 
+##### Default hotkeys
+
 - `TAB`: Search (not realtime)
 - `Ctrl+,`: preview
+
+##### Note
+
 - Input regards as a regex pattern
-- Because ripgrep search just fastly when you need to search, **it needs no indexes and caches, of course, no need to create them before!** ✨
 
-## For users who use earlier than v6.0.0
+### For users who use earlier than v6.0.0
 
-v6.0.0 has some breaking changes related to commands and settings.
+Please read a "🔥 Breaking changes" section in the [Release note](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/tag/6.0.0).
 
-### Commands
-
-These commands were removed or renamed command ids.
-
-1. Normal search
-2. Recommended recent search
-3. Recent search
-4. Filename recent search
-5. Star Recent Search
-
-In other words, **It is necessary to reconfigure hotkey settings and other plugin settings**.
-
-If you want to use commands precisely the same as before, please look to the old [README](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/blob/c54890d2375a556031a0c69256624eb0fe42e266/README.md#1%E2%83%A3-file-searches) and set the priorities as the same.
-
-> **Note**
-> Example for "Normal search"
-> ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/v6.0.0-migration.png)
-
-### Settings
-
-|                            Before                             |                              After                               |
-| ------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `Search by headers`                                           | in `Search commands`                                             |
-| `Search by links`                                             | in `Search commands`                                             |
-| `Ignore prefix path patterns for Normal search`               | in `Search commands`                                             |
-| `Ignore prefix path patterns for Recent search`               | in `Search commands`                                             |
-| `Ignore prefix path patterns for Filename Recent search`      | in `Search commands`                                             |
-| `Ignore prefix path patterns for Backlink search`             | `Exclude prefix path patterns for "Backlink search"`             |
-| `Ignore prefix path patterns for Move file to another folder` | `Exclude prefix path patterns for "Move file to another folder"` |
-
-## 📱 Mobile support
+### 📱 Mobile support
 
 It both supports desktop and mobile.
+
+---
 
 ## 🖥️ For developers
 
