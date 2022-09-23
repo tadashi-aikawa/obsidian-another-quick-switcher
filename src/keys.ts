@@ -2,9 +2,11 @@ import { Instruction, Modifier, Platform } from "obsidian";
 import { equalsAsSet } from "./utils/collection-helper";
 
 export const MOD = Platform.isMacOS ? "Cmd" : "Ctrl";
+export const ALT = Platform.isMacOS ? "Option" : "Alt";
+
 export const quickResultSelectionModifier = (
   userAltInsteadOfModForQuickResultSelection: boolean
-) => (userAltInsteadOfModForQuickResultSelection ? "Alt" : MOD);
+) => (userAltInsteadOfModForQuickResultSelection ? ALT : MOD);
 
 export type Hotkey = { modifiers: Modifier[]; key: string };
 
@@ -43,7 +45,9 @@ function createInstruction(
   if (!hotKey) {
     return null;
   }
-  const mods = hotKey.modifiers.map((x) => (x === "Mod" ? MOD : x)).join(" ");
+  const mods = hotKey.modifiers
+    .map((x) => (x === "Mod" ? MOD : x === "Alt" ? ALT : x))
+    .join(" ");
   const key =
     hotKey.key === "Enter"
       ? "↵"
