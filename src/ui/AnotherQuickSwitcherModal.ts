@@ -477,6 +477,9 @@ export class AnotherQuickSwitcherModal
       this.handleCreateNew(this.searchQuery, "popup");
     });
 
+    this.registerKeys("open in google", () => {
+      activeWindow.open(`https://www.google.com/search?q=${this.searchQuery}`);
+    });
     this.registerKeys("open first URL", async () => {
       const fileToOpened =
         this.chooser.values?.[this.chooser.selectedItem]?.file;
