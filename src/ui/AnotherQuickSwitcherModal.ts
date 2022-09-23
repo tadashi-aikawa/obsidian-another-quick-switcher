@@ -335,14 +335,30 @@ export class AnotherQuickSwitcherModal
   onNoSuggestion() {
     super.onNoSuggestion();
 
+    const div = createDiv({
+      cls: "another-quick-switcher__command_buttons",
+    });
+
     const createButton = createEl("button", {
       text: "Create",
-      cls: "another-quick-switcher__create_button",
+      cls: "another-quick-switcher__command_button",
     });
     createButton.addEventListener("click", () =>
       this.handleCreateNew(this.searchQuery, "same-tab")
     );
-    this.resultContainerEl.appendChild(createButton);
+    div.appendChild(createButton);
+
+    const searchInGoogleButton = createEl("button", {
+      text: "Search in google",
+      cls: "another-quick-switcher__command_button",
+    });
+    searchInGoogleButton.addEventListener("click", () => {
+      activeWindow.open(`https://www.google.com/search?q=${this.searchQuery}`);
+      this.close();
+    });
+    div.appendChild(searchInGoogleButton);
+
+    this.resultContainerEl.appendChild(div);
   }
 
   async chooseCurrentSuggestion(leaf: LeafType): Promise<void> {
@@ -479,6 +495,7 @@ export class AnotherQuickSwitcherModal
 
     this.registerKeys("open in google", () => {
       activeWindow.open(`https://www.google.com/search?q=${this.searchQuery}`);
+      this.close();
     });
     this.registerKeys("open first URL", async () => {
       const fileToOpened =
