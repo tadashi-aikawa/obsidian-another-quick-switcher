@@ -15,27 +15,13 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 - It can search to **consider prefix emoji**
 - It shows file names and directory names separately
 
-
-## 👥 For users
-
-### Feature requests / Bugs
-
-Please create a new [issue].
-
-### Pull requests
-
-Before creating a pull request, please make an [issue] or a [discussion]😉
-
-[issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
-[discussion]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/discussions
-
-### ⏬ Install
+## ⏬ Install
 
 You can download from `Community plugins` in Obsidian settings.
 
-### ⌨️Features
+## ⌨️Features
 
-#### 1. Custom searches
+### 1. Custom searches
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/custom-searches.gif)
 
@@ -44,7 +30,7 @@ Custom searches enables you to create your original search commands.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/search-commands-setting.png)
 
-##### Sort priorities
+#### Sort priorities
 
 You can use the following names as a `Sort priorities`.
 
@@ -73,7 +59,7 @@ You can use the following names as a `Sort priorities`.
 > **Note**
 > Examples of `(Tags spit by comma)` are `#hoge`, `#hoge,#huga`, and so on.
 
-##### Preset search commands
+#### Preset search commands
 
 <details>
   <summary>Recent search</summary>
@@ -101,44 +87,55 @@ You can use the following names as a `Sort priorities`.
 </details>
 
 
-#### 2. Header floating search in file / Header search in file
+### 2. Header floating search in file / Header search in file
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/header-floating-search-in-file.gif)
 
 - Show all headers even after filtering to retain file structures in the brain
 - Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab` as default
 
-#### 3. Grep
+### 3. Grep
 
 This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) that can call from anywhere. In other words, the `rg --version` command must be in a state to succeed everywhere.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/grep.gif)
 
-##### Default hotkeys
+#### Default hotkeys
 
 - `TAB`: Search (not realtime)
 - `Ctrl+,`: preview
 
-##### Note
+#### Note
 
 - Input regards as a regex pattern
 
-### For users who use earlier than v6.0.0
+## For users who use earlier than v6.0.0
 
 Please read a "🔥 Breaking changes" section in the [Release note](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/tag/6.0.0).
 
-### 📱 Mobile support
+## 📱 Mobile support
 
 It both supports desktop and mobile.
 
+## Feature requests / Bugs
+
+Please create a new [issue].
+
 ---
 
-## 🖥️ For developers
+## 🖥️ For developers / contributors
 
-- Requirements
-  - [Task]
+### Pull requests
+
+Sorry, I would not accept the pull requests except for the following cases.
+
+1. Fix obvious bugs
+2. Fix typo or wrong documentation
+3. If I ask for it in the GitHub issues or the discussions
 
 ### Development
+
+[Task] is required.
 
 ```console
 task init
@@ -156,3 +153,5 @@ task release VERSION=1.2.3
 ```
 
 [task]: https://github.com/go-task/task
+[issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
+[discussion]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/discussions
