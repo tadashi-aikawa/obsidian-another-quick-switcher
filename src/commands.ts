@@ -106,7 +106,7 @@ export function createCommands(app: App, settings: Settings): Command[] {
     ...settings.searchCommands.map((command) => {
       return {
         id: `${SEARCH_COMMAND_PREFIX}_${command.name
-          .replace(" ", "-")
+          .replace(/ /g, "-")
           .toLowerCase()}`,
         name: command.name,
         hotkeys: [],
