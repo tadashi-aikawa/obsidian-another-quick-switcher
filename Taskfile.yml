@@ -37,15 +37,10 @@ tasks:
     desc: |
       Build
           ∟ [Ex] task release VERSION=1.2.3
+          ∟ [Ex] task release VERSION=1.2.3-beta
     deps:
       - ci
     cmds:
-      - |
-        sed -i -r 's/\"version\": \".+\"/\"version\": \"{{.VERSION}}\"/g' manifest.json
-      - |
-        sed -i -r 's/\"version\": \".+\"/\"version\": \"{{.VERSION}}\"/g' manifest-beta.json
-      - git add manifest.json manifest-beta.json
-      - git commit -m "Update manifest"
       - npm version {{.VERSION}}
       - task: ci
       - git push --tags
@@ -53,24 +48,3 @@ tasks:
     preconditions:
       - sh: "[ {{.VERSION}} != '' ]"
         msg: "VERSION is required."
-
-  release-beta:
-    desc: |
-      Build
-          ∟ [Ex] task release-beta VERSION=1.2.3-beta1
-    deps:
-      - ci
-    cmds:
-      - |
-        sed -i -r 's/\"version\": \".+\"/\"version\": \"{{.VERSION}}\"/g' manifest-beta.json
-      - git add manifest-beta.json
-      - git commit -m "[beta] Update manifest"
-      - npm version {{.VERSION}}
-      - task: ci
-      - git push --tags
-      - git push
-    preconditions:
-      - sh: "[ {{.VERSION}} != '' ]"
-        msg: "VERSION is required."
-      - sh: "[[ {{.VERSION}} =~ .+-beta[0-9]+$ ]]"
-        msg: "VERSION must have -beta[0-9]+ suffix."

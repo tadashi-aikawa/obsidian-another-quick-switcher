@@ -145,11 +145,11 @@ task dev
 ### Release
 
 ```console
-# Beta
-task release-beta VERSION=1.2.3-beta1
-
 # Stable
 task release VERSION=1.2.3
+
+# Beta
+task release VERSION=1.2.3-beta1
 ```
 
 [task]: https://github.com/go-task/task
