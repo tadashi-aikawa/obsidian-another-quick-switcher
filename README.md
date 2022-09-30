@@ -86,6 +86,11 @@ You can use the following names as a `Sort priorities`.
   <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/backlink-search-setting.png" alt="backlink search" />
 </details>
 
+#### Note
+
+- Queries enclosed in double quotes are searched as is
+    - `"ho ge"` only matches `ho ge` not `hoge`
+    - `ho ge` matches both `ho ge` and `hoge`
 
 ### 2. Header floating search in file / Header search in file
 
@@ -93,10 +98,13 @@ You can use the following names as a `Sort priorities`.
 
 - Show all headers even after filtering to retain file structures in the brain
 - Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab` as default
+- Queries enclosed in double quotes are searched as is
+    - `"ho ge"` only matches `ho ge` not `hoge`
+    - `ho ge` matches both `ho ge` and `hoge`
 
 ### 3. Grep
 
-This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) that can call from anywhere. In other words, the `rg --version` command must be in a state to succeed everywhere.
+This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) and set the executable command to "Ripgrep command" option.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/grep.gif)
 
