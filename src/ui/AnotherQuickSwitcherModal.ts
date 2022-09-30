@@ -361,7 +361,10 @@ export class AnotherQuickSwitcherModal
     this.resultContainerEl.appendChild(div);
   }
 
-  async chooseCurrentSuggestion(leaf: LeafType): Promise<void> {
+  async chooseCurrentSuggestion(
+    leaf: LeafType,
+    option: { keepOpen?: boolean } = {}
+  ): Promise<void> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
     if (!item) {
       return;
@@ -380,7 +383,9 @@ export class AnotherQuickSwitcherModal
           )
         : undefined;
 
-    this.close();
+    if (!option.keepOpen) {
+      this.close();
+    }
     this.appHelper.openMarkdownFile(fileToOpened, { leaf: leaf, offset });
   }
 
@@ -463,6 +468,9 @@ export class AnotherQuickSwitcherModal
     });
     this.registerKeys("open in popup", () => {
       this.chooseCurrentSuggestion("popup");
+    });
+    this.registerKeys("open in new tab in background", () => {
+      this.chooseCurrentSuggestion("new-tab-background", { keepOpen: true });
     });
     this.registerKeys("open all in new tabs", () => {
       this.close();

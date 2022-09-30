@@ -35,6 +35,7 @@ export interface Hotkeys {
     "open in new pane (vertical)": Hotkey[];
     "open in new window": Hotkey[];
     "open in popup": Hotkey[];
+    "open in new tab in background": Hotkey[];
     "open all in new tabs": Hotkey[];
     create: Hotkey[];
     "create in new tab": Hotkey[];
@@ -106,6 +107,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
     "open in new window": [{ modifiers: ["Mod"], key: "o" }],
     "open in popup": [],
+    "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
     "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     create: [{ modifiers: ["Shift"], key: "Enter" }],
     "create in new tab": [{ modifiers: ["Mod", "Shift"], key: "Enter" }],
