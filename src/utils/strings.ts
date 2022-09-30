@@ -29,7 +29,7 @@ export function smartIncludes(
   isNormalizeAccentsDiacritics: boolean
 ): boolean {
   return excludeSpace(normalize(text, isNormalizeAccentsDiacritics)).includes(
-    normalize(query, isNormalizeAccentsDiacritics)
+    excludeSpace(normalize(query, isNormalizeAccentsDiacritics))
   );
 }
 
@@ -40,7 +40,7 @@ export function smartStartsWith(
 ): boolean {
   return excludeSpace(
     excludeEmoji(normalize(text, isNormalizeAccentsDiacritics))
-  ).startsWith(normalize(query, isNormalizeAccentsDiacritics));
+  ).startsWith(excludeSpace(normalize(query, isNormalizeAccentsDiacritics)));
 }
 
 export function smartEquals(
@@ -71,7 +71,34 @@ export function excludeFormat(text: string): string {
 }
 
 export function smartLineBreakSplit(text: string): string[] {
-  return text
-    .split("\n")
-    .filter((x) => x)
+  return text.split("\n").filter((x) => x);
+}
+
+export function smartWhitespaceSplit(text: string): string[] {
+  const strs = [];
+  let str = "";
+  let hasQuote = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    switch (ch) {
+      case `"`:
+        hasQuote = !hasQuote;
+        break;
+      case ` `:
+        if (hasQuote) {
+          str += ch;
+        } else {
+          strs.push(str);
+          str = "";
+        }
+        break;
+      default:
+        str += ch;
+    }
+  }
+
+  strs.push(str);
+
+  return strs.filter((x) => x);
 }

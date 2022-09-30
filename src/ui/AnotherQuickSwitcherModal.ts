@@ -19,7 +19,7 @@ import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
 import { filterNoQueryPriorities, sort } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
-import { excludeFormat } from "../utils/strings";
+import { excludeFormat, smartWhitespaceSplit } from "../utils/strings";
 import { createInstructions, quickResultSelectionModifier } from "src/keys";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
 
@@ -229,7 +229,7 @@ export class AnotherQuickSwitcherModal
 
     this.renderInputComponent();
 
-    const qs = this.searchQuery.split(" ").filter((x) => x);
+    const qs = smartWhitespaceSplit(this.searchQuery);
 
     if (
       this.command.searchTarget === "backlink" &&

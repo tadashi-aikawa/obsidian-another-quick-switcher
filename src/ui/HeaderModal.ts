@@ -1,7 +1,11 @@
 import { App, Pos, SuggestModal } from "obsidian";
 import { Hotkeys, Settings } from "../settings";
 import { AppHelper } from "../app-helper";
-import { excludeFormat, smartIncludes } from "../utils/strings";
+import {
+  excludeFormat,
+  smartIncludes,
+  smartWhitespaceSplit,
+} from "../utils/strings";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { createInstructions } from "../keys";
 
@@ -153,7 +157,7 @@ export class HeaderModal
   }
 
   getSuggestions(query: string): SuggestionItem[] {
-    const qs = query.split(" ").filter((x) => x);
+    const qs = smartWhitespaceSplit(query);
 
     const suggestions = this.items.map((x) => {
       const hit =
