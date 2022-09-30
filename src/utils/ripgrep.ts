@@ -29,9 +29,9 @@ export interface MatchResult {
   };
 }
 
-export async function existsRg(): Promise<boolean> {
+export async function existsRg(cmd: string): Promise<boolean> {
   return new Promise((resolve, _) => {
-    execFile("rg", ["--version"], (error, _stdout, _stderr) => {
+    execFile(cmd, ["--version"], (error, _stdout, _stderr) => {
       if (error) {
         console.dir(error);
       }
@@ -40,10 +40,13 @@ export async function existsRg(): Promise<boolean> {
   });
 }
 
-export async function rg(...args: string[]): Promise<MatchResult[]> {
+export async function rg(
+  cmd: string,
+  ...args: string[]
+): Promise<MatchResult[]> {
   return new Promise((resolve, _) => {
     execFile(
-      "rg",
+      cmd,
       ["--json", ...args],
       { maxBuffer: 100 * 1024 * 1024 },
       (_, stdout, _stderr) => {

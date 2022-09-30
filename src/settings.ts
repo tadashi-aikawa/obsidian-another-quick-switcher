@@ -87,6 +87,8 @@ export interface Settings {
   hotkeys: Hotkeys;
   // Searches
   searchCommands: SearchCommand[];
+  // Grep
+  ripgrepCommand: string;
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
   // debug
@@ -264,6 +266,8 @@ export const DEFAULT_SETTINGS: Settings = {
   hotkeys: createDefaultHotkeys(),
   // Searches
   searchCommands: createPreSettingSearchCommands(),
+  // Grep
+  ripgrepCommand: "rg",
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
   // debug
@@ -295,6 +299,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addAppearanceSettings(containerEl);
     this.addHotKeysInDialogSettings(containerEl);
     this.addSearchSettings(containerEl);
+    this.addGrepSettings(containerEl);
     this.addMoveSettings(containerEl);
 
     this.addDebugSettings(containerEl);
@@ -837,6 +842,22 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
 
         return el;
       });
+  }
+
+  private addGrepSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "🔍 Grep" });
+
+    new Setting(containerEl)
+      .setName("Ripgrep command")
+      .setDesc("A command that can execute ripgrep")
+      .addText((tc) =>
+        tc
+          .setValue(this.plugin.settings.ripgrepCommand)
+          .onChange(async (value) => {
+            this.plugin.settings.ripgrepCommand = value;
+            await this.plugin.saveSettings();
+          })
+      );
   }
 
   private addMoveSettings(containerEl: HTMLElement) {

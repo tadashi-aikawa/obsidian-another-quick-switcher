@@ -106,6 +106,7 @@ export class GrepModal
 
     const basePath: string = (this.app.vault.adapter as any).basePath;
     const rgResults = await rg(
+      this.settings.ripgrepCommand,
       ...[
         "-t",
         "md",

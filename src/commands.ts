@@ -33,10 +33,10 @@ export async function showGrepDialog(app: App, settings: Settings) {
     return;
   }
 
-  if (!(await existsRg())) {
+  if (!(await existsRg(settings.ripgrepCommand))) {
     // noinspection ObjectAllocationIgnored
     new Notice(
-      "You need to install ripgrep and enable it to call from anywhere."
+      `"${settings.ripgrepCommand}" was not working as a ripgrep command. If you have not installed ripgrep yet, please install it.`
     );
     return;
   }
