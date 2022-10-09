@@ -305,6 +305,7 @@ export class AnotherQuickSwitcherModal
     if (this.command.searchBy.link) {
       this.searchCommandEl.insertAdjacentHTML("beforeend", LINK);
     }
+    this.inputEl.parentElement?.setAttr("style", "display: initial");
     this.inputEl.before(this.searchCommandEl);
 
     if (this.command.defaultInput) {
