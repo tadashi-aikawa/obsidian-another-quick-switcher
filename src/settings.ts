@@ -696,6 +696,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       "another-quick-switcher__settings__search-command__search-by-button_disabled";
     new Setting(div)
       .setName("Search by")
+      .setDesc("Click the button to enable/disable the search target")
       .addButton((bc) => {
         const coloring = () => {
           bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
