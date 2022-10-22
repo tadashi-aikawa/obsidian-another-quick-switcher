@@ -35,11 +35,20 @@ interface MatchQueryResult {
 function matchQuery(
   item: SuggestionItem,
   query: string,
-  searchByTags: boolean,
-  searchByHeaders: boolean,
-  searchByLinks: boolean,
-  isNormalizeAccentsDiacritics: boolean
+  options: {
+    searchByTags: boolean;
+    searchByHeaders: boolean;
+    searchByLinks: boolean;
+    isNormalizeAccentsDiacritics: boolean;
+  }
 ): MatchQueryResult[] {
+  const {
+    searchByTags,
+    searchByHeaders,
+    searchByLinks,
+    isNormalizeAccentsDiacritics,
+  } = options;
+
   // tag
   if (searchByTags && query.startsWith("#")) {
     const tags = item.tags.filter((tag) =>
@@ -153,40 +162,28 @@ function matchQuery(
 function matchQueryAll(
   item: SuggestionItem,
   queries: string[],
-  searchByTags: boolean,
-  searchByHeaders: boolean,
-  searchByLinks: boolean,
-  isNormalizeAccentsDiacritics: boolean
+  options: {
+    searchByTags: boolean;
+    searchByHeaders: boolean;
+    searchByLinks: boolean;
+    isNormalizeAccentsDiacritics: boolean;
+  }
 ): MatchQueryResult[] {
-  return queries.flatMap((q) =>
-    matchQuery(
-      item,
-      q,
-      searchByTags,
-      searchByHeaders,
-      searchByLinks,
-      isNormalizeAccentsDiacritics
-    )
-  );
+  return queries.flatMap((q) => matchQuery(item, q, options));
 }
 
 export function stampMatchResults(
   item: SuggestionItem,
   queries: string[],
-  searchByTags: boolean,
-  searchByHeaders: boolean,
-  searchByLinks: boolean,
-  isNormalizeAccentsDiacritics: boolean
+  options: {
+    searchByTags: boolean;
+    searchByHeaders: boolean;
+    searchByLinks: boolean;
+    isNormalizeAccentsDiacritics: boolean;
+  }
 ): SuggestionItem {
   return {
     ...item,
-    matchResults: matchQueryAll(
-      item,
-      queries,
-      searchByTags,
-      searchByHeaders,
-      searchByLinks,
-      isNormalizeAccentsDiacritics
-    ),
+    matchResults: matchQueryAll(item, queries, options),
   };
 }

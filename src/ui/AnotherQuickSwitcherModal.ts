@@ -243,14 +243,13 @@ export class AnotherQuickSwitcherModal
       ? this.ignoredItems
       : this.ignoredItems
           .map((x) =>
-            stampMatchResults(
-              x,
-              qs,
-              this.command.searchBy.tag,
-              this.command.searchBy.header,
-              this.command.searchBy.link,
-              this.settings.normalizeAccentsAndDiacritics
-            )
+            stampMatchResults(x, qs, {
+              isNormalizeAccentsDiacritics:
+                this.settings.normalizeAccentsAndDiacritics,
+              searchByHeaders: this.command.searchBy.header,
+              searchByLinks: this.command.searchBy.link,
+              searchByTags: this.command.searchBy.tag,
+            })
           )
           .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
 
