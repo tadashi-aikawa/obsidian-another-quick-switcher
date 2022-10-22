@@ -54,9 +54,9 @@ export class GrepModal
   basePath: string;
 
   clonedInputEl: HTMLInputElement;
-  clonedInputElKeyupEventListener: (
+  clonedInputElKeydownEventListener: (
     this: HTMLInputElement,
-    ev: HTMLElementEventMap["keyup"]
+    ev: HTMLElementEventMap["keydown"]
   ) => any;
   countInputEl?: HTMLDivElement;
   basePathInputEl: HTMLInputElement;
@@ -64,9 +64,9 @@ export class GrepModal
     this: HTMLInputElement,
     ev: HTMLElementEventMap["change"]
   ) => any;
-  basePathInputElKeyupEventListener: (
+  basePathInputElKeydownEventListener: (
     this: HTMLInputElement,
-    ev: HTMLElementEventMap["keyup"]
+    ev: HTMLElementEventMap["keydown"]
   ) => any;
 
   constructor(app: App, settings: Settings) {
@@ -116,18 +116,43 @@ export class GrepModal
         placeholder:
           "path from vault root (<current_dir> means current directory)",
         cls: "another-quick-switcher__grep__path-input",
+        type: "text",
       });
+      this.basePathInputEl.setAttrs({
+        autocomplete: "on",
+        list: "directories",
+      });
+
+      const basePathInputList = createEl("datalist");
+      basePathInputList.setAttrs({ id: "directories" });
+
+      basePathInputList.appendChild(
+        createEl("option", { value: "<current_dir>" })
+      );
+      this.appHelper
+        .getFolders()
+        .filter((x) => !x.isRoot())
+        .forEach((x) => {
+          basePathInputList.appendChild(createEl("option", { value: x.path }));
+        });
+
       this.basePathInputElChangeEventListener = (evt: Event) => {
         const value = (evt.target as any).value;
         this.basePath = normalizePath(`${this.vaultRootPath}/${value}`);
       };
-      this.basePathInputElKeyupEventListener = (evt: KeyboardEvent) => {
-        const keyEvent = evt as KeyboardEvent;
+      this.basePathInputElKeydownEventListener = (evt: KeyboardEvent) => {
+        // XXX: Handled when selecting a suggestion
+        if (!evt.key) {
+          evt.preventDefault();
+          return;
+        }
+
         const hotkey = this.settings.hotkeys.grep.search[0];
         if (!hotkey) {
           return;
         }
 
+        const keyEvent = evt as KeyboardEvent;
         if (equalsAsHotkey(hotkey, keyEvent)) {
           evt.preventDefault();
 
@@ -146,19 +171,19 @@ export class GrepModal
       );
       this.basePathInputEl.addEventListener(
         "keydown",
-        this.basePathInputElKeyupEventListener
+        this.basePathInputElKeydownEventListener
       );
 
       const wrapper = createDiv({
         cls: "another-quick-switcher__grep__path-input__wrapper",
       });
       wrapper.appendChild(this.basePathInputEl);
+      wrapper.appendChild(basePathInputList);
 
       const promptInputContainerEl = activeWindow.activeDocument.querySelector(
         ".prompt-input-container"
       );
       promptInputContainerEl?.after(wrapper);
-      // promptInputContainerEl?.after(this.basePathInputEl);
 
       wrapper.insertAdjacentHTML("afterbegin", FOLDER);
     }, 0);
@@ -170,16 +195,16 @@ export class GrepModal
     globalInternalStorage.basePath = this.basePath;
     globalInternalStorage.selected = this.chooser.selectedItem;
     this.clonedInputEl.removeEventListener(
-      "keyup",
-      this.clonedInputElKeyupEventListener
+      "keydown",
+      this.clonedInputElKeydownEventListener
     );
     this.basePathInputEl.removeEventListener(
       "change",
       this.basePathInputElChangeEventListener
     );
     this.basePathInputEl.removeEventListener(
-      "keyup",
-      this.basePathInputElKeyupEventListener
+      "keydown",
+      this.basePathInputElKeydownEventListener
     );
   }
 
@@ -376,7 +401,7 @@ export class GrepModal
     // XXX: This is a hack to avoid default input events
     this.clonedInputEl = this.inputEl.cloneNode(true) as HTMLInputElement;
     this.inputEl.parentNode?.replaceChild(this.clonedInputEl, this.inputEl);
-    this.clonedInputElKeyupEventListener = (evt: KeyboardEvent) => {
+    this.clonedInputElKeydownEventListener = (evt: KeyboardEvent) => {
       const keyEvent = evt as KeyboardEvent;
       const hotkey = this.settings.hotkeys.grep.search[0];
       if (!hotkey) {
@@ -393,7 +418,7 @@ export class GrepModal
     };
     this.clonedInputEl.addEventListener(
       "keydown",
-      this.clonedInputElKeyupEventListener
+      this.clonedInputElKeydownEventListener
     );
 
     this.registerKeys("up", () => {
