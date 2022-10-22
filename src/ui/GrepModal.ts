@@ -3,6 +3,7 @@ import { Hotkeys, Settings } from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { rg } from "../utils/ripgrep";
 import {
+  createInstruction,
   createInstructions,
   equalsAsHotkey,
   quickResultSelectionModifier,
@@ -12,9 +13,11 @@ import { FOLDER } from "./icons";
 
 let globalInternalStorage: {
   items: SuggestionItem[];
+  basePath?: string;
   selected?: number;
 } = {
   items: [],
+  basePath: undefined,
   selected: undefined,
 };
 
@@ -45,8 +48,10 @@ export class GrepModal
   settings: Settings;
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
+  vaultRootPath: string;
   currentQuery: string;
   suggestions: SuggestionItem[];
+  basePath: string;
 
   clonedInputEl: HTMLInputElement;
   clonedInputElKeyupEventListener: (
@@ -54,16 +59,39 @@ export class GrepModal
     ev: HTMLElementEventMap["keyup"]
   ) => any;
   countInputEl?: HTMLDivElement;
+  basePathInputEl: HTMLInputElement;
+  basePathInputElChangeEventListener: (
+    this: HTMLInputElement,
+    ev: HTMLElementEventMap["change"]
+  ) => any;
+  basePathInputElKeyupEventListener: (
+    this: HTMLInputElement,
+    ev: HTMLElementEventMap["keyup"]
+  ) => any;
 
   constructor(app: App, settings: Settings) {
     super(app);
     this.suggestions = globalInternalStorage.items;
+    this.vaultRootPath = normalizePath(
+      (this.app.vault.adapter as any).basePath as string
+    );
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
     this.limit = 255;
 
-    this.setPlaceholder("Search around the vault by TAB key");
+    const searchCmd = this.settings.hotkeys.grep.search.at(0);
+    if (searchCmd) {
+      const inst = createInstruction("_", {
+        key: searchCmd.key,
+        modifiers: searchCmd.modifiers,
+      });
+      this.setPlaceholder(`Search around the vault by ${inst?.command} key`);
+    } else {
+      this.setPlaceholder(
+        `Please set a key about "search" in the "Grep dialog" setting`
+      );
+    }
     this.setHotkeys();
   }
 
@@ -73,22 +101,85 @@ export class GrepModal
       .querySelector(".modal-bg")
       ?.addClass("another-quick-switcher__grep__floating-modal-bg");
 
+    this.basePath =
+      globalInternalStorage.basePath ?? normalizePath(this.vaultRootPath);
+
     const promptEl = activeWindow.activeDocument.querySelector(".prompt");
     promptEl?.addClass("another-quick-switcher__grep__floating-prompt");
     window.setTimeout(() => {
       if (globalInternalStorage.selected != null) {
         this.chooser.setSelectedItem(globalInternalStorage.selected!);
       }
+
+      this.basePathInputEl = createEl("input", {
+        value: this.basePath.replace(new RegExp(this.vaultRootPath + "/?"), ""),
+        placeholder:
+          "path from vault root (<current_dir> means current directory)",
+        cls: "another-quick-switcher__grep__path-input",
+      });
+      this.basePathInputElChangeEventListener = (evt: Event) => {
+        const value = (evt.target as any).value;
+        this.basePath = normalizePath(`${this.vaultRootPath}/${value}`);
+      };
+      this.basePathInputElKeyupEventListener = (evt: KeyboardEvent) => {
+        const keyEvent = evt as KeyboardEvent;
+        const hotkey = this.settings.hotkeys.grep.search[0];
+        if (!hotkey) {
+          return;
+        }
+
+        if (equalsAsHotkey(hotkey, keyEvent)) {
+          evt.preventDefault();
+
+          const value = (evt.target as any).value;
+          this.basePath = normalizePath(`${this.vaultRootPath}/${value}`);
+
+          this.currentQuery = this.clonedInputEl!.value;
+          this.inputEl.value = this.currentQuery;
+          // Necessary to rerender suggestions
+          this.inputEl.dispatchEvent(new Event("input"));
+        }
+      };
+      this.basePathInputEl.addEventListener(
+        "change",
+        this.basePathInputElChangeEventListener
+      );
+      this.basePathInputEl.addEventListener(
+        "keydown",
+        this.basePathInputElKeyupEventListener
+      );
+
+      const wrapper = createDiv({
+        cls: "another-quick-switcher__grep__path-input__wrapper",
+      });
+      wrapper.appendChild(this.basePathInputEl);
+
+      const promptInputContainerEl = activeWindow.activeDocument.querySelector(
+        ".prompt-input-container"
+      );
+      promptInputContainerEl?.after(wrapper);
+      // promptInputContainerEl?.after(this.basePathInputEl);
+
+      wrapper.insertAdjacentHTML("afterbegin", FOLDER);
     }, 0);
   }
 
   onClose() {
     super.onClose();
     globalInternalStorage.items = this.suggestions;
+    globalInternalStorage.basePath = this.basePath;
     globalInternalStorage.selected = this.chooser.selectedItem;
     this.clonedInputEl.removeEventListener(
       "keyup",
       this.clonedInputElKeyupEventListener
+    );
+    this.basePathInputEl.removeEventListener(
+      "change",
+      this.basePathInputElChangeEventListener
+    );
+    this.basePathInputEl.removeEventListener(
+      "keyup",
+      this.basePathInputElKeyupEventListener
     );
   }
 
@@ -104,29 +195,34 @@ export class GrepModal
 
     const hasCapitalLetter = query.toLowerCase() !== query;
 
-    const basePath: string = (this.app.vault.adapter as any).basePath;
+    const paths = this.basePath.replace(
+      /<current_dir>/g,
+      this.appHelper.getCurrentDirPath()
+    );
     const rgResults = await rg(
       this.settings.ripgrepCommand,
-      ...[
-        "-t",
-        "md",
-        hasCapitalLetter ? "" : "-i",
-        "--",
-        query,
-        basePath,
-      ].filter((x) => x)
+      ...["-t", "md", hasCapitalLetter ? "" : "-i", "--", query, paths].filter(
+        (x) => x
+      )
     );
 
-    const items = rgResults.map((x, order) => ({
-      order,
-      file: this.appHelper.getMarkdownFileByPath(
-        normalizePath(x.data.path.text.replace(basePath, ""))
-      )!,
-      line: x.data.lines.text,
-      lineNumber: x.data.line_number,
-      offset: x.data.absolute_offset,
-      submatches: x.data.submatches,
-    }));
+    const items = rgResults
+      .map((x, order) => {
+        return {
+          order,
+          file: this.appHelper.getMarkdownFileByPath(
+            normalizePath(x.data.path.text).replace(
+              this.vaultRootPath + "/",
+              ""
+            )
+          )!,
+          line: x.data.lines.text,
+          lineNumber: x.data.line_number,
+          offset: x.data.absolute_offset,
+          submatches: x.data.submatches,
+        };
+      })
+      .filter((x) => x.file != null);
 
     this.showDebugLog(() =>
       buildLogMessage(`getSuggestions: `, performance.now() - start)

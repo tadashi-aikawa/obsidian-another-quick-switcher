@@ -107,6 +107,10 @@ export class AppHelper {
     return this.getMarkdownViewInActiveLeaf()?.editor ?? null;
   }
 
+  getCurrentDirPath(): string {
+    return this.getActiveFile()?.parent.path ?? "";
+  }
+
   getCurrentOffset(): number | null {
     const editor = this.getCurrentEditor();
     if (!editor) {

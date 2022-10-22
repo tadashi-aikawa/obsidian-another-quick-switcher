@@ -176,13 +176,12 @@ export class AnotherQuickSwitcherModal
       return items;
     };
 
-    const currentDirPath = this.appHelper.getActiveFile()?.parent.path ?? "";
     return filterItems(
       command.includePrefixPathPatterns.map((p) =>
-        p.replace(/<current_dir>/g, currentDirPath)
+        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath)
       ),
       command.excludePrefixPathPatterns.map((p) =>
-        p.replace(/<current_dir>/g, currentDirPath)
+        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath)
       )
     );
   }

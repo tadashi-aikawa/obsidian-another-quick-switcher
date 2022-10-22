@@ -38,7 +38,7 @@ export function createInstructions(hotkeysByComand: {
     .filter((x) => x !== null) as Instruction[];
 }
 
-function createInstruction(
+export function createInstruction(
   commandName: string,
   hotKey?: Hotkey
 ): Instruction | null {
