@@ -11,3 +11,28 @@ export function extname(path: string): string {
 export function dirname(path: string): string {
   return path.match(/(.+)[\\/].+$/)?.[1] ?? ".";
 }
+
+export function normalizeRelativePath(path: string, base: string): string {
+  const sep = /[\\/]/;
+  let es: string[] = [];
+  path.split(sep).forEach((x, i) => {
+    if (i === 0 && x === ".") {
+      es = base.split("/");
+      return;
+    }
+
+    if (x === "..") {
+      if (i === 0) {
+        es = base.split("/");
+      }
+      es = dirname(es.join("/"))
+        .split("/")
+        .filter((x) => x !== ".");
+      return;
+    }
+
+    es = [...es, x];
+  });
+
+  return es.filter((x) => x !== "").join("/");
+}

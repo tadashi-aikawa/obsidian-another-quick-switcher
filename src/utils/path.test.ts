@@ -1,4 +1,4 @@
-import { basename, dirname, extname } from "./path";
+import { basename, dirname, extname, normalizeRelativePath } from "./path";
 import { describe, expect, test } from "@jest/globals";
 
 describe.each<{ path: string; ext?: string; expected: string }>`
@@ -56,5 +56,31 @@ describe.each`
 `("dirname", ({ path, expected }) => {
   test(`dirname(${path}) = ${expected}`, () => {
     expect(dirname(path)).toBe(expected);
+  });
+});
+
+describe.each`
+  path                            | base                 | expected
+  ${"a\\b\\c.txt"}                | ${""}                | ${"a/b/c.txt"}
+  ${"a/b/c.txt"}                  | ${""}                | ${"a/b/c.txt"}
+  ${"a\\b\\..\\c.txt"}            | ${""}                | ${"a/c.txt"}
+  ${"a/b/../c.txt"}               | ${""}                | ${"a/c.txt"}
+  ${"a\\b\\..\\tmp\\..\\c.txt"}   | ${""}                | ${"a/c.txt"}
+  ${"a/b/../tmp/../c.txt"}        | ${""}                | ${"a/c.txt"}
+  ${"./"}                         | ${"c:/root/aaa/bbb"} | ${"c:/root/aaa/bbb"}
+  ${"../"}                        | ${"c:/root/aaa/bbb"} | ${"c:/root/aaa"}
+  ${"../../"}                     | ${"c:/root/aaa/bbb"} | ${"c:/root"}
+  ${"../../"}                     | ${"c:/root"}         | ${""}
+  ${"../../fufu"}                 | ${"c:/root"}         | ${"fufu"}
+  ${"../hoge"}                    | ${"c:/root"}         | ${"c:/hoge"}
+  ${"./a\\b\\c.txt"}              | ${"c:/root/hoge"}    | ${"c:/root/hoge/a/b/c.txt"}
+  ${"./a/b/c.txt"}                | ${"c:/root/hoge"}    | ${"c:/root/hoge/a/b/c.txt"}
+  ${"./a\\b\\..\\c.txt"}          | ${"c:/root/hoge"}    | ${"c:/root/hoge/a/c.txt"}
+  ${"./a/b/../c.txt"}             | ${"c:/root/hoge"}    | ${"c:/root/hoge/a/c.txt"}
+  ${"./a\\b\\..\\tmp\\..\\c.txt"} | ${"c:/root/hoge"}    | ${"c:/root/hoge/a/c.txt"}
+  ${"./a/b/../tmp/../c.txt"}      | ${"c:/root/hoge"}    | ${"c:/root/hoge/a/c.txt"}
+`("normalizeRelativePath", ({ path, base, expected }) => {
+  test(`normalizeRelativePath(${path}, ${base}) = ${expected}`, () => {
+    expect(normalizeRelativePath(path, base)).toBe(expected);
   });
 });

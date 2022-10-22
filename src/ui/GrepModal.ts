@@ -10,6 +10,7 @@ import {
 } from "../keys";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
+import { normalizeRelativePath } from "../utils/path";
 
 let globalInternalStorage: {
   items: SuggestionItem[];
@@ -51,6 +52,7 @@ export class GrepModal
   vaultRootPath: string;
   currentQuery: string;
   suggestions: SuggestionItem[];
+  // input value
   basePath: string;
 
   clonedInputEl: HTMLInputElement;
@@ -101,8 +103,7 @@ export class GrepModal
       .querySelector(".modal-bg")
       ?.addClass("another-quick-switcher__grep__floating-modal-bg");
 
-    this.basePath =
-      globalInternalStorage.basePath ?? normalizePath(this.vaultRootPath);
+    this.basePath = globalInternalStorage.basePath ?? "";
 
     const promptEl = activeWindow.activeDocument.querySelector(".prompt");
     promptEl?.addClass("another-quick-switcher__grep__floating-prompt");
@@ -112,9 +113,9 @@ export class GrepModal
       }
 
       this.basePathInputEl = createEl("input", {
-        value: this.basePath.replace(new RegExp(this.vaultRootPath + "/?"), ""),
+        value: this.basePath,
         placeholder:
-          "path from vault root (<current_dir> means current directory)",
+          "path from vault root (./ means current directory. ../ means parent directory)",
         cls: "another-quick-switcher__grep__path-input",
         type: "text",
       });
@@ -125,10 +126,6 @@ export class GrepModal
 
       const basePathInputList = createEl("datalist");
       basePathInputList.setAttrs({ id: "directories" });
-
-      basePathInputList.appendChild(
-        createEl("option", { value: "<current_dir>" })
-      );
       this.appHelper
         .getFolders()
         .filter((x) => !x.isRoot())
@@ -137,8 +134,7 @@ export class GrepModal
         });
 
       this.basePathInputElChangeEventListener = (evt: Event) => {
-        const value = (evt.target as any).value;
-        this.basePath = normalizePath(`${this.vaultRootPath}/${value}`);
+        this.basePath = (evt.target as any).value;
       };
       this.basePathInputElKeydownEventListener = (evt: KeyboardEvent) => {
         // XXX: Handled when selecting a suggestion
@@ -156,9 +152,7 @@ export class GrepModal
         if (equalsAsHotkey(hotkey, keyEvent)) {
           evt.preventDefault();
 
-          const value = (evt.target as any).value;
-          this.basePath = normalizePath(`${this.vaultRootPath}/${value}`);
-
+          this.basePath = (evt.target as any).value;
           this.currentQuery = this.clonedInputEl!.value;
           this.inputEl.value = this.currentQuery;
           // Necessary to rerender suggestions
@@ -220,15 +214,21 @@ export class GrepModal
 
     const hasCapitalLetter = query.toLowerCase() !== query;
 
-    const paths = this.basePath.replace(
-      /<current_dir>/g,
+    const absolutePathFromRoot = normalizeRelativePath(
+      this.basePath,
       this.appHelper.getCurrentDirPath()
     );
+
     const rgResults = await rg(
       this.settings.ripgrepCommand,
-      ...["-t", "md", hasCapitalLetter ? "" : "-i", "--", query, paths].filter(
-        (x) => x
-      )
+      ...[
+        "-t",
+        "md",
+        hasCapitalLetter ? "" : "-i",
+        "--",
+        query,
+        `${this.vaultRootPath}/${absolutePathFromRoot}`,
+      ].filter((x) => x)
     );
 
     const items = rgResults
@@ -434,6 +434,16 @@ export class GrepModal
       this.clonedInputEl.value = "";
       // Necessary to rerender suggestions
       this.clonedInputEl.dispatchEvent(new InputEvent("input"));
+      this.clonedInputEl.focus();
+    });
+
+    this.registerKeys("clear path", () => {
+      this.basePathInputEl.value = "";
+      this.basePathInputEl.dispatchEvent(new InputEvent("change"));
+    });
+    this.registerKeys("set ./ to path", () => {
+      this.basePathInputEl.value = "./";
+      this.basePathInputEl.dispatchEvent(new InputEvent("change"));
     });
 
     this.registerKeys("open in new tab", () => {
