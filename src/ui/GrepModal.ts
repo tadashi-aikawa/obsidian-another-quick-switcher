@@ -374,7 +374,7 @@ export class GrepModal
     handler: () => void | Promise<void>
   ) {
     this.settings.hotkeys.grep[key]?.forEach((x) => {
-      this.scope.register(x.modifiers, x.key, (evt) => {
+      this.scope.register(x.modifiers, x.key.toUpperCase(), (evt) => {
         evt.preventDefault();
         handler();
         return false;
