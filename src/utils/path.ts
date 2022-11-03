@@ -12,6 +12,10 @@ export function dirname(path: string): string {
   return path.match(/(.+)[\\/].+$/)?.[1] ?? ".";
 }
 
+export function normalizePath(path: string): string {
+  return path.replace(/\\/g, "/");
+}
+
 export function normalizeRelativePath(path: string, base: string): string {
   const sep = /[\\/]/;
   let es: string[] = [];
@@ -34,5 +38,6 @@ export function normalizeRelativePath(path: string, base: string): string {
     es = [...es, x];
   });
 
-  return es.filter((x) => x !== "").join("/");
+  const r = es.filter((x) => x !== "").join("/");
+  return base[0] === "/" ? "/" + r : r;
 }

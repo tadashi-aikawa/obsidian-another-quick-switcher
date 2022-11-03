@@ -1,4 +1,10 @@
-import { basename, dirname, extname, normalizeRelativePath } from "./path";
+import {
+  basename,
+  dirname,
+  extname,
+  normalizePath,
+  normalizeRelativePath,
+} from "./path";
 import { describe, expect, test } from "@jest/globals";
 
 describe.each<{ path: string; ext?: string; expected: string }>`
@@ -60,6 +66,19 @@ describe.each`
 });
 
 describe.each`
+  path                   | expected
+  ${"a\\b\\c.txt"}       | ${"a/b/c.txt"}
+  ${"a/b/c.txt"}         | ${"a/b/c.txt"}
+  ${"a\\b\\..\\c.txt"}   | ${"a/b/../c.txt"}
+  ${"./a\\b\\c.txt"}     | ${"./a/b/c.txt"}
+  ${"/home/a\\b\\c.txt"} | ${"/home/a/b/c.txt"}
+`("normalizePath", ({ path, expected }) => {
+  test(`normalizePath(${path}) = ${expected}`, () => {
+    expect(normalizePath(path)).toBe(expected);
+  });
+});
+
+describe.each`
   path                            | base                 | expected
   ${"a\\b\\c.txt"}                | ${""}                | ${"a/b/c.txt"}
   ${"a/b/c.txt"}                  | ${""}                | ${"a/b/c.txt"}
@@ -79,6 +98,7 @@ describe.each`
   ${"./a/b/../c.txt"}             | ${"c:/root/hoge"}    | ${"c:/root/hoge/a/c.txt"}
   ${"./a\\b\\..\\tmp\\..\\c.txt"} | ${"c:/root/hoge"}    | ${"c:/root/hoge/a/c.txt"}
   ${"./a/b/../tmp/../c.txt"}      | ${"c:/root/hoge"}    | ${"c:/root/hoge/a/c.txt"}
+  ${"./a\\b\\c.txt"}              | ${"/home/hoge"}      | ${"/home/hoge/a/b/c.txt"}
 `("normalizeRelativePath", ({ path, base, expected }) => {
   test(`normalizeRelativePath(${path}, ${base}) = ${expected}`, () => {
     expect(normalizeRelativePath(path, base)).toBe(expected);

@@ -1,4 +1,4 @@
-import { App, normalizePath, SuggestModal, TFile } from "obsidian";
+import { App, SuggestModal, TFile } from "obsidian";
 import { Hotkeys, Settings } from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { rg } from "../utils/ripgrep";
@@ -10,7 +10,7 @@ import {
 } from "../keys";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
-import { normalizeRelativePath } from "../utils/path";
+import { normalizePath, normalizeRelativePath } from "../utils/path";
 
 let globalInternalStorage: {
   items: SuggestionItem[];
