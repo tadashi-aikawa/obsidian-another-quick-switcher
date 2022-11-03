@@ -13,7 +13,7 @@ export function dirname(path: string): string {
 }
 
 export function normalizePath(path: string): string {
-  return path.replace(/\\/g, "/");
+  return path.replace(/\\/g, "/").replace(/\/+/g, "/");
 }
 
 export function normalizeRelativePath(path: string, base: string): string {
