@@ -93,6 +93,7 @@ function createMetaDiv(args: {
     Object.entries(frontMatter).forEach(([key, value]) => {
       const frontMatterSpan = createSpan({
         cls: "another-quick-switcher__item__meta__front_matter",
+        title: `${key}: ${value}`,
       });
       frontMatterSpan.insertAdjacentHTML("beforeend", FRONT_MATTER);
       frontMatterSpan.appendText(`${key}: ${value}`);
