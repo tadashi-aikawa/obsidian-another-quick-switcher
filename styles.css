@@ -264,6 +264,10 @@
     opacity: 0.5;
 }
 
+.another-quick-switcher__settings__exclude_front_matter_keys {
+    height: 120px;
+    width: 300px;
+}
 .another-quick-switcher__settings__ignore_path_patterns {
     height: 120px;
     width: 300px;

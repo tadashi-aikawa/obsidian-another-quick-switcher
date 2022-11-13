@@ -17,6 +17,7 @@ export interface SearchCommand {
   };
   searchTarget: SearchTarget;
   showFrontMatter: boolean;
+  excludeFrontMatterKeys: string[];
   defaultInput: string;
   commandPrefix: string;
   sortPriorities: SortPriority[];
@@ -148,6 +149,15 @@ const createDefaultHotkeys = (): Hotkeys => ({
   },
 });
 
+const createDefaultExcludeFrontMatterKeys = (): string[] => [
+  "aliases",
+  "alias",
+  "tag",
+  "tags",
+  "cssclass",
+  "publish",
+];
+
 export const createDefaultSearchCommand = (): SearchCommand => ({
   name: "",
   searchBy: {
@@ -157,6 +167,7 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   },
   searchTarget: "markdown",
   showFrontMatter: false,
+  excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
   commandPrefix: "",
   sortPriorities: [],
@@ -175,6 +186,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     },
     searchTarget: "markdown",
     showFrontMatter: false,
+    excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
     commandPrefix: ":e ",
     sortPriorities: ["Name match", "Last opened", "Last modified"],
@@ -191,6 +203,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     },
     searchTarget: "markdown",
     showFrontMatter: false,
+    excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
     commandPrefix: ":f ",
     sortPriorities: [
@@ -212,6 +225,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     },
     searchTarget: "markdown",
     showFrontMatter: false,
+    excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
     commandPrefix: ":l ",
     sortPriorities: [
@@ -236,6 +250,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     },
     searchTarget: "markdown",
     showFrontMatter: false,
+    excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
     commandPrefix: ":s ",
     sortPriorities: ["Star", "Last opened", "Last modified"],
@@ -252,6 +267,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     },
     searchTarget: "backlink",
     showFrontMatter: false,
+    excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
     commandPrefix: "",
     sortPriorities: ["Last opened", "Last modified"],
@@ -770,8 +786,26 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(div).setName("Show front matter").addToggle((cb) => {
       cb.setValue(command.showFrontMatter).onChange(async (value) => {
         command.showFrontMatter = value as boolean;
+        this.display();
       });
     });
+
+    if (command.showFrontMatter) {
+      new Setting(div)
+        .setName("Exclude front matter keys")
+        .setDesc("It can set multi patterns by line breaks.")
+        .addTextArea((tc) => {
+          const el = tc
+            .setValue(command.excludeFrontMatterKeys!.join("\n"))
+            .onChange(async (value) => {
+              command.excludeFrontMatterKeys = smartLineBreakSplit(value);
+            });
+          el.inputEl.className =
+            "another-quick-switcher__settings__exclude_front_matter_keys";
+
+          return el;
+        });
+    }
 
     new Setting(div)
       .setName("Default input")

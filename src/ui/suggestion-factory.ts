@@ -10,6 +10,7 @@ interface Elements {
 
 interface Options {
   showFrontMatter: boolean;
+  excludeFrontMatterKeys: string[];
   showDirectory: boolean;
   showDirectoryAtNewLine: boolean;
   showFullPathOfDirectory: boolean;
@@ -231,7 +232,7 @@ export function createElements(
   const frontMatter = omitBy(
     item.frontMatter ?? {},
     (key, value) =>
-      ["aliases", "alias", "tag", "tags"].includes(key) || value == null
+      options.excludeFrontMatterKeys.includes(key) || value == null
   );
   const metaDiv =
     Object.keys(frontMatter).length > 0

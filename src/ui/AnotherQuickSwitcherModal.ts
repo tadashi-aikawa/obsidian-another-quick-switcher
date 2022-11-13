@@ -324,6 +324,7 @@ export class AnotherQuickSwitcherModal
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
     const { itemDiv, metaDiv, descriptionDiv } = createElements(item, {
       showFrontMatter: this.command.showFrontMatter,
+      excludeFrontMatterKeys: this.command.excludeFrontMatterKeys,
       showDirectory: this.settings.showDirectory,
       showDirectoryAtNewLine: this.settings.showDirectoryAtNewLine,
       showFullPathOfDirectory: this.settings.showFullPathOfDirectory,
