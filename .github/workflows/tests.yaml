@@ -22,9 +22,6 @@ jobs:
           node-version: '18'
 
       - run: task ci
-      - uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage/clover.xml
 
       - name: "Discord notification (not success)"
         uses: rjstone/discord-webhook-notify@v1
