@@ -1,4 +1,4 @@
-import { count, equalsAsSet, intersection } from "./collection-helper";
+import { count, equalsAsSet, intersection, omitBy } from "./collection-helper";
 import { describe, expect, test } from "@jest/globals";
 
 describe.each<{ values: number[][]; expected: number[] }>`
@@ -34,5 +34,23 @@ describe.each<{ ary1: string[]; ary2: string[]; expected: boolean }>`
 `("equalsAsSet", ({ ary1, ary2, expected }) => {
   test(`equalsAsSet(${ary1}, ${ary2}) = ${expected}`, () => {
     expect(equalsAsSet(ary1, ary2)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{
+  obj: any;
+  shouldOmit: (key: string, value: any) => boolean;
+  expected: any;
+}>`
+  obj                     | shouldOmit                                 | expected
+  ${{ id: 1, name: "a" }} | ${(k: string, _: unknown) => k === "id"}   | ${{ name: "a" }}
+  ${{ id: 2, name: "a" }} | ${(k: string, _: unknown) => k === "name"} | ${{ id: 2 }}
+  ${{ id: 3, name: "a" }} | ${(k: string, _: unknown) => false}        | ${{ id: 3, name: "a" }}
+  ${{ id: 4, name: "a" }} | ${(k: string, _: unknown) => true}         | ${{}}
+`("omitBy", ({ obj, shouldOmit, expected }) => {
+  test(`omitBy(${JSON.stringify(obj)}, shouldOmit) = ${JSON.stringify(
+    expected
+  )}`, () => {
+    expect(omitBy(obj, shouldOmit)).toStrictEqual(expected);
   });
 });

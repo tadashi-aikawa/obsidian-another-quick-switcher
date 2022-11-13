@@ -1,13 +1,15 @@
 import { SuggestionItem } from "../matcher";
-import { count, uniq, uniqFlatMap } from "../utils/collection-helper";
-import { ALIAS, FOLDER, HEADER, LINK, TAG } from "./icons";
+import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
+import { ALIAS, FOLDER, FRONT_MATTER, HEADER, LINK, TAG } from "./icons";
 
 interface Elements {
   itemDiv: HTMLDivElement;
+  metaDiv?: HTMLDivElement;
   descriptionDiv?: HTMLDivElement;
 }
 
 interface Options {
+  showFrontMatter: boolean;
   showDirectory: boolean;
   showDirectoryAtNewLine: boolean;
   showFullPathOfDirectory: boolean;
@@ -73,16 +75,55 @@ function createItemDiv(
   return itemDiv;
 }
 
-function createDescriptionDiv(
-  item: SuggestionItem,
-  aliases: string[],
-  tags: string[],
-  countByLink: { [link: string]: number },
-  countByHeader: { [header: string]: number },
-  linkResultsNum: number,
-  headerResultsNum: number,
-  options: Options
-): Elements["descriptionDiv"] {
+function createMetaDiv(args: {
+  frontMatter: { [key: string]: string | number };
+  options: Options;
+}): Elements["metaDiv"] {
+  const { frontMatter, options } = args;
+
+  const metaDiv = createDiv({
+    cls: "another-quick-switcher__item__metas",
+  });
+
+  if (options.showFrontMatter && Object.keys(frontMatter).length > 0) {
+    const frontMatterDiv = createDiv({
+      cls: "another-quick-switcher__item__meta",
+    });
+    Object.entries(frontMatter).forEach(([key, value]) => {
+      const frontMatterSpan = createSpan({
+        cls: "another-quick-switcher__item__meta__front_matter",
+      });
+      frontMatterSpan.insertAdjacentHTML("beforeend", FRONT_MATTER);
+      frontMatterSpan.appendText(`${key}: ${value}`);
+      frontMatterDiv.appendChild(frontMatterSpan);
+    });
+    metaDiv.appendChild(frontMatterDiv);
+  }
+
+  return metaDiv;
+}
+
+function createDescriptionDiv(args: {
+  item: SuggestionItem;
+  aliases: string[];
+  tags: string[];
+  countByLink: { [link: string]: number };
+  countByHeader: { [header: string]: number };
+  linkResultsNum: number;
+  headerResultsNum: number;
+  options: Options;
+}): Elements["descriptionDiv"] {
+  const {
+    item,
+    aliases,
+    tags,
+    countByLink,
+    countByHeader,
+    linkResultsNum,
+    headerResultsNum,
+    options,
+  } = args;
+
   const descriptionDiv = createDiv({
     cls: "another-quick-switcher__item__descriptions",
   });
@@ -184,15 +225,27 @@ export function createElements(
     item.matchResults.filter((res) => res.alias),
     (x) => x.meta ?? []
   );
+  const itemDiv = createItemDiv(item, aliases, options);
+
+  // meta
+  const frontMatter = omitBy(
+    item.frontMatter ?? {},
+    (key, value) =>
+      ["aliases", "alias", "tag", "tags"].includes(key) || value == null
+  );
+  const metaDiv =
+    Object.keys(frontMatter).length > 0
+      ? createMetaDiv({ frontMatter, options })
+      : undefined;
+
+  // description
   const tags = uniqFlatMap(
     item.matchResults.filter((res) => res.type === "tag"),
     (x) => x.meta ?? []
   );
-
   const linkResults = item.matchResults.filter((res) => res.type === "link");
   const linkResultsNum = linkResults.length;
   const countByLink = count(linkResults.flatMap((xs) => uniq(xs.meta ?? [])));
-
   const headerResults = item.matchResults.filter(
     (res) => res.type === "header"
   );
@@ -200,30 +253,26 @@ export function createElements(
   const countByHeader = count(
     headerResults.flatMap((xs) => uniq(xs.meta ?? []))
   );
-
-  const itemDiv = createItemDiv(item, aliases, options);
-
-  if (
-    aliases.length === 0 &&
-    tags.length === 0 &&
-    Object.keys(countByLink).length == 0 &&
-    Object.keys(countByHeader).length == 0
-  ) {
-    return { itemDiv };
-  }
-  const descriptionDiv = createDescriptionDiv(
-    item,
-    aliases,
-    tags,
-    countByLink,
-    countByHeader,
-    linkResultsNum,
-    headerResultsNum,
-    options
-  );
+  const descriptionDiv =
+    aliases.length !== 0 ||
+    tags.length !== 0 ||
+    Object.keys(countByLink).length !== 0 ||
+    Object.keys(countByHeader).length !== 0
+      ? createDescriptionDiv({
+          item,
+          aliases,
+          tags,
+          countByLink,
+          countByHeader,
+          linkResultsNum,
+          headerResultsNum,
+          options,
+        })
+      : undefined;
 
   return {
     itemDiv,
+    metaDiv: metaDiv,
     descriptionDiv,
   };
 }

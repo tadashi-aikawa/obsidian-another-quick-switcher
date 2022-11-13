@@ -11,6 +11,7 @@ import {
   excludeItems,
   includeItems,
   keyBy,
+  omitBy,
   uniq,
 } from "../utils/collection-helper";
 import { Hotkeys, SearchCommand, Settings } from "../settings";
@@ -119,6 +120,10 @@ export class AnotherQuickSwitcherModal
           links: this.command.searchBy.link
             ? uniq(cache.links?.map((x) => x.displayText ?? "") ?? [])
             : [],
+          frontMatter:
+            this.command.showFrontMatter && cache.frontmatter
+              ? omitBy(cache.frontmatter, (key, _) => key === "position")
+              : undefined,
           phantom: false,
           starred: x.path in starredPathMap,
           matchResults: [],
@@ -317,7 +322,8 @@ export class AnotherQuickSwitcherModal
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
-    const { itemDiv, descriptionDiv } = createElements(item, {
+    const { itemDiv, metaDiv, descriptionDiv } = createElements(item, {
+      showFrontMatter: this.command.showFrontMatter,
       showDirectory: this.settings.showDirectory,
       showDirectoryAtNewLine: this.settings.showDirectoryAtNewLine,
       showFullPathOfDirectory: this.settings.showFullPathOfDirectory,
@@ -325,6 +331,9 @@ export class AnotherQuickSwitcherModal
       hideGutterIcons: this.settings.hideGutterIcons,
     });
 
+    if (metaDiv?.hasChildNodes()) {
+      itemDiv.appendChild(metaDiv);
+    }
     if (descriptionDiv?.hasChildNodes()) {
       itemDiv.appendChild(descriptionDiv);
     }

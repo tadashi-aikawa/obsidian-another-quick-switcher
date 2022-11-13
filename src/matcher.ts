@@ -18,6 +18,7 @@ export interface SuggestionItem {
   aliases: string[];
   headers: string[];
   links: string[];
+  frontMatter?: { [key: string]: string | number };
   matchResults: MatchQueryResult[];
   phantom: boolean;
   starred: boolean;

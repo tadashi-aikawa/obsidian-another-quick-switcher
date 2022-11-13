@@ -16,6 +16,7 @@ export interface SearchCommand {
     link: boolean;
   };
   searchTarget: SearchTarget;
+  showFrontMatter: boolean;
   defaultInput: string;
   commandPrefix: string;
   sortPriorities: SortPriority[];
@@ -155,6 +156,7 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
     header: false,
   },
   searchTarget: "markdown",
+  showFrontMatter: false,
   defaultInput: "",
   commandPrefix: "",
   sortPriorities: [],
@@ -172,6 +174,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: false,
     },
     searchTarget: "markdown",
+    showFrontMatter: false,
     defaultInput: "",
     commandPrefix: ":e ",
     sortPriorities: ["Name match", "Last opened", "Last modified"],
@@ -186,8 +189,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: false,
       header: false,
     },
-
     searchTarget: "markdown",
+    showFrontMatter: false,
     defaultInput: "",
     commandPrefix: ":f ",
     sortPriorities: [
@@ -208,6 +211,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: true,
     },
     searchTarget: "markdown",
+    showFrontMatter: false,
     defaultInput: "",
     commandPrefix: ":l ",
     sortPriorities: [
@@ -231,6 +235,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: false,
     },
     searchTarget: "markdown",
+    showFrontMatter: false,
     defaultInput: "",
     commandPrefix: ":s ",
     sortPriorities: ["Star", "Last opened", "Last modified"],
@@ -246,6 +251,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: false,
     },
     searchTarget: "backlink",
+    showFrontMatter: false,
     defaultInput: "",
     commandPrefix: "",
     sortPriorities: ["Last opened", "Last modified"],
@@ -759,6 +765,12 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         .onChange(async (value) => {
           command.searchTarget = value as SearchTarget;
         });
+    });
+
+    new Setting(div).setName("Show front matter").addToggle((cb) => {
+      cb.setValue(command.showFrontMatter).onChange(async (value) => {
+        command.showFrontMatter = value as boolean;
+      });
     });
 
     new Setting(div)

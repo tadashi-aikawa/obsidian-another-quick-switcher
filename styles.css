@@ -207,6 +207,19 @@
     padding-right: 0.5rem;
 }
 
+.another-quick-switcher__item__metas {
+    padding-top: 0.5rem
+}
+.another-quick-switcher__item__meta {
+    font-size: 0.75em;
+    display: inline-block;
+}
+.another-quick-switcher__item__meta__front_matter {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 5px;
+}
+
 .another-quick-switcher__item__descriptions {
     padding-top: 0.5rem
 }

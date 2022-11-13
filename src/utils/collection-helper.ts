@@ -112,3 +112,17 @@ export function mirrorMap<T>(
 export function mirror(collection: string[]): { [key: string]: string } {
   return mirrorMap(collection, (x) => x);
 }
+
+export function omitBy<T extends { [key: string]: any }>(
+  obj: T,
+  shouldOmit: (key: string, value: any) => boolean
+): T {
+  const cloned = { ...obj };
+  Object.entries(cloned).forEach(([k, v]) => {
+    if (shouldOmit(k, v)) {
+      delete cloned[k];
+    }
+  });
+
+  return cloned;
+}
