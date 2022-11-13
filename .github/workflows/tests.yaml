@@ -15,11 +15,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: arduino/setup-task@v1
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
       - run: task ci
       - uses: codecov/codecov-action@v1
@@ -31,7 +31,7 @@ jobs:
         if: "! success()"
         with:
           description: "⚠ Another Quick Switcher Tests failed!"
-          footer: "Node.js v16"
+          footer: "Node.js v18"
           severity: error
           avatarUrl: https://cdn.otamart.com/item-picture/26205822/0-1574353123758.jpg
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
@@ -46,7 +46,7 @@ jobs:
         if: always()
         with:
           description: "✅ Another Quick Switcher Tests passed!"
-          footer: "Node.js v16"
+          footer: "Node.js v18"
           severity: info
           avatarUrl: https://cdn.otamart.com/item-picture/26205822/0-1574353123758.jpg
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
