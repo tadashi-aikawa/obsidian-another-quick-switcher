@@ -30,6 +30,14 @@ Custom searches enables you to create your original search commands.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/search-commands-setting.png)
 
+#### Search target
+
+| Name     | Description                                          |
+| -------- |------------------------------------------------------|
+| markdown | All markdown files                                   |
+| backlink | Markdown files in backlinks on the current file      |
+| link     | Markdown files in outgoing links on the current file |
+
 #### Sort priorities
 
 You can use the following names as a `Sort priorities`.
