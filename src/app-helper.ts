@@ -12,7 +12,7 @@ import {
   Workspace,
   WorkspaceLeaf,
 } from "obsidian";
-import { flatten, uniq } from "./utils/collection-helper";
+import { flatten, groupBy, mapValues, uniq } from "./utils/collection-helper";
 import { basename, dirname, extname } from "./utils/path";
 import { ExhaustiveError } from "./errors";
 
@@ -190,6 +190,20 @@ export class AppHelper {
     }
 
     return backLinksMap;
+  }
+
+  /**
+   * @return {"<relative path from root>: LinkCache"}
+   */
+  createActiveFileLinkMap(): Record<string, LinkCache> {
+    return mapValues(
+      groupBy(
+        this.unsafeApp.metadataCache.getFileCache(this.getActiveFile()!)
+          ?.links ?? [],
+        (x) => this.getPathToBeCreated(x.link)
+      ),
+      (caches) => caches[0]
+    );
   }
 
   async moveTo(to: Pos | number, editor?: Editor) {
@@ -379,7 +393,7 @@ export class AppHelper {
     );
   }
 
-  private getPathToBeCreated(linkText: string): string {
+  public getPathToBeCreated(linkText: string): string {
     let linkPath = getLinkpath(linkText);
     if (extname(linkPath) !== ".md") {
       linkPath += ".md";

@@ -12,6 +12,7 @@ import {
   includeItems,
   keyBy,
   omitBy,
+  sorter,
   uniq,
 } from "../utils/collection-helper";
 import { Hotkeys, SearchCommand, Settings } from "../settings";
@@ -164,13 +165,27 @@ export class AnotherQuickSwitcherModal
       excludePatterns: string[]
     ): SuggestionItem[] => {
       let items = this.originItems;
-      if (command.searchTarget === "backlink") {
-        const backlinksMap = this.appHelper.createBacklinksMap();
-        items = items.filter((x) =>
-          backlinksMap[this.appHelper.getActiveFile()?.path ?? ""]?.has(
-            x.file.path
-          )
-        );
+      switch (command.searchTarget) {
+        case "markdown":
+          break;
+        case "backlink":
+          const backlinksMap = this.appHelper.createBacklinksMap();
+          items = items.filter((x) =>
+            backlinksMap[this.appHelper.getActiveFile()?.path ?? ""]?.has(
+              x.file.path
+            )
+          );
+          break;
+        case "link":
+          const activeFileLinkMap = this.appHelper.createActiveFileLinkMap();
+          items = items
+            .filter((x) => activeFileLinkMap[x.file.path])
+            .sort(
+              sorter(
+                (x) => activeFileLinkMap[x.file.path].position.start.offset
+              )
+            );
+          break;
       }
       if (includePatterns.length > 0) {
         items = includeItems(items, includePatterns, (x) => x.file.path);

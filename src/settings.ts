@@ -5,7 +5,7 @@ import { smartLineBreakSplit } from "./utils/strings";
 import { Hotkey, hotkey2String, string2Hotkey } from "./keys";
 import { mirror } from "./utils/collection-helper";
 
-const searchTargetList = ["markdown", "backlink"] as const;
+const searchTargetList = ["markdown", "backlink", "link"] as const;
 export type SearchTarget = typeof searchTargetList[number];
 
 export interface SearchCommand {
