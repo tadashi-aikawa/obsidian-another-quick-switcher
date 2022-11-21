@@ -200,7 +200,7 @@ export class AppHelper {
       groupBy(
         this.unsafeApp.metadataCache.getFileCache(this.getActiveFile()!)
           ?.links ?? [],
-        (x) => this.getPathToBeCreated(x.link)
+        (x) => this.linkText2Path(x.link) ?? this.getPathToBeCreated(x.link)
       ),
       (caches) => caches[0]
     );
@@ -393,7 +393,7 @@ export class AppHelper {
     );
   }
 
-  public getPathToBeCreated(linkText: string): string {
+  getPathToBeCreated(linkText: string): string {
     let linkPath = getLinkpath(linkText);
     if (extname(linkPath) !== ".md") {
       linkPath += ".md";
@@ -414,6 +414,20 @@ export class AppHelper {
         // Normally, same as the "root"
         return `/${linkPath}`;
     }
+  }
+
+  linkText2Path(linkText: string): string | null {
+    const activeFile = this.getActiveFile();
+    if (!activeFile) {
+      return null;
+    }
+
+    return (
+      this.unsafeApp.metadataCache.getFirstLinkpathDest(
+        linkText,
+        activeFile.path
+      )?.path ?? null
+    );
   }
 
   // TODO: Use another interface instead of TFile
