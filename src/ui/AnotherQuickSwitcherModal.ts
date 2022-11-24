@@ -323,7 +323,13 @@ export class AnotherQuickSwitcherModal
     if (this.command.searchBy.link) {
       this.searchCommandEl.insertAdjacentHTML("beforeend", LINK);
     }
-    this.inputEl.parentElement?.setAttr("style", "display: initial");
+
+    // For the bugfix (can't scroll on the mobile)
+    const promptInputContainer = this.modalEl.find(".prompt-input-container");
+    if (promptInputContainer) {
+      promptInputContainer.setAttr("style", "display: initial");
+    }
+
     this.inputEl.before(this.searchCommandEl);
 
     if (this.command.defaultInput) {
