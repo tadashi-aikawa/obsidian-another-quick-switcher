@@ -130,7 +130,15 @@ This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) and set t
 
 Detailed hotkeys customization is available for each dialog.
 
-> ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/customizable-hotkeys-setting.png)
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/customizable-hotkeys-setting.png)
+
+### 5. Show backlinks from the dialog
+
+You can show the backlinks about the suggestion in the dialog. (Default hotkey is `Mod h`)
+
+It can show backlinks from not only existing notes but also phantom(not existing) notes.
+
+![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/show-backlinks-from-the-dialog.gif)
 
 ## For users who use earlier than v6.0.0
 
