@@ -12,9 +12,16 @@ import {
   Workspace,
   WorkspaceLeaf,
 } from "obsidian";
-import { flatten, groupBy, mapValues, uniq } from "./utils/collection-helper";
+import {
+  flatten,
+  groupBy,
+  mapKeys,
+  mapValues,
+  uniq,
+} from "./utils/collection-helper";
 import { basename, dirname, extname } from "./utils/path";
 import { ExhaustiveError } from "./errors";
+import merge from "ts-deepmerge";
 
 interface UnsafeAppInterface {
   internalPlugins: {
@@ -161,25 +168,30 @@ export class AppHelper {
   }
 
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
+    // linkFileがphantom
     const fileCache = this.unsafeApp.metadataCache.getFileCache(file);
     const links = fileCache?.links ?? [];
     const embeds = fileCache?.embeds ?? [];
 
-    return [...links, ...embeds].find((x: LinkCache) => {
-      const toLinkFilePath = this.unsafeApp.metadataCache.getFirstLinkpathDest(
-        getLinkpath(x.link),
-        file.path
-      )?.path;
-      return toLinkFilePath === linkFile.path;
-    })!.position.start.offset;
+    return [...links, ...embeds].find(
+      (x: LinkCache) => this.getPathToBeCreated(x.link) === linkFile.path
+    )!.position.start.offset;
   }
 
   // noinspection FunctionWithMultipleLoopsJS
+  /**
+   * Includes phantom files
+   */
   createBacklinksMap(): Record<string, Set<string>> {
     const backLinksMap: Record<string, Set<string>> = {};
 
+    const unresolvedLinks = mapValues(
+      this.unsafeApp.metadataCache.unresolvedLinks,
+      (innerMap) => mapKeys(innerMap, (x) => this.getPathToBeCreated(x))
+    );
+
     for (const [filePath, linkMap] of Object.entries(
-      this.unsafeApp.metadataCache.resolvedLinks
+      merge(this.unsafeApp.metadataCache.resolvedLinks, unresolvedLinks)
     ) as [string, Record<string, number>][]) {
       for (const linkPath of Object.keys(linkMap)) {
         if (!backLinksMap[linkPath]) {

@@ -6,6 +6,14 @@ export const mapValues = <K, T, U>(
     Object.entries(obj).map(([key, value]) => [key, to(value)])
   );
 
+export const mapKeys = <T>(
+  obj: { [key: string]: T },
+  to: (x: string) => string
+): { [key: string]: T } =>
+  Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [to(key), value])
+  );
+
 /**
  * Use as compareFn in sort
  */

@@ -49,6 +49,7 @@ export interface Hotkeys {
     "open first URL": Hotkey[];
     "insert to editor": Hotkey[];
     "insert all to editor": Hotkey[];
+    "show backlinks": Hotkey[];
   };
   move: {
     up: Hotkey[];
@@ -124,6 +125,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "open first URL": [{ modifiers: ["Mod"], key: "]" }],
     "insert to editor": [{ modifiers: ["Alt"], key: "Enter" }],
     "insert all to editor": [{ modifiers: ["Alt", "Shift"], key: "Enter" }],
+    "show backlinks": [{ modifiers: ["Mod"], key: "h" }],
   },
   move: {
     up: [{ modifiers: ["Mod"], key: "p" }],
@@ -178,6 +180,25 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   includePrefixPathPatterns: [],
   excludePrefixPathPatterns: [],
   expand: true,
+});
+
+export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
+  name: "Backlink search",
+  searchBy: {
+    tag: false,
+    link: false,
+    header: false,
+  },
+  searchTarget: "backlink",
+  floating: false,
+  showFrontMatter: false,
+  excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+  defaultInput: "",
+  commandPrefix: "",
+  sortPriorities: ["Last opened", "Last modified"],
+  includePrefixPathPatterns: [],
+  excludePrefixPathPatterns: [],
+  expand: false,
 });
 
 export const createPreSettingSearchCommands = (): SearchCommand[] => [
@@ -266,24 +287,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     excludePrefixPathPatterns: [],
     expand: false,
   },
-  {
-    name: "Backlink search",
-    searchBy: {
-      tag: false,
-      link: false,
-      header: false,
-    },
-    searchTarget: "backlink",
-    floating: false,
-    showFrontMatter: false,
-    excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
-    defaultInput: "",
-    commandPrefix: "",
-    sortPriorities: ["Last opened", "Last modified"],
-    includePrefixPathPatterns: [],
-    excludePrefixPathPatterns: [],
-    expand: false,
-  },
+  createDefaultBacklinkSearchCommand(),
 ];
 
 export const DEFAULT_SETTINGS: Settings = {

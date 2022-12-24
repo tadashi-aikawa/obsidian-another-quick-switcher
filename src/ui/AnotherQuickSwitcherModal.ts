@@ -16,7 +16,12 @@ import {
   sorter,
   uniq,
 } from "../utils/collection-helper";
-import { Hotkeys, SearchCommand, Settings } from "../settings";
+import {
+  createDefaultBacklinkSearchCommand,
+  Hotkeys,
+  SearchCommand,
+  Settings,
+} from "../settings";
 import { AppHelper, LeafType } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
@@ -57,14 +62,19 @@ export class AnotherQuickSwitcherModal
   defaultInputEl?: HTMLDivElement;
   countInputEl?: HTMLDivElement;
 
-  constructor(app: App, settings: Settings, command: SearchCommand) {
+  constructor(
+    app: App,
+    settings: Settings,
+    command: SearchCommand,
+    originFile: TFile | null
+  ) {
     super(app);
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
     this.initialCommand = command;
     this.command = command;
-    this.originFile = this.appHelper.getActiveFile();
+    this.originFile = originFile;
 
     this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotkeys();
@@ -287,10 +297,7 @@ export class AnotherQuickSwitcherModal
 
     const qs = smartWhitespaceSplit(this.searchQuery);
 
-    if (
-      this.command.searchTarget === "backlink" &&
-      !this.app.workspace.getActiveFile()?.path
-    ) {
+    if (this.command.searchTarget === "backlink" && !this.originFile?.path) {
       return [];
     }
 
@@ -609,6 +616,25 @@ export class AnotherQuickSwitcherModal
         this.appHelper.insertLinkToActiveFileBy(x.file);
         this.appHelper.insertStringToActiveFile("\n");
       });
+    });
+
+    this.registerKeys("show backlinks", () => {
+      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
+      if (!file) {
+        return;
+      }
+
+      this.close();
+      const modal = new AnotherQuickSwitcherModal(
+        this.app,
+        this.settings,
+        {
+          ...createDefaultBacklinkSearchCommand(),
+          floating: this.command.floating,
+        },
+        file
+      );
+      modal.open();
     });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection

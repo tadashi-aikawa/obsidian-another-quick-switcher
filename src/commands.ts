@@ -13,7 +13,12 @@ export function showSearchDialog(
   settings: Settings,
   command: SearchCommand
 ) {
-  const modal = new AnotherQuickSwitcherModal(app, settings, command);
+  const modal = new AnotherQuickSwitcherModal(
+    app,
+    settings,
+    command,
+    app.workspace.getActiveFile()
+  );
   modal.open();
 }
 
