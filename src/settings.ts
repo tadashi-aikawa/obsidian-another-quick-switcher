@@ -16,6 +16,7 @@ export interface SearchCommand {
     link: boolean;
   };
   searchTarget: SearchTarget;
+  floating: boolean;
   showFrontMatter: boolean;
   excludeFrontMatterKeys: string[];
   defaultInput: string;
@@ -39,6 +40,7 @@ export interface Hotkeys {
     "open in popup": Hotkey[];
     "open in new tab in background": Hotkey[];
     "open all in new tabs": Hotkey[];
+    preview: Hotkey[];
     create: Hotkey[];
     "create in new tab": Hotkey[];
     "create in new window": Hotkey[];
@@ -113,6 +115,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "open in popup": [],
     "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
     "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
+    preview: [{ modifiers: ["Mod"], key: "," }],
     create: [{ modifiers: ["Shift"], key: "Enter" }],
     "create in new tab": [{ modifiers: ["Mod", "Shift"], key: "Enter" }],
     "create in new window": [{ modifiers: ["Mod", "Shift"], key: "o" }],
@@ -166,6 +169,7 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
     header: false,
   },
   searchTarget: "markdown",
+  floating: false,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
@@ -185,6 +189,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: false,
     },
     searchTarget: "markdown",
+    floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -202,6 +207,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: false,
     },
     searchTarget: "markdown",
+    floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -224,6 +230,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: true,
     },
     searchTarget: "markdown",
+    floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -249,6 +256,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: false,
     },
     searchTarget: "markdown",
+    floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -266,6 +274,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: false,
     },
     searchTarget: "backlink",
+    floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -781,6 +790,13 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         .onChange(async (value) => {
           command.searchTarget = value as SearchTarget;
         });
+    });
+
+    new Setting(div).setName("Floating").addToggle((cb) => {
+      cb.setValue(command.floating).onChange(async (value) => {
+        command.floating = value as boolean;
+        this.display();
+      });
     });
 
     new Setting(div).setName("Show front matter").addToggle((cb) => {

@@ -6,6 +6,7 @@ import {
   parseFrontMatterAliases,
   parseFrontMatterTags,
   SuggestModal,
+  TFile,
 } from "obsidian";
 import {
   excludeItems,
@@ -39,6 +40,7 @@ export class AnotherQuickSwitcherModal
   appHelper: AppHelper;
   settings: Settings;
   searchQuery: string;
+  originFile: TFile | null;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
@@ -62,6 +64,7 @@ export class AnotherQuickSwitcherModal
     this.settings = settings;
     this.initialCommand = command;
     this.command = command;
+    this.originFile = this.appHelper.getActiveFile();
 
     this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotkeys();
@@ -91,18 +94,54 @@ export class AnotherQuickSwitcherModal
     );
   }
 
+  onOpen() {
+    super.onOpen();
+
+    if (this.command.floating) {
+      activeWindow.activeDocument
+        .querySelector(".modal-bg")
+        ?.addClass("another-quick-switcher__floating-modal-bg");
+
+      const promptEl = activeWindow.activeDocument.querySelector(".prompt");
+      promptEl?.addClass("another-quick-switcher__floating-prompt");
+
+      const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
+
+      if (markdownView) {
+        const windowWidth = activeWindow.innerWidth;
+        const windowHeight = activeWindow.innerHeight;
+        const modalWidth = this.modalEl.offsetWidth;
+        const modalHeight = this.modalEl.offsetHeight;
+        const {
+          x: leafX,
+          y: leafY,
+          width: leafWidth,
+        } = markdownView.containerEl.getBoundingClientRect();
+        const { y: promptY } = promptEl!.getBoundingClientRect();
+
+        const left = Math.min(
+          windowWidth - modalWidth - 30,
+          leafX + leafWidth / 1.5
+        );
+        const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
+
+        promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);
+      }
+    }
+  }
+
   indexingItems() {
     const starredPathMap = keyBy(
       this.appHelper.getStarredFilePaths(),
       (x) => x
     );
-    const activeFilePath = app.workspace.getActiveFile()?.path;
+    const originFilePath = this.originFile?.path;
 
     const start = performance.now();
     const markdownItems = app.vault
       .getMarkdownFiles()
       .filter(
-        (x) => x.path !== activeFilePath && app.metadataCache.getFileCache(x)
+        (x) => x.path !== originFilePath && app.metadataCache.getFileCache(x)
       )
       .map((x) => {
         const cache = app.metadataCache.getFileCache(x)!; // already filtered
@@ -171,18 +210,16 @@ export class AnotherQuickSwitcherModal
         case "backlink":
           const backlinksMap = this.appHelper.createBacklinksMap();
           items = items.filter((x) =>
-            backlinksMap[this.appHelper.getActiveFile()?.path ?? ""]?.has(
-              x.file.path
-            )
+            backlinksMap[this.originFile?.path ?? ""]?.has(x.file.path)
           );
           break;
         case "link":
-          const activeFileLinkMap = this.appHelper.createActiveFileLinkMap();
+          const originFileLinkMap = this.appHelper.createActiveFileLinkMap();
           items = items
-            .filter((x) => activeFileLinkMap[x.file.path])
+            .filter((x) => originFileLinkMap[x.file.path])
             .sort(
               sorter(
-                (x) => activeFileLinkMap[x.file.path].position.start.offset
+                (x) => originFileLinkMap[x.file.path].position.start.offset
               )
             );
           break;
@@ -407,16 +444,13 @@ export class AnotherQuickSwitcherModal
 
     const offset =
       this.command.searchTarget === "backlink"
-        ? this.appHelper.findFirstLinkOffset(
-            item.file,
-            this.app.workspace.getActiveFile()! // never undefined
-          )
+        ? this.appHelper.findFirstLinkOffset(item.file, this.originFile!) // backlinkの候補がある場合はかならずoriginFileが存在する
         : undefined;
 
     if (!option.keepOpen) {
       this.close();
     }
-    this.appHelper.openMarkdownFile(fileToOpened, { leaf: leaf, offset });
+    this.appHelper.openMarkdownFile(fileToOpened, { leaf, offset });
   }
 
   async onChooseSuggestion(
@@ -484,23 +518,25 @@ export class AnotherQuickSwitcherModal
       }
     });
 
-    this.registerKeys("open in new tab", () => {
-      this.chooseCurrentSuggestion("new-tab");
+    this.registerKeys("open in new tab", async () => {
+      await this.chooseCurrentSuggestion("new-tab");
     });
-    this.registerKeys("open in new pane (horizontal)", () => {
-      this.chooseCurrentSuggestion("new-pane-horizontal");
+    this.registerKeys("open in new pane (horizontal)", async () => {
+      await this.chooseCurrentSuggestion("new-pane-horizontal");
     });
-    this.registerKeys("open in new pane (vertical)", () => {
-      this.chooseCurrentSuggestion("new-pane-vertical");
+    this.registerKeys("open in new pane (vertical)", async () => {
+      await this.chooseCurrentSuggestion("new-pane-vertical");
     });
-    this.registerKeys("open in new window", () => {
-      this.chooseCurrentSuggestion("new-window");
+    this.registerKeys("open in new window", async () => {
+      await this.chooseCurrentSuggestion("new-window");
     });
-    this.registerKeys("open in popup", () => {
-      this.chooseCurrentSuggestion("popup");
+    this.registerKeys("open in popup", async () => {
+      await this.chooseCurrentSuggestion("popup");
     });
-    this.registerKeys("open in new tab in background", () => {
-      this.chooseCurrentSuggestion("new-tab-background", { keepOpen: true });
+    this.registerKeys("open in new tab in background", async () => {
+      await this.chooseCurrentSuggestion("new-tab-background", {
+        keepOpen: true,
+      });
     });
     this.registerKeys("open all in new tabs", () => {
       this.close();
@@ -518,17 +554,21 @@ export class AnotherQuickSwitcherModal
         );
     });
 
-    this.registerKeys("create", () => {
-      this.handleCreateNew(this.searchQuery, "same-tab");
+    this.registerKeys("preview", async () => {
+      await this.chooseCurrentSuggestion("same-tab", { keepOpen: true });
     });
-    this.registerKeys("create in new tab", () => {
-      this.handleCreateNew(this.searchQuery, "new-tab");
+
+    this.registerKeys("create", async () => {
+      await this.handleCreateNew(this.searchQuery, "same-tab");
     });
-    this.registerKeys("create in new window", () => {
-      this.handleCreateNew(this.searchQuery, "new-window");
+    this.registerKeys("create in new tab", async () => {
+      await this.handleCreateNew(this.searchQuery, "new-tab");
     });
-    this.registerKeys("create in new popup", () => {
-      this.handleCreateNew(this.searchQuery, "popup");
+    this.registerKeys("create in new window", async () => {
+      await this.handleCreateNew(this.searchQuery, "new-window");
+    });
+    this.registerKeys("create in new popup", async () => {
+      await this.handleCreateNew(this.searchQuery, "popup");
     });
 
     this.registerKeys("open in google", () => {

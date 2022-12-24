@@ -7,6 +7,7 @@
 This is an Obsidian plugin which is another choice of Quick switcher.
 
 - It can create custom search commands (`Custom searches`)
+- It allows you to customize the hotkeys in the quick switcher to your preference
 - It can search backlinks and move them **without leaving from a keyboard** (`Backlink search`)
 - It can move a file to another folder (`Move file to another folder`)
 - It can search **regardless of the appearance order of tokens**
@@ -62,7 +63,7 @@ You can use the following names as a `Sort priorities`.
 
 > **Warning**
 > Please don't forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
-> ![](demo/save-button.png)
+> ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/save-button.png)
 
 > **Note**
 > Examples of `(Tags spit by comma)` are `#hoge`, `#hoge,#huga`, and so on.
@@ -124,6 +125,12 @@ This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) and set t
 #### Note
 
 - Input regards as a regex pattern
+
+### 4. Customizable hotkeys
+
+Detailed hotkeys customization is available for each dialog.
+
+> ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/customizable-hotkeys-setting.png)
 
 ## For users who use earlier than v6.0.0
 
