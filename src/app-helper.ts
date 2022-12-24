@@ -168,14 +168,19 @@ export class AppHelper {
   }
 
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
-    // linkFileがphantom
     const fileCache = this.unsafeApp.metadataCache.getFileCache(file);
     const links = fileCache?.links ?? [];
     const embeds = fileCache?.embeds ?? [];
 
-    return [...links, ...embeds].find(
-      (x: LinkCache) => this.getPathToBeCreated(x.link) === linkFile.path
-    )!.position.start.offset;
+    return [...links, ...embeds].find((x: LinkCache) => {
+      const firstLinkPath = this.isPhantomFile(linkFile)
+        ? this.getPathToBeCreated(x.link)
+        : this.unsafeApp.metadataCache.getFirstLinkpathDest(
+            getLinkpath(x.link),
+            file.path
+          )?.path;
+      return firstLinkPath === linkFile.path;
+    })!.position.start.offset;
   }
 
   // noinspection FunctionWithMultipleLoopsJS
@@ -440,6 +445,10 @@ export class AppHelper {
         activeFile.path
       )?.path ?? null
     );
+  }
+
+  isPhantomFile(file: TFile): boolean {
+    return file.stat.ctime === 0;
   }
 
   // TODO: Use another interface instead of TFile
