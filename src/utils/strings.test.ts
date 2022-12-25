@@ -3,8 +3,10 @@ import {
   excludeFormat,
   excludeSpace,
   normalizeAccentsDiacritics,
+  smartCommaSplit,
   smartEquals,
   smartIncludes,
+  smartLineBreakSplit,
   smartStartsWith,
   smartWhitespaceSplit,
 } from "./strings";
@@ -132,6 +134,26 @@ describe.each`
 `("excludeFormat", ({ text, expected }) => {
   test(`excludeFormat(${text}) = ${expected}`, () => {
     expect(excludeFormat(text)).toBe(expected);
+  });
+});
+
+describe.each<{ text: string; expected: string[] }>`
+  text       | expected
+  ${"aa,bb"} | ${["aa", "bb"]}
+  ${""}      | ${[]}
+`("smartCommaSplit", ({ text, expected }) => {
+  test(`smartCommaSplit(${text}) = ${expected}`, () => {
+    expect(smartCommaSplit(text)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{ text: string; expected: string[] }>`
+  text        | expected
+  ${"aa\nbb"} | ${["aa", "bb"]}
+  ${""}       | ${[]}
+`("smartLineBreakSplit", ({ text, expected }) => {
+  test(`smartLineBreakSplit(${text}) = ${expected}`, () => {
+    expect(smartLineBreakSplit(text)).toStrictEqual(expected);
   });
 });
 

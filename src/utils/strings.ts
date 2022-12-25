@@ -70,6 +70,10 @@ export function excludeFormat(text: string): string {
     .replace(/<[^>]+>([^<]+)<\/[^>]+>/g, "$1");
 }
 
+export function smartCommaSplit(text: string): string[] {
+  return text.split(",").filter((x) => x);
+}
+
 export function smartLineBreakSplit(text: string): string[] {
   return text.split("\n").filter((x) => x);
 }

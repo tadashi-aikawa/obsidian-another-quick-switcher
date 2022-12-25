@@ -1,11 +1,11 @@
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import AnotherQuickSwitcher from "./main";
 import { regardAsSortPriority, SortPriority } from "./sorters";
-import { smartLineBreakSplit } from "./utils/strings";
+import { smartCommaSplit, smartLineBreakSplit } from "./utils/strings";
 import { Hotkey, hotkey2String, string2Hotkey } from "./keys";
 import { mirror } from "./utils/collection-helper";
 
-const searchTargetList = ["markdown", "backlink", "link"] as const;
+const searchTargetList = ["file", "backlink", "link"] as const;
 export type SearchTarget = typeof searchTargetList[number];
 
 export interface SearchCommand {
@@ -16,6 +16,7 @@ export interface SearchCommand {
     link: boolean;
   };
   searchTarget: SearchTarget;
+  targetExtensions: string[];
   floating: boolean;
   showFrontMatter: boolean;
   excludeFrontMatterKeys: string[];
@@ -174,7 +175,8 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
     link: false,
     header: false,
   },
-  searchTarget: "markdown",
+  searchTarget: "file",
+  targetExtensions: [],
   floating: false,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -194,6 +196,7 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
     header: false,
   },
   searchTarget: "backlink",
+  targetExtensions: ["md"],
   floating: false,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -213,7 +216,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: false,
       link: false,
     },
-    searchTarget: "markdown",
+    searchTarget: "file",
+    targetExtensions: [],
     floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -231,7 +235,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: false,
       header: false,
     },
-    searchTarget: "markdown",
+    searchTarget: "file",
+    targetExtensions: [],
     floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -254,7 +259,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: true,
       header: true,
     },
-    searchTarget: "markdown",
+    searchTarget: "file",
+    targetExtensions: [],
     floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -280,7 +286,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: false,
       header: false,
     },
-    searchTarget: "markdown",
+    searchTarget: "file",
+    targetExtensions: [],
     floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -799,6 +806,20 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           command.searchTarget = value as SearchTarget;
         });
     });
+
+    new Setting(div)
+      .setName("Target extensions")
+      .setDesc(
+        "If set, only files whose extension equals will be suggested. If empty, all files will be suggested. It can set multi extensions using comma."
+      )
+      .addTextArea((tc) =>
+        tc
+          .setPlaceholder("(ex: md,png,canvas)")
+          .setValue(command.targetExtensions.join(","))
+          .onChange(async (value) => {
+            command.targetExtensions = smartCommaSplit(value);
+          })
+      );
 
     new Setting(div).setName("Floating").addToggle((cb) => {
       cb.setValue(command.floating).onChange(async (value) => {

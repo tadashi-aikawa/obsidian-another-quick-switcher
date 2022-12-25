@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import { createCommands, showSearchDialog } from "./commands";
+import { createCommands } from "./commands";
 import {
   AnotherQuickSwitcherSettingTab,
   createDefaultSearchCommand,
@@ -28,6 +28,7 @@ export default class AnotherQuickSwitcher extends Plugin {
 
   async loadSettings(): Promise<void> {
     const currentSettings = await this.loadData();
+
     this.settings = merge.withOptions(
       { mergeArrays: false },
       DEFAULT_SETTINGS,
@@ -41,6 +42,11 @@ export default class AnotherQuickSwitcher extends Plugin {
           ...this.settings.searchCommands[i],
         }
       );
+
+      // @ts-ignore (v7 -> v8 backward compatibility)
+      if (this.settings.searchCommands[i].searchTarget === "markdown") {
+        this.settings.searchCommands[i].searchTarget = "file";
+      }
     });
   }
 

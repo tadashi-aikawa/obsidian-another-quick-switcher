@@ -115,9 +115,9 @@ export class AnotherQuickSwitcherModal
       const promptEl = activeWindow.activeDocument.querySelector(".prompt");
       promptEl?.addClass("another-quick-switcher__floating-prompt");
 
-      const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
+      const fileView = this.appHelper.getFileViewInActiveLeaf();
 
-      if (markdownView) {
+      if (fileView) {
         const windowWidth = activeWindow.innerWidth;
         const windowHeight = activeWindow.innerHeight;
         const modalWidth = this.modalEl.offsetWidth;
@@ -126,7 +126,7 @@ export class AnotherQuickSwitcherModal
           x: leafX,
           y: leafY,
           width: leafWidth,
-        } = markdownView.containerEl.getBoundingClientRect();
+        } = fileView.containerEl.getBoundingClientRect();
         const { y: promptY } = promptEl!.getBoundingClientRect();
 
         const left = Math.min(
@@ -148,8 +148,8 @@ export class AnotherQuickSwitcherModal
     const originFilePath = this.originFile?.path;
 
     const start = performance.now();
-    const markdownItems = app.vault
-      .getMarkdownFiles()
+    const fileItems = app.vault
+      .getFiles()
       .filter(
         (x) => x.path !== originFilePath && app.metadataCache.getFileCache(x)
       )
@@ -181,14 +181,14 @@ export class AnotherQuickSwitcherModal
         };
       });
     this.showDebugLog(() =>
-      buildLogMessage(`Indexing markdown items: `, performance.now() - start)
+      buildLogMessage(`Indexing file items: `, performance.now() - start)
     );
 
-    this.originItems = [...markdownItems, ...this.phantomItems];
+    this.originItems = [...fileItems, ...this.phantomItems];
     this.ignoredItems = this.prefilterItems(this.command);
   }
 
-  async handleCreateNew(
+  async handleCreateNewMarkdown(
     searchQuery: string,
     leafType: LeafType
   ): Promise<boolean> {
@@ -204,7 +204,7 @@ export class AnotherQuickSwitcherModal
     }
 
     this.close();
-    this.appHelper.openMarkdownFile(file, { leaf: leafType });
+    this.appHelper.openFile(file, { leaf: leafType });
     return false;
   }
 
@@ -214,8 +214,14 @@ export class AnotherQuickSwitcherModal
       excludePatterns: string[]
     ): SuggestionItem[] => {
       let items = this.originItems;
+      if (command.targetExtensions.length > 0) {
+        items = items.filter((x) =>
+          command.targetExtensions.includes(x.file.extension)
+        );
+      }
+
       switch (command.searchTarget) {
-        case "markdown":
+        case "file":
           break;
         case "backlink":
           const backlinksMap = this.appHelper.createBacklinksMap();
@@ -418,7 +424,7 @@ export class AnotherQuickSwitcherModal
       cls: "another-quick-switcher__command_button",
     });
     createButton.addEventListener("click", () =>
-      this.handleCreateNew(this.searchQuery, "same-tab")
+      this.handleCreateNewMarkdown(this.searchQuery, "same-tab")
     );
     div.appendChild(createButton);
 
@@ -457,7 +463,7 @@ export class AnotherQuickSwitcherModal
     if (!option.keepOpen) {
       this.close();
     }
-    this.appHelper.openMarkdownFile(fileToOpened, { leaf, offset });
+    this.appHelper.openFile(fileToOpened, { leaf, offset });
   }
 
   async onChooseSuggestion(
@@ -555,7 +561,7 @@ export class AnotherQuickSwitcherModal
         .slice()
         .reverse()
         .forEach((x) =>
-          this.appHelper.openMarkdownFile(x.file, {
+          this.appHelper.openFile(x.file, {
             leaf: "new-tab-background",
           })
         );
@@ -566,16 +572,16 @@ export class AnotherQuickSwitcherModal
     });
 
     this.registerKeys("create", async () => {
-      await this.handleCreateNew(this.searchQuery, "same-tab");
+      await this.handleCreateNewMarkdown(this.searchQuery, "same-tab");
     });
     this.registerKeys("create in new tab", async () => {
-      await this.handleCreateNew(this.searchQuery, "new-tab");
+      await this.handleCreateNewMarkdown(this.searchQuery, "new-tab");
     });
     this.registerKeys("create in new window", async () => {
-      await this.handleCreateNew(this.searchQuery, "new-window");
+      await this.handleCreateNewMarkdown(this.searchQuery, "new-window");
     });
     this.registerKeys("create in new popup", async () => {
-      await this.handleCreateNew(this.searchQuery, "popup");
+      await this.handleCreateNewMarkdown(this.searchQuery, "popup");
     });
 
     this.registerKeys("open in google", () => {
@@ -595,7 +601,7 @@ export class AnotherQuickSwitcherModal
       if (urls.length > 0) {
         activeWindow.open(urls[0]);
       } else {
-        this.appHelper.openMarkdownFile(fileToOpened, {
+        this.appHelper.openFile(fileToOpened, {
           leaf: "same-tab",
         });
       }

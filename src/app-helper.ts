@@ -1,6 +1,7 @@
 import {
   App,
   Editor,
+  FileView,
   getLinkpath,
   HeadingCache,
   LinkCache,
@@ -85,7 +86,7 @@ export type LeafType =
   | "new-pane-horizontal"
   | "new-window"
   | "popup";
-type OpenMarkdownFileOption = {
+type OpenFileOption = {
   leaf: LeafType;
   offset?: number;
   line?: number;
@@ -100,6 +101,14 @@ export class AppHelper {
 
   getActiveFile(): TFile | null {
     return this.unsafeApp.workspace.getActiveFile();
+  }
+
+  getFileViewInActiveLeaf(): FileView | null {
+    if (!this.unsafeApp.workspace.getActiveViewOfType(FileView)) {
+      return null;
+    }
+
+    return this.unsafeApp.workspace.activeLeaf!.view as FileView;
   }
 
   getMarkdownViewInActiveLeaf(): MarkdownView | null {
@@ -213,10 +222,12 @@ export class AppHelper {
    * @return {"<relative path from root>: LinkCache"}
    */
   createActiveFileLinkMap(): Record<string, LinkCache> {
+    const cache = this.unsafeApp.metadataCache.getFileCache(
+      this.getActiveFile()!
+    );
     return mapValues(
       groupBy(
-        this.unsafeApp.metadataCache.getFileCache(this.getActiveFile()!)
-          ?.links ?? [],
+        [...(cache?.embeds ?? []), ...(cache?.links ?? [])],
         (x) => this.linkText2Path(x.link) ?? this.getPathToBeCreated(x.link)
       ),
       (caches) => caches[0]
@@ -267,13 +278,13 @@ export class AppHelper {
     return abstractFile as TFile;
   }
 
-  openMarkdownFile(file: TFile, option: Partial<OpenMarkdownFileOption> = {}) {
-    const opt: OpenMarkdownFileOption = {
+  openFile(file: TFile, option: Partial<OpenFileOption> = {}) {
+    const opt: OpenFileOption = {
       ...{ leaf: "same-tab" },
       ...option,
     };
 
-    const openFile = (leaf: WorkspaceLeaf, background = false) => {
+    const _openFile = (leaf: WorkspaceLeaf, background = false) => {
       leaf
         .openFile(file, {
           ...this.unsafeApp.workspace.activeLeaf?.getViewState(),
@@ -297,36 +308,36 @@ export class AppHelper {
     switch (opt.leaf) {
       case "same-tab":
         leaf = this.unsafeApp.workspace.getLeaf();
-        openFile(leaf);
+        _openFile(leaf);
         break;
       case "new-tab":
         leaf = this.unsafeApp.workspace.getLeaf(true);
-        openFile(leaf);
+        _openFile(leaf);
         break;
       case "new-tab-background":
         leaf = this.unsafeApp.workspace.getLeaf(true);
-        openFile(leaf, true);
+        _openFile(leaf, true);
         break;
       case "new-pane-horizontal":
         leaf = this.unsafeApp.workspace.getLeaf("split", "horizontal");
-        openFile(leaf);
+        _openFile(leaf);
         break;
       case "new-pane-vertical":
         leaf = this.unsafeApp.workspace.getLeaf("split", "vertical");
-        openFile(leaf);
+        _openFile(leaf);
         break;
       case "new-window":
-        openFile(this.unsafeApp.workspace.openPopoutLeaf());
+        _openFile(this.unsafeApp.workspace.openPopoutLeaf());
         break;
       case "popup":
         const hoverEditorInstance =
           this.unsafeApp.plugins.plugins["obsidian-hover-editor"];
         if (hoverEditorInstance) {
           leaf = hoverEditorInstance.spawnPopover(undefined, () => {
-            openFile(leaf);
+            _openFile(leaf);
           });
         } else {
-          openFile(this.unsafeApp.workspace.getLeaf());
+          _openFile(this.unsafeApp.workspace.getLeaf());
         }
         break;
       default:
@@ -374,7 +385,10 @@ export class AppHelper {
     );
 
     const editor = activeMarkdownView.editor;
-    editor.replaceSelection(linkText);
+    editor.replaceSelection(
+      // XXX: dirty hack
+      linkText.endsWith(".excalidraw]]") ? `!${linkText}` : linkText
+    );
   }
 
   async createMarkdown(linkText: string): Promise<TFile | null> {

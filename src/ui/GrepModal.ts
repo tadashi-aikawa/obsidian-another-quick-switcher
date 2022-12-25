@@ -355,7 +355,7 @@ export class GrepModal
     if (!option.keepOpen) {
       this.close();
     }
-    this.appHelper.openMarkdownFile(item.file, {
+    this.appHelper.openFile(item.file, {
       leaf: leaf,
       line: item.lineNumber - 1,
     });
@@ -481,7 +481,7 @@ export class GrepModal
         .slice()
         .reverse()
         .forEach((x) =>
-          this.appHelper.openMarkdownFile(x.file, {
+          this.appHelper.openFile(x.file, {
             leaf: "new-tab-background",
           })
         );
@@ -493,7 +493,7 @@ export class GrepModal
         return;
       }
 
-      this.appHelper.openMarkdownFile(item.file, {
+      this.appHelper.openFile(item.file, {
         line: item.lineNumber - 1,
       });
     });

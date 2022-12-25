@@ -45,6 +45,15 @@ function createItemDiv(
   });
   entryDiv.appendChild(titleDiv);
 
+  const isExcalidraw = item.file.basename.endsWith(".excalidraw");
+  if (item.file.extension !== "md" || isExcalidraw) {
+    const extDiv = createDiv({
+      cls: "another-quick-switcher__item__extension",
+      text: isExcalidraw ? "excalidraw" : item.file.extension,
+    });
+    titleDiv.appendChild(extDiv);
+  }
+
   if (item.order! < 9) {
     const hotKeyGuide = createSpan({
       cls: "another-quick-switcher__item__hot-key-guide",
