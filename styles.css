@@ -1,5 +1,6 @@
 .another-quick-switcher__floating-prompt {
     width: 33vw;
+    min-width: 500px;
     right: 30px;
 }
 
