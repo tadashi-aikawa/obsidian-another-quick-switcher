@@ -343,13 +343,18 @@ export class GrepModal
     el.appendChild(itemDiv);
   }
 
-  async chooseCurrentSuggestion(leaf: LeafType): Promise<void> {
+  async chooseCurrentSuggestion(
+    leaf: LeafType,
+    option: { keepOpen?: boolean } = {}
+  ): Promise<void> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
     if (!item) {
       return;
     }
 
-    this.close();
+    if (!option.keepOpen) {
+      this.close();
+    }
     this.appHelper.openMarkdownFile(item.file, {
       leaf: leaf,
       line: item.lineNumber - 1,
@@ -446,20 +451,40 @@ export class GrepModal
       this.basePathInputEl.dispatchEvent(new InputEvent("change"));
     });
 
-    this.registerKeys("open in new tab", () => {
-      this.chooseCurrentSuggestion("new-tab");
+    this.registerKeys("open in new tab", async () => {
+      await this.chooseCurrentSuggestion("new-tab");
     });
-    this.registerKeys("open in new pane (horizontal)", () => {
-      this.chooseCurrentSuggestion("new-pane-horizontal");
+    this.registerKeys("open in new pane (horizontal)", async () => {
+      await this.chooseCurrentSuggestion("new-pane-horizontal");
     });
-    this.registerKeys("open in new pane (vertical)", () => {
-      this.chooseCurrentSuggestion("new-pane-vertical");
+    this.registerKeys("open in new pane (vertical)", async () => {
+      await this.chooseCurrentSuggestion("new-pane-vertical");
     });
-    this.registerKeys("open in new window", () => {
-      this.chooseCurrentSuggestion("new-window");
+    this.registerKeys("open in new window", async () => {
+      await this.chooseCurrentSuggestion("new-window");
     });
-    this.registerKeys("open in popup", () => {
-      this.chooseCurrentSuggestion("popup");
+    this.registerKeys("open in popup", async () => {
+      await this.chooseCurrentSuggestion("popup");
+    });
+    this.registerKeys("open in new tab in background", async () => {
+      await this.chooseCurrentSuggestion("new-tab-background", {
+        keepOpen: true,
+      });
+    });
+    this.registerKeys("open all in new tabs", () => {
+      this.close();
+      if (this.chooser.values == null) {
+        return;
+      }
+
+      this.chooser.values
+        .slice()
+        .reverse()
+        .forEach((x) =>
+          this.appHelper.openMarkdownFile(x.file, {
+            leaf: "new-tab-background",
+          })
+        );
     });
 
     this.registerKeys("preview", () => {
