@@ -614,13 +614,27 @@ export class AnotherQuickSwitcherModal
       }
 
       this.close();
-      this.appHelper.insertLinkToActiveFileBy(file);
+      if (this.appHelper.isActiveLeafCanvas()) {
+        this.appHelper.addFileToCanvas(file);
+      } else {
+        this.appHelper.insertLinkToActiveFileBy(file);
+      }
     });
     this.registerKeys("insert all to editor", () => {
       this.close();
-      this.chooser.values?.forEach((x) => {
-        this.appHelper.insertLinkToActiveFileBy(x.file);
-        this.appHelper.insertStringToActiveFile("\n");
+
+      let offsetX = 0;
+      this.chooser.values?.forEach((x, i) => {
+        if (this.appHelper.isActiveLeafCanvas()) {
+          const cv = this.appHelper.addFileToCanvas(x.file, {
+            x: offsetX,
+            y: 0,
+          });
+          offsetX += cv.width + 30;
+        } else {
+          this.appHelper.insertLinkToActiveFileBy(x.file);
+          this.appHelper.insertStringToActiveFile("\n");
+        }
       });
     });
 

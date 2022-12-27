@@ -465,6 +465,24 @@ export class AppHelper {
     return file.stat.ctime === 0;
   }
 
+  isActiveLeafCanvas(): boolean {
+    return this.unsafeApp.workspace.activeLeaf?.view.getViewType() === "canvas";
+  }
+
+  addFileToCanvas(
+    file: TFile,
+    offset: { x: number; y: number } = { x: 0, y: 0 }
+  ): { x: number; y: number; width: number; height: number } {
+    const unsafeView = this.unsafeApp.workspace.activeLeaf?.view as any;
+    const { x, y } = unsafeView.canvas.posCenter();
+    const meta = unsafeView.canvas.createFileNode(file, "", {
+      x: x + offset.x,
+      y: y + offset.y,
+    });
+    unsafeView.requestSave();
+    return meta;
+  }
+
   // TODO: Use another interface instead of TFile
   private createPhantomFile(linkText: string): TFile {
     const linkPath = this.getPathToBeCreated(linkText);
