@@ -170,7 +170,18 @@ function matchQueryAll(
     isNormalizeAccentsDiacritics: boolean;
   }
 ): MatchQueryResult[] {
-  return queries.flatMap((q) => matchQuery(item, q, options));
+  return queries.flatMap((q) => {
+    const [query, negative] = q.startsWith("-")
+      ? [q.slice(1), true]
+      : [q, false];
+
+    const matched = matchQuery(item, query, options);
+    if (matched[0]?.type === "not found") {
+      return negative ? [] : matched;
+    } else {
+      return negative ? [{ type: "not found", query }] : matched;
+    }
+  });
 }
 
 export function stampMatchResults(
