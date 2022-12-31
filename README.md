@@ -11,7 +11,6 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 - It can search backlinks and move them **without leaving from a keyboard** (`Backlink search`)
 - It can move a file to another folder (`Move file to another folder`)
 - It can search **regardless of the appearance order of tokens**
-- It **only searches Markdown files** except for the case of `Move file to another folder`
 - It does not search very fuzzy (e.g. searching for `201` doesn't match `2.01`) 
 - It can search to **consider prefix emoji**
 - It shows file names and directory names separately
@@ -97,9 +96,20 @@ You can use the following names as a `Sort priorities`.
 
 #### Note
 
-- Queries enclosed in double quotes are searched as is
-    - `"ho ge"` only matches `ho ge` not `hoge`
-    - `ho ge` matches both `ho ge` and `hoge`
+##### Queries enclosed in double quotes are searched as is
+
+- `"ho ge"` only matches `ho ge` not `hoge`
+- `ho ge` matches both `ho ge` and `hoge`
+
+##### A minus sign at the beginning excludes the matched candidates
+
+Ex: If there are three files.
+
+- hoge.md
+- hoge
+- mdhoge
+
+`hoge -md` suggests only `hoge`.
 
 ### 2. Header floating search in file / Header search in file
 
@@ -139,6 +149,14 @@ You can show the backlinks about the suggestion in the dialog. (Default hotkey i
 It can show backlinks from not only existing notes but also phantom(not existing) notes.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/show-backlinks-from-the-dialog.gif)
+
+## For users who use earlier than v8.0.0
+
+Please read a "🔥 Breaking changes" section in the [Release note](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/tag/8.0.0).
+
+## For users who use earlier than v7.0.0
+
+Please read a "🔥 Breaking changes" section in the [Release note](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/tag/7.0.0).
 
 ## For users who use earlier than v6.0.0
 
