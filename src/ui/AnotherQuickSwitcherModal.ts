@@ -61,6 +61,7 @@ export class AnotherQuickSwitcherModal
   searchCommandEl?: HTMLDivElement;
   defaultInputEl?: HTMLDivElement;
   countInputEl?: HTMLDivElement;
+  floating: boolean;
 
   constructor(
     app: App,
@@ -75,6 +76,7 @@ export class AnotherQuickSwitcherModal
     this.initialCommand = command;
     this.command = command;
     this.originFile = originFile;
+    this.floating = command.floating;
 
     this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotkeys();
@@ -108,35 +110,40 @@ export class AnotherQuickSwitcherModal
     super.onOpen();
 
     if (this.command.floating) {
-      activeWindow.activeDocument
-        .querySelector(".modal-bg")
-        ?.addClass("another-quick-switcher__floating-modal-bg");
+      this.enableFloating();
+    }
+  }
 
-      const promptEl = activeWindow.activeDocument.querySelector(".prompt");
-      promptEl?.addClass("another-quick-switcher__floating-prompt");
+  enableFloating() {
+    this.floating = true;
+    activeWindow.activeDocument
+      .querySelector(".modal-bg")
+      ?.addClass("another-quick-switcher__floating-modal-bg");
 
-      const fileView = this.appHelper.getFileViewInActiveLeaf();
+    const promptEl = activeWindow.activeDocument.querySelector(".prompt");
+    promptEl?.addClass("another-quick-switcher__floating-prompt");
 
-      if (fileView) {
-        const windowWidth = activeWindow.innerWidth;
-        const windowHeight = activeWindow.innerHeight;
-        const modalWidth = this.modalEl.offsetWidth;
-        const modalHeight = this.modalEl.offsetHeight;
-        const {
-          x: leafX,
-          y: leafY,
-          width: leafWidth,
-        } = fileView.containerEl.getBoundingClientRect();
-        const { y: promptY } = promptEl!.getBoundingClientRect();
+    const fileView = this.appHelper.getFileViewInActiveLeaf();
 
-        const left = Math.min(
-          windowWidth - modalWidth - 30,
-          leafX + leafWidth / 1.5
-        );
-        const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
+    if (fileView) {
+      const windowWidth = activeWindow.innerWidth;
+      const windowHeight = activeWindow.innerHeight;
+      const modalWidth = this.modalEl.offsetWidth;
+      const modalHeight = this.modalEl.offsetHeight;
+      const {
+        x: leafX,
+        y: leafY,
+        width: leafWidth,
+      } = fileView.containerEl.getBoundingClientRect();
+      const { y: promptY } = promptEl!.getBoundingClientRect();
 
-        promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);
-      }
+      const left = Math.min(
+        windowWidth - modalWidth - 30,
+        leafX + leafWidth / 1.5
+      );
+      const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
+
+      promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);
     }
   }
 
@@ -568,6 +575,9 @@ export class AnotherQuickSwitcherModal
     });
 
     this.registerKeys("preview", async () => {
+      if (!this.floating) {
+        this.enableFloating();
+      }
       await this.chooseCurrentSuggestion("same-tab", { keepOpen: true });
     });
 
