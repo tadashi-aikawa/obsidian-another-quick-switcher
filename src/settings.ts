@@ -62,6 +62,7 @@ export interface Hotkeys {
     "clear input": Hotkey[];
     "move to next hit": Hotkey[];
     "move to previous hit": Hotkey[];
+    "toggle auto preview": Hotkey[];
   };
   grep: {
     search: Hotkey[];
@@ -98,6 +99,8 @@ export interface Settings {
   hotkeys: Hotkeys;
   // Searches
   searchCommands: SearchCommand[];
+  // Header search
+  autoPreviewInFloatingHeaderSearch: boolean;
   // Grep
   ripgrepCommand: string;
   // Move file to another folder
@@ -140,6 +143,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "clear input": [{ modifiers: ["Mod"], key: "d" }],
     "move to next hit": [{ modifiers: [], key: "Tab" }],
     "move to previous hit": [{ modifiers: ["Shift"], key: "Tab" }],
+    "toggle auto preview": [{ modifiers: ["Mod"], key: "," }],
   },
   grep: {
     search: [{ modifiers: [], key: "Tab" }],
@@ -318,6 +322,8 @@ export const DEFAULT_SETTINGS: Settings = {
   hotkeys: createDefaultHotkeys(),
   // Searches
   searchCommands: createPreSettingSearchCommands(),
+  // Header search
+  autoPreviewInFloatingHeaderSearch: true,
   // Grep
   ripgrepCommand: "rg",
   // Move file to another folder
@@ -351,6 +357,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addAppearanceSettings(containerEl);
     this.addHotKeysInDialogSettings(containerEl);
     this.addSearchSettings(containerEl);
+    this.addHeaderSearchSettings(containerEl);
     this.addGrepSettings(containerEl);
     this.addMoveSettings(containerEl);
 
@@ -939,6 +946,21 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           "another-quick-switcher__settings__exclude_path_patterns";
 
         return el;
+      });
+  }
+
+  private addHeaderSearchSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "📒 Header search" });
+
+    new Setting(containerEl)
+      .setName("Auto preview in the floating mode")
+      .addToggle((tc) => {
+        tc.setValue(
+          this.plugin.settings.autoPreviewInFloatingHeaderSearch
+        ).onChange(async (value) => {
+          this.plugin.settings.autoPreviewInFloatingHeaderSearch = value;
+          await this.plugin.saveSettings();
+        });
       });
   }
 

@@ -8,6 +8,7 @@ import {
 } from "../utils/strings";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { createInstructions } from "../keys";
+import { PREVIEW } from "./icons";
 
 interface SuggestionItem {
   value: string;
@@ -26,11 +27,14 @@ export class HeaderModal
   appHelper: AppHelper;
   settings: Settings;
   floating: boolean;
+  autoPreview: boolean;
   /** ⚠Not work correctly in all cases */
   unsafeSelectedIndex = 0;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
+
+  previewIcon: Element | null;
 
   constructor(app: App, settings: Settings, floating: boolean) {
     super(app);
@@ -39,6 +43,7 @@ export class HeaderModal
     this.appHelper = new AppHelper(app);
     this.settings = settings;
     this.floating = floating;
+    this.autoPreview = settings.autoPreviewInFloatingHeaderSearch && floating;
 
     this.items = this.appHelper.getHeadersInActiveFile().map((x, i) => ({
       value: excludeFormat(x.heading),
@@ -52,20 +57,20 @@ export class HeaderModal
       const unsafeEvt = evt as KeyboardEvent;
 
       if (this.hitItems.length === 0) {
-        this.select(this.unsafeSelectedIndex, unsafeEvt, this.floating);
+        this.select(this.unsafeSelectedIndex, unsafeEvt);
         return;
       }
 
       const nextIndex =
         this.hitItems.find((x) => x.index >= this.unsafeSelectedIndex)?.index ??
         this.hitItems[0].index;
-      this.select(nextIndex, unsafeEvt, this.floating);
+      this.select(nextIndex, unsafeEvt);
     });
 
     this.setHotkeys();
   }
 
-  select(index: number, evt?: KeyboardEvent, preview: boolean = true) {
+  select(index: number, evt?: KeyboardEvent) {
     this.chooser.setSelectedItem(index, evt);
     this.chooser.suggestions[index].scrollIntoView({
       behavior: "auto",
@@ -74,7 +79,7 @@ export class HeaderModal
     });
 
     this.unsafeSelectedIndex = index;
-    if (preview) {
+    if (this.autoPreview) {
       this.appHelper.moveTo(this.items[this.unsafeSelectedIndex].position);
     }
   }
@@ -95,35 +100,8 @@ export class HeaderModal
     super.onOpen();
 
     if (this.floating) {
-      activeWindow.activeDocument
-        .querySelector(".modal-bg")
-        ?.addClass("another-quick-switcher__header__floating-modal-bg");
-
-      const promptEl = activeWindow.activeDocument.querySelector(".prompt");
-      promptEl?.addClass("another-quick-switcher__header__floating-prompt");
-
-      const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
-
-      if (markdownView) {
-        const windowWidth = activeWindow.innerWidth;
-        const windowHeight = activeWindow.innerHeight;
-        const modalWidth = this.modalEl.offsetWidth;
-        const modalHeight = this.modalEl.offsetHeight;
-        const {
-          x: leafX,
-          y: leafY,
-          width: leafWidth,
-        } = markdownView.containerEl.getBoundingClientRect();
-        const { y: promptY } = promptEl!.getBoundingClientRect();
-
-        const left = Math.min(
-          windowWidth - modalWidth - 30,
-          leafX + leafWidth / 1.5
-        );
-        const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
-
-        promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);
-      }
+      this.enableFloating();
+      this.refreshPreviewIcon();
     }
 
     const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
@@ -156,6 +134,50 @@ export class HeaderModal
     }
   }
 
+  refreshPreviewIcon() {
+    this.previewIcon?.remove();
+    if (this.autoPreview) {
+      this.previewIcon = this.inputEl.insertAdjacentElement(
+        "afterend",
+        createDiv({ cls: "another-quick-switcher__header__auto-preview-icon" })
+      );
+      this.previewIcon?.insertAdjacentHTML("beforeend", PREVIEW);
+    }
+  }
+
+  enableFloating() {
+    this.floating = true;
+    activeWindow.activeDocument
+      .querySelector(".modal-bg")
+      ?.addClass("another-quick-switcher__floating-modal-bg");
+
+    const promptEl = activeWindow.activeDocument.querySelector(".prompt");
+    promptEl?.addClass("another-quick-switcher__floating-prompt");
+
+    const fileView = this.appHelper.getFileViewInActiveLeaf();
+
+    if (fileView) {
+      const windowWidth = activeWindow.innerWidth;
+      const windowHeight = activeWindow.innerHeight;
+      const modalWidth = this.modalEl.offsetWidth;
+      const modalHeight = this.modalEl.offsetHeight;
+      const {
+        x: leafX,
+        y: leafY,
+        width: leafWidth,
+      } = fileView.containerEl.getBoundingClientRect();
+      const { y: promptY } = promptEl!.getBoundingClientRect();
+
+      const left = Math.min(
+        windowWidth - modalWidth - 30,
+        leafX + leafWidth / 1.5
+      );
+      const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
+
+      promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);
+    }
+  }
+
   getSuggestions(query: string): SuggestionItem[] {
     const qs = smartWhitespaceSplit(query);
 
@@ -169,6 +191,7 @@ export class HeaderModal
     });
 
     this.hitItems = suggestions.filter((x) => x.hit);
+
     return suggestions;
   }
 
@@ -238,10 +261,10 @@ export class HeaderModal
     }
 
     const navigateNext = (evt: KeyboardEvent) => {
-      this.select(this.getNextSelectIndex(), evt, this.floating);
+      this.select(this.getNextSelectIndex(), evt);
     };
     const navigatePrevious = (evt: KeyboardEvent) => {
-      this.select(this.getPreviousSelectIndex(), evt, this.floating);
+      this.select(this.getPreviousSelectIndex(), evt);
     };
     const moveToNextHit = (evt: KeyboardEvent) => {
       if (this.hitItems.length === 1) {
@@ -255,7 +278,7 @@ export class HeaderModal
       const nextIndex =
         this.hitItems.find((x) => x.index > this.unsafeSelectedIndex)?.index ??
         this.hitItems[0].index;
-      this.select(nextIndex, evt, this.floating);
+      this.select(nextIndex, evt);
     };
     const moveToPreviousHit = (evt: KeyboardEvent) => {
       if (this.hitItems.length === 1) {
@@ -271,7 +294,7 @@ export class HeaderModal
       );
       const previousIndex =
         currentIndex === 0 ? this.hitItems.length - 1 : currentIndex - 1;
-      this.select(this.hitItems[previousIndex].index, evt, this.floating);
+      this.select(this.hitItems[previousIndex].index, evt);
     };
 
     // Unregister default arrows behavior
@@ -305,6 +328,13 @@ export class HeaderModal
     });
     this.registerKeys("move to previous hit", (evt) => {
       moveToPreviousHit(evt);
+    });
+    this.registerKeys("toggle auto preview", (evt) => {
+      this.autoPreview = !this.autoPreview;
+      this.refreshPreviewIcon();
+      if (this.autoPreview && !this.floating) {
+        this.enableFloating();
+      }
     });
   }
 }
