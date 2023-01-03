@@ -17,7 +17,11 @@ export function showSearchDialog(
     app,
     settings,
     command,
-    app.workspace.getActiveFile()
+    app.workspace.getActiveFile(),
+    "",
+    [],
+    0,
+    true
   );
   modal.open();
 }

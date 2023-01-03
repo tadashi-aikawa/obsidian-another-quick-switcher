@@ -36,6 +36,12 @@ function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
 }
 
+interface CustomSearchHistory {
+  originFile: TFile | null;
+  command: SearchCommand;
+  inputQuery: string;
+}
+
 export class AnotherQuickSwitcherModal
   extends SuggestModal<SuggestionItem>
   implements UnsafeModalInterface<SuggestionItem>
@@ -45,8 +51,12 @@ export class AnotherQuickSwitcherModal
   ignoredItems: SuggestionItem[];
   appHelper: AppHelper;
   settings: Settings;
+  initialInputQuery: string;
   searchQuery: string;
   originFile: TFile | null;
+  navigationHistories: CustomSearchHistory[];
+  currentNavigationHistoryIndex: number;
+  stackHistory: boolean;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
@@ -59,16 +69,22 @@ export class AnotherQuickSwitcherModal
   command: SearchCommand;
   initialCommand: SearchCommand;
 
+  navigationHistoryEl?: HTMLDivElement;
   searchCommandEl?: HTMLDivElement;
   defaultInputEl?: HTMLDivElement;
   countInputEl?: HTMLDivElement;
   floating: boolean;
+  opened: boolean;
 
   constructor(
     app: App,
     settings: Settings,
     command: SearchCommand,
-    originFile: TFile | null
+    originFile: TFile | null,
+    inputQuery: string,
+    navigationHistories: CustomSearchHistory[],
+    currentNavigationHistoryIndex: number,
+    stackHistory: boolean
   ) {
     super(app);
 
@@ -78,6 +94,10 @@ export class AnotherQuickSwitcherModal
     this.command = command;
     this.originFile = originFile;
     this.floating = command.floating;
+    this.initialInputQuery = inputQuery;
+    this.navigationHistories = navigationHistories;
+    this.currentNavigationHistoryIndex = currentNavigationHistoryIndex;
+    this.stackHistory = stackHistory;
 
     this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotkeys();
@@ -113,6 +133,22 @@ export class AnotherQuickSwitcherModal
     if (this.command.floating) {
       this.enableFloating();
     }
+
+    this.inputEl.value = this.initialInputQuery;
+    // Necessary to rerender suggestions
+    this.inputEl.dispatchEvent(new Event("input"));
+
+    if (this.stackHistory) {
+      this.navigationHistories.push({
+        inputQuery: this.inputEl.value,
+        command: { ...this.command },
+        originFile: this.originFile,
+      });
+    }
+
+    this.opened = true;
+
+    console.log(this.navigationHistories);
   }
 
   enableFloating() {
@@ -270,7 +306,7 @@ export class AnotherQuickSwitcherModal
   }
 
   getSuggestions(query: string): SuggestionItem[] | Promise<SuggestionItem[]> {
-    if (!query || query === this.command.defaultInput) {
+    if (!query || query === this.command.defaultInput || !this.opened) {
       return this._getSuggestions(query);
     }
 
@@ -363,9 +399,27 @@ export class AnotherQuickSwitcherModal
   }
 
   renderInputComponent() {
+    this.navigationHistoryEl?.remove();
     this.searchCommandEl?.remove();
     this.defaultInputEl?.remove();
     this.countInputEl?.remove();
+
+    this.navigationHistoryEl = createDiv({
+      cls: "another-quick-switcher__custom-search__navigation-history-header",
+    });
+    const backHistoryLength = this.currentNavigationHistoryIndex;
+    if (backHistoryLength > 0) {
+      this.navigationHistoryEl.appendText(`${backHistoryLength} < `);
+    }
+    this.navigationHistoryEl.appendText(
+      this.originFile ? this.originFile.basename : "No file"
+    );
+    const forwardHistoryLength =
+      this.navigationHistories.length - this.currentNavigationHistoryIndex - 1;
+    if (forwardHistoryLength > 0) {
+      this.navigationHistoryEl.appendText(` > ${forwardHistoryLength}`);
+    }
+    this.inputEl.before(this.navigationHistoryEl);
 
     this.searchCommandEl = createDiv({
       cls: "another-quick-switcher__status__search-command",
@@ -651,7 +705,7 @@ export class AnotherQuickSwitcherModal
       });
     });
 
-    this.registerKeys("show links", () => {
+    const navigateLinks = (command: SearchCommand) => {
       const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
       if (!file) {
         return;
@@ -662,17 +716,39 @@ export class AnotherQuickSwitcherModal
         this.app,
         this.settings,
         {
-          ...createDefaultLinkSearchCommand(),
-          floating: this.command.floating,
+          ...command,
+          floating: this.floating,
         },
-        file
+        file,
+        "",
+        [
+          ...this.navigationHistories.slice(
+            0,
+            this.currentNavigationHistoryIndex
+          ),
+          {
+            inputQuery: this.inputEl.value,
+            command: { ...this.command },
+            originFile: this.originFile,
+          },
+        ],
+        this.currentNavigationHistoryIndex + 1,
+        true
       );
       modal.open();
+    };
+
+    this.registerKeys("show links", () => {
+      navigateLinks(createDefaultLinkSearchCommand());
     });
 
     this.registerKeys("show backlinks", () => {
-      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
-      if (!file) {
+      navigateLinks(createDefaultBacklinkSearchCommand());
+    });
+
+    const navigate = (index: number) => {
+      const history = this.navigationHistories[index];
+      if (!history) {
         return;
       }
 
@@ -681,12 +757,24 @@ export class AnotherQuickSwitcherModal
         this.app,
         this.settings,
         {
-          ...createDefaultBacklinkSearchCommand(),
-          floating: this.command.floating,
+          ...history.command,
+          floating: this.floating,
         },
-        file
+        history.originFile,
+        history.inputQuery,
+        this.navigationHistories,
+        index,
+        false
       );
       modal.open();
+    };
+
+    this.registerKeys("navigate back", () => {
+      navigate(this.currentNavigationHistoryIndex - 1);
+    });
+
+    this.registerKeys("navigate forward", () => {
+      navigate(this.currentNavigationHistoryIndex + 1);
     });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
