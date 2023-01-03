@@ -221,10 +221,8 @@ export class AppHelper {
   /**
    * @return {"<relative path from root>: LinkCache"}
    */
-  createActiveFileLinkMap(): Record<string, LinkCache> {
-    const cache = this.unsafeApp.metadataCache.getFileCache(
-      this.getActiveFile()!
-    );
+  createLinksMap(file: TFile): Record<string, LinkCache> {
+    const cache = this.unsafeApp.metadataCache.getFileCache(file);
     return mapValues(
       groupBy(
         [...(cache?.embeds ?? []), ...(cache?.links ?? [])],

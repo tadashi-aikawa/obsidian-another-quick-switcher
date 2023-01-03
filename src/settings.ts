@@ -51,6 +51,7 @@ export interface Hotkeys {
     "insert to editor": Hotkey[];
     "insert all to editor": Hotkey[];
     "show backlinks": Hotkey[];
+    "show links": Hotkey[];
   };
   move: {
     up: Hotkey[];
@@ -132,6 +133,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "insert to editor": [{ modifiers: ["Alt"], key: "Enter" }],
     "insert all to editor": [{ modifiers: ["Alt", "Shift"], key: "Enter" }],
     "show backlinks": [{ modifiers: ["Mod"], key: "h" }],
+    "show links": [{ modifiers: ["Mod"], key: "l" }],
   },
   move: {
     up: [{ modifiers: ["Mod"], key: "p" }],
@@ -190,6 +192,26 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   includePrefixPathPatterns: [],
   excludePrefixPathPatterns: [],
   expand: true,
+});
+
+export const createDefaultLinkSearchCommand = (): SearchCommand => ({
+  name: "Link search",
+  searchBy: {
+    tag: false,
+    link: false,
+    header: false,
+  },
+  searchTarget: "link",
+  targetExtensions: [],
+  floating: false,
+  showFrontMatter: false,
+  excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+  defaultInput: "",
+  commandPrefix: "",
+  sortPriorities: ["Last opened", "Last modified"],
+  includePrefixPathPatterns: [],
+  excludePrefixPathPatterns: [],
+  expand: false,
 });
 
 export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
@@ -302,6 +324,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     excludePrefixPathPatterns: [],
     expand: false,
   },
+  createDefaultLinkSearchCommand(),
   createDefaultBacklinkSearchCommand(),
 ];
 

@@ -18,6 +18,7 @@ import {
 } from "../utils/collection-helper";
 import {
   createDefaultBacklinkSearchCommand,
+  createDefaultLinkSearchCommand,
   Hotkeys,
   SearchCommand,
   Settings,
@@ -237,7 +238,9 @@ export class AnotherQuickSwitcherModal
           );
           break;
         case "link":
-          const originFileLinkMap = this.appHelper.createActiveFileLinkMap();
+          const originFileLinkMap = this.originFile
+            ? this.appHelper.createLinksMap(this.originFile)
+            : {};
           items = items
             .filter((x) => originFileLinkMap[x.file.path])
             .sort(
@@ -634,7 +637,7 @@ export class AnotherQuickSwitcherModal
       this.close();
 
       let offsetX = 0;
-      this.chooser.values?.forEach((x, i) => {
+      this.chooser.values?.forEach((x) => {
         if (this.appHelper.isActiveLeafCanvas()) {
           const cv = this.appHelper.addFileToCanvas(x.file, {
             x: offsetX,
@@ -646,6 +649,25 @@ export class AnotherQuickSwitcherModal
           this.appHelper.insertStringToActiveFile("\n");
         }
       });
+    });
+
+    this.registerKeys("show links", () => {
+      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
+      if (!file) {
+        return;
+      }
+
+      this.close();
+      const modal = new AnotherQuickSwitcherModal(
+        this.app,
+        this.settings,
+        {
+          ...createDefaultLinkSearchCommand(),
+          floating: this.command.floating,
+        },
+        file
+      );
+      modal.open();
     });
 
     this.registerKeys("show backlinks", () => {
