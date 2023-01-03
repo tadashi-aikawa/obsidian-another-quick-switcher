@@ -212,7 +212,7 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
   commandPrefix: "",
-  sortPriorities: ["Last opened", "Last modified"],
+  sortPriorities: [],
   includePrefixPathPatterns: [],
   excludePrefixPathPatterns: [],
   expand: false,
