@@ -147,8 +147,6 @@ export class AnotherQuickSwitcherModal
     }
 
     this.opened = true;
-
-    console.log(this.navigationHistories);
   }
 
   enableFloating() {
