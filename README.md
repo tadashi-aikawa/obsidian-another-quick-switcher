@@ -42,23 +42,24 @@ Custom searches enables you to create your original search commands.
 
 You can use the following names as a `Sort priorities`.
 
-| Name                  | Description                                            | Since |
-| --------------------- | ------------------------------------------------------ | ----- |
-| Perfect word match    | A query matches perfectly with a word in the file name | 6.0.0 |
-| Prefix name match     | The file name or alias starts with a query             | 6.0.0 |
-| Name match            | The file name or alias includes a query                | 6.0.0 |
-| Tag match             | The tag name in the file includes a query              | 6.0.0 |
-| Header match          | The header name in the file includes a query           | 6.0.0 |
-| Link match            | The internal link name in the file includes a query    | 6.0.0 |
-| Length                | Length of the file name or alias                       | 6.0.0 |
-| Last opened           | The time the file opened last                          | 6.0.0 |
-| Last modified         | The time the file modified last                        | 6.0.0 |
-| Star                  | The file has a star                                    | 6.0.0 |
-| Alphabetical          | File name or alias order by alphabetically ascend      | 6.2.0 |
-| Alphabetical reverse  | File name or alias order by alphabetically descend     | 7.0.0 |
-| Created latest        | File creation date from the latest to the earliest     | 7.0.0 |
-| Created earliest      | File creation date from the earliest to the latest     | 7.0.0 |
-| (Tags split by comma) | The file has specific tags                             | 7.0.0 |
+| Name                        | Description                                            | Since |
+| --------------------------- | ------------------------------------------------------ | ----- |
+| Perfect word match          | A query matches perfectly with a word in the file name | 6.0.0 |
+| Prefix name match           | The file name or alias starts with a query             | 6.0.0 |
+| Name match                  | The file name or alias includes a query                | 6.0.0 |
+| Tag match                   | The tag name in the file includes a query              | 6.0.0 |
+| Header match                | The header name in the file includes a query           | 6.0.0 |
+| Link match                  | The internal link name in the file includes a query    | 6.0.0 |
+| Length                      | Length of the file name or alias                       | 6.0.0 |
+| Last opened                 | The time the file opened last                          | 6.0.0 |
+| Last modified               | The time the file modified last                        | 6.0.0 |
+| Star                        | The file has a star                                    | 6.0.0 |
+| Alphabetical                | File name or alias order by alphabetically ascend      | 6.2.0 |
+| Alphabetical reverse        | File name or alias order by alphabetically descend     | 7.0.0 |
+| Created latest              | File creation date from the latest to the earliest     | 7.0.0 |
+| Created earliest            | File creation date from the earliest to the latest     | 7.0.0 |
+| (Tags split by comma)       | The file has specific tags                             | 7.0.0 |
+| (Extensions split by comma) | The file has specific extensions                       | 8.3.0 |
 
 > **Warning**
 > Please don't forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
@@ -66,6 +67,9 @@ You can use the following names as a `Sort priorities`.
 
 > **Note**
 > Examples of `(Tags spit by comma)` are `#hoge`, `#hoge,#huga`, and so on.
+
+> **Note**
+> Examples of `(Extensions spit by comma)` are `.md`, `.md,.canvas`, and so on.
 
 #### Preset search commands
 

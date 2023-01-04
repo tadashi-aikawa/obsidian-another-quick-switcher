@@ -19,11 +19,15 @@ export const sortPriorityList = [
   "Alphabetical",
   "Alphabetical reverse",
 ] as const;
-export type SortPriority = typeof sortPriorityList[number] | `#${string}`;
+export type SortPriority =
+  | typeof sortPriorityList[number]
+  | `#${string}`
+  | `.${string}`;
 export function regardAsSortPriority(x: string) {
   return (
     sortPriorityList.includes(x as any) ||
-    x.split(",").every((y) => y.startsWith("#"))
+    x.split(",").every((y) => y.startsWith("#")) ||
+    x.split(",").every((y) => y.startsWith("."))
   );
 }
 
@@ -40,7 +44,9 @@ export function filterNoQueryPriorities(
         "Star",
         "Alphabetical",
         "Alphabetical reverse",
-      ].includes(x) || x.startsWith("#")
+      ].includes(x) ||
+      x.startsWith("#") ||
+      x.startsWith(".")
   );
 }
 
@@ -85,6 +91,11 @@ function getComparator(
         const tags = priority.split(",");
         return (a: SuggestionItem, b: SuggestionItem) =>
           priorityToTags(a, b, tags);
+      }
+      if (priority.startsWith(".")) {
+        const extensions = priority.split(",").map((x) => x.slice(1));
+        return (a: SuggestionItem, b: SuggestionItem) =>
+          priorityToExtensions(a, b, extensions);
       }
       // XXX: xox
       throw new ExhaustiveError(priority as never);
@@ -285,7 +296,7 @@ function priorityToStar(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
 }
 
 const toComparedAlphabetical = (item: SuggestionItem): string =>
-  excludeEmoji(item.matchResults[0]?.alias ?? item.file.basename);
+  excludeEmoji(item.matchResults[0]?.alias ?? item.file.basename).toLowerCase();
 
 function priorityToAlphabetical(
   a: SuggestionItem,
@@ -313,4 +324,17 @@ function priorityToTags(
   tags: string[]
 ): 0 | -1 | 1 {
   return compare(a, b, (x) => intersection([tags, x.tags]).length, "desc");
+}
+
+function priorityToExtensions(
+  a: SuggestionItem,
+  b: SuggestionItem,
+  extensions: string[]
+): 0 | -1 | 1 {
+  return compare(
+    a,
+    b,
+    (x) => Number(extensions.contains(x.file.extension)),
+    "desc"
+  );
 }
