@@ -189,7 +189,7 @@ export class AnotherQuickSwitcherModal
     );
     const originFilePath = this.originFile?.path;
 
-    const start = performance.now();
+    let start = performance.now();
     const fileItems = app.vault
       .getFiles()
       .filter(
@@ -227,7 +227,12 @@ export class AnotherQuickSwitcherModal
     );
 
     this.originItems = [...fileItems, ...this.phantomItems];
+
+    start = performance.now();
     this.ignoredItems = this.prefilterItems(this.command);
+    this.showDebugLog(() =>
+      buildLogMessage(`Prefilter items: `, performance.now() - start)
+    );
   }
 
   async handleCreateNewMarkdown(
