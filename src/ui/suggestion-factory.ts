@@ -29,7 +29,10 @@ function createItemDiv(
       item.phantom ? "another-quick-switcher__phantom_item" : "",
       item.starred ? "another-quick-switcher__starred_item" : "",
       options.hideGutterIcons ? "another-quick-switcher__gutter_hidden" : "",
-    ],
+    ].filter((x) => x),
+    attr: {
+      extension: item.file.extension,
+    },
   });
 
   const entryDiv = createDiv({
