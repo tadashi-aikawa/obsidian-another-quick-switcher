@@ -57,6 +57,7 @@ interface UnsafeAppInterface {
   workspace: Workspace & {
     openPopoutLeaf(): WorkspaceLeaf;
   };
+  openWithDefaultApp(path: string): unknown;
 }
 
 interface UnSafeLayoutChild {
@@ -341,6 +342,14 @@ export class AppHelper {
       default:
         throw new ExhaustiveError(opt.leaf);
     }
+  }
+
+  openFileInDefaultApp(file: TFile): void {
+    this.unsafeApp.openWithDefaultApp(file.path);
+  }
+
+  openFolderInDefaultApp(folder: TFolder): void {
+    this.unsafeApp.openWithDefaultApp(folder.path);
   }
 
   getStarredFilePaths(): string[] {

@@ -5,6 +5,7 @@ import { Hotkeys, Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { createInstructions } from "../keys";
+import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 interface SuggestionItem {
   folder: TFolder;
@@ -86,6 +87,8 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
   filteredItems: SuggestionItem[];
   appHelper: AppHelper;
   settings: Settings;
+
+  chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
 
   constructor(app: App, settings: Settings) {
     super(app);
@@ -201,6 +204,16 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
       document.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown" })
       );
+    });
+
+    this.registerKeys("open in default app", () => {
+      const folder = this.chooser.values?.[this.chooser.selectedItem]?.folder;
+      if (!folder) {
+        return;
+      }
+
+      this.appHelper.openFolderInDefaultApp(folder);
+      this.close();
     });
   }
 }

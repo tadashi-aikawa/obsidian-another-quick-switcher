@@ -46,6 +46,7 @@ export interface Hotkeys {
     "create in new tab": Hotkey[];
     "create in new window": Hotkey[];
     "create in new popup": Hotkey[];
+    "open in default app": Hotkey[];
     "open in google": Hotkey[];
     "open first URL": Hotkey[];
     "insert to editor": Hotkey[];
@@ -58,6 +59,7 @@ export interface Hotkeys {
   move: {
     up: Hotkey[];
     down: Hotkey[];
+    "open in default app": Hotkey[];
   };
   header: {
     up: Hotkey[];
@@ -130,6 +132,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "create in new tab": [{ modifiers: ["Mod", "Shift"], key: "Enter" }],
     "create in new window": [{ modifiers: ["Mod", "Shift"], key: "o" }],
     "create in new popup": [],
+    "open in default app": [],
     "open in google": [{ modifiers: ["Mod"], key: "g" }],
     "open first URL": [{ modifiers: ["Mod"], key: "]" }],
     "insert to editor": [{ modifiers: ["Alt"], key: "Enter" }],
@@ -142,6 +145,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
   move: {
     up: [{ modifiers: ["Mod"], key: "p" }],
     down: [{ modifiers: ["Mod"], key: "n" }],
+    "open in default app": [],
   },
   header: {
     up: [{ modifiers: ["Mod"], key: "p" }],
