@@ -300,10 +300,10 @@ export class AnotherQuickSwitcherModal
 
     return filterItems(
       command.includePrefixPathPatterns.map((p) =>
-        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath)
+        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath())
       ),
       command.excludePrefixPathPatterns.map((p) =>
-        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath)
+        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath())
       )
     );
   }
