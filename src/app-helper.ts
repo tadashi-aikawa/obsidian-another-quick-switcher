@@ -1,6 +1,7 @@
 import {
   App,
   Editor,
+  EditorRange,
   FileView,
   getLinkpath,
   HeadingCache,
@@ -77,6 +78,32 @@ interface UnsafeLayouts {
   left: UnSafeLayout;
   main: UnSafeLayout;
   right: UnSafeLayout;
+}
+interface UnSafeWorkspaceLeaf extends WorkspaceLeaf {
+  history: {
+    backHistory: UnsafeHistory[];
+    forwardHistory: UnsafeHistory[];
+    updateState(history: UnsafeHistory): unknown;
+  };
+  getHistoryState(): UnsafeHistory;
+}
+export interface UnsafeHistory {
+  title: string;
+  icon: string;
+  state: UnsafeState;
+  eState: UnsafeEState;
+}
+interface UnsafeState {
+  type: "markdown" | string;
+  state: {
+    file: string;
+    mode: string;
+    backlinks: unknown;
+    source: boolean;
+  };
+}
+interface UnsafeEState {
+  cursor: EditorRange;
 }
 
 export type LeafType =
@@ -488,6 +515,50 @@ export class AppHelper {
     });
     unsafeView.requestSave();
     return meta;
+  }
+
+  getCurrentLeafHistoryState(leaf: WorkspaceLeaf): UnsafeHistory {
+    const uLeaf = leaf as UnSafeWorkspaceLeaf;
+    return uLeaf.getHistoryState();
+  }
+
+  getCurrentLeafForwardHistories(leaf: WorkspaceLeaf): UnsafeHistory[] {
+    const uLeaf = leaf as UnSafeWorkspaceLeaf;
+    return uLeaf.history.forwardHistory;
+  }
+
+  resetCurrentLeafHistoryState(leaf: WorkspaceLeaf, history: UnsafeHistory) {
+    const uLeaf = leaf as UnSafeWorkspaceLeaf;
+    uLeaf.history.updateState(history);
+
+    const historyIndex = uLeaf.history.backHistory.findIndex(
+      (x) => x.state.state.file == history.state.state.file
+    );
+    this.setLeafBackHistories(
+      leaf,
+      uLeaf.history.backHistory.slice(0, historyIndex)
+    );
+  }
+
+  cloneLeafHistories(leaf: WorkspaceLeaf): {
+    backHistories: UnsafeHistory[];
+    forwardHistories: UnsafeHistory[];
+  } {
+    const uLeaf = leaf as UnSafeWorkspaceLeaf;
+    return {
+      backHistories: uLeaf.history.backHistory.slice(),
+      forwardHistories: uLeaf.history.forwardHistory.slice(),
+    };
+  }
+
+  setLeafForwardHistories(leaf: WorkspaceLeaf, histories: UnsafeHistory[]) {
+    const uLeaf = leaf as UnSafeWorkspaceLeaf;
+    uLeaf.history.forwardHistory = histories;
+  }
+
+  setLeafBackHistories(leaf: WorkspaceLeaf, histories: UnsafeHistory[]) {
+    const uLeaf = leaf as UnSafeWorkspaceLeaf;
+    uLeaf.history.backHistory = histories;
   }
 
   // TODO: Use another interface instead of TFile

@@ -21,7 +21,10 @@ export function showSearchDialog(
     "",
     [],
     0,
-    true
+    true,
+    undefined,
+    [],
+    undefined
   );
   modal.open();
 }

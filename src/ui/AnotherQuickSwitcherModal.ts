@@ -23,7 +23,7 @@ import {
   SearchCommand,
   Settings,
 } from "../settings";
-import { AppHelper, LeafType } from "../app-helper";
+import { AppHelper, LeafType, UnsafeHistory } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
 import { filterNoQueryPriorities, sort } from "../sorters";
@@ -58,6 +58,8 @@ export class AnotherQuickSwitcherModal
   currentNavigationHistoryIndex: number;
   stackHistory: boolean;
 
+  previewedFiles: TFile[];
+
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
@@ -69,12 +71,17 @@ export class AnotherQuickSwitcherModal
   command: SearchCommand;
   initialCommand: SearchCommand;
 
+  initialHistory: UnsafeHistory;
+  forwardHistories: UnsafeHistory[];
+
   navigationHistoryEl?: HTMLDivElement;
   searchCommandEl?: HTMLDivElement;
   defaultInputEl?: HTMLDivElement;
   countInputEl?: HTMLDivElement;
   floating: boolean;
   opened: boolean;
+  openInSameLeaf: boolean;
+  willSilentClose: boolean = false;
 
   constructor(
     app: App,
@@ -84,7 +91,10 @@ export class AnotherQuickSwitcherModal
     inputQuery: string,
     navigationHistories: CustomSearchHistory[],
     currentNavigationHistoryIndex: number,
-    stackHistory: boolean
+    stackHistory: boolean,
+    initialHistory: UnsafeHistory | undefined,
+    previewedFiles: TFile[],
+    forwardHistories: UnsafeHistory[] | undefined
   ) {
     super(app);
 
@@ -98,6 +108,15 @@ export class AnotherQuickSwitcherModal
     this.navigationHistories = navigationHistories;
     this.currentNavigationHistoryIndex = currentNavigationHistoryIndex;
     this.stackHistory = stackHistory;
+    this.initialHistory =
+      initialHistory ??
+      this.appHelper.getCurrentLeafHistoryState(this.app.workspace.getLeaf());
+    this.previewedFiles = previewedFiles;
+    this.forwardHistories =
+      forwardHistories ??
+      this.appHelper.getCurrentLeafForwardHistories(
+        this.app.workspace.getLeaf()
+      );
 
     this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotkeys();
@@ -146,7 +165,38 @@ export class AnotherQuickSwitcherModal
       });
     }
 
+    this.openInSameLeaf = false;
     this.opened = true;
+  }
+
+  onClose() {
+    super.onClose();
+    if (this.willSilentClose) {
+      return;
+    }
+
+    const leaf = this.app.workspace.getLeaf();
+
+    if (!this.openInSameLeaf) {
+      this.appHelper.resetCurrentLeafHistoryState(leaf, this.initialHistory);
+      this.appHelper.setLeafForwardHistories(leaf, this.forwardHistories);
+    }
+
+    setTimeout(() => {
+      const previewedPaths = this.previewedFiles.map((x) => x.path);
+      const { backHistories } = this.appHelper.cloneLeafHistories(leaf);
+      this.appHelper.setLeafBackHistories(
+        leaf,
+        backHistories.filter(
+          (x) => !previewedPaths.includes(x.state.state.file)
+        )
+      );
+    }, 200);
+  }
+
+  silentClose() {
+    this.willSilentClose = true;
+    this.close();
   }
 
   enableFloating() {
@@ -511,10 +561,10 @@ export class AnotherQuickSwitcherModal
   async chooseCurrentSuggestion(
     leaf: LeafType,
     option: { keepOpen?: boolean } = {}
-  ): Promise<void> {
+  ): Promise<TFile | null> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
     if (!item) {
-      return;
+      return null;
     }
 
     let fileToOpened = item.file;
@@ -528,9 +578,13 @@ export class AnotherQuickSwitcherModal
         : undefined;
 
     if (!option.keepOpen) {
+      if (leaf === "same-tab") {
+        this.openInSameLeaf = true;
+      }
       this.close();
     }
     this.appHelper.openFile(fileToOpened, { leaf, offset });
+    return fileToOpened;
   }
 
   async onChooseSuggestion(
@@ -560,13 +614,14 @@ export class AnotherQuickSwitcherModal
   }
 
   private setHotkeys() {
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
+
     const openNthMod = quickResultSelectionModifier(
       this.settings.userAltInsteadOfModForQuickResultSelection
     );
 
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
-        { command: "[↵]", purpose: "open" },
         { command: `[↑]`, purpose: "up" },
         { command: `[↓]`, purpose: "down" },
         { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
@@ -598,6 +653,9 @@ export class AnotherQuickSwitcherModal
       }
     });
 
+    this.registerKeys("open", async () => {
+      await this.chooseCurrentSuggestion("same-tab");
+    });
     this.registerKeys("open in new tab", async () => {
       await this.chooseCurrentSuggestion("new-tab");
     });
@@ -638,7 +696,12 @@ export class AnotherQuickSwitcherModal
       if (!this.floating) {
         this.enableFloating();
       }
-      await this.chooseCurrentSuggestion("same-tab", { keepOpen: true });
+      const file = await this.chooseCurrentSuggestion("same-tab", {
+        keepOpen: true,
+      });
+      if (file) {
+        this.previewedFiles.push(file);
+      }
     });
 
     this.registerKeys("create", async () => {
@@ -723,7 +786,7 @@ export class AnotherQuickSwitcherModal
         return;
       }
 
-      this.close();
+      this.silentClose();
       const modal = new AnotherQuickSwitcherModal(
         this.app,
         this.settings,
@@ -745,7 +808,10 @@ export class AnotherQuickSwitcherModal
           },
         ],
         this.currentNavigationHistoryIndex + 1,
-        true
+        true,
+        this.initialHistory,
+        this.previewedFiles,
+        this.forwardHistories
       );
       modal.open();
     };
@@ -764,7 +830,7 @@ export class AnotherQuickSwitcherModal
         return;
       }
 
-      this.close();
+      this.silentClose();
       const modal = new AnotherQuickSwitcherModal(
         this.app,
         this.settings,
@@ -776,7 +842,10 @@ export class AnotherQuickSwitcherModal
         history.inputQuery,
         this.navigationHistories,
         index,
-        false
+        false,
+        this.initialHistory,
+        this.previewedFiles,
+        this.forwardHistories
       );
       modal.open();
     };

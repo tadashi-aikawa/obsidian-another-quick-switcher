@@ -34,6 +34,7 @@ export interface Hotkeys {
     down: Hotkey[];
     "clear input": Hotkey[];
     "replace input": Hotkey[];
+    open: Hotkey[];
     "open in new tab": Hotkey[];
     "open in new pane (horizontal)": Hotkey[];
     "open in new pane (vertical)": Hotkey[];
@@ -120,6 +121,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     down: [{ modifiers: ["Mod"], key: "n" }],
     "clear input": [{ modifiers: ["Mod"], key: "d" }],
     "replace input": [{ modifiers: [], key: "Tab" }],
+    open: [{ modifiers: [], key: "Enter" }],
     "open in new tab": [{ modifiers: ["Mod"], key: "Enter" }],
     "open in new pane (horizontal)": [{ modifiers: ["Mod"], key: "-" }],
     "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
