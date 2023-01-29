@@ -285,26 +285,6 @@ export class AnotherQuickSwitcherModal
     );
   }
 
-  async handleCreateNewMarkdown(
-    searchQuery: string,
-    leafType: LeafType
-  ): Promise<boolean> {
-    if (!searchQuery) {
-      return true;
-    }
-
-    const file = await this.appHelper.createMarkdown(this.searchQuery);
-    if (!file) {
-      // noinspection ObjectAllocationIgnored
-      new Notice("This file already exists.");
-      return true;
-    }
-
-    this.close();
-    this.appHelper.openFile(file, { leaf: leafType });
-    return false;
-  }
-
   prefilterItems(command: SearchCommand): SuggestionItem[] {
     const filterItems = (
       includePatterns: string[],
@@ -598,6 +578,29 @@ export class AnotherQuickSwitcherModal
     if (this.settings.showLogAboutPerformanceInConsole) {
       console.log(toMessage());
     }
+  }
+
+  async handleCreateNewMarkdown(
+    searchQuery: string,
+    leafType: LeafType
+  ): Promise<boolean> {
+    if (!searchQuery) {
+      return true;
+    }
+
+    const file = await this.appHelper.createMarkdown(this.searchQuery);
+    if (!file) {
+      // noinspection ObjectAllocationIgnored
+      new Notice("This file already exists.");
+      return true;
+    }
+
+    if (leafType === "same-tab") {
+      this.openInSameLeaf = true;
+    }
+    this.close();
+    this.appHelper.openFile(file, { leaf: leafType });
+    return false;
   }
 
   private registerKeys(
