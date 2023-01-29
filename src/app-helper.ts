@@ -527,7 +527,7 @@ export class AppHelper {
     return uLeaf.history.forwardHistory;
   }
 
-  resetCurrentLeafHistoryState(leaf: WorkspaceLeaf, history: UnsafeHistory) {
+  resetCurrentLeafHistoryStateTo(leaf: WorkspaceLeaf, history: UnsafeHistory) {
     const uLeaf = leaf as UnSafeWorkspaceLeaf;
     uLeaf.history.updateState(history);
 

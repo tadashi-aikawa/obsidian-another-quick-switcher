@@ -178,7 +178,7 @@ export class AnotherQuickSwitcherModal
     const leaf = this.app.workspace.getLeaf();
 
     if (!this.openInSameLeaf) {
-      this.appHelper.resetCurrentLeafHistoryState(leaf, this.initialHistory);
+      this.appHelper.resetCurrentLeafHistoryStateTo(leaf, this.initialHistory);
       this.appHelper.setLeafForwardHistories(leaf, this.forwardHistories);
     }
 
