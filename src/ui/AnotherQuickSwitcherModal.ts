@@ -5,9 +5,11 @@ import {
   Notice,
   parseFrontMatterAliases,
   parseFrontMatterTags,
+  resolveSubpath,
   SuggestModal,
   TFile,
 } from "obsidian";
+import type { HeadingSubpathResult } from 'obsidian';
 import {
   excludeItems,
   includeItems,
@@ -552,10 +554,24 @@ export class AnotherQuickSwitcherModal
       fileToOpened = await this.app.vault.create(item.file.path, "");
     }
 
-    const offset =
-      this.command.searchTarget === "backlink"
-        ? this.appHelper.findFirstLinkOffset(item.file, this.originFile!) // backlinkの候補がある場合はかならずoriginFileが存在する
-        : undefined;
+    let offset = undefined;
+    let line = undefined;
+    if (this.command.searchTarget === 'backlink') {
+      offset = this.appHelper.findFirstLinkOffset(item.file, this.originFile!); // backlinkの候補がある場合はかならずoriginFileが存在する
+    } else if (this.command.searchTarget === 'file') {
+      // Try to enrich the result with a position if the first match includes one
+      if (item.matchResults.length > 0 && item.matchResults[0].type === 'header') {
+        // The match is a header, let's go to that header when opening the file
+        const result = item.matchResults[0];
+        const cache = app.metadataCache.getFileCache(item.file);
+        if (cache && result.meta && result.meta.length > 0) {
+          const path = resolveSubpath(cache,  result.meta[0]);
+          if (path && path.type === 'heading') {
+            line = path.current.position.start.line;
+          }
+        }
+      }
+    }
 
     if (!option.keepOpen) {
       if (leaf === "same-tab") {
@@ -563,7 +579,7 @@ export class AnotherQuickSwitcherModal
       }
       this.close();
     }
-    this.appHelper.openFile(fileToOpened, { leaf, offset });
+    this.appHelper.openFile(fileToOpened, { leaf, offset, line });
     return fileToOpened;
   }
 
