@@ -7,12 +7,12 @@ import {
   HeadingCache,
   LinkCache,
   MarkdownView,
-  Pos,
+  Pos, resolveSubpath,
   TFile,
   TFolder,
   Vault,
   Workspace,
-  WorkspaceLeaf,
+  WorkspaceLeaf
 } from "obsidian";
 import {
   flatten,
@@ -218,6 +218,16 @@ export class AppHelper {
           )?.path;
       return firstLinkPath === linkFile.path;
     })!.position.start.offset;
+  }
+
+  findFirstHeaderOffset(file: TFile, header: string): number | null {
+    const cache = app.metadataCache.getFileCache(file);
+    if (!cache) {
+      return null
+    }
+
+    const path = resolveSubpath(cache, header);
+    return path.type === "heading" ? path.current.position.start.offset : null
   }
 
   // noinspection FunctionWithMultipleLoopsJS

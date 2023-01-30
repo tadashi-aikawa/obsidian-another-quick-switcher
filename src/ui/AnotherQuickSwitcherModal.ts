@@ -5,11 +5,9 @@ import {
   Notice,
   parseFrontMatterAliases,
   parseFrontMatterTags,
-  resolveSubpath,
   SuggestModal,
   TFile,
 } from "obsidian";
-import type { HeadingSubpathResult } from 'obsidian';
 import {
   excludeItems,
   includeItems,
@@ -33,6 +31,7 @@ import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { excludeFormat, smartWhitespaceSplit } from "../utils/strings";
 import { createInstructions, quickResultSelectionModifier } from "src/keys";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
+import { ExhaustiveError } from "../errors";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -554,23 +553,27 @@ export class AnotherQuickSwitcherModal
       fileToOpened = await this.app.vault.create(item.file.path, "");
     }
 
-    let offset = undefined;
-    let line = undefined;
-    if (this.command.searchTarget === 'backlink') {
-      offset = this.appHelper.findFirstLinkOffset(item.file, this.originFile!); // backlinkの候補がある場合はかならずoriginFileが存在する
-    } else if (this.command.searchTarget === 'file') {
-      // Try to enrich the result with a position if the first match includes one
-      if (item.matchResults.length > 0 && item.matchResults[0].type === 'header') {
-        // The match is a header, let's go to that header when opening the file
-        const result = item.matchResults[0];
-        const cache = app.metadataCache.getFileCache(item.file);
-        if (cache && result.meta && result.meta.length > 0) {
-          const path = resolveSubpath(cache,  result.meta[0]);
-          if (path && path.type === 'heading') {
-            line = path.current.position.start.line;
-          }
+    let offset: number | undefined;
+    switch (this.command.searchTarget) {
+      case "file":
+        if (item.matchResults[0]?.type === "header") {
+          // If type is "header", meta[0] is not empty
+          const firstHeader = item.matchResults[0].meta![0];
+          offset =
+            this.appHelper.findFirstHeaderOffset(item.file, firstHeader) ??
+            undefined;
         }
-      }
+        break;
+      case "backlink":
+        offset = this.appHelper.findFirstLinkOffset(
+          item.file,
+          this.originFile!
+        );
+        break;
+      case "link":
+        break;
+      default:
+        throw new ExhaustiveError(this.command.searchTarget as never);
     }
 
     if (!option.keepOpen) {
@@ -579,7 +582,7 @@ export class AnotherQuickSwitcherModal
       }
       this.close();
     }
-    this.appHelper.openFile(fileToOpened, { leaf, offset, line });
+    this.appHelper.openFile(fileToOpened, { leaf, offset });
     return fileToOpened;
   }
 
