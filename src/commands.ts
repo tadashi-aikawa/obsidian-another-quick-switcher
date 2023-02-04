@@ -53,7 +53,7 @@ export async function showGrepDialog(app: App, settings: Settings) {
     return;
   }
 
-  const modal = new GrepModal(app, settings);
+  const modal = new GrepModal(app, settings, undefined, [], undefined);
   modal.open();
 }
 

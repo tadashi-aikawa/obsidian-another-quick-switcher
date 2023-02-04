@@ -84,6 +84,7 @@ export class AnotherQuickSwitcherModal
   opened: boolean;
   openInSameLeaf: boolean;
   willSilentClose: boolean = false;
+  historyRestoreStatus: "initial" | "doing" | "done" = "initial";
 
   constructor(
     app: App,
@@ -178,10 +179,14 @@ export class AnotherQuickSwitcherModal
     }
 
     const leaf = this.app.workspace.getLeaf();
-
     if (!this.openInSameLeaf) {
-      this.appHelper.resetCurrentLeafHistoryStateTo(leaf, this.initialHistory);
-      this.appHelper.setLeafForwardHistories(leaf, this.forwardHistories);
+      this.historyRestoreStatus = "doing";
+      this.appHelper
+        .resetCurrentLeafHistoryStateTo(leaf, this.initialHistory)
+        .then(() => {
+          this.appHelper.setLeafForwardHistories(leaf, this.forwardHistories);
+          this.historyRestoreStatus = "done";
+        });
     }
 
     setTimeout(() => {
@@ -559,6 +564,15 @@ export class AnotherQuickSwitcherModal
       }
       this.close();
     }
+
+    // HACK: For click after preview handling
+    if (this.historyRestoreStatus === "doing") {
+      // @ts-ignore
+      while (this.historyRestoreStatus !== "done") {
+        await sleep(0);
+      }
+    }
+
     this.appHelper.openFile(fileToOpened, { leaf, offset });
     return fileToOpened;
   }

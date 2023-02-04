@@ -1,6 +1,6 @@
 import { App, SuggestModal, TFile } from "obsidian";
 import { Hotkeys, Settings } from "../settings";
-import { AppHelper, LeafType } from "../app-helper";
+import { AppHelper, LeafType, UnsafeHistory } from "../app-helper";
 import { rg } from "../utils/ripgrep";
 import {
   createInstruction,
@@ -48,8 +48,13 @@ export class GrepModal
 {
   appHelper: AppHelper;
   settings: Settings;
+  initialHistory: UnsafeHistory;
+  previewedFiles: TFile[];
+  forwardHistories: UnsafeHistory[];
+
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
+
   vaultRootPath: string;
   currentQuery: string;
   suggestions: SuggestionItem[];
@@ -72,7 +77,16 @@ export class GrepModal
     ev: HTMLElementEventMap["keydown"]
   ) => any;
 
-  constructor(app: App, settings: Settings) {
+  openInSameLeaf: boolean;
+  historyRestoreStatus: "initial" | "doing" | "done" = "initial";
+
+  constructor(
+    app: App,
+    settings: Settings,
+    initialHistory: UnsafeHistory | undefined,
+    previewedFiles: TFile[],
+    forwardHistories: UnsafeHistory[] | undefined
+  ) {
     super(app);
     this.suggestions = globalInternalStorage.items;
     this.vaultRootPath = normalizePath(
@@ -82,6 +96,15 @@ export class GrepModal
     this.appHelper = new AppHelper(app);
     this.settings = settings;
     this.limit = 255;
+    this.initialHistory =
+      initialHistory ??
+      this.appHelper.getCurrentLeafHistoryState(this.app.workspace.getLeaf());
+    this.previewedFiles = previewedFiles;
+    this.forwardHistories =
+      forwardHistories ??
+      this.appHelper.getCurrentLeafForwardHistories(
+        this.app.workspace.getLeaf()
+      );
 
     const searchCmd = this.settings.hotkeys.grep.search.at(0);
     if (searchCmd) {
@@ -106,6 +129,7 @@ export class GrepModal
       this.modalEl.offsetHeight
     );
 
+    this.openInSameLeaf = false;
     this.basePath = globalInternalStorage.basePath ?? "";
 
     window.setTimeout(() => {
@@ -201,6 +225,28 @@ export class GrepModal
       "keydown",
       this.basePathInputElKeydownEventListener
     );
+
+    const leaf = this.app.workspace.getLeaf();
+    if (!this.openInSameLeaf) {
+      this.historyRestoreStatus = "doing";
+      this.appHelper
+        .resetCurrentLeafHistoryStateTo(leaf, this.initialHistory)
+        .then(() => {
+          this.appHelper.setLeafForwardHistories(leaf, this.forwardHistories);
+          this.historyRestoreStatus = "done";
+        });
+    }
+
+    setTimeout(() => {
+      const previewedPaths = this.previewedFiles.map((x) => x.path);
+      const { backHistories } = this.appHelper.cloneLeafHistories(leaf);
+      this.appHelper.setLeafBackHistories(
+        leaf,
+        backHistories.filter(
+          (x) => !previewedPaths.includes(x.state.state.file)
+        )
+      );
+    }, 200);
   }
 
   async searchSuggestions(query: string): Promise<SuggestionItem[]> {
@@ -347,19 +393,32 @@ export class GrepModal
   async chooseCurrentSuggestion(
     leaf: LeafType,
     option: { keepOpen?: boolean } = {}
-  ): Promise<void> {
+  ): Promise<TFile | null> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
     if (!item) {
-      return;
+      return null;
     }
 
     if (!option.keepOpen) {
+      if (leaf === "same-tab") {
+        this.openInSameLeaf = true;
+      }
       this.close();
     }
+
+    // HACK: For click after preview handling
+    if (this.historyRestoreStatus === "doing") {
+      // @ts-ignore
+      while (this.historyRestoreStatus !== "done") {
+        await sleep(0);
+      }
+    }
+
     this.appHelper.openFile(item.file, {
       leaf: leaf,
       line: item.lineNumber - 1,
     });
+    return item.file;
   }
 
   async onChooseSuggestion(
@@ -389,6 +448,8 @@ export class GrepModal
   }
 
   private setHotkeys() {
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
+
     const openNthMod = quickResultSelectionModifier(
       this.settings.userAltInsteadOfModForQuickResultSelection
     );
@@ -452,6 +513,9 @@ export class GrepModal
       this.basePathInputEl.dispatchEvent(new InputEvent("change"));
     });
 
+    this.registerKeys("open", async () => {
+      await this.chooseCurrentSuggestion("same-tab");
+    });
     this.registerKeys("open in new tab", async () => {
       await this.chooseCurrentSuggestion("new-tab");
     });
@@ -488,15 +552,14 @@ export class GrepModal
         );
     });
 
-    this.registerKeys("preview", () => {
-      const item = this.chooser.values?.[this.chooser.selectedItem];
-      if (!item) {
-        return;
-      }
-
-      this.appHelper.openFile(item.file, {
-        line: item.lineNumber - 1,
+    this.registerKeys("preview", async () => {
+      // FIXME: chooseCurrentSuggestionにできるか?
+      const file = await this.chooseCurrentSuggestion("same-tab", {
+        keepOpen: true,
       });
+      if (file) {
+        this.previewedFiles.push(file);
+      }
     });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection

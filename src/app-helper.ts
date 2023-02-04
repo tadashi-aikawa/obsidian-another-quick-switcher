@@ -7,12 +7,13 @@ import {
   HeadingCache,
   LinkCache,
   MarkdownView,
-  Pos, resolveSubpath,
+  Pos,
+  resolveSubpath,
   TFile,
   TFolder,
   Vault,
   Workspace,
-  WorkspaceLeaf
+  WorkspaceLeaf,
 } from "obsidian";
 import {
   flatten,
@@ -83,7 +84,7 @@ interface UnSafeWorkspaceLeaf extends WorkspaceLeaf {
   history: {
     backHistory: UnsafeHistory[];
     forwardHistory: UnsafeHistory[];
-    updateState(history: UnsafeHistory): unknown;
+    updateState(history: UnsafeHistory): Promise<unknown>;
   };
   getHistoryState(): UnsafeHistory;
 }
@@ -223,11 +224,11 @@ export class AppHelper {
   findFirstHeaderOffset(file: TFile, header: string): number | null {
     const cache = app.metadataCache.getFileCache(file);
     if (!cache) {
-      return null
+      return null;
     }
 
     const path = resolveSubpath(cache, header);
-    return path.type === "heading" ? path.current.position.start.offset : null
+    return path.type === "heading" ? path.current.position.start.offset : null;
   }
 
   // noinspection FunctionWithMultipleLoopsJS
@@ -537,9 +538,12 @@ export class AppHelper {
     return uLeaf.history.forwardHistory;
   }
 
-  resetCurrentLeafHistoryStateTo(leaf: WorkspaceLeaf, history: UnsafeHistory) {
+  async resetCurrentLeafHistoryStateTo(
+    leaf: WorkspaceLeaf,
+    history: UnsafeHistory
+  ) {
     const uLeaf = leaf as UnSafeWorkspaceLeaf;
-    uLeaf.history.updateState(history);
+    await uLeaf.history.updateState(history);
 
     const historyIndex = uLeaf.history.backHistory.findIndex(
       (x) => x.state.state.file == history.state.state.file
