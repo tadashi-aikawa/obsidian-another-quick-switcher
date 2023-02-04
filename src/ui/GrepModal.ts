@@ -11,6 +11,7 @@ import {
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { normalizePath, normalizeRelativePath } from "../utils/path";
+import { setFloatingModal } from "./modal";
 
 let globalInternalStorage: {
   items: SuggestionItem[];
@@ -99,14 +100,14 @@ export class GrepModal
 
   onOpen() {
     super.onOpen();
-    activeWindow.activeDocument
-      .querySelector(".modal-bg")
-      ?.addClass("another-quick-switcher__grep__floating-modal-bg");
+    setFloatingModal(
+      this.appHelper,
+      this.modalEl.offsetWidth,
+      this.modalEl.offsetHeight
+    );
 
     this.basePath = globalInternalStorage.basePath ?? "";
 
-    const promptEl = activeWindow.activeDocument.querySelector(".prompt");
-    promptEl?.addClass("another-quick-switcher__grep__floating-prompt");
     window.setTimeout(() => {
       if (globalInternalStorage.selected != null) {
         this.chooser.setSelectedItem(globalInternalStorage.selected!);
