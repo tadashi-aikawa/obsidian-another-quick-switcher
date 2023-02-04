@@ -25,6 +25,7 @@ import {
 import { basename, dirname, extname } from "./utils/path";
 import { ExhaustiveError } from "./errors";
 import merge from "ts-deepmerge";
+import { excludeFormat } from "./utils/strings";
 
 interface UnsafeAppInterface {
   internalPlugins: {
@@ -227,8 +228,10 @@ export class AppHelper {
       return null;
     }
 
-    const path = resolveSubpath(cache, header);
-    return path.type === "heading" ? path.current.position.start.offset : null;
+    const target = cache.headings?.find(
+      (x) => excludeFormat(x.heading) === excludeFormat(header)
+    );
+    return target?.position.start.offset ?? null;
   }
 
   // noinspection FunctionWithMultipleLoopsJS
