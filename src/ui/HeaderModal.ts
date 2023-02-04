@@ -99,7 +99,6 @@ export class HeaderModal
 
   onOpen() {
     super.onOpen();
-
     if (this.floating) {
       this.enableFloating();
       this.refreshPreviewIcon();

@@ -1,6 +1,10 @@
 import { AppHelper } from "../app-helper";
 
-export function setFloatingModal(appHelper: AppHelper, modalOffsetWidth: number, modalOffsetHeight: number) {
+export function setFloatingModal(
+  appHelper: AppHelper,
+  modalOffsetWidth: number,
+  modalOffsetHeight: number
+) {
   activeWindow.activeDocument
     .querySelector(".modal-bg")
     ?.addClass("another-quick-switcher__floating-modal-bg");
@@ -22,10 +26,13 @@ export function setFloatingModal(appHelper: AppHelper, modalOffsetWidth: number,
     } = fileView.containerEl.getBoundingClientRect();
     const { y: promptY } = promptEl!.getBoundingClientRect();
 
-    const left = Math.min(
-      windowWidth - modalWidth - 30,
-      leafX + leafWidth / 1.5
-    );
+    const leafXEnd = leafX + leafWidth;
+    const left =
+      windowWidth - leafXEnd > modalWidth + 30
+        ? leafXEnd - 30
+        : leafX - modalWidth + 100 > 0
+        ? leafX - modalWidth + 100
+        : windowWidth - modalWidth - 30;
     const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
 
     promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);
