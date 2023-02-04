@@ -9,6 +9,7 @@ import {
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { createInstructions } from "../keys";
 import { PREVIEW } from "./icons";
+import { setFloatingModal } from "./modal";
 
 interface SuggestionItem {
   value: string;
@@ -147,35 +148,11 @@ export class HeaderModal
 
   enableFloating() {
     this.floating = true;
-    activeWindow.activeDocument
-      .querySelector(".modal-bg")
-      ?.addClass("another-quick-switcher__floating-modal-bg");
-
-    const promptEl = activeWindow.activeDocument.querySelector(".prompt");
-    promptEl?.addClass("another-quick-switcher__floating-prompt");
-
-    const fileView = this.appHelper.getFileViewInActiveLeaf();
-
-    if (fileView) {
-      const windowWidth = activeWindow.innerWidth;
-      const windowHeight = activeWindow.innerHeight;
-      const modalWidth = this.modalEl.offsetWidth;
-      const modalHeight = this.modalEl.offsetHeight;
-      const {
-        x: leafX,
-        y: leafY,
-        width: leafWidth,
-      } = fileView.containerEl.getBoundingClientRect();
-      const { y: promptY } = promptEl!.getBoundingClientRect();
-
-      const left = Math.min(
-        windowWidth - modalWidth - 30,
-        leafX + leafWidth / 1.5
-      );
-      const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
-
-      promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);
-    }
+    setFloatingModal(
+      this.appHelper,
+      this.modalEl.offsetWidth,
+      this.modalEl.offsetHeight
+    );
   }
 
   getSuggestions(query: string): SuggestionItem[] {

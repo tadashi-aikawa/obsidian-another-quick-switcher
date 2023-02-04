@@ -32,6 +32,7 @@ import { excludeFormat, smartWhitespaceSplit } from "../utils/strings";
 import { createInstructions, quickResultSelectionModifier } from "src/keys";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
 import { ExhaustiveError } from "../errors";
+import { setFloatingModal } from "./modal";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -202,35 +203,11 @@ export class AnotherQuickSwitcherModal
 
   enableFloating() {
     this.floating = true;
-    activeWindow.activeDocument
-      .querySelector(".modal-bg")
-      ?.addClass("another-quick-switcher__floating-modal-bg");
-
-    const promptEl = activeWindow.activeDocument.querySelector(".prompt");
-    promptEl?.addClass("another-quick-switcher__floating-prompt");
-
-    const fileView = this.appHelper.getFileViewInActiveLeaf();
-
-    if (fileView) {
-      const windowWidth = activeWindow.innerWidth;
-      const windowHeight = activeWindow.innerHeight;
-      const modalWidth = this.modalEl.offsetWidth;
-      const modalHeight = this.modalEl.offsetHeight;
-      const {
-        x: leafX,
-        y: leafY,
-        width: leafWidth,
-      } = fileView.containerEl.getBoundingClientRect();
-      const { y: promptY } = promptEl!.getBoundingClientRect();
-
-      const left = Math.min(
-        windowWidth - modalWidth - 30,
-        leafX + leafWidth / 1.5
-      );
-      const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
-
-      promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);
-    }
+    setFloatingModal(
+      this.appHelper,
+      this.modalEl.offsetWidth,
+      this.modalEl.offsetHeight
+    );
   }
 
   indexingItems() {
