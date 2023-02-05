@@ -449,6 +449,7 @@ export class GrepModal
 
   private setHotkeys() {
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
 
     const openNthMod = quickResultSelectionModifier(
       this.settings.userAltInsteadOfModForQuickResultSelection
@@ -461,7 +462,6 @@ export class GrepModal
         { command: `[↓]`, purpose: "down" },
         { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
         ...createInstructions(this.settings.hotkeys.grep),
-        { command: "[esc]", purpose: "dismiss" },
       ]);
     }
 
@@ -571,6 +571,10 @@ export class GrepModal
         this.chooser.useSelectedItem({});
         return false;
       });
+    });
+
+    this.registerKeys("dismiss", async () => {
+      this.close();
     });
   }
 }

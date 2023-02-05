@@ -628,6 +628,7 @@ export class AnotherQuickSwitcherModal
 
   private setHotkeys() {
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
 
     const openNthMod = quickResultSelectionModifier(
       this.settings.userAltInsteadOfModForQuickResultSelection
@@ -639,7 +640,6 @@ export class AnotherQuickSwitcherModal
         { command: `[↓]`, purpose: "down" },
         { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
         ...createInstructions(this.settings.hotkeys.main),
-        { command: "[Esc]", purpose: "dismiss" },
       ]);
     }
 
@@ -881,6 +881,10 @@ export class AnotherQuickSwitcherModal
         this.chooseCurrentSuggestion("same-tab");
         return false;
       });
+    });
+
+    this.registerKeys("dismiss", async () => {
+      this.close();
     });
   }
 }

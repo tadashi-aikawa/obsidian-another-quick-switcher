@@ -29,12 +29,12 @@ export function string2Hotkey(hotKey: string): Hotkey | null {
   };
 }
 
-export function createInstructions(hotkeysByComand: {
+export function createInstructions(hotkeysByCommand: {
   [key: string]: Hotkey[];
 }): Instruction[] {
-  return Object.keys(hotkeysByComand)
-    .filter((x) => hotkeysByComand[x].length > 0)
-    .map((x) => createInstruction(x, hotkeysByComand[x][0]))
+  return Object.keys(hotkeysByCommand)
+    .filter((x) => hotkeysByCommand[x].length > 0)
+    .map((x) => createInstruction(x, hotkeysByCommand[x][0]))
     .filter((x) => x !== null) as Instruction[];
 }
 
@@ -55,6 +55,8 @@ export function createInstruction(
       ? "↑"
       : hotKey.key === "ArrowDown"
       ? "↓"
+      : hotKey.key === "Escape"
+      ? "ESC"
       : hotKey.key;
   const command = mods ? `[${mods} ${key}]` : `[${key}]`;
   return { command, purpose: commandName };

@@ -89,6 +89,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
   settings: Settings;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
+  scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   constructor(app: App, settings: Settings) {
     super(app);
@@ -187,13 +188,14 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
   }
 
   private setHotkeys() {
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
+
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
         { command: "[↵]", purpose: "move to" },
         { command: `[↑]`, purpose: "up" },
         { command: `[↓]`, purpose: "down" },
         ...createInstructions(this.settings.hotkeys.move),
-        { command: "[Esc]", purpose: "dismiss" },
       ]);
     }
 
@@ -213,6 +215,10 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
       }
 
       this.appHelper.openFolderInDefaultApp(folder);
+      this.close();
+    });
+
+    this.registerKeys("dismiss", async () => {
       this.close();
     });
   }

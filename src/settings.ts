@@ -56,11 +56,13 @@ export interface Hotkeys {
     "show links": Hotkey[];
     "navigate forward": Hotkey[];
     "navigate back": Hotkey[];
+    dismiss: Hotkey[];
   };
   move: {
     up: Hotkey[];
     down: Hotkey[];
     "open in default app": Hotkey[];
+    dismiss: Hotkey[];
   };
   header: {
     up: Hotkey[];
@@ -69,6 +71,7 @@ export interface Hotkeys {
     "move to next hit": Hotkey[];
     "move to previous hit": Hotkey[];
     "toggle auto preview": Hotkey[];
+    dismiss: Hotkey[];
   };
   grep: {
     search: Hotkey[];
@@ -86,6 +89,7 @@ export interface Hotkeys {
     "open in new tab in background": Hotkey[];
     "open all in new tabs": Hotkey[];
     preview: Hotkey[];
+    dismiss: Hotkey[];
   };
 }
 
@@ -144,11 +148,13 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "show links": [{ modifiers: ["Mod"], key: "l" }],
     "navigate forward": [{ modifiers: ["Alt"], key: "ArrowRight" }],
     "navigate back": [{ modifiers: ["Alt"], key: "ArrowLeft" }],
+    dismiss: [{ modifiers: [], key: "Escape" }],
   },
   move: {
     up: [{ modifiers: ["Mod"], key: "p" }],
     down: [{ modifiers: ["Mod"], key: "n" }],
     "open in default app": [],
+    dismiss: [{ modifiers: [], key: "Escape" }],
   },
   header: {
     up: [{ modifiers: ["Mod"], key: "p" }],
@@ -157,6 +163,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "move to next hit": [{ modifiers: [], key: "Tab" }],
     "move to previous hit": [{ modifiers: ["Shift"], key: "Tab" }],
     "toggle auto preview": [{ modifiers: ["Mod"], key: "," }],
+    dismiss: [{ modifiers: [], key: "Escape" }],
   },
   grep: {
     search: [{ modifiers: [], key: "Tab" }],
@@ -174,6 +181,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
     "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     preview: [{ modifiers: ["Mod"], key: "," }],
+    dismiss: [{ modifiers: [], key: "Escape" }],
   },
 });
 

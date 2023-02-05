@@ -226,13 +226,14 @@ export class HeaderModal
   }
 
   setHotkeys() {
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
+
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
         { command: "[↵]", purpose: "move to header" },
         { command: `[↑]`, purpose: "up" },
         { command: `[↓]`, purpose: "down" },
         ...createInstructions(this.settings.hotkeys.header),
-        { command: "[Esc]", purpose: "dismiss" },
       ]);
     }
 
@@ -311,6 +312,10 @@ export class HeaderModal
       if (this.autoPreview && !this.floating) {
         this.enableFloating();
       }
+    });
+
+    this.registerKeys("dismiss", async () => {
+      this.close();
     });
   }
 }
