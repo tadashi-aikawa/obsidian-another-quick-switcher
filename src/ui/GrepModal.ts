@@ -123,11 +123,7 @@ export class GrepModal
 
   onOpen() {
     super.onOpen();
-    setFloatingModal(
-      this.appHelper,
-      this.modalEl.offsetWidth,
-      this.modalEl.offsetHeight
-    );
+    setFloatingModal(this.appHelper);
 
     this.openInSameLeaf = false;
     this.basePath = globalInternalStorage.basePath ?? "";

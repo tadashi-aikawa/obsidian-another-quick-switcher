@@ -208,11 +208,7 @@ export class AnotherQuickSwitcherModal
 
   enableFloating() {
     this.floating = true;
-    setFloatingModal(
-      this.appHelper,
-      this.modalEl.offsetWidth,
-      this.modalEl.offsetHeight
-    );
+    setFloatingModal(this.appHelper);
   }
 
   indexingItems() {

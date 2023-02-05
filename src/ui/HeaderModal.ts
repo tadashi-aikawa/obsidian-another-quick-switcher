@@ -147,11 +147,7 @@ export class HeaderModal
 
   enableFloating() {
     this.floating = true;
-    setFloatingModal(
-      this.appHelper,
-      this.modalEl.offsetWidth,
-      this.modalEl.offsetHeight
-    );
+    setFloatingModal(this.appHelper);
   }
 
   getSuggestions(query: string): SuggestionItem[] {
