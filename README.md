@@ -160,6 +160,10 @@ You can navigate outgoing/backlinks without leaving the dialog by using the "sho
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/navigate-outgoing-backlinks-without-leaving-the-dialog.gif)
 
+### 7. Preview
+
+You can preview the file without closing the dialog. It shows a floating view that doesn't distract the contents. Additionally, it makes the editor state before opening the dialog after previewing files and closing the dialog.
+
 ## For users who use earlier than v8.0.0
 
 Please read a "🔥 Breaking changes" section in the [Release note](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/tag/8.0.0).
