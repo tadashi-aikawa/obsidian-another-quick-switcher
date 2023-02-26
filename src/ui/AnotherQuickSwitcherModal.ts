@@ -780,6 +780,33 @@ export class AnotherQuickSwitcherModal
       }
     });
 
+    this.registerKeys("insert to editor in background", async () => {
+      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
+      if (!file) {
+        return;
+      }
+
+      this.historyRestoreStatus = "doing";
+      const leaf = this.app.workspace.getLeaf();
+      await this.appHelper
+        .resetCurrentLeafHistoryStateTo(leaf, this.initialHistory)
+        .then(() => {
+          this.appHelper.setLeafForwardHistories(leaf, this.forwardHistories);
+          this.historyRestoreStatus = "done";
+        });
+
+      if (this.appHelper.isActiveLeafCanvas()) {
+        this.appHelper.addFileToCanvas(file);
+      } else {
+        this.appHelper.insertLinkToActiveFileBy(file);
+        this.appHelper.insertStringToActiveFile("\n");
+      }
+
+      this.initialHistory = this.appHelper.getCurrentLeafHistoryState(
+        this.app.workspace.getLeaf()
+      );
+    });
+
     this.registerKeys("insert all to editor", async () => {
       await this.safeClose();
 

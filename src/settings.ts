@@ -51,6 +51,7 @@ export interface Hotkeys {
     "open in google": Hotkey[];
     "open first URL": Hotkey[];
     "insert to editor": Hotkey[];
+    "insert to editor in background": Hotkey[];
     "insert all to editor": Hotkey[];
     "show backlinks": Hotkey[];
     "show links": Hotkey[];
@@ -143,6 +144,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "open in google": [{ modifiers: ["Mod"], key: "g" }],
     "open first URL": [{ modifiers: ["Mod"], key: "]" }],
     "insert to editor": [{ modifiers: ["Alt"], key: "Enter" }],
+    "insert to editor in background": [],
     "insert all to editor": [{ modifiers: ["Alt", "Shift"], key: "Enter" }],
     "show backlinks": [{ modifiers: ["Mod"], key: "h" }],
     "show links": [{ modifiers: ["Mod"], key: "l" }],
