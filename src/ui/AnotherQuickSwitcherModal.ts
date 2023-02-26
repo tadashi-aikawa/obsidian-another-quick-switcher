@@ -149,6 +149,21 @@ export class AnotherQuickSwitcherModal
     );
   }
 
+  async waitForHistoryRestored() {
+    // HACK: For click after preview handling
+    if (this.historyRestoreStatus === "doing") {
+      // @ts-ignore
+      while (this.historyRestoreStatus !== "done") {
+        await sleep(0);
+      }
+    }
+  }
+
+  async safeClose() {
+    this.close();
+    await this.waitForHistoryRestored();
+  }
+
   onOpen() {
     super.onOpen();
 
@@ -558,15 +573,7 @@ export class AnotherQuickSwitcherModal
       if (leaf === "same-tab") {
         this.openInSameLeaf = true;
       }
-      this.close();
-    }
-
-    // HACK: For click after preview handling
-    if (this.historyRestoreStatus === "doing") {
-      // @ts-ignore
-      while (this.historyRestoreStatus !== "done") {
-        await sleep(0);
-      }
+      await this.safeClose();
     }
 
     this.appHelper.openFile(fileToOpened, { leaf, offset });
@@ -758,21 +765,23 @@ export class AnotherQuickSwitcherModal
       }
     });
 
-    this.registerKeys("insert to editor", () => {
+    this.registerKeys("insert to editor", async () => {
       const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
       if (!file) {
         return;
       }
 
-      this.close();
+      await this.safeClose();
+
       if (this.appHelper.isActiveLeafCanvas()) {
         this.appHelper.addFileToCanvas(file);
       } else {
         this.appHelper.insertLinkToActiveFileBy(file);
       }
     });
-    this.registerKeys("insert all to editor", () => {
-      this.close();
+
+    this.registerKeys("insert all to editor", async () => {
+      await this.safeClose();
 
       let offsetX = 0;
       this.chooser.values?.forEach((x) => {

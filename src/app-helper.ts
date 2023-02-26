@@ -8,7 +8,6 @@ import {
   LinkCache,
   MarkdownView,
   Pos,
-  resolveSubpath,
   TFile,
   TFolder,
   Vault,
