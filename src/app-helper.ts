@@ -548,7 +548,7 @@ export class AppHelper {
     await uLeaf.history.updateState(history);
 
     const historyIndex = uLeaf.history.backHistory.findIndex(
-      (x) => x.state.state.file == history.state.state.file
+      (x) => x.state.state.file === history.state.state.file
     );
     this.setLeafBackHistories(
       leaf,
