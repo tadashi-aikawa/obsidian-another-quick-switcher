@@ -13,19 +13,19 @@ export function showSearchDialog(
   settings: Settings,
   command: SearchCommand
 ) {
-  const modal = new AnotherQuickSwitcherModal(
+  const modal = new AnotherQuickSwitcherModal({
     app,
     settings,
     command,
-    app.workspace.getActiveFile(),
-    "",
-    [],
-    0,
-    true,
-    undefined,
-    [],
-    undefined
-  );
+    originFile: app.workspace.getActiveFile(),
+    inputQuery: "",
+    navigationHistories: [],
+    currentNavigationHistoryIndex: 0,
+    stackHistory: true,
+    initialHistory: undefined,
+    previewedFiles: [],
+    forwardHistories: undefined,
+  });
   modal.open();
 }
 

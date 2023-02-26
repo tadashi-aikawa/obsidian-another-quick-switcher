@@ -86,37 +86,37 @@ export class AnotherQuickSwitcherModal
   willSilentClose: boolean = false;
   historyRestoreStatus: "initial" | "doing" | "done" = "initial";
 
-  constructor(
-    app: App,
-    settings: Settings,
-    command: SearchCommand,
-    originFile: TFile | null,
-    inputQuery: string,
-    navigationHistories: CustomSearchHistory[],
-    currentNavigationHistoryIndex: number,
-    stackHistory: boolean,
-    initialHistory: UnsafeHistory | undefined,
-    previewedFiles: TFile[],
-    forwardHistories: UnsafeHistory[] | undefined
-  ) {
+  constructor(args: {
+    app: App;
+    settings: Settings;
+    command: SearchCommand;
+    originFile: TFile | null;
+    inputQuery: string;
+    navigationHistories: CustomSearchHistory[];
+    currentNavigationHistoryIndex: number;
+    stackHistory: boolean;
+    initialHistory: UnsafeHistory | undefined;
+    previewedFiles: TFile[];
+    forwardHistories: UnsafeHistory[] | undefined;
+  }) {
     super(app);
 
     this.appHelper = new AppHelper(app);
-    this.settings = settings;
-    this.initialCommand = command;
-    this.command = command;
-    this.originFile = originFile;
-    this.floating = command.floating;
-    this.initialInputQuery = inputQuery;
-    this.navigationHistories = navigationHistories;
-    this.currentNavigationHistoryIndex = currentNavigationHistoryIndex;
-    this.stackHistory = stackHistory;
+    this.settings = args.settings;
+    this.initialCommand = args.command;
+    this.command = args.command;
+    this.originFile = args.originFile;
+    this.floating = args.command.floating;
+    this.initialInputQuery = args.inputQuery;
+    this.navigationHistories = args.navigationHistories;
+    this.currentNavigationHistoryIndex = args.currentNavigationHistoryIndex;
+    this.stackHistory = args.stackHistory;
     this.initialHistory =
-      initialHistory ??
+      args.initialHistory ??
       this.appHelper.getCurrentLeafHistoryState(this.app.workspace.getLeaf());
-    this.previewedFiles = previewedFiles;
+    this.previewedFiles = args.previewedFiles;
     this.forwardHistories =
-      forwardHistories ??
+      args.forwardHistories ??
       this.appHelper.getCurrentLeafForwardHistories(
         this.app.workspace.getLeaf()
       );
@@ -805,16 +805,16 @@ export class AnotherQuickSwitcherModal
       }
 
       this.silentClose();
-      const modal = new AnotherQuickSwitcherModal(
-        this.app,
-        this.settings,
-        {
+      const modal = new AnotherQuickSwitcherModal({
+        app: this.app,
+        settings: this.settings,
+        command: {
           ...command,
           floating: this.floating,
         },
-        file,
-        "",
-        [
+        originFile: file,
+        inputQuery: "",
+        navigationHistories: [
           ...this.navigationHistories.slice(
             0,
             this.currentNavigationHistoryIndex
@@ -825,12 +825,12 @@ export class AnotherQuickSwitcherModal
             originFile: this.originFile,
           },
         ],
-        this.currentNavigationHistoryIndex + 1,
-        true,
-        this.initialHistory,
-        this.previewedFiles,
-        this.forwardHistories
-      );
+        currentNavigationHistoryIndex: this.currentNavigationHistoryIndex + 1,
+        stackHistory: true,
+        initialHistory: this.initialHistory,
+        previewedFiles: this.previewedFiles,
+        forwardHistories: this.forwardHistories,
+      });
       modal.open();
     };
 
@@ -849,22 +849,22 @@ export class AnotherQuickSwitcherModal
       }
 
       this.silentClose();
-      const modal = new AnotherQuickSwitcherModal(
-        this.app,
-        this.settings,
-        {
+      const modal = new AnotherQuickSwitcherModal({
+        app: this.app,
+        settings: this.settings,
+        command: {
           ...history.command,
           floating: this.floating,
         },
-        history.originFile,
-        history.inputQuery,
-        this.navigationHistories,
-        index,
-        false,
-        this.initialHistory,
-        this.previewedFiles,
-        this.forwardHistories
-      );
+        originFile: history.originFile,
+        inputQuery: history.inputQuery,
+        navigationHistories: this.navigationHistories,
+        currentNavigationHistoryIndex: index,
+        stackHistory: false,
+        initialHistory: this.initialHistory,
+        previewedFiles: this.previewedFiles,
+        forwardHistories: this.forwardHistories,
+      });
       modal.open();
     };
 
