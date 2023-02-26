@@ -164,7 +164,7 @@ You can navigate outgoing/backlinks without leaving the dialog by using the "sho
 
 You can preview the file without closing the dialog. It shows a floating view that doesn't distract the contents. Additionally, it makes the editor state before opening the dialog after previewing files and closing the dialog.
 
-https://user-images.githubusercontent.com/9500018/221396499-8fc4b5c0-bd93-41d3-b7ee-ac705223a2ca.mp4
+https://user-images.githubusercontent.com/9500018/216806330-daf57b52-d8a4-42e3-9803-ba7d76a93319.mp4
 
 ## For users who use earlier than v8.0.0
 
