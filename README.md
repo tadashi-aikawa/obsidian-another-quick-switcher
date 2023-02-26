@@ -214,3 +214,5 @@ task release VERSION=1.2.3-beta1
 [task]: https://github.com/go-task/task
 [issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
 [discussion]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/discussions
+
+<a href="https://www.buymeacoffee.com/mamansoft"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=mamansoft&button_colour=40DCA5&font_colour=ffffff&font_family=Comic&outline_colour=000000&coffee_colour=FFDD00" /></a>
