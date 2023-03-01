@@ -1,10 +1,10 @@
 export type LANGUAGES = {
-  RUSSIAN: { [k: string]: string };
   UKRAINIAN: { [k: string]: string };
   POLISH: { [k: string]: string };
   GERMAN: { [k: string]: string };
   ROMANIAN: { [k: string]: string };
   FRENCH: { [k: string]: string };
+  RUSSIAN: { [k: string]: string };
   TURKISH: { [k: string]: string };
   PORTUGUESE: { [k: string]: string };
   SPANISH: { [k: string]: string };
@@ -12,42 +12,6 @@ export type LANGUAGES = {
 };
 
 export const layouts: LANGUAGES = {
-  RUSSIAN: {
-    й: "q",
-    ц: "w",
-    у: "e",
-    к: "r",
-    е: "t",
-    н: "y",
-    г: "u",
-    ш: "i",
-    щ: "o",
-    з: "p",
-    х: "[",
-    ъ: "]",
-    ф: "a",
-    ы: "s",
-    в: "d",
-    а: "f",
-    п: "g",
-    р: "h",
-    о: "j",
-    л: "k",
-    д: "l",
-    ж: ";",
-    э: "'",
-    я: "z",
-    ч: "x",
-    с: "c",
-    м: "v",
-    и: "b",
-    т: "n",
-    ь: "m",
-    б: ",",
-    ю: ".",
-    Ё: "~",
-    ё: "`",
-  },
   UKRAINIAN: {
     й: "q",
     ц: "w",
@@ -203,6 +167,42 @@ export const layouts: LANGUAGES = {
     Â: "{",
     Ş: ":",
     Ţ: '"',
+  },
+  RUSSIAN: {
+    й: "q",
+    ц: "w",
+    у: "e",
+    к: "r",
+    е: "t",
+    н: "y",
+    г: "u",
+    ш: "i",
+    щ: "o",
+    з: "p",
+    х: "[",
+    ъ: "]",
+    ф: "a",
+    ы: "s",
+    в: "d",
+    а: "f",
+    п: "g",
+    р: "h",
+    о: "j",
+    л: "k",
+    д: "l",
+    ж: ";",
+    э: "'",
+    я: "z",
+    ч: "x",
+    с: "c",
+    м: "v",
+    и: "b",
+    т: "n",
+    ь: "m",
+    б: ",",
+    ю: ".",
+    Ё: "~",
+    ё: "`",
   },
   FRENCH: {
     a: "a",

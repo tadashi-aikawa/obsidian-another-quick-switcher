@@ -184,11 +184,11 @@ function matchQueryAll(
       ? [q.slice(1), true]
       : [q, false];
 
-    const russianLayout = translateText(query, "RUSSIAN");
     const ukrainianLayout = translateText(query, "UKRAINIAN");
     const polishLayout = translateText(query, "POLISH");
     const germanLayout = translateText(query, "GERMAN");
     const romanianLayout = translateText(query, "ROMANIAN");
+    const russianLayout = translateText(query, "RUSSIAN");
     const frenchLayout = translateText(query, "FRENCH");
     const turkishLayout = translateText(query, "TURKISH");
     const portugueseLayout = translateText(query, "PORTUGUESE");
@@ -196,12 +196,12 @@ function matchQueryAll(
     const italianLayout = translateText(query, "ITALIAN");
 
     const matchedLayouts = [
-      russianLayout,
       ukrainianLayout,
       polishLayout,
       germanLayout,
       romanianLayout,
       frenchLayout,
+      russianLayout,
       turkishLayout,
       portugueseLayout,
       spanishLayout,
@@ -222,9 +222,6 @@ function matchQueryAll(
     if (matchedLayouts.every((matched) => matched[0]?.type === "not found")) {
       return negative ? [] : matchedLayouts.flat();
     } else {
-      console.log(
-        negative ? [{ type: "not found", query }] : matchedLayouts.flat()
-      );
       return negative
         ? [{ type: "not found", query }]
         : matchedLayouts.flat().filter((x) => x.type !== "not found");

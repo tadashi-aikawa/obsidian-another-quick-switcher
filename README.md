@@ -16,7 +16,7 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 - It can move a file to another folder (`Move file to another folder`)
 - It can search **regardless of the appearance order of tokens**
 - It does not search very fuzzy (e.g. searching for `201` doesn't match `2.01`) 
-- It can search with different layouts (like transliteration or if you forgot to change language layout, supports 🇷🇺,🇺🇦,🇵🇱,🇩🇪,🇲🇩,🇷🇴,🇫🇷,🇹🇷,🇵🇹,🇪🇸,🇮🇹 languages) ❇️
+- It can search with different layouts (like transliteration or if you forgot to change language layout, supports 🇺🇦,🇵🇱,🇩🇪,🇲🇩,🇷🇴,🇷🇺,🇫🇷,🇹🇷,🇵🇹,🇪🇸,🇮🇹 languages) ❇️
 - It can search to **consider prefix emoji**
 - It shows file names and directory names separately
 
