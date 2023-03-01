@@ -347,6 +347,17 @@ export class AnotherQuickSwitcherModal
   _getSuggestions(query: string): SuggestionItem[] {
     const start = performance.now();
 
+    // console.log(russianLayout);
+    // console.log(ukrainianLayout);
+    // console.log(polishLayout);
+    // console.log(germanLayout);
+    // console.log(romanianLayout);
+    // console.log(frenchLayout);
+    // console.log(turkishLayout);
+    // console.log(portugueseLayout);
+    // console.log(spanishLayout);
+    // console.log(italianLayout);
+
     let lastOpenFileIndexByPath: { [path: string]: number } = {};
     this.app.workspace.getLastOpenFiles().forEach((v, i) => {
       lastOpenFileIndexByPath[v] = i;

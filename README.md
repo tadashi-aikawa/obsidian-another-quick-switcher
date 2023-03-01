@@ -4,6 +4,10 @@
 [![Tests](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/workflows/Tests/badge.svg)](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/actions)
 ![downloads](https://img.shields.io/github/downloads/tadashi-aikawa/obsidian-another-quick-switcher/total)
 
+This is a fork of "obsidian-another-quick-switcher" plugin with additional functionality
+
+========================================
+
 This is an Obsidian plugin which is another choice of Quick switcher.
 
 - It can create custom search commands (`Custom searches`)
@@ -12,6 +16,7 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 - It can move a file to another folder (`Move file to another folder`)
 - It can search **regardless of the appearance order of tokens**
 - It does not search very fuzzy (e.g. searching for `201` doesn't match `2.01`) 
+- It can search with different layouts (like transliteration or if you forgot to change language layout, supports 🇷🇺,🇺🇦,🇵🇱,🇩🇪,🇲🇩,🇷🇴,🇫🇷,🇹🇷,🇵🇹,🇪🇸,🇮🇹 languages) ❇️
 - It can search to **consider prefix emoji**
 - It shows file names and directory names separately
 

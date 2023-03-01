@@ -1,6 +1,7 @@
 import { TFile } from "obsidian";
 import { smartEquals, smartIncludes, smartStartsWith } from "./utils/strings";
 import { minBy } from "./utils/collection-helper";
+import { LANGUAGES, layouts } from "./utils/layouts";
 
 type MatchType =
   | "not found"
@@ -31,6 +32,14 @@ interface MatchQueryResult {
   alias?: string;
   query: string;
   meta?: string[];
+}
+
+function translateText(text: string, layout: keyof LANGUAGES) {
+  const symbols = layouts[layout];
+  return text
+    .split("")
+    .map((char) => symbols[char.toLowerCase()] || char)
+    .join("");
 }
 
 function matchQuery(
@@ -175,11 +184,50 @@ function matchQueryAll(
       ? [q.slice(1), true]
       : [q, false];
 
-    const matched = matchQuery(item, query, options);
-    if (matched[0]?.type === "not found") {
-      return negative ? [] : matched;
+    const russianLayout = translateText(query, "RUSSIAN");
+    const ukrainianLayout = translateText(query, "UKRAINIAN");
+    const polishLayout = translateText(query, "POLISH");
+    const germanLayout = translateText(query, "GERMAN");
+    const romanianLayout = translateText(query, "ROMANIAN");
+    const frenchLayout = translateText(query, "FRENCH");
+    const turkishLayout = translateText(query, "TURKISH");
+    const portugueseLayout = translateText(query, "PORTUGUESE");
+    const spanishLayout = translateText(query, "SPANISH");
+    const italianLayout = translateText(query, "ITALIAN");
+
+    const matchedLayouts = [
+      russianLayout,
+      ukrainianLayout,
+      polishLayout,
+      germanLayout,
+      romanianLayout,
+      frenchLayout,
+      turkishLayout,
+      portugueseLayout,
+      spanishLayout,
+      italianLayout,
+    ].map((x) => {
+      const matched = matchQuery(item, x, options);
+      return matched;
+    });
+
+    // const matched = matchQuery(item, query, options);
+    //
+    // if (matched[0]?.type === "not found") {
+    //   return negative ? [] : matched;
+    // } else {
+    //   return negative ? [{ type: "not found", query }] : matched;
+    // }
+
+    if (matchedLayouts.every((matched) => matched[0]?.type === "not found")) {
+      return negative ? [] : matchedLayouts.flat();
     } else {
-      return negative ? [{ type: "not found", query }] : matched;
+      console.log(
+        negative ? [{ type: "not found", query }] : matchedLayouts.flat()
+      );
+      return negative
+        ? [{ type: "not found", query }]
+        : matchedLayouts.flat().filter((x) => x.type !== "not found");
     }
   });
 }
