@@ -206,18 +206,10 @@ function matchQueryAll(
       portugueseLayout,
       spanishLayout,
       italianLayout,
-    ].map((x) => {
-      const matched = matchQuery(item, x, options);
+    ].map((languageLayout) => {
+      const matched = matchQuery(item, languageLayout, options);
       return matched;
     });
-
-    // const matched = matchQuery(item, query, options);
-    //
-    // if (matched[0]?.type === "not found") {
-    //   return negative ? [] : matched;
-    // } else {
-    //   return negative ? [{ type: "not found", query }] : matched;
-    // }
 
     if (matchedLayouts.every((matched) => matched[0]?.type === "not found")) {
       return negative ? [] : matchedLayouts.flat();
