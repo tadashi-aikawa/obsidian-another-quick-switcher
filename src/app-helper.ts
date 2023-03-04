@@ -11,6 +11,7 @@ import {
   TFile,
   TFolder,
   Vault,
+  View,
   Workspace,
   WorkspaceLeaf,
 } from "obsidian";
@@ -105,6 +106,25 @@ interface UnsafeState {
 }
 interface UnsafeEState {
   cursor: EditorRange;
+}
+
+interface UnsafeCanvasView extends View {
+  canvas: UnsafeCanvas;
+  requestSave(): unknown;
+}
+
+type UnsafeCardLayout = { x: number; y: number; width: number; height: number };
+interface UnsafeCanvas {
+  posCenter(): { x: number; y: number };
+  createFileNode(args: {
+    file: TFile;
+    pos: { x: number; y: number };
+    subpath?: unknown | undefined;
+    size?: unknown | undefined;
+    position?: unknown | undefined;
+    save?: unknown | undefined;
+    focus?: unknown | undefined;
+  }): UnsafeCardLayout;
 }
 
 export type LeafType =
@@ -519,15 +539,14 @@ export class AppHelper {
   addFileToCanvas(
     file: TFile,
     offset: { x: number; y: number } = { x: 0, y: 0 }
-  ): { x: number; y: number; width: number; height: number } {
-    const unsafeView = this.unsafeApp.workspace.activeLeaf?.view as any;
+  ): UnsafeCardLayout {
+    const unsafeView = this.unsafeApp.workspace.activeLeaf
+      ?.view as UnsafeCanvasView;
     const { x, y } = unsafeView.canvas.posCenter();
-    const meta = unsafeView.canvas.createFileNode(file, "", {
-      x: x + offset.x,
-      y: y + offset.y,
+    return unsafeView.canvas.createFileNode({
+      file,
+      pos: { x: x + offset.x, y: y + offset.y },
     });
-    unsafeView.requestSave();
-    return meta;
   }
 
   getCurrentLeafHistoryState(leaf: WorkspaceLeaf): UnsafeHistory {
