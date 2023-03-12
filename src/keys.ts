@@ -8,24 +8,34 @@ export const quickResultSelectionModifier = (
   userAltInsteadOfModForQuickResultSelection: boolean
 ) => (userAltInsteadOfModForQuickResultSelection ? ALT : MOD);
 
-export type Hotkey = { modifiers: Modifier[]; key: string };
+export type Hotkey = {
+  modifiers: Modifier[];
+  key: string;
+  hideHotkeyGuide?: boolean;
+};
 
-export function hotkey2String(hotKey?: Hotkey): string {
-  if (!hotKey) {
+export function hotkey2String(hotkey?: Hotkey): string {
+  if (!hotkey) {
     return "";
   }
-  const mods = hotKey.modifiers.join(" ");
-  return mods ? `${mods} ${hotKey.key}` : hotKey.key;
+  const mods = hotkey.modifiers.join(" ");
+  return mods ? `${mods} ${hotkey.key}` : hotkey.key;
 }
 
-export function string2Hotkey(hotKey: string): Hotkey | null {
+export function string2Hotkey(
+  hotKey: string,
+  hideHotkeyGuide: boolean
+): Hotkey | null {
   const keys = hotKey.split(" ");
   if (keys.length === 1) {
-    return keys[0] === "" ? null : { modifiers: [], key: keys[0] };
+    return keys[0] === ""
+      ? null
+      : { modifiers: [], key: keys[0], hideHotkeyGuide };
   }
   return {
     modifiers: keys.slice(0, -1) as Modifier[],
     key: keys.at(-1) as Modifier,
+    hideHotkeyGuide,
   };
 }
 
@@ -40,24 +50,24 @@ export function createInstructions(hotkeysByCommand: {
 
 export function createInstruction(
   commandName: string,
-  hotKey?: Hotkey
+  hotkey?: Hotkey
 ): Instruction | null {
-  if (!hotKey) {
+  if (!hotkey || hotkey.hideHotkeyGuide) {
     return null;
   }
-  const mods = hotKey.modifiers
+  const mods = hotkey.modifiers
     .map((x) => (x === "Mod" ? MOD : x === "Alt" ? ALT : x))
     .join(" ");
   const key =
-    hotKey.key === "Enter"
+    hotkey.key === "Enter"
       ? "↵"
-      : hotKey.key === "ArrowUp"
+      : hotkey.key === "ArrowUp"
       ? "↑"
-      : hotKey.key === "ArrowDown"
+      : hotkey.key === "ArrowDown"
       ? "↓"
-      : hotKey.key === "Escape"
+      : hotkey.key === "Escape"
       ? "ESC"
-      : hotKey.key;
+      : hotkey.key;
   const command = mods ? `[${mods} ${key}]` : `[${key}]`;
   return { command, purpose: commandName };
 }

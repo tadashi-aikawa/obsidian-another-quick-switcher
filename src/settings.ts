@@ -568,8 +568,30 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             return cb
               .setValue(hotkey2String(dialog[command][0]))
               .onChange(async (value: string) => {
-                const hk = string2Hotkey(value);
+                const hk = string2Hotkey(
+                  value,
+                  dialog[command][0]?.hideHotkeyGuide ?? false
+                );
                 dialog[command] = hk ? [hk] : [];
+                await this.plugin.saveSettings();
+              });
+          })
+          .addToggle((cb) => {
+            const dialog = this.plugin.settings.hotkeys[dialogKey] as {
+              [key: string]: Hotkey[];
+            };
+            return cb
+              .setTooltip("Show hotkey guide if enabled")
+              .setValue(!dialog[command][0]?.hideHotkeyGuide ?? false)
+              .onChange(async (showHotkeyGuide: boolean) => {
+                dialog[command] = dialog[command][0]
+                  ? [
+                      {
+                        ...dialog[command][0],
+                        hideHotkeyGuide: !showHotkeyGuide,
+                      },
+                    ]
+                  : [];
                 await this.plugin.saveSettings();
               });
           });
