@@ -256,6 +256,32 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
   expand: false,
 });
 
+export const createDefault2HopLinkSearchCommand = (): SearchCommand => ({
+  name: "2 hop link search",
+  searchBy: {
+    tag: true,
+    link: false,
+    header: false,
+  },
+  searchTarget: "2-hop-link",
+  targetExtensions: [],
+  floating: false,
+  showFrontMatter: false,
+  excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+  defaultInput: "",
+  commandPrefix: "",
+  sortPriorities: [
+    "Prefix name match",
+    "Alphabetical",
+    ".md",
+    "Last opened",
+    "Last modified",
+  ],
+  includePrefixPathPatterns: [],
+  excludePrefixPathPatterns: [],
+  expand: false,
+});
+
 export const createPreSettingSearchCommands = (): SearchCommand[] => [
   {
     name: "Recent search",
@@ -350,6 +376,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
   },
   createDefaultLinkSearchCommand(),
   createDefaultBacklinkSearchCommand(),
+  createDefault2HopLinkSearchCommand(),
 ];
 
 export const DEFAULT_SETTINGS: Settings = {
