@@ -75,6 +75,17 @@ export function uniq<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
 
+export function uniqBy<T>(values: T[], fn: (x: T) => string | number): T[] {
+  const m = new Map<string | number, T>();
+  values.forEach((x) => {
+    const k = fn(x);
+    if (!m.has(k)) {
+      m.set(k, x);
+    }
+  });
+  return Array.from(m.values());
+}
+
 export function uniqFlatMap<T, U>(values: T[], mapper: (x: T) => U[]): U[] {
   return uniq(flatten(values.map(mapper)));
 }

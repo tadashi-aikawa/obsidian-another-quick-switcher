@@ -5,7 +5,7 @@ import { smartCommaSplit, smartLineBreakSplit } from "./utils/strings";
 import { Hotkey, hotkey2String, string2Hotkey } from "./keys";
 import { mirror } from "./utils/collection-helper";
 
-const searchTargetList = ["file", "backlink", "link"] as const;
+const searchTargetList = ["file", "backlink", "link", "2-hop-link"] as const;
 export type SearchTarget = typeof searchTargetList[number];
 
 export interface SearchCommand {

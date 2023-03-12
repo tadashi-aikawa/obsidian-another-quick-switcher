@@ -312,6 +312,29 @@ export class AnotherQuickSwitcherModal
               )
             );
           break;
+        case "2-hop-link":
+          const backlinksMap2 = this.appHelper.createBacklinksMap();
+          const originFileLinkMap2 = this.originFile
+            ? this.appHelper.createLinksMap(this.originFile)
+            : {};
+          const linkPaths = items
+            .filter((x) => originFileLinkMap2[x.file.path])
+            .map((x) => x.file.path);
+          const backlinkPaths = linkPaths.flatMap((x) =>
+            Array.from(backlinksMap2[x])
+          );
+
+          const filteredPaths = uniq([...linkPaths, ...backlinkPaths]);
+          items = items
+            .filter((x) => filteredPaths.includes(x.file.path))
+            .sort(
+              sorter(
+                (x) =>
+                  originFileLinkMap2[x.file.path]?.position.start.offset ??
+                  65535
+              )
+            );
+          break;
       }
       if (includePatterns.length > 0) {
         items = includeItems(items, includePatterns, (x) => x.file.path);
@@ -564,6 +587,8 @@ export class AnotherQuickSwitcherModal
         );
         break;
       case "link":
+        break;
+      case "2-hop-link":
         break;
       default:
         throw new ExhaustiveError(this.command.searchTarget as never);
