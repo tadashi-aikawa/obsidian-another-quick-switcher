@@ -37,7 +37,7 @@ Custom searches enables you to create your original search commands.
 | markdown                           | All markdown files                                   |
 | backlink                           | Markdown files in backlinks on the current file      |
 | link                               | Markdown files in outgoing links on the current file |
-| [2-hop-link](#what-is-2-hop-links) | Markdown files in 2-hop-links from the current file  |
+| [2-hop-link] | Markdown files in 2-hop-links from the current file  |
 
 #### Sort priorities
 
@@ -220,9 +220,9 @@ task release VERSION=1.2.3-beta1
 
 ## Appendix
 
-### What is "2-hop-links"?
+### What is the "2-hop-link"?
 
-"2-hop-links" are outgoing links in the current file, and files that have outgoing links to them.
+[2-hop-link] are outgoing links in the current file, and files that have outgoing links to them.
 
 For example, If there are relations as follows,
 
@@ -233,7 +233,7 @@ flowchart LR
     O[Owl] --> A
 ```
 
-`2 hop link` from the "Dog" is as follows.
+[2-hop-link] from the "Dog" is as follows.
 
 ```mermaid
 flowchart LR
@@ -263,7 +263,7 @@ flowchart LR
     classDef focus fill:#f96
 ```
 
-`2 hop link` from the "Dog" is as follows.
+[2-hop-link] from the "Dog" is as follows.
 
 ```mermaid
 flowchart LR
@@ -286,3 +286,5 @@ flowchart LR
 [task]: https://github.com/go-task/task
 [issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
 [discussion]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/discussions
+
+[2-hop-link]: #what-is-the-2-hop-link
