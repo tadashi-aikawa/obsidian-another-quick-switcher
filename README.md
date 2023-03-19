@@ -32,12 +32,12 @@ Custom searches enables you to create your original search commands.
 
 #### Search target
 
-| Name         | Description                                          |
-|--------------| ---------------------------------------------------- |
-| markdown     | All markdown files                                   |
-| backlink     | Markdown files in backlinks on the current file      |
-| link         | Markdown files in outgoing links on the current file |
-| [2-hop-link] | Markdown files in 2-hop-links from the current file  |
+| Name                               | Description                                          |
+| ---------------------------------- | ---------------------------------------------------- |
+| markdown                           | All markdown files                                   |
+| backlink                           | Markdown files in backlinks on the current file      |
+| link                               | Markdown files in outgoing links on the current file |
+| [2-hop-link](#what-is-2-hop-links) | Markdown files in 2-hop-links from the current file  |
 
 #### Sort priorities
 
