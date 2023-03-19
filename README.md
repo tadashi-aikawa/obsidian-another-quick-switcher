@@ -32,11 +32,12 @@ Custom searches enables you to create your original search commands.
 
 #### Search target
 
-| Name     | Description                                          |
-| -------- |------------------------------------------------------|
-| markdown | All markdown files                                   |
-| backlink | Markdown files in backlinks on the current file      |
-| link     | Markdown files in outgoing links on the current file |
+| Name         | Description                                          |
+|--------------| ---------------------------------------------------- |
+| markdown     | All markdown files                                   |
+| backlink     | Markdown files in backlinks on the current file      |
+| link         | Markdown files in outgoing links on the current file |
+| [2-hop-link] | Markdown files in 2-hop-links from the current file  |
 
 #### Sort priorities
 
@@ -216,6 +217,71 @@ task release VERSION=1.2.3
 # Beta
 task release VERSION=1.2.3-beta1
 ```
+
+## Appendix
+
+### What is "2-hop-links"?
+
+"2-hop-links" are outgoing links in the current file, and files that have outgoing links to them.
+
+For example, If there are relations as follows,
+
+```mermaid
+flowchart LR
+    D[Dog] --> A[Animal]
+    C[Cat] --> A
+    O[Owl] --> A
+```
+
+`2 hop link` from the "Dog" is as follows.
+
+```mermaid
+flowchart LR
+    D[Dog]:::focus --> A[Animal]
+    D[Dog]:::focus --> C[Cat]
+    D[Dog]:::focus --> O[Owl]
+    
+    classDef focus fill:#f96
+```
+
+More complicated example.
+
+```mermaid
+flowchart LR
+    Dog:::focus --> Animal
+    Dog --> Masaru
+    Zagitova --> Masaru
+    Masaru --> Akita-inu
+    Cat --> Animal
+    Owl --> Animal
+    Tama --> Cat
+    Mike --> Cat
+    Animal --> Zoo
+    Zoo --> Animal
+    Mahjong --> Zoo
+    Animal --> Coffee
+    classDef focus fill:#f96
+```
+
+`2 hop link` from the "Dog" is as follows.
+
+```mermaid
+flowchart LR
+    Dog:::focus --> Animal:::focus
+    Dog --> Masaru:::focus
+    Zagitova:::focus --> Masaru
+    Masaru --> Akita-inu
+    Cat:::focus --> Animal
+    Owl:::focus --> Animal
+    Tama --> Cat
+    Mike --> Cat
+    Animal --> Zoo
+    Zoo:::focus --> Animal
+    Mahjong --> Zoo
+    Animal --> Coffee
+    classDef focus fill:#f96
+```
+
 
 [task]: https://github.com/go-task/task
 [issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
