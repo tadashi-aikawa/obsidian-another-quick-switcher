@@ -33,6 +33,7 @@ import { createInstructions, quickResultSelectionModifier } from "src/keys";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
 import { ExhaustiveError } from "../errors";
 import { setFloatingModal } from "./modal";
+import { tryRedirect } from "../utils/redirect-utils";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -568,6 +569,8 @@ export class AnotherQuickSwitcherModal
     if (item.phantom) {
       fileToOpened = await this.app.vault.create(item.file.path, "");
     }
+
+	fileToOpened = tryRedirect(fileToOpened, this.app);
 
     let offset: number | undefined;
     switch (this.command.searchTarget) {
