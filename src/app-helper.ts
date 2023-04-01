@@ -439,17 +439,21 @@ export class AppHelper {
     editor.replaceSelection(str);
   }
 
-  insertLinkToActiveFileBy(file: TFile) {
+  insertLinkToActiveFileBy(file: TFile, phantom: boolean) {
     const activeMarkdownView =
       this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
     if (!activeMarkdownView) {
       return;
     }
 
-    const linkText = this.unsafeApp.fileManager.generateMarkdownLink(
+    let linkText = this.unsafeApp.fileManager.generateMarkdownLink(
       file,
       activeMarkdownView.file.path
     );
+
+    if (phantom) {
+      linkText = linkText.replace(/\[\[.*\/([^\]]+)]]/, "[[$1]]");
+    }
 
     const editor = activeMarkdownView.editor;
     editor.replaceSelection(

@@ -801,7 +801,10 @@ export class AnotherQuickSwitcherModal
       if (this.appHelper.isActiveLeafCanvas()) {
         this.appHelper.addFileToCanvas(file);
       } else {
-        this.appHelper.insertLinkToActiveFileBy(file);
+        this.appHelper.insertLinkToActiveFileBy(
+          file,
+          this.chooser.values?.[this.chooser.selectedItem]?.phantom ?? false
+        );
       }
     });
 
@@ -823,7 +826,10 @@ export class AnotherQuickSwitcherModal
       if (this.appHelper.isActiveLeafCanvas()) {
         this.appHelper.addFileToCanvas(file);
       } else {
-        this.appHelper.insertLinkToActiveFileBy(file);
+        this.appHelper.insertLinkToActiveFileBy(
+          file,
+          this.chooser.values?.[this.chooser.selectedItem]?.phantom ?? false
+        );
         this.appHelper.insertStringToActiveFile("\n");
       }
 
@@ -844,7 +850,7 @@ export class AnotherQuickSwitcherModal
           });
           offsetX += cv.width + 30;
         } else {
-          this.appHelper.insertLinkToActiveFileBy(x.file);
+          this.appHelper.insertLinkToActiveFileBy(x.file, x.phantom);
           this.appHelper.insertStringToActiveFile("\n");
         }
       });
