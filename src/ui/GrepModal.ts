@@ -446,6 +446,8 @@ export class GrepModal
   private setHotkeys() {
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "Home")!);
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "End")!);
 
     const openNthMod = quickResultSelectionModifier(
       this.settings.userAltInsteadOfModForQuickResultSelection

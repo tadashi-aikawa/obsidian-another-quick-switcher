@@ -189,6 +189,8 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
 
   private setHotkeys() {
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "Home")!);
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "End")!);
 
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
