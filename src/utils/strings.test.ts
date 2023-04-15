@@ -1,4 +1,5 @@
 import {
+  capitalizeFirstLetter,
   excludeEmoji,
   excludeFormat,
   excludeSpace,
@@ -177,5 +178,19 @@ describe.each<{ text: string; expected: string[] }>`
 `("smartWhitespaceSplit", ({ text, expected }) => {
   test(`smartWhitespaceSplit(${text}) = ${expected}`, () => {
     expect(smartWhitespaceSplit(text)).toStrictEqual(expected);
+  });
+});
+
+describe.each`
+  text        | expected
+  ${"abc"}    | ${"Abc"}
+  ${"Abc"}    | ${"Abc"}
+  ${"ABC"}    | ${"ABC"}
+  ${" abc"}   | ${" abc"}
+  ${"あいう"} | ${"あいう"}
+  ${"🍰🍴"}   | ${"🍰🍴"}
+`("capitalizeFirstLetter", ({ text, expected }) => {
+  test(`capitalizeFirstLetter(${text}) = ${expected}`, () => {
+    expect(capitalizeFirstLetter(text)).toBe(expected);
   });
 });

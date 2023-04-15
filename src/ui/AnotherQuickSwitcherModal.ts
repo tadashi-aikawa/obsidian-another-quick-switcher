@@ -28,7 +28,11 @@ import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
 import { filterNoQueryPriorities, sort } from "../sorters";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
-import { excludeFormat, smartWhitespaceSplit } from "../utils/strings";
+import {
+  capitalizeFirstLetter,
+  excludeFormat,
+  smartWhitespaceSplit,
+} from "../utils/strings";
 import { createInstructions, quickResultSelectionModifier } from "src/keys";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
 import { ExhaustiveError } from "../errors";
@@ -646,10 +650,12 @@ export class AnotherQuickSwitcherModal
     handler: () => void | Promise<void>
   ) {
     this.settings.hotkeys.main[key]?.forEach((x) => {
-      this.scope.register(x.modifiers, x.key.toUpperCase(), (evt) => {
-        evt.preventDefault();
-        handler();
-        return false;
+      this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
+        if (!evt.isComposing) {
+          evt.preventDefault();
+          handler();
+          return false;
+        }
       });
     });
   }

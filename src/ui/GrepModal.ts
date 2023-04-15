@@ -12,6 +12,7 @@ import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { normalizePath, normalizeRelativePath } from "../utils/path";
 import { setFloatingModal } from "./modal";
+import { capitalizeFirstLetter } from "../utils/strings";
 
 let globalInternalStorage: {
   items: SuggestionItem[];
@@ -443,10 +444,12 @@ export class GrepModal
     handler: () => void | Promise<void>
   ) {
     this.settings.hotkeys.grep[key]?.forEach((x) => {
-      this.scope.register(x.modifiers, x.key.toUpperCase(), (evt) => {
-        evt.preventDefault();
-        handler();
-        return false;
+      this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
+        if (!evt.isComposing) {
+          evt.preventDefault();
+          handler();
+          return false;
+        }
       });
     });
   }
