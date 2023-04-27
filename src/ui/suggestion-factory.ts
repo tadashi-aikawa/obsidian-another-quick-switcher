@@ -71,8 +71,8 @@ function createItemDiv(
     });
     directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
     const text = options.showFullPathOfDirectory
-      ? item.file.parent.path
-      : item.file.parent.name;
+      ? item.file.parent?.path
+      : item.file.parent?.name;
     directoryDiv.appendText(` ${text}`);
     entryDiv.appendChild(directoryDiv);
 

@@ -346,8 +346,8 @@ export class GrepModal
         });
         directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
         const text = this.settings.showFullPathOfDirectory
-          ? item.file.parent.path
-          : item.file.parent.name;
+          ? item.file.parent?.path
+          : item.file.parent?.name;
         directoryDiv.appendText(` ${text}`);
         entryDiv.appendChild(directoryDiv);
 

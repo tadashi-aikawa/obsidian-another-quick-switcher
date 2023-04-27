@@ -68,7 +68,7 @@ function matchQuery(
   const file = qs.pop()!;
   const dirs = qs;
   const includeDir = dirs.every((dir) =>
-    smartIncludes(item.file.parent.path, dir, isNormalizeAccentsDiacritics)
+    smartIncludes(item.file.parent?.path!, dir, isNormalizeAccentsDiacritics)
   );
   if (!includeDir) {
     return [{ type: "not found", query }];
@@ -113,7 +113,7 @@ function matchQuery(
   }
 
   if (
-    smartIncludes(item.file.parent.path, query, isNormalizeAccentsDiacritics)
+    smartIncludes(item.file.parent?.path!, query, isNormalizeAccentsDiacritics)
   ) {
     results.push({ type: "directory", meta: [item.file.path], query });
   }

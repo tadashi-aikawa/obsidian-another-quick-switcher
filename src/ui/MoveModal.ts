@@ -22,7 +22,11 @@ function matchQuery(
   const folder = qs.pop()!;
   return (
     qs.every((dir) =>
-      smartIncludes(item.folder.parent.path, dir, isNormalizeAccentsDiacritics)
+      smartIncludes(
+        item.folder.parent?.path!,
+        dir,
+        isNormalizeAccentsDiacritics
+      )
     ) && matcher(item, folder)
   );
 }
@@ -154,7 +158,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
       cls: "another-quick-switcher__item__directory",
     });
     directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
-    directoryDiv.appendText(` ${item.folder.parent.name}`);
+    directoryDiv.appendText(` ${item.folder.parent?.name}`);
     entryDiv.appendChild(directoryDiv);
 
     itemDiv.appendChild(entryDiv);

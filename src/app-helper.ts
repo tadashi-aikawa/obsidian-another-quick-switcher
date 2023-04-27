@@ -27,12 +27,16 @@ import { ExhaustiveError } from "./errors";
 import merge from "ts-deepmerge";
 import { excludeFormat } from "./utils/strings";
 
+type BookmarkItem =
+  | { type: "file"; path: string }
+  | { type: "group"; items: BookmarkItem[] };
+
 interface UnsafeAppInterface {
   internalPlugins: {
     plugins: {
-      starred: {
+      bookmarks: {
         instance: {
-          items: { path: string }[];
+          getBookmarks(): BookmarkItem[];
         };
       };
     };
@@ -173,7 +177,7 @@ export class AppHelper {
   }
 
   getCurrentDirPath(): string {
-    return this.getActiveFile()?.parent.path ?? "";
+    return this.getActiveFile()?.parent?.path ?? "";
   }
 
   getCurrentOffset(): number | null {
@@ -412,10 +416,12 @@ export class AppHelper {
     this.unsafeApp.openWithDefaultApp(folder.path);
   }
 
+  // FIXME: function name
   getStarredFilePaths(): string[] {
-    return this.unsafeApp.internalPlugins.plugins.starred.instance.items.map(
-      (x) => x.path
-    );
+    return this.unsafeApp.internalPlugins.plugins.bookmarks.instance
+      .getBookmarks()
+      .map((x) => (x.type === "file" ? x.path : undefined))
+      .filter((x) => x !== undefined) as string[];
   }
 
   searchPhantomFiles(): TFile[] {
@@ -509,7 +515,7 @@ export class AppHelper {
       case "root":
         return `/${linkPath}`;
       case "current":
-        return `${this.getActiveFile()?.parent.path ?? ""}/${linkPath}`;
+        return `${this.getActiveFile()?.parent?.path ?? ""}/${linkPath}`;
       case "folder":
         return `${this.unsafeApp.vault.config.newFileFolderPath}/${linkPath}`;
       default:
