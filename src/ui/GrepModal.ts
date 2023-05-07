@@ -13,6 +13,7 @@ import { FOLDER } from "./icons";
 import { normalizePath, normalizeRelativePath } from "../utils/path";
 import { setFloatingModal } from "./modal";
 import { capitalizeFirstLetter } from "../utils/strings";
+import { sorter } from "../utils/collection-helper";
 
 let globalInternalStorage: {
   items: SuggestionItem[];
@@ -276,9 +277,9 @@ export class GrepModal
     );
 
     const items = rgResults
-      .map((x, order) => {
+      .map((x) => {
         return {
-          order,
+          order: -1,
           file: this.appHelper.getMarkdownFileByPath(
             normalizePath(x.data.path.text).replace(
               this.vaultRootPath + "/",
@@ -291,7 +292,9 @@ export class GrepModal
           submatches: x.data.submatches,
         };
       })
-      .filter((x) => x.file != null);
+      .filter((x) => x.file != null)
+      .sort(sorter((x) => x.file.stat.mtime, "desc"))
+      .map((x, order) => ({ ...x, order }));
 
     this.showDebugLog(() =>
       buildLogMessage(`getSuggestions: `, performance.now() - start)
