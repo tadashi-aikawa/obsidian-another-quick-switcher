@@ -16,6 +16,7 @@ export interface SearchCommand {
     link: boolean;
   };
   searchTarget: SearchTarget;
+  allowFuzzySearchForSearchTarget: boolean;
   targetExtensions: string[];
   floating: boolean;
   showFrontMatter: boolean;
@@ -204,6 +205,7 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
     header: false,
   },
   searchTarget: "file",
+  allowFuzzySearchForSearchTarget: false,
   targetExtensions: [],
   floating: false,
   showFrontMatter: false,
@@ -224,6 +226,7 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
     header: false,
   },
   searchTarget: "link",
+  allowFuzzySearchForSearchTarget: false,
   targetExtensions: [],
   floating: false,
   showFrontMatter: false,
@@ -244,6 +247,7 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
     header: false,
   },
   searchTarget: "backlink",
+  allowFuzzySearchForSearchTarget: false,
   targetExtensions: ["md"],
   floating: false,
   showFrontMatter: false,
@@ -264,6 +268,7 @@ export const createDefault2HopLinkSearchCommand = (): SearchCommand => ({
     header: false,
   },
   searchTarget: "2-hop-link",
+  allowFuzzySearchForSearchTarget: false,
   targetExtensions: [],
   floating: false,
   showFrontMatter: false,
@@ -291,6 +296,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       link: false,
     },
     searchTarget: "file",
+    allowFuzzySearchForSearchTarget: false,
     targetExtensions: [],
     floating: false,
     showFrontMatter: false,
@@ -310,6 +316,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: false,
     },
     searchTarget: "file",
+    allowFuzzySearchForSearchTarget: false,
     targetExtensions: [],
     floating: false,
     showFrontMatter: false,
@@ -335,6 +342,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: true,
     },
     searchTarget: "file",
+    allowFuzzySearchForSearchTarget: false,
     targetExtensions: [],
     floating: false,
     showFrontMatter: false,
@@ -363,6 +371,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       header: false,
     },
     searchTarget: "file",
+    allowFuzzySearchForSearchTarget: false,
     targetExtensions: [],
     floating: false,
     showFrontMatter: false,
@@ -909,6 +918,16 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           command.searchTarget = value as SearchTarget;
         });
     });
+
+    new Setting(div)
+      .setName('Allow fuzzy search for "Search target"')
+      .addToggle((cb) => {
+        cb.setValue(command.allowFuzzySearchForSearchTarget).onChange(
+          async (value) => {
+            command.allowFuzzySearchForSearchTarget = value as boolean;
+          }
+        );
+      });
 
     new Setting(div)
       .setName("Target extensions")

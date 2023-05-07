@@ -1,11 +1,12 @@
 import { TFile } from "obsidian";
-import { smartEquals, smartIncludes, smartStartsWith } from "./utils/strings";
+import { smartEquals, smartIncludes, smartMicroFuzzy } from "./utils/strings";
 import { minBy } from "./utils/collection-helper";
 
 type MatchType =
   | "not found"
   | "name"
   | "prefix-name"
+  | "fuzzy-name"
   | "word-perfect"
   | "directory"
   | "header"
@@ -41,6 +42,7 @@ function matchQuery(
     searchByHeaders: boolean;
     searchByLinks: boolean;
     isNormalizeAccentsDiacritics: boolean;
+    fuzzyTarget: boolean;
   }
 ): MatchQueryResult[] {
   const {
@@ -82,12 +84,38 @@ function matchQuery(
     results.push({ type: "word-perfect", meta: [item.file.name], query });
   }
 
-  if (smartStartsWith(item.file.name, file, isNormalizeAccentsDiacritics)) {
-    results.push({ type: "prefix-name", meta: [item.file.name], query });
+  // noinspection FallThroughInSwitchStatementJS
+  switch (
+    smartMicroFuzzy(item.file.name, query, isNormalizeAccentsDiacritics)
+  ) {
+    case "starts-with":
+      results.push({ type: "prefix-name", meta: [item.file.name], query });
+    case "includes":
+      results.push({ type: "name", meta: [item.file.name], query });
+    case "fuzzy":
+      if (options.fuzzyTarget) {
+        results.push({ type: "fuzzy-name", meta: [item.file.name], query });
+      }
   }
-  const prefixNameMatchedAliases = item.aliases.filter((x) =>
-    smartStartsWith(x, file, isNormalizeAccentsDiacritics)
-  );
+
+  const prefixNameMatchedAliases: string[] = [];
+  const nameMatchedAliases: string[] = [];
+  const fuzzyNameMatchedAliases: string[] = [];
+  for (let al of item.aliases) {
+    const r = smartMicroFuzzy(al, file, isNormalizeAccentsDiacritics);
+    // noinspection FallThroughInSwitchStatementJS
+    switch (r) {
+      case "starts-with":
+        prefixNameMatchedAliases.push(al);
+      case "includes":
+        nameMatchedAliases.push(al);
+      case "fuzzy":
+        if (options.fuzzyTarget) {
+          fuzzyNameMatchedAliases.push(al);
+        }
+    }
+  }
+
   if (prefixNameMatchedAliases.length > 0) {
     results.push({
       type: "prefix-name",
@@ -96,18 +124,19 @@ function matchQuery(
       query,
     });
   }
-
-  if (smartIncludes(item.file.name, file, isNormalizeAccentsDiacritics)) {
-    results.push({ type: "name", meta: [item.file.name], query });
-  }
-  const nameMatchedAliases = item.aliases.filter((x) =>
-    smartIncludes(x, file, isNormalizeAccentsDiacritics)
-  );
   if (nameMatchedAliases.length > 0) {
     results.push({
       type: "name",
       meta: nameMatchedAliases,
       alias: minBy(nameMatchedAliases, (x) => x.length),
+      query,
+    });
+  }
+  if (options.fuzzyTarget && fuzzyNameMatchedAliases.length > 0) {
+    results.push({
+      type: "fuzzy-name",
+      meta: fuzzyNameMatchedAliases,
+      alias: minBy(fuzzyNameMatchedAliases, (x) => x.length),
       query,
     });
   }
@@ -168,6 +197,7 @@ function matchQueryAll(
     searchByHeaders: boolean;
     searchByLinks: boolean;
     isNormalizeAccentsDiacritics: boolean;
+    fuzzyTarget: boolean;
   }
 ): MatchQueryResult[] {
   return queries.flatMap((q) => {
@@ -192,6 +222,7 @@ export function stampMatchResults(
     searchByHeaders: boolean;
     searchByLinks: boolean;
     isNormalizeAccentsDiacritics: boolean;
+    fuzzyTarget: boolean;
   }
 ): SuggestionItem {
   return {

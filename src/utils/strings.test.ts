@@ -3,6 +3,8 @@ import {
   excludeEmoji,
   excludeFormat,
   excludeSpace,
+  FuzzyResult,
+  microFuzzy,
   normalizeAccentsDiacritics,
   smartCommaSplit,
   smartEquals,
@@ -192,5 +194,20 @@ describe.each`
 `("capitalizeFirstLetter", ({ text, expected }) => {
   test(`capitalizeFirstLetter(${text}) = ${expected}`, () => {
     expect(capitalizeFirstLetter(text)).toBe(expected);
+  });
+});
+
+describe.each<{ value: string; query: string; expected: FuzzyResult }>`
+  value      | query       | expected
+  ${"abcde"} | ${"ab"}     | ${"starts-with"}
+  ${"abcde"} | ${"bc"}     | ${"includes"}
+  ${"abcde"} | ${"ace"}    | ${"fuzzy"}
+  ${"abcde"} | ${"abcde"}  | ${"starts-with"}
+  ${"abcde"} | ${"abcdef"} | ${false}
+  ${"abcde"} | ${"bd"}     | ${"fuzzy"}
+  ${"abcde"} | ${"ba"}     | ${false}
+`("microFuzzy", ({ value, query, expected }) => {
+  test(`microFuzzy(${value}, ${query}) = ${expected}`, () => {
+    expect(microFuzzy(value, query)).toBe(expected);
   });
 });

@@ -110,3 +110,38 @@ export function smartWhitespaceSplit(text: string): string[] {
 export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export type FuzzyResult = "starts-with" | "includes" | "fuzzy" | false;
+
+export function microFuzzy(value: string, query: string): FuzzyResult {
+  let i = 0;
+  let lastMatchIndex = null;
+  let result: FuzzyResult = "starts-with";
+
+  for (let j = 0; j < value.length; j++) {
+    if (value[j] === query[i]) {
+      if (lastMatchIndex == null) {
+        result = j === 0 ? "starts-with" : "includes";
+      } else if (j - lastMatchIndex > 1) {
+        result = "fuzzy";
+      }
+      lastMatchIndex = j;
+      i++;
+    }
+    if (i === query.length) {
+      return result;
+    }
+  }
+  return false;
+}
+
+export function smartMicroFuzzy(
+  text: string,
+  query: string,
+  isNormalizeAccentsDiacritics: boolean
+): FuzzyResult {
+  return microFuzzy(
+    excludeSpace(excludeEmoji(normalize(text, isNormalizeAccentsDiacritics))),
+    excludeSpace(normalize(query, isNormalizeAccentsDiacritics))
+  );
+}

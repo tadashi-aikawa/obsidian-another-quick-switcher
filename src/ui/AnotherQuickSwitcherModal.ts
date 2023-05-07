@@ -419,6 +419,7 @@ export class AnotherQuickSwitcherModal
               searchByHeaders: this.command.searchBy.header,
               searchByLinks: this.command.searchBy.link,
               searchByTags: this.command.searchBy.tag,
+              fuzzyTarget: this.command.allowFuzzySearchForSearchTarget,
             })
           )
           .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
