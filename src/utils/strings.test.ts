@@ -199,15 +199,15 @@ describe.each`
 
 describe.each<{ value: string; query: string; expected: FuzzyResult }>`
   value      | query       | expected
-  ${"abcde"} | ${"ab"}     | ${"starts-with"}
-  ${"abcde"} | ${"bc"}     | ${"includes"}
-  ${"abcde"} | ${"ace"}    | ${"fuzzy"}
-  ${"abcde"} | ${"abcde"}  | ${"starts-with"}
-  ${"abcde"} | ${"abcdef"} | ${false}
-  ${"abcde"} | ${"bd"}     | ${"fuzzy"}
-  ${"abcde"} | ${"ba"}     | ${false}
+  ${"abcde"} | ${"ab"}     | ${{ type: "starts-with" }}
+  ${"abcde"} | ${"bc"}     | ${{ type: "includes" }}
+  ${"abcde"} | ${"ace"}    | ${{ type: "fuzzy" }}
+  ${"abcde"} | ${"abcde"}  | ${{ type: "starts-with" }}
+  ${"abcde"} | ${"abcdef"} | ${{ type: "none" }}
+  ${"abcde"} | ${"bd"}     | ${{ type: "fuzzy" }}
+  ${"abcde"} | ${"ba"}     | ${{ type: "none" }}
 `("microFuzzy", ({ value, query, expected }) => {
   test(`microFuzzy(${value}, ${query}) = ${expected}`, () => {
-    expect(microFuzzy(value, query)).toBe(expected);
+    expect(microFuzzy(value, query)).toStrictEqual(expected);
   });
 });

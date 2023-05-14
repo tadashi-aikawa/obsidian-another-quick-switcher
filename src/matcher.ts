@@ -85,9 +85,12 @@ function matchQuery(
   }
 
   // noinspection FallThroughInSwitchStatementJS
-  switch (
-    smartMicroFuzzy(item.file.name, query, isNormalizeAccentsDiacritics)
-  ) {
+  const fuzzyResult = smartMicroFuzzy(
+    item.file.name,
+    query,
+    isNormalizeAccentsDiacritics
+  );
+  switch (fuzzyResult.type) {
     case "starts-with":
       results.push({ type: "prefix-name", meta: [item.file.name], query });
     case "includes":
@@ -104,7 +107,7 @@ function matchQuery(
   for (let al of item.aliases) {
     const r = smartMicroFuzzy(al, file, isNormalizeAccentsDiacritics);
     // noinspection FallThroughInSwitchStatementJS
-    switch (r) {
+    switch (r.type) {
       case "starts-with":
         prefixNameMatchedAliases.push(al);
       case "includes":

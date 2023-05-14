@@ -111,12 +111,16 @@ export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export type FuzzyResult = "starts-with" | "includes" | "fuzzy" | false;
+export type FuzzyResult =
+  | { type: "starts-with" }
+  | { type: "includes" }
+  | { type: "fuzzy" }
+  | { type: "none" };
 
 export function microFuzzy(value: string, query: string): FuzzyResult {
   let i = 0;
   let lastMatchIndex = null;
-  let result: FuzzyResult = "starts-with";
+  let result: FuzzyResult["type"] = "starts-with";
 
   for (let j = 0; j < value.length; j++) {
     if (value[j] === query[i]) {
@@ -129,10 +133,10 @@ export function microFuzzy(value: string, query: string): FuzzyResult {
       i++;
     }
     if (i === query.length) {
-      return result;
+      return { type: result };
     }
   }
-  return false;
+  return { type: "none" };
 }
 
 export function smartMicroFuzzy(
