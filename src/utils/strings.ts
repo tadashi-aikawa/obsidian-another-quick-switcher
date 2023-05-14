@@ -118,28 +118,19 @@ export type FuzzyResult =
   | { type: "none"; score: number };
 
 export function microFuzzy(value: string, query: string): FuzzyResult {
+  if (value.startsWith(query)) {
+    return { type: "starts-with", score: 2 ** query.length / value.length };
+  }
+  if (value.includes(query)) {
+    return { type: "includes", score: 2 ** query.length / value.length };
+  }
+
   let i = 0;
-  let lastMatchIndex = null;
-  let result: FuzzyResult = { type: "starts-with", score: 0 };
   let scoreSeed = 0;
   let combo = 0;
-
   for (let j = 0; j < value.length; j++) {
     if (value[j] === query[i]) {
-      if (lastMatchIndex == null) {
-        if (j === 0) {
-          result = { type: "starts-with", score: 0 };
-        } else {
-          result = { type: "includes", score: 0 };
-        }
-        combo = 1;
-      } else if (j - lastMatchIndex > 1) {
-        result = { type: "fuzzy", score: 0 };
-        combo++;
-      } else {
-        combo++;
-      }
-      lastMatchIndex = j;
+      combo++;
       i++;
     } else {
       if (combo > 0) {
@@ -151,9 +142,10 @@ export function microFuzzy(value: string, query: string): FuzzyResult {
       if (combo > 0) {
         scoreSeed += 2 ** combo;
       }
-      return { ...result, score: scoreSeed / value.length };
+      return { type: "fuzzy", score: scoreSeed / value.length };
     }
   }
+
   return { type: "none", score: 0 };
 }
 

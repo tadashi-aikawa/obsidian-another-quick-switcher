@@ -198,14 +198,15 @@ describe.each`
 });
 
 describe.each<{ value: string; query: string; expected: FuzzyResult }>`
-  value      | query       | expected
-  ${"abcde"} | ${"ab"}     | ${{ type: "starts-with", score: 0.8 }}
-  ${"abcde"} | ${"bc"}     | ${{ type: "includes", score: 0.8 }}
-  ${"abcde"} | ${"ace"}    | ${{ type: "fuzzy", score: 1.2 }}
-  ${"abcde"} | ${"abcde"}  | ${{ type: "starts-with", score: 6.4 }}
-  ${"abcde"} | ${"abcdef"} | ${{ type: "none", score: 0 }}
-  ${"abcde"} | ${"bd"}     | ${{ type: "fuzzy", score: 0.8 }}
-  ${"abcde"} | ${"ba"}     | ${{ type: "none", score: 0 }}
+  value                 | query       | expected
+  ${"abcde"}            | ${"ab"}     | ${{ type: "starts-with", score: 0.8 }}
+  ${"abcde"}            | ${"bc"}     | ${{ type: "includes", score: 0.8 }}
+  ${"abcde"}            | ${"ace"}    | ${{ type: "fuzzy", score: 1.2 }}
+  ${"abcde"}            | ${"abcde"}  | ${{ type: "starts-with", score: 6.4 }}
+  ${"abcde"}            | ${"abcdef"} | ${{ type: "none", score: 0 }}
+  ${"abcde"}            | ${"bd"}     | ${{ type: "fuzzy", score: 0.8 }}
+  ${"abcde"}            | ${"ba"}     | ${{ type: "none", score: 0 }}
+  ${"fuzzy name match"} | ${"match"}  | ${{ type: "includes", score: 2 }}
 `("microFuzzy", ({ value, query, expected }) => {
   test(`microFuzzy(${value}, ${query}) = ${expected}`, () => {
     expect(microFuzzy(value, query)).toStrictEqual(expected);
