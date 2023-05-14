@@ -112,31 +112,49 @@ export function capitalizeFirstLetter(str: string): string {
 }
 
 export type FuzzyResult =
-  | { type: "starts-with" }
-  | { type: "includes" }
-  | { type: "fuzzy" }
-  | { type: "none" };
+  | { type: "starts-with"; score: number }
+  | { type: "includes"; score: number }
+  | { type: "fuzzy"; score: number }
+  | { type: "none"; score: number };
 
 export function microFuzzy(value: string, query: string): FuzzyResult {
   let i = 0;
   let lastMatchIndex = null;
-  let result: FuzzyResult["type"] = "starts-with";
+  let result: FuzzyResult = { type: "starts-with", score: 0 };
+  let scoreSeed = 0;
+  let combo = 0;
 
   for (let j = 0; j < value.length; j++) {
     if (value[j] === query[i]) {
       if (lastMatchIndex == null) {
-        result = j === 0 ? "starts-with" : "includes";
+        if (j === 0) {
+          result = { type: "starts-with", score: 0 };
+        } else {
+          result = { type: "includes", score: 0 };
+        }
+        combo = 1;
       } else if (j - lastMatchIndex > 1) {
-        result = "fuzzy";
+        result = { type: "fuzzy", score: 0 };
+        combo++;
+      } else {
+        combo++;
       }
       lastMatchIndex = j;
       i++;
+    } else {
+      if (combo > 0) {
+        scoreSeed += 2 ** combo;
+        combo = 0;
+      }
     }
     if (i === query.length) {
-      return { type: result };
+      if (combo > 0) {
+        scoreSeed += 2 ** combo;
+      }
+      return { ...result, score: scoreSeed / value.length };
     }
   }
-  return { type: "none" };
+  return { type: "none", score: 0 };
 }
 
 export function smartMicroFuzzy(

@@ -14,6 +14,7 @@ export const sortPriorityList = [
   "Name match",
   "Perfect word match",
   "Prefix name match",
+  "Fuzzy name match",
   "Star",
   "Tag match",
   "Alphabetical",
@@ -78,6 +79,8 @@ function getComparator(
       return priorityToPerfectWord;
     case "Prefix name match":
       return priorityToPrefixName;
+    case "Fuzzy name match":
+      return priorityToFuzzyScore;
     case "Star":
       return priorityToStar;
     case "Tag match":
@@ -196,6 +199,18 @@ function priorityToName(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
         .filter((x) => x.type === "name")
         .map((x) => x.query)
         .unique().length,
+    "desc"
+  );
+}
+
+function priorityToFuzzyScore(
+  a: SuggestionItem,
+  b: SuggestionItem
+): 0 | -1 | 1 {
+  return compare(
+    a,
+    b,
+    (x) => Math.max(...x.matchResults.map((x) => x.score ?? 0)),
     "desc"
   );
 }

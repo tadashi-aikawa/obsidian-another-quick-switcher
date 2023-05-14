@@ -17,6 +17,7 @@ export interface SearchCommand {
   };
   searchTarget: SearchTarget;
   allowFuzzySearchForSearchTarget: boolean;
+  minFuzzyMatchScore: number;
   targetExtensions: string[];
   floating: boolean;
   showFrontMatter: boolean;
@@ -120,6 +121,7 @@ export interface Settings {
   moveFileExcludePrefixPathPatterns: string[];
   // debug
   showLogAboutPerformanceInConsole: boolean;
+  showFuzzyMatchScore: boolean;
 }
 
 const createDefaultHotkeys = (): Hotkeys => ({
@@ -206,6 +208,7 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   },
   searchTarget: "file",
   allowFuzzySearchForSearchTarget: false,
+  minFuzzyMatchScore: 0.5,
   targetExtensions: [],
   floating: false,
   showFrontMatter: false,
@@ -227,6 +230,7 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
   },
   searchTarget: "link",
   allowFuzzySearchForSearchTarget: false,
+  minFuzzyMatchScore: 0.5,
   targetExtensions: [],
   floating: false,
   showFrontMatter: false,
@@ -248,6 +252,7 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
   },
   searchTarget: "backlink",
   allowFuzzySearchForSearchTarget: false,
+  minFuzzyMatchScore: 0.5,
   targetExtensions: ["md"],
   floating: false,
   showFrontMatter: false,
@@ -269,6 +274,7 @@ export const createDefault2HopLinkSearchCommand = (): SearchCommand => ({
   },
   searchTarget: "2-hop-link",
   allowFuzzySearchForSearchTarget: false,
+  minFuzzyMatchScore: 0.5,
   targetExtensions: [],
   floating: false,
   showFrontMatter: false,
@@ -297,6 +303,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     },
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
+    minFuzzyMatchScore: 0.5,
     targetExtensions: [],
     floating: false,
     showFrontMatter: false,
@@ -317,6 +324,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     },
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
+    minFuzzyMatchScore: 0.5,
     targetExtensions: [],
     floating: false,
     showFrontMatter: false,
@@ -335,6 +343,33 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     expand: false,
   },
   {
+    name: "File name fuzzy search",
+    searchBy: {
+      tag: false,
+      link: false,
+      header: false,
+    },
+    searchTarget: "file",
+    allowFuzzySearchForSearchTarget: true,
+    minFuzzyMatchScore: 0.5,
+    targetExtensions: [],
+    floating: false,
+    showFrontMatter: false,
+    excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+    defaultInput: "",
+    commandPrefix: "",
+    sortPriorities: [
+      "Prefix name match",
+      "Fuzzy name match",
+      ".md",
+      "Last opened",
+      "Last modified",
+    ],
+    includePrefixPathPatterns: [],
+    excludePrefixPathPatterns: [],
+    expand: false,
+  },
+  {
     name: "Landmark search",
     searchBy: {
       tag: true,
@@ -343,6 +378,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     },
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
+    minFuzzyMatchScore: 0.5,
     targetExtensions: [],
     floating: false,
     showFrontMatter: false,
@@ -372,6 +408,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     },
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
+    minFuzzyMatchScore: 0.5,
     targetExtensions: [],
     floating: false,
     showFrontMatter: false,
@@ -413,6 +450,7 @@ export const DEFAULT_SETTINGS: Settings = {
   moveFileExcludePrefixPathPatterns: [],
   // debug
   showLogAboutPerformanceInConsole: false,
+  showFuzzyMatchScore: false,
 };
 export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   plugin: AnotherQuickSwitcher;
@@ -930,6 +968,21 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       });
 
     new Setting(div)
+      .setName("Min fuzzy match score")
+      .setDesc(
+        "Only show suggestion those score is more than the specific score"
+      )
+      .addSlider((sc) =>
+        sc
+          .setLimits(0, 10.0, 0.1)
+          .setValue(command.minFuzzyMatchScore)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            command.minFuzzyMatchScore = value;
+          })
+      );
+
+    new Setting(div)
       .setName("Target extensions")
       .setDesc(
         "If set, only files whose extension equals will be suggested. If empty, all files will be suggested. It can set multi extensions using comma."
@@ -1132,6 +1185,17 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           this.plugin.settings.showLogAboutPerformanceInConsole = value;
           await this.plugin.saveSettings();
         });
+      });
+
+    new Setting(containerEl)
+      .setName("Show fuzzy match score in the dialog")
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.showFuzzyMatchScore).onChange(
+          async (value) => {
+            this.plugin.settings.showFuzzyMatchScore = value;
+            await this.plugin.saveSettings();
+          }
+        );
       });
   }
 }

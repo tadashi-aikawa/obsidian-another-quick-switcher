@@ -1,6 +1,7 @@
 import { SuggestionItem } from "../matcher";
 import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
-import { ALIAS, FOLDER, FRONT_MATTER, HEADER, LINK, TAG } from "./icons";
+import { ALIAS, FOLDER, FRONT_MATTER, HEADER, LINK, SCORE, TAG } from "./icons";
+import { round } from "../utils/math";
 
 interface Elements {
   itemDiv: HTMLDivElement;
@@ -16,6 +17,7 @@ interface Options {
   showFullPathOfDirectory: boolean;
   showAliasesOnTop: boolean;
   hideGutterIcons: boolean;
+  showFuzzyMatchScore: boolean;
 }
 
 function createItemDiv(
@@ -90,6 +92,7 @@ function createItemDiv(
 
 function createMetaDiv(args: {
   frontMatter: { [key: string]: string | number };
+  score: number;
   options: Options;
 }): Elements["metaDiv"] {
   const { frontMatter, options } = args;
@@ -97,6 +100,19 @@ function createMetaDiv(args: {
   const metaDiv = createDiv({
     cls: "another-quick-switcher__item__metas",
   });
+
+  if (options.showFuzzyMatchScore) {
+    const scoreDiv = createDiv({
+      cls: "another-quick-switcher__item__meta",
+    });
+    const scoreSpan = createSpan({
+      cls: "another-quick-switcher__item__meta__score",
+    });
+    scoreSpan.insertAdjacentHTML("beforeend", SCORE);
+    scoreSpan.appendText(String(args.score));
+    scoreDiv.appendChild(scoreSpan);
+    metaDiv.appendChild(scoreDiv);
+  }
 
   if (options.showFrontMatter && Object.keys(frontMatter).length > 0) {
     const frontMatterDiv = createDiv({
@@ -247,9 +263,19 @@ export function createElements(
     (key, value) =>
       options.excludeFrontMatterKeys.includes(key) || value == null
   );
+
+  const maxScore = round(
+    Math.max(...item.matchResults.map((a) => a.score ?? 0)),
+    6
+  );
+
   const metaDiv =
-    Object.keys(frontMatter).length > 0
-      ? createMetaDiv({ frontMatter, options })
+    Object.keys(frontMatter).length > 0 || maxScore > 0
+      ? createMetaDiv({
+          frontMatter,
+          score: maxScore,
+          options,
+        })
       : undefined;
 
   // description

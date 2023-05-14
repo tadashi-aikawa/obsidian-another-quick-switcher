@@ -420,6 +420,7 @@ export class AnotherQuickSwitcherModal
               searchByLinks: this.command.searchBy.link,
               searchByTags: this.command.searchBy.tag,
               fuzzyTarget: this.command.allowFuzzySearchForSearchTarget,
+              minFuzzyScore: this.command.minFuzzyMatchScore,
             })
           )
           .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
@@ -520,6 +521,7 @@ export class AnotherQuickSwitcherModal
       showFullPathOfDirectory: this.settings.showFullPathOfDirectory,
       showAliasesOnTop: this.settings.showAliasesOnTop,
       hideGutterIcons: this.settings.hideGutterIcons,
+      showFuzzyMatchScore: this.settings.showFuzzyMatchScore,
     });
 
     if (metaDiv?.hasChildNodes()) {

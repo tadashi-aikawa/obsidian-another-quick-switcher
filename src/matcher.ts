@@ -32,6 +32,7 @@ interface MatchQueryResult {
   alias?: string;
   query: string;
   meta?: string[];
+  score?: number;
 }
 
 function matchQuery(
@@ -43,6 +44,7 @@ function matchQuery(
     searchByLinks: boolean;
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
+    minFuzzyScore: number;
   }
 ): MatchQueryResult[] {
   const {
@@ -97,13 +99,20 @@ function matchQuery(
       results.push({ type: "name", meta: [item.file.name], query });
     case "fuzzy":
       if (options.fuzzyTarget) {
-        results.push({ type: "fuzzy-name", meta: [item.file.name], query });
+        if (fuzzyResult.score > options.minFuzzyScore) {
+          results.push({
+            type: "fuzzy-name",
+            meta: [item.file.name],
+            query,
+            score: fuzzyResult.score,
+          });
+        }
       }
   }
 
   const prefixNameMatchedAliases: string[] = [];
   const nameMatchedAliases: string[] = [];
-  const fuzzyNameMatchedAliases: string[] = [];
+  const fuzzyNameMatchedAliases: { value: string; score: number }[] = [];
   for (let al of item.aliases) {
     const r = smartMicroFuzzy(al, file, isNormalizeAccentsDiacritics);
     // noinspection FallThroughInSwitchStatementJS
@@ -114,7 +123,12 @@ function matchQuery(
         nameMatchedAliases.push(al);
       case "fuzzy":
         if (options.fuzzyTarget) {
-          fuzzyNameMatchedAliases.push(al);
+          if (r.score > options.minFuzzyScore) {
+            fuzzyNameMatchedAliases.push({
+              value: al,
+              score: r.score,
+            });
+          }
         }
     }
   }
@@ -136,10 +150,12 @@ function matchQuery(
     });
   }
   if (options.fuzzyTarget && fuzzyNameMatchedAliases.length > 0) {
+    const m = minBy(fuzzyNameMatchedAliases, (x) => x.score);
     results.push({
       type: "fuzzy-name",
-      meta: fuzzyNameMatchedAliases,
-      alias: minBy(fuzzyNameMatchedAliases, (x) => x.length),
+      meta: fuzzyNameMatchedAliases.map((x) => x.value),
+      alias: m.value,
+      score: m.score,
       query,
     });
   }
@@ -201,6 +217,7 @@ function matchQueryAll(
     searchByLinks: boolean;
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
+    minFuzzyScore: number;
   }
 ): MatchQueryResult[] {
   return queries.flatMap((q) => {
@@ -226,6 +243,7 @@ export function stampMatchResults(
     searchByLinks: boolean;
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
+    minFuzzyScore: number;
   }
 ): SuggestionItem {
   return {
