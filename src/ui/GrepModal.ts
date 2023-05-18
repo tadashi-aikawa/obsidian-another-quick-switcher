@@ -1,6 +1,6 @@
 import { App, SuggestModal, TFile } from "obsidian";
 import { Hotkeys, Settings } from "../settings";
-import { AppHelper, LeafType, UnsafeHistory } from "../app-helper";
+import { AppHelper, LeafType, CaptureState } from "../app-helper";
 import { rg } from "../utils/ripgrep";
 import {
   createInstruction,
@@ -50,9 +50,7 @@ export class GrepModal
 {
   appHelper: AppHelper;
   settings: Settings;
-  initialHistory: UnsafeHistory;
-  previewedFiles: TFile[];
-  forwardHistories: UnsafeHistory[];
+  initialState: CaptureState;  // State of leaf before previewing began
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
@@ -79,15 +77,15 @@ export class GrepModal
     ev: HTMLElementEventMap["keydown"]
   ) => any;
 
-  openInSameLeaf: boolean;
-  historyRestoreStatus: "initial" | "doing" | "done" = "initial";
+  private markClosed: () => void;
+  isClosed: Promise<void> = new Promise(resolve => {
+    this.markClosed = resolve;
+  });
+  navQueue: Promise<void> = Promise.resolve();
 
   constructor(
     app: App,
     settings: Settings,
-    initialHistory: UnsafeHistory | undefined,
-    previewedFiles: TFile[],
-    forwardHistories: UnsafeHistory[] | undefined
   ) {
     super(app);
     this.suggestions = globalInternalStorage.items;
@@ -98,15 +96,6 @@ export class GrepModal
     this.appHelper = new AppHelper(app);
     this.settings = settings;
     this.limit = 255;
-    this.initialHistory =
-      initialHistory ??
-      this.appHelper.getCurrentLeafHistoryState(this.app.workspace.getLeaf());
-    this.previewedFiles = previewedFiles;
-    this.forwardHistories =
-      forwardHistories ??
-      this.appHelper.getCurrentLeafForwardHistories(
-        this.app.workspace.getLeaf()
-      );
 
     const searchCmd = this.settings.hotkeys.grep.search.at(0);
     if (searchCmd) {
@@ -127,7 +116,6 @@ export class GrepModal
     super.onOpen();
     setFloatingModal(this.appHelper);
 
-    this.openInSameLeaf = false;
     this.basePath = globalInternalStorage.basePath ?? "";
 
     window.setTimeout(() => {
@@ -224,27 +212,11 @@ export class GrepModal
       this.basePathInputElKeydownEventListener
     );
 
-    const leaf = this.app.workspace.getLeaf();
-    if (!this.openInSameLeaf) {
-      this.historyRestoreStatus = "doing";
-      this.appHelper
-        .resetCurrentLeafHistoryStateTo(leaf, this.initialHistory)
-        .then(() => {
-          this.appHelper.setLeafForwardHistories(leaf, this.forwardHistories);
-          this.historyRestoreStatus = "done";
-        });
+    if (this.initialState) {
+      // restore initial leaf state, undoing any previewing
+      this.navigate(() => this.initialState.restore());
     }
-
-    setTimeout(() => {
-      const previewedPaths = this.previewedFiles.map((x) => x.path);
-      const { backHistories } = this.appHelper.cloneLeafHistories(leaf);
-      this.appHelper.setLeafBackHistories(
-        leaf,
-        backHistories.filter(
-          (x) => !previewedPaths.includes(x.state.state.file)
-        )
-      );
-    }, 200);
+    this.navigate(this.markClosed);
   }
 
   async searchSuggestions(query: string): Promise<SuggestionItem[]> {
@@ -398,6 +370,10 @@ export class GrepModal
     el.appendChild(itemDiv);
   }
 
+  navigate(cb: () => any) {
+    this.navQueue = this.navQueue.then(cb);
+  }
+
   async chooseCurrentSuggestion(
     leaf: LeafType,
     option: { keepOpen?: boolean } = {}
@@ -408,24 +384,17 @@ export class GrepModal
     }
 
     if (!option.keepOpen) {
-      if (leaf === "same-tab") {
-        this.openInSameLeaf = true;
-      }
       this.close();
+      this.navigate(() => this.isClosed); // wait for close to finish before navigating
+    } else if (leaf === "same-tab") {
+      // Previewing in same tab; save state if not already saved
+      this.initialState ??= this.appHelper.captureState();
     }
-
-    // HACK: For click after preview handling
-    if (this.historyRestoreStatus === "doing") {
-      // @ts-ignore
-      while (this.historyRestoreStatus !== "done") {
-        await sleep(0);
-      }
-    }
-
-    this.appHelper.openFile(item.file, {
+    this.navigate(() => this.appHelper.openFile(item.file, {
       leaf: leaf,
       line: item.lineNumber - 1,
-    });
+      inplace: option.keepOpen
+    }, this.initialState));
     return item.file;
   }
 
@@ -569,9 +538,6 @@ export class GrepModal
       const file = await this.chooseCurrentSuggestion("same-tab", {
         keepOpen: true,
       });
-      if (file) {
-        this.previewedFiles.push(file);
-      }
     });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection

@@ -22,9 +22,6 @@ export function showSearchDialog(
     navigationHistories: [],
     currentNavigationHistoryIndex: 0,
     stackHistory: true,
-    initialHistory: undefined,
-    previewedFiles: [],
-    forwardHistories: undefined,
   });
   modal.open();
 }
@@ -53,7 +50,7 @@ export async function showGrepDialog(app: App, settings: Settings) {
     return;
   }
 
-  const modal = new GrepModal(app, settings, undefined, [], undefined);
+  const modal = new GrepModal(app, settings);
   modal.open();
 }
 

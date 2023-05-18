@@ -23,7 +23,7 @@ import {
   SearchCommand,
   Settings,
 } from "../settings";
-import { AppHelper, LeafType, UnsafeHistory } from "../app-helper";
+import { AppHelper, LeafType, CaptureState } from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
 import { filterNoQueryPriorities, sort } from "../sorters";
@@ -64,8 +64,6 @@ export class AnotherQuickSwitcherModal
   currentNavigationHistoryIndex: number;
   stackHistory: boolean;
 
-  previewedFiles: TFile[];
-
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
@@ -77,8 +75,7 @@ export class AnotherQuickSwitcherModal
   command: SearchCommand;
   initialCommand: SearchCommand;
 
-  initialHistory: UnsafeHistory;
-  forwardHistories: UnsafeHistory[];
+  initialState?: CaptureState;  // State of leaf before previewing began
 
   navigationHistoryEl?: HTMLDivElement;
   searchCommandEl?: HTMLDivElement;
@@ -86,9 +83,14 @@ export class AnotherQuickSwitcherModal
   countInputEl?: HTMLDivElement;
   floating: boolean;
   opened: boolean;
-  openInSameLeaf: boolean;
   willSilentClose: boolean = false;
   historyRestoreStatus: "initial" | "doing" | "done" = "initial";
+
+  private markClosed: () => void;
+  isClosed: Promise<void> = new Promise(resolve => {
+    this.markClosed = resolve;
+  });
+  navQueue: Promise<void>;
 
   constructor(args: {
     app: App;
@@ -99,9 +101,8 @@ export class AnotherQuickSwitcherModal
     navigationHistories: CustomSearchHistory[];
     currentNavigationHistoryIndex: number;
     stackHistory: boolean;
-    initialHistory: UnsafeHistory | undefined;
-    previewedFiles: TFile[];
-    forwardHistories: UnsafeHistory[] | undefined;
+    initialState?: CaptureState,
+    navQueue?: Promise<void>,
   }) {
     super(app);
 
@@ -115,15 +116,8 @@ export class AnotherQuickSwitcherModal
     this.navigationHistories = args.navigationHistories;
     this.currentNavigationHistoryIndex = args.currentNavigationHistoryIndex;
     this.stackHistory = args.stackHistory;
-    this.initialHistory =
-      args.initialHistory ??
-      this.appHelper.getCurrentLeafHistoryState(this.app.workspace.getLeaf());
-    this.previewedFiles = args.previewedFiles;
-    this.forwardHistories =
-      args.forwardHistories ??
-      this.appHelper.getCurrentLeafForwardHistories(
-        this.app.workspace.getLeaf()
-      );
+    this.initialState = args.initialState;
+    this.navQueue = args.navQueue ?? Promise.resolve();
 
     this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotkeys();
@@ -153,19 +147,9 @@ export class AnotherQuickSwitcherModal
     );
   }
 
-  async waitForHistoryRestored() {
-    // HACK: For click after preview handling
-    if (this.historyRestoreStatus === "doing") {
-      // @ts-ignore
-      while (this.historyRestoreStatus !== "done") {
-        await sleep(0);
-      }
-    }
-  }
-
-  async safeClose() {
+  safeClose(): Promise<void> {
     this.close();
-    await this.waitForHistoryRestored();
+    return this.isClosed;
   }
 
   onOpen() {
@@ -187,7 +171,6 @@ export class AnotherQuickSwitcherModal
       });
     }
 
-    this.openInSameLeaf = false;
     this.opened = true;
   }
 
@@ -196,28 +179,11 @@ export class AnotherQuickSwitcherModal
     if (this.willSilentClose) {
       return;
     }
-
-    const leaf = this.app.workspace.getLeaf();
-    if (!this.openInSameLeaf) {
-      this.historyRestoreStatus = "doing";
-      this.appHelper
-        .resetCurrentLeafHistoryStateTo(leaf, this.initialHistory)
-        .then(() => {
-          this.appHelper.setLeafForwardHistories(leaf, this.forwardHistories);
-          this.historyRestoreStatus = "done";
-        });
+    if (this.initialState) {
+      // restore initial leaf state, undoing any previewing
+      this.navigate(() => this.initialState!.restore());
     }
-
-    setTimeout(() => {
-      const previewedPaths = this.previewedFiles.map((x) => x.path);
-      const { backHistories } = this.appHelper.cloneLeafHistories(leaf);
-      this.appHelper.setLeafBackHistories(
-        leaf,
-        backHistories.filter(
-          (x) => !previewedPaths.includes(x.state.state.file)
-        )
-      );
-    }, 200);
+    this.navigate(this.markClosed);
   }
 
   silentClose() {
@@ -562,6 +528,10 @@ export class AnotherQuickSwitcherModal
     this.resultContainerEl.appendChild(div);
   }
 
+  navigate(cb: () => any) {
+    this.navQueue = this.navQueue.then(cb);
+  }
+
   async chooseCurrentSuggestion(
     leaf: LeafType,
     option: { keepOpen?: boolean } = {}
@@ -602,13 +572,14 @@ export class AnotherQuickSwitcherModal
     }
 
     if (!option.keepOpen) {
-      if (leaf === "same-tab") {
-        this.openInSameLeaf = true;
-      }
-      await this.safeClose();
+      this.close();
+      this.navigate(() => this.isClosed); // wait for close to finish before navigating
+    } else if (leaf === "same-tab") {
+      // Previewing in same tab; save state if not already saved
+      this.initialState ??= this.appHelper.captureState();
     }
 
-    this.appHelper.openFile(fileToOpened, { leaf, offset });
+    this.navigate(() => this.appHelper.openFile(fileToOpened, {leaf, offset, inplace: option.keepOpen}, this.initialState));
     return fileToOpened;
   }
 
@@ -640,11 +611,9 @@ export class AnotherQuickSwitcherModal
       return true;
     }
 
-    if (leafType === "same-tab") {
-      this.openInSameLeaf = true;
-    }
     this.close();
-    this.appHelper.openFile(file, { leaf: leafType });
+    this.navigate(() => this.isClosed);
+    this.navigate(() => this.appHelper.openFile(file, { leaf: leafType }));
     return false;
   }
 
@@ -744,16 +713,13 @@ export class AnotherQuickSwitcherModal
         );
     });
 
-    this.registerKeys("preview", async () => {
+    this.registerKeys("preview", () => {
       if (!this.floating) {
         this.enableFloating();
       }
-      const file = await this.chooseCurrentSuggestion("same-tab", {
+      this.chooseCurrentSuggestion("same-tab", {
         keepOpen: true,
       });
-      if (file) {
-        this.previewedFiles.push(file);
-      }
     });
 
     this.registerKeys("create", async () => {
@@ -790,6 +756,7 @@ export class AnotherQuickSwitcherModal
       }
 
       this.close();
+      await this.isClosed;
 
       const urls = await this.appHelper.findExternalLinkUrls(fileToOpened);
       if (urls.length > 0) {
@@ -826,13 +793,10 @@ export class AnotherQuickSwitcherModal
       }
 
       this.historyRestoreStatus = "doing";
-      const leaf = this.app.workspace.getLeaf();
-      await this.appHelper
-        .resetCurrentLeafHistoryStateTo(leaf, this.initialHistory)
-        .then(() => {
-          this.appHelper.setLeafForwardHistories(leaf, this.forwardHistories);
-          this.historyRestoreStatus = "done";
-        });
+      if (this.initialState) {
+        await this.initialState.restore();
+        this.initialState = undefined;
+      }
 
       if (this.appHelper.isActiveLeafCanvas()) {
         this.appHelper.addFileToCanvas(file);
@@ -843,10 +807,6 @@ export class AnotherQuickSwitcherModal
         );
         this.appHelper.insertStringToActiveFile("\n");
       }
-
-      this.initialHistory = this.appHelper.getCurrentLeafHistoryState(
-        this.app.workspace.getLeaf()
-      );
     });
 
     this.registerKeys("insert all to editor", async () => {
@@ -896,9 +856,8 @@ export class AnotherQuickSwitcherModal
         ],
         currentNavigationHistoryIndex: this.currentNavigationHistoryIndex + 1,
         stackHistory: true,
-        initialHistory: this.initialHistory,
-        previewedFiles: this.previewedFiles,
-        forwardHistories: this.forwardHistories,
+        initialState: this.initialState,
+        navQueue: this.navQueue,
       });
       modal.open();
     };
@@ -930,9 +889,8 @@ export class AnotherQuickSwitcherModal
         navigationHistories: this.navigationHistories,
         currentNavigationHistoryIndex: index,
         stackHistory: false,
-        initialHistory: this.initialHistory,
-        previewedFiles: this.previewedFiles,
-        forwardHistories: this.forwardHistories,
+        initialState: this.initialState,
+        navQueue: this.navQueue,
       });
       modal.open();
     };

@@ -1,7 +1,6 @@
 import {
   App,
   Editor,
-  EditorRange,
   FileView,
   getLinkpath,
   HeadingCache,
@@ -12,6 +11,7 @@ import {
   TFolder,
   Vault,
   View,
+  ViewState,
   Workspace,
   WorkspaceLeaf,
 } from "obsidian";
@@ -65,6 +65,9 @@ interface UnsafeAppInterface {
     openPopoutLeaf(): WorkspaceLeaf;
   };
   openWithDefaultApp(path: string): unknown;
+  viewRegistry: {
+    getTypeByExtension(ext: string): string
+  }
 }
 
 interface UnSafeLayoutChild {
@@ -85,33 +88,6 @@ interface UnsafeLayouts {
   main: UnSafeLayout;
   right: UnSafeLayout;
 }
-interface UnSafeWorkspaceLeaf extends WorkspaceLeaf {
-  history: {
-    backHistory: UnsafeHistory[];
-    forwardHistory: UnsafeHistory[];
-    updateState(history: UnsafeHistory): Promise<unknown>;
-  };
-  getHistoryState(): UnsafeHistory;
-}
-export interface UnsafeHistory {
-  title: string;
-  icon: string;
-  state: UnsafeState;
-  eState: UnsafeEState;
-}
-interface UnsafeState {
-  type: "markdown" | string;
-  state: {
-    file: string;
-    mode: string;
-    backlinks: unknown;
-    source: boolean;
-  };
-}
-interface UnsafeEState {
-  cursor: EditorRange;
-}
-
 interface UnsafeCanvasView extends View {
   canvas: UnsafeCanvas;
   requestSave(): unknown;
@@ -131,6 +107,11 @@ interface UnsafeCanvas {
   }): UnsafeCardLayout;
 }
 
+export type CaptureState = {
+  leaf?: WorkspaceLeaf
+  restore(): Promise<void> | void;
+}
+
 export type LeafType =
   | "same-tab"
   | "new-tab"
@@ -143,6 +124,7 @@ type OpenFileOption = {
   leaf: LeafType;
   offset?: number;
   line?: number;
+  inplace?: boolean;
 };
 
 export class AppHelper {
@@ -341,70 +323,96 @@ export class AppHelper {
     return abstractFile as TFile;
   }
 
-  openFile(file: TFile, option: Partial<OpenFileOption> = {}) {
+  captureState(): CaptureState {
+    const existing = new WeakSet<WorkspaceLeaf>;
+    const oldLeaf = this.unsafeApp.workspace.activeLeaf;
+    app.workspace.iterateAllLeaves(leaf => existing.add(leaf));
+    let
+      leaf: WorkspaceLeaf|undefined = app.workspace.getLeaf(),
+      state = leaf.getViewState(),
+      eState = leaf.getEphemeralState()
+    ;
+    return {
+      leaf,
+      async restore() {
+        if (!leaf) return;
+        if (existing.has(leaf)) {
+          await leaf.setViewState({...state, active: leaf === oldLeaf, popstate: true} as ViewState, eState);
+          if (oldLeaf && leaf !== oldLeaf) app.workspace.setActiveLeaf(oldLeaf, {focus: true});
+        } else {
+          // Newly opened leaf: close it and drop references
+          leaf.detach();
+        }
+        leaf = this.leaf = undefined;
+      }
+    }
+  }
+
+  getOpenState(leaf: WorkspaceLeaf, file: TFile) {
+    let type = this.unsafeApp.viewRegistry.getTypeByExtension(file.extension);
+    if (leaf.view instanceof FileView && leaf.view.canAcceptExtension(file.extension)) {
+      type = leaf.view.getViewType();
+    }
+    return {type, state: {file: file.path}};
+  }
+
+  async openFile(file: TFile, option: Partial<OpenFileOption> = {}, captureState?: CaptureState) {
     const opt: OpenFileOption = {
-      ...{ leaf: "same-tab" },
+      ...{ leaf: "same-tab", inplace: false },
       ...option,
     };
 
-    const _openFile = (leaf: WorkspaceLeaf, background = false) => {
-      leaf
-        .openFile(file, {
-          ...this.unsafeApp.workspace.activeLeaf?.getViewState(),
-          active: !background,
-        })
-        .then(() => {
-          const markdownView =
-            this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
-          if (markdownView) {
-            if (opt.offset != null) {
-              this.moveTo(opt.offset, markdownView.editor);
-            } else if (opt.line != null) {
-              const p = { line: opt.line, offset: 0, col: 0 };
-              this.moveTo({ start: p, end: p });
-            }
-          }
-        });
-    };
-
-    let leaf: WorkspaceLeaf;
+    let leaf: WorkspaceLeaf|undefined = captureState?.leaf, background: boolean = false;
     switch (opt.leaf) {
       case "same-tab":
-        leaf = this.unsafeApp.workspace.getLeaf();
-        _openFile(leaf);
+        leaf ??= this.unsafeApp.workspace.getLeaf();
         break;
       case "new-tab":
         leaf = this.unsafeApp.workspace.getLeaf(true);
-        _openFile(leaf);
         break;
       case "new-tab-background":
         leaf = this.unsafeApp.workspace.getLeaf(true);
-        _openFile(leaf, true);
+        background = true;
         break;
       case "new-pane-horizontal":
         leaf = this.unsafeApp.workspace.getLeaf("split", "horizontal");
-        _openFile(leaf);
         break;
       case "new-pane-vertical":
         leaf = this.unsafeApp.workspace.getLeaf("split", "vertical");
-        _openFile(leaf);
         break;
       case "new-window":
-        _openFile(this.unsafeApp.workspace.openPopoutLeaf());
+        leaf = this.unsafeApp.workspace.openPopoutLeaf();
         break;
       case "popup":
         const hoverEditorInstance =
           this.unsafeApp.plugins.plugins["obsidian-hover-editor"];
         if (hoverEditorInstance) {
-          leaf = hoverEditorInstance.spawnPopover(undefined, () => {
-            _openFile(leaf);
-          });
+          leaf = hoverEditorInstance.spawnPopover();
         } else {
-          _openFile(this.unsafeApp.workspace.getLeaf());
+          leaf = this.unsafeApp.workspace.getLeaf(true);
         }
         break;
       default:
         throw new ExhaustiveError(opt.leaf);
+    }
+    if (opt.inplace && opt.leaf === "same-tab") {
+      await leaf.setViewState({
+        ...leaf.getViewState(),
+        active: !background,
+        popstate: true,
+        ...this.getOpenState(leaf, file)
+      } as ViewState);
+    } else {
+      await leaf.openFile(file, {...leaf.getViewState(), active: !background});
+    }
+    if (leaf.view instanceof MarkdownView) {
+      const markdownView = leaf.view;
+      if (opt.offset != null) {
+        this.moveTo(opt.offset, markdownView.editor);
+      } else if (opt.line != null) {
+        const p = { line: opt.line, offset: 0, col: 0 };
+        this.moveTo({ start: p, end: p }, markdownView.editor);
+      }
     }
   }
 
@@ -557,53 +565,6 @@ export class AppHelper {
       file,
       pos: { x: x + offset.x, y: y + offset.y },
     });
-  }
-
-  getCurrentLeafHistoryState(leaf: WorkspaceLeaf): UnsafeHistory {
-    const uLeaf = leaf as UnSafeWorkspaceLeaf;
-    return uLeaf.getHistoryState();
-  }
-
-  getCurrentLeafForwardHistories(leaf: WorkspaceLeaf): UnsafeHistory[] {
-    const uLeaf = leaf as UnSafeWorkspaceLeaf;
-    return uLeaf.history.forwardHistory;
-  }
-
-  async resetCurrentLeafHistoryStateTo(
-    leaf: WorkspaceLeaf,
-    history: UnsafeHistory
-  ) {
-    const uLeaf = leaf as UnSafeWorkspaceLeaf;
-    await uLeaf.history.updateState(history);
-
-    const historyIndex = uLeaf.history.backHistory.findIndex(
-      (x) => x.state.state.file === history.state.state.file
-    );
-    this.setLeafBackHistories(
-      leaf,
-      uLeaf.history.backHistory.slice(0, historyIndex)
-    );
-  }
-
-  cloneLeafHistories(leaf: WorkspaceLeaf): {
-    backHistories: UnsafeHistory[];
-    forwardHistories: UnsafeHistory[];
-  } {
-    const uLeaf = leaf as UnSafeWorkspaceLeaf;
-    return {
-      backHistories: uLeaf.history.backHistory.slice(),
-      forwardHistories: uLeaf.history.forwardHistory.slice(),
-    };
-  }
-
-  setLeafForwardHistories(leaf: WorkspaceLeaf, histories: UnsafeHistory[]) {
-    const uLeaf = leaf as UnSafeWorkspaceLeaf;
-    uLeaf.history.forwardHistory = histories;
-  }
-
-  setLeafBackHistories(leaf: WorkspaceLeaf, histories: UnsafeHistory[]) {
-    const uLeaf = leaf as UnSafeWorkspaceLeaf;
-    uLeaf.history.backHistory = histories;
   }
 
   // TODO: Use another interface instead of TFile
