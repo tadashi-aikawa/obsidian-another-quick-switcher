@@ -108,9 +108,8 @@ interface UnsafeCanvas {
 }
 
 export type CaptureState = {
-  leaf: WorkspaceLeaf,
-  state: ViewState,
-  eState: any,
+  leaf?: WorkspaceLeaf
+  restore(): Promise<void> | void;
 }
 
 export type LeafType =
@@ -325,12 +324,28 @@ export class AppHelper {
   }
 
   captureState(): CaptureState {
-    const leaf = app.workspace.getLeaf();
-    return {leaf, state: leaf.getViewState(), eState: leaf.getEphemeralState()}
-  }
-
-  restoreState(capture: CaptureState): Promise<void> {
-    return capture.leaf.setViewState({...capture.state, popstate: true} as ViewState, capture.eState)
+    const existing = new WeakSet<WorkspaceLeaf>;
+    const oldLeaf = this.unsafeApp.workspace.activeLeaf;
+    app.workspace.iterateAllLeaves(leaf => existing.add(leaf));
+    let
+      leaf: WorkspaceLeaf|undefined = app.workspace.getLeaf(),
+      state = leaf.getViewState(),
+      eState = leaf.getEphemeralState()
+    ;
+    return {
+      leaf,
+      async restore() {
+        if (!leaf) return;
+        if (existing.has(leaf)) {
+          await leaf.setViewState({...state, active: leaf === oldLeaf, popstate: true} as ViewState, eState);
+          if (oldLeaf && leaf !== oldLeaf) app.workspace.setActiveLeaf(oldLeaf, {focus: true});
+        } else {
+          // Newly opened leaf: close it and drop references
+          leaf.detach();
+        }
+        leaf = this.leaf = undefined;
+      }
+    }
   }
 
   getOpenState(leaf: WorkspaceLeaf, file: TFile) {

@@ -214,7 +214,7 @@ export class GrepModal
 
     if (this.initialState) {
       // restore initial leaf state, undoing any previewing
-      this.navigate(() => this.appHelper.restoreState(this.initialState));
+      this.navigate(() => this.initialState.restore());
     }
     this.navigate(this.markClosed);
   }

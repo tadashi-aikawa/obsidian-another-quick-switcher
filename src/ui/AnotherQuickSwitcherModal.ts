@@ -181,7 +181,7 @@ export class AnotherQuickSwitcherModal
     }
     if (this.initialState) {
       // restore initial leaf state, undoing any previewing
-      this.navigate(() => this.appHelper.restoreState(this.initialState!));
+      this.navigate(() => this.initialState!.restore());
     }
     this.navigate(this.markClosed);
   }
@@ -794,7 +794,7 @@ export class AnotherQuickSwitcherModal
 
       this.historyRestoreStatus = "doing";
       if (this.initialState) {
-        await this.appHelper.restoreState(this.initialState);
+        await this.initialState.restore();
         this.initialState = undefined;
       }
 
