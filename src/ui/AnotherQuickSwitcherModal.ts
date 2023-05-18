@@ -6,7 +6,7 @@ import {
   parseFrontMatterAliases,
   parseFrontMatterTags,
   SuggestModal,
-  TFile,
+  TFile, View, WorkspaceLeaf,
 } from "obsidian";
 import {
   excludeItems,
@@ -117,12 +117,12 @@ export class AnotherQuickSwitcherModal
     this.stackHistory = args.stackHistory;
     this.initialHistory =
       args.initialHistory ??
-      this.appHelper.getCurrentLeafHistoryState(this.app.workspace.getLeaf());
+      this.appHelper.getCurrentLeafHistoryState(this.app.workspace.getActiveViewOfType(View)?.leaf as WorkspaceLeaf);
     this.previewedFiles = args.previewedFiles;
     this.forwardHistories =
       args.forwardHistories ??
       this.appHelper.getCurrentLeafForwardHistories(
-        this.app.workspace.getLeaf()
+        this.app.workspace.getActiveViewOfType(View)?.leaf as WorkspaceLeaf
       );
 
     this.limit = this.settings.maxNumberOfSuggestions;
@@ -197,7 +197,7 @@ export class AnotherQuickSwitcherModal
       return;
     }
 
-    const leaf = this.app.workspace.getLeaf();
+    const leaf = this.app.workspace.getActiveViewOfType(View)?.leaf as WorkspaceLeaf
     if (!this.openInSameLeaf) {
       this.historyRestoreStatus = "doing";
       this.appHelper

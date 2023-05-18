@@ -1,4 +1,4 @@
-import { App, SuggestModal, TFile } from "obsidian";
+import {App, SuggestModal, TFile, View, WorkspaceLeaf} from "obsidian";
 import { Hotkeys, Settings } from "../settings";
 import { AppHelper, LeafType, UnsafeHistory } from "../app-helper";
 import { rg } from "../utils/ripgrep";
@@ -100,12 +100,12 @@ export class GrepModal
     this.limit = 255;
     this.initialHistory =
       initialHistory ??
-      this.appHelper.getCurrentLeafHistoryState(this.app.workspace.getLeaf());
+      this.appHelper.getCurrentLeafHistoryState(this.app.workspace.getActiveViewOfType(View)?.leaf as WorkspaceLeaf);
     this.previewedFiles = previewedFiles;
     this.forwardHistories =
       forwardHistories ??
       this.appHelper.getCurrentLeafForwardHistories(
-        this.app.workspace.getLeaf()
+        this.app.workspace.getActiveViewOfType(View)?.leaf as WorkspaceLeaf
       );
 
     const searchCmd = this.settings.hotkeys.grep.search.at(0);
@@ -224,7 +224,7 @@ export class GrepModal
       this.basePathInputElKeydownEventListener
     );
 
-    const leaf = this.app.workspace.getLeaf();
+    const leaf = this.app.workspace.getActiveViewOfType(View)?.leaf as WorkspaceLeaf
     if (!this.openInSameLeaf) {
       this.historyRestoreStatus = "doing";
       this.appHelper
