@@ -11,7 +11,7 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 - It can search backlinks and move them **without leaving from a keyboard** (`Backlink search`)
 - It can move a file to another folder (`Move file to another folder`)
 - It can search **regardless of the appearance order of tokens**
-- It does not search very fuzzy (e.g. searching for `201` doesn't match `2.01`) 
+- It does not perform very fuzzy searches by default, but an option is available to enable such searches
 - It can search to **consider prefix emoji**
 - It shows file names and directory names separately
 
@@ -43,24 +43,25 @@ Custom searches enables you to create your original search commands.
 
 You can use the following names as a `Sort priorities`.
 
-| Name                        | Description                                            | Since |
-| --------------------------- | ------------------------------------------------------ | ----- |
-| Perfect word match          | A query matches perfectly with a word in the file name | 6.0.0 |
-| Prefix name match           | The file name or alias starts with a query             | 6.0.0 |
-| Name match                  | The file name or alias includes a query                | 6.0.0 |
-| Tag match                   | The tag name in the file includes a query              | 6.0.0 |
-| Header match                | The header name in the file includes a query           | 6.0.0 |
-| Link match                  | The internal link name in the file includes a query    | 6.0.0 |
-| Length                      | Length of the file name or alias                       | 6.0.0 |
-| Last opened                 | The time the file opened last                          | 6.0.0 |
-| Last modified               | The time the file modified last                        | 6.0.0 |
-| Star                        | The file has a star                                    | 6.0.0 |
-| Alphabetical                | File name or alias order by alphabetically ascend      | 6.2.0 |
-| Alphabetical reverse        | File name or alias order by alphabetically descend     | 7.0.0 |
-| Created latest              | File creation date from the latest to the earliest     | 7.0.0 |
-| Created earliest            | File creation date from the earliest to the latest     | 7.0.0 |
-| (Tags split by comma)       | The file has specific tags                             | 7.0.0 |
-| (Extensions split by comma) | The file has specific extensions                       | 8.3.0 |
+| Name                        | Description                                            | Since  |
+| --------------------------- | ------------------------------------------------------ | ------ |
+| Perfect word match          | A query matches perfectly with a word in the file name | 6.0.0  |
+| Prefix name match           | The file name or alias starts with a query             | 6.0.0  |
+| Name match                  | The file name or alias includes a query                | 6.0.0  |
+| Fuzzy name match            | The file name or alias matches fuzzy with a query      | 8.10.0 |
+| Tag match                   | The tag name in the file includes a query              | 6.0.0  |
+| Header match                | The header name in the file includes a query           | 6.0.0  |
+| Link match                  | The internal link name in the file includes a query    | 6.0.0  |
+| Length                      | Length of the file name or alias                       | 6.0.0  |
+| Last opened                 | The time the file opened last                          | 6.0.0  |
+| Last modified               | The time the file modified last                        | 6.0.0  |
+| Star                        | The file has a star                                    | 6.0.0  |
+| Alphabetical                | File name or alias order by alphabetically ascend      | 6.2.0  |
+| Alphabetical reverse        | File name or alias order by alphabetically descend     | 7.0.0  |
+| Created latest              | File creation date from the latest to the earliest     | 7.0.0  |
+| Created earliest            | File creation date from the earliest to the latest     | 7.0.0  |
+| (Tags split by comma)       | The file has specific tags                             | 7.0.0  |
+| (Extensions split by comma) | The file has specific extensions                       | 8.3.0  |
 
 > **Warning**
 > Please don't forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
@@ -131,6 +132,8 @@ Ex: If there are three files.
 This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) and set the executable command to "Ripgrep command" option.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/grep.gif)
+
+It sorts results by modified time descending.
 
 #### Default hotkeys
 
