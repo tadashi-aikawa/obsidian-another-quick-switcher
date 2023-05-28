@@ -7,6 +7,7 @@ import {
   parseFrontMatterTags,
   SuggestModal,
   TFile,
+  WorkspaceLeaf,
 } from "obsidian";
 import {
   excludeItems,
@@ -75,7 +76,8 @@ export class AnotherQuickSwitcherModal
   command: SearchCommand;
   initialCommand: SearchCommand;
 
-  initialState?: CaptureState;  // State of leaf before previewing began
+  initialLeaf: WorkspaceLeaf | null;
+  stateToRestore?: CaptureState;
 
   navigationHistoryEl?: HTMLDivElement;
   searchCommandEl?: HTMLDivElement;
@@ -87,7 +89,7 @@ export class AnotherQuickSwitcherModal
   historyRestoreStatus: "initial" | "doing" | "done" = "initial";
 
   private markClosed: () => void;
-  isClosed: Promise<void> = new Promise(resolve => {
+  isClosed: Promise<void> = new Promise((resolve) => {
     this.markClosed = resolve;
   });
   navQueue: Promise<void>;
@@ -101,8 +103,9 @@ export class AnotherQuickSwitcherModal
     navigationHistories: CustomSearchHistory[];
     currentNavigationHistoryIndex: number;
     stackHistory: boolean;
-    initialState?: CaptureState,
-    navQueue?: Promise<void>,
+    initialLeaf: WorkspaceLeaf | null;
+    initialState?: CaptureState;
+    navQueue?: Promise<void>;
   }) {
     super(app);
 
@@ -116,7 +119,8 @@ export class AnotherQuickSwitcherModal
     this.navigationHistories = args.navigationHistories;
     this.currentNavigationHistoryIndex = args.currentNavigationHistoryIndex;
     this.stackHistory = args.stackHistory;
-    this.initialState = args.initialState;
+    this.initialLeaf = args.initialLeaf;
+    this.stateToRestore = args.initialState;
     this.navQueue = args.navQueue ?? Promise.resolve();
 
     this.limit = this.settings.maxNumberOfSuggestions;
@@ -179,9 +183,8 @@ export class AnotherQuickSwitcherModal
     if (this.willSilentClose) {
       return;
     }
-    if (this.initialState) {
-      // restore initial leaf state, undoing any previewing
-      this.navigate(() => this.initialState!.restore());
+    if (this.stateToRestore) {
+      this.navigate(() => this.stateToRestore!.restore());
     }
     this.navigate(this.markClosed);
   }
@@ -575,11 +578,16 @@ export class AnotherQuickSwitcherModal
       this.close();
       this.navigate(() => this.isClosed); // wait for close to finish before navigating
     } else if (leaf === "same-tab") {
-      // Previewing in same tab; save state if not already saved
-      this.initialState ??= this.appHelper.captureState();
+      this.stateToRestore ??= this.appHelper.captureState(this.initialLeaf);
     }
 
-    this.navigate(() => this.appHelper.openFile(fileToOpened, {leaf, offset, inplace: option.keepOpen}, this.initialState));
+    this.navigate(() =>
+      this.appHelper.openFile(
+        fileToOpened,
+        { leaf, offset, inplace: option.keepOpen },
+        this.stateToRestore
+      )
+    );
     return fileToOpened;
   }
 
@@ -793,9 +801,9 @@ export class AnotherQuickSwitcherModal
       }
 
       this.historyRestoreStatus = "doing";
-      if (this.initialState) {
-        await this.initialState.restore();
-        this.initialState = undefined;
+      if (this.stateToRestore) {
+        await this.stateToRestore.restore();
+        this.stateToRestore = undefined;
       }
 
       if (this.appHelper.isActiveLeafCanvas()) {
@@ -856,7 +864,8 @@ export class AnotherQuickSwitcherModal
         ],
         currentNavigationHistoryIndex: this.currentNavigationHistoryIndex + 1,
         stackHistory: true,
-        initialState: this.initialState,
+        initialLeaf: this.initialLeaf,
+        initialState: this.stateToRestore,
         navQueue: this.navQueue,
       });
       modal.open();
@@ -889,7 +898,8 @@ export class AnotherQuickSwitcherModal
         navigationHistories: this.navigationHistories,
         currentNavigationHistoryIndex: index,
         stackHistory: false,
-        initialState: this.initialState,
+        initialState: this.stateToRestore,
+        initialLeaf: this.initialLeaf,
         navQueue: this.navQueue,
       });
       modal.open();

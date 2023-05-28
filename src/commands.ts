@@ -1,5 +1,5 @@
 import { AnotherQuickSwitcherModal } from "./ui/AnotherQuickSwitcherModal";
-import { App, Command, Notice, Platform } from "obsidian";
+import { App, Command, FileView, Notice, Platform } from "obsidian";
 import { SearchCommand, Settings } from "./settings";
 import { MoveModal } from "./ui/MoveModal";
 import { HeaderModal } from "./ui/HeaderModal";
@@ -13,6 +13,9 @@ export function showSearchDialog(
   settings: Settings,
   command: SearchCommand
 ) {
+  const activeFileLeaf =
+    app.workspace.getActiveViewOfType(FileView)?.leaf ?? null;
+
   const modal = new AnotherQuickSwitcherModal({
     app,
     settings,
@@ -22,6 +25,7 @@ export function showSearchDialog(
     navigationHistories: [],
     currentNavigationHistoryIndex: 0,
     stackHistory: true,
+    initialLeaf: activeFileLeaf,
   });
   modal.open();
 }
@@ -50,7 +54,10 @@ export async function showGrepDialog(app: App, settings: Settings) {
     return;
   }
 
-  const modal = new GrepModal(app, settings);
+  const activeFileLeaf =
+    app.workspace.getActiveViewOfType(FileView)?.leaf ?? null;
+
+  const modal = new GrepModal(app, settings, activeFileLeaf);
   modal.open();
 }
 

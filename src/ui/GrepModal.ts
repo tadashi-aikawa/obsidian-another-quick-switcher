@@ -1,4 +1,4 @@
-import { App, SuggestModal, TFile } from "obsidian";
+import { App, SuggestModal, TFile, WorkspaceLeaf } from "obsidian";
 import { Hotkeys, Settings } from "../settings";
 import { AppHelper, LeafType, CaptureState } from "../app-helper";
 import { rg } from "../utils/ripgrep";
@@ -50,7 +50,8 @@ export class GrepModal
 {
   appHelper: AppHelper;
   settings: Settings;
-  initialState: CaptureState;  // State of leaf before previewing began
+  initialLeaf: WorkspaceLeaf | null;
+  stateToRestore: CaptureState;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
@@ -78,15 +79,12 @@ export class GrepModal
   ) => any;
 
   private markClosed: () => void;
-  isClosed: Promise<void> = new Promise(resolve => {
+  isClosed: Promise<void> = new Promise((resolve) => {
     this.markClosed = resolve;
   });
   navQueue: Promise<void> = Promise.resolve();
 
-  constructor(
-    app: App,
-    settings: Settings,
-  ) {
+  constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
     this.suggestions = globalInternalStorage.items;
     this.vaultRootPath = normalizePath(
@@ -95,6 +93,7 @@ export class GrepModal
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
+    this.initialLeaf = initialLeaf;
     this.limit = 255;
 
     const searchCmd = this.settings.hotkeys.grep.search.at(0);
@@ -212,9 +211,9 @@ export class GrepModal
       this.basePathInputElKeydownEventListener
     );
 
-    if (this.initialState) {
+    if (this.stateToRestore) {
       // restore initial leaf state, undoing any previewing
-      this.navigate(() => this.initialState.restore());
+      this.navigate(() => this.stateToRestore.restore());
     }
     this.navigate(this.markClosed);
   }
@@ -387,14 +386,19 @@ export class GrepModal
       this.close();
       this.navigate(() => this.isClosed); // wait for close to finish before navigating
     } else if (leaf === "same-tab") {
-      // Previewing in same tab; save state if not already saved
-      this.initialState ??= this.appHelper.captureState();
+      this.stateToRestore ??= this.appHelper.captureState(this.initialLeaf);
     }
-    this.navigate(() => this.appHelper.openFile(item.file, {
-      leaf: leaf,
-      line: item.lineNumber - 1,
-      inplace: option.keepOpen
-    }, this.initialState));
+    this.navigate(() =>
+      this.appHelper.openFile(
+        item.file,
+        {
+          leaf: leaf,
+          line: item.lineNumber - 1,
+          inplace: option.keepOpen,
+        },
+        this.stateToRestore
+      )
+    );
     return item.file;
   }
 

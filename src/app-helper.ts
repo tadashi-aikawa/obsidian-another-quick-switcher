@@ -66,8 +66,8 @@ interface UnsafeAppInterface {
   };
   openWithDefaultApp(path: string): unknown;
   viewRegistry: {
-    getTypeByExtension(ext: string): string
-  }
+    getTypeByExtension(ext: string): string;
+  };
 }
 
 interface UnSafeLayoutChild {
@@ -108,9 +108,9 @@ interface UnsafeCanvas {
 }
 
 export type CaptureState = {
-  leaf?: WorkspaceLeaf
+  leaf?: WorkspaceLeaf;
   restore(): Promise<void> | void;
-}
+};
 
 export type LeafType =
   | "same-tab"
@@ -323,46 +323,64 @@ export class AppHelper {
     return abstractFile as TFile;
   }
 
-  captureState(): CaptureState {
-    const existing = new WeakSet<WorkspaceLeaf>;
-    const oldLeaf = this.unsafeApp.workspace.activeLeaf;
-    app.workspace.iterateAllLeaves(leaf => existing.add(leaf));
-    let
-      leaf: WorkspaceLeaf|undefined = app.workspace.getLeaf(),
-      state = leaf.getViewState(),
-      eState = leaf.getEphemeralState()
-    ;
+  captureState(initialLeaf: WorkspaceLeaf | null): CaptureState {
+    const currentLeaf = this.unsafeApp.workspace.activeLeaf;
+    const newLeaf = app.workspace.getLeaf();
+    const newState = newLeaf.getViewState();
+    const newEState = newLeaf.getEphemeralState();
+
     return {
-      leaf,
+      leaf: newLeaf,
       async restore() {
-        if (!leaf) return;
-        if (existing.has(leaf)) {
-          await leaf.setViewState({...state, active: leaf === oldLeaf, popstate: true} as ViewState, eState);
-          if (oldLeaf && leaf !== oldLeaf) app.workspace.setActiveLeaf(oldLeaf, {focus: true});
-        } else {
-          // Newly opened leaf: close it and drop references
-          leaf.detach();
+        if (!newLeaf) {
+          return;
         }
-        leaf = this.leaf = undefined;
-      }
-    }
+
+        if (!initialLeaf || initialLeaf.getViewState().pinned) {
+          newLeaf.detach();
+        } else {
+          await newLeaf.setViewState(
+            {
+              ...newState,
+              active: newLeaf === currentLeaf,
+              popstate: true,
+            } as ViewState,
+            newEState
+          );
+
+          if (newLeaf !== currentLeaf) {
+            app.workspace.setActiveLeaf(currentLeaf!, { focus: true });
+          }
+        }
+
+        this.leaf = undefined;
+      },
+    };
   }
 
   getOpenState(leaf: WorkspaceLeaf, file: TFile) {
     let type = this.unsafeApp.viewRegistry.getTypeByExtension(file.extension);
-    if (leaf.view instanceof FileView && leaf.view.canAcceptExtension(file.extension)) {
+    if (
+      leaf.view instanceof FileView &&
+      leaf.view.canAcceptExtension(file.extension)
+    ) {
       type = leaf.view.getViewType();
     }
-    return {type, state: {file: file.path}};
+    return { type, state: { file: file.path } };
   }
 
-  async openFile(file: TFile, option: Partial<OpenFileOption> = {}, captureState?: CaptureState) {
+  async openFile(
+    file: TFile,
+    option: Partial<OpenFileOption> = {},
+    captureState?: CaptureState
+  ) {
     const opt: OpenFileOption = {
       ...{ leaf: "same-tab", inplace: false },
       ...option,
     };
 
-    let leaf: WorkspaceLeaf|undefined = captureState?.leaf, background: boolean = false;
+    let leaf: WorkspaceLeaf | undefined = captureState?.leaf,
+      background: boolean = false;
     switch (opt.leaf) {
       case "same-tab":
         leaf ??= this.unsafeApp.workspace.getLeaf();
@@ -400,10 +418,13 @@ export class AppHelper {
         ...leaf.getViewState(),
         active: !background,
         popstate: true,
-        ...this.getOpenState(leaf, file)
+        ...this.getOpenState(leaf, file),
       } as ViewState);
     } else {
-      await leaf.openFile(file, {...leaf.getViewState(), active: !background});
+      await leaf.openFile(file, {
+        ...leaf.getViewState(),
+        active: !background,
+      });
     }
     if (leaf.view instanceof MarkdownView) {
       const markdownView = leaf.view;
