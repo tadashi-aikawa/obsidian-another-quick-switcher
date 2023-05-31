@@ -10,6 +10,7 @@ import {
   smartEquals,
   smartIncludes,
   smartLineBreakSplit,
+  smartMicroFuzzy,
   smartStartsWith,
   smartWhitespaceSplit,
 } from "./strings";
@@ -203,12 +204,33 @@ describe.each<{ value: string; query: string; expected: FuzzyResult }>`
   ${"abcde"}            | ${"bc"}     | ${{ type: "includes", score: 0.8 }}
   ${"abcde"}            | ${"ace"}    | ${{ type: "fuzzy", score: 1.2 }}
   ${"abcde"}            | ${"abcde"}  | ${{ type: "starts-with", score: 6.4 }}
+  ${"abcde"}            | ${"abcdf"}  | ${{ type: "none", score: 0 }}
   ${"abcde"}            | ${"abcdef"} | ${{ type: "none", score: 0 }}
   ${"abcde"}            | ${"bd"}     | ${{ type: "fuzzy", score: 0.8 }}
   ${"abcde"}            | ${"ba"}     | ${{ type: "none", score: 0 }}
   ${"fuzzy name match"} | ${"match"}  | ${{ type: "includes", score: 2 }}
+  ${"📝memo"}           | ${"mem"}    | ${{ type: "starts-with", score: 1.3333333333333333 }}
+  ${"📝memo"}           | ${"📝"}     | ${{ type: "starts-with", score: 0.6666666666666666 }}
 `("microFuzzy", ({ value, query, expected }) => {
   test(`microFuzzy(${value}, ${query}) = ${expected}`, () => {
     expect(microFuzzy(value, query)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{ value: string; query: string; expected: FuzzyResult }>`
+  value                 | query       | expected
+  ${"abcde"}            | ${"ab"}     | ${{ type: "starts-with", score: 0.8 }}
+  ${"abcde"}            | ${"bc"}     | ${{ type: "includes", score: 0.8 }}
+  ${"abcde"}            | ${"ace"}    | ${{ type: "fuzzy", score: 1.2 }}
+  ${"abcde"}            | ${"abcde"}  | ${{ type: "starts-with", score: 6.4 }}
+  ${"abcde"}            | ${"abcdef"} | ${{ type: "none", score: 0 }}
+  ${"abcde"}            | ${"bd"}     | ${{ type: "fuzzy", score: 0.8 }}
+  ${"abcde"}            | ${"ba"}     | ${{ type: "none", score: 0 }}
+  ${"fuzzy name match"} | ${"match"}  | ${{ type: "includes", score: 2.2857142857142856 }}
+  ${"📝memo"}           | ${"mem"}    | ${{ type: "starts-with", score: 1.3333333333333333 }}
+  ${"📝memo"}           | ${"📝"}     | ${{ type: "starts-with", score: 0.6666666666666666 }}
+`("smartMicroFuzzy", ({ value, query, expected }) => {
+  test(`smartMicroFuzzy(${value}, ${query}) = ${expected}`, () => {
+    expect(smartMicroFuzzy(value, query, false)).toStrictEqual(expected);
   });
 });

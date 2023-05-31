@@ -121,6 +121,11 @@ export function microFuzzy(value: string, query: string): FuzzyResult {
   if (value.startsWith(query)) {
     return { type: "starts-with", score: 2 ** query.length / value.length };
   }
+  const emojiLessValue = excludeEmoji(value);
+  if (emojiLessValue.startsWith(query)) {
+    return { type: "starts-with", score: 2 ** query.length / value.length };
+  }
+
   if (value.includes(query)) {
     return { type: "includes", score: 2 ** query.length / value.length };
   }
@@ -128,8 +133,8 @@ export function microFuzzy(value: string, query: string): FuzzyResult {
   let i = 0;
   let scoreSeed = 0;
   let combo = 0;
-  for (let j = 0; j < value.length; j++) {
-    if (value[j] === query[i]) {
+  for (let j = 0; j < emojiLessValue.length; j++) {
+    if (emojiLessValue[j] === query[i]) {
       combo++;
       i++;
     } else {
@@ -155,7 +160,7 @@ export function smartMicroFuzzy(
   isNormalizeAccentsDiacritics: boolean
 ): FuzzyResult {
   return microFuzzy(
-    excludeSpace(excludeEmoji(normalize(text, isNormalizeAccentsDiacritics))),
+    excludeSpace(normalize(text, isNormalizeAccentsDiacritics)),
     excludeSpace(normalize(query, isNormalizeAccentsDiacritics))
   );
 }
