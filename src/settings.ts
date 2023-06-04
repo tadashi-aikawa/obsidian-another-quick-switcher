@@ -50,6 +50,7 @@ export interface Hotkeys {
     "create in new window": Hotkey[];
     "create in new popup": Hotkey[];
     "open in default app": Hotkey[];
+    "show in system explorer": Hotkey[];
     "open in google": Hotkey[];
     "open first URL": Hotkey[];
     "insert to editor": Hotkey[];
@@ -144,6 +145,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "create in new window": [{ modifiers: ["Mod", "Shift"], key: "o" }],
     "create in new popup": [],
     "open in default app": [],
+    "show in system explorer": [],
     "open in google": [{ modifiers: ["Mod"], key: "g" }],
     "open first URL": [{ modifiers: ["Mod"], key: "]" }],
     "insert to editor": [{ modifiers: ["Alt"], key: "Enter" }],

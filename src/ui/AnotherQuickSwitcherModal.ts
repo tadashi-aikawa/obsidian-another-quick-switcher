@@ -752,6 +752,15 @@ export class AnotherQuickSwitcherModal
       this.appHelper.openFileInDefaultApp(file);
       this.close();
     });
+    this.registerKeys("show in system explorer", () => {
+      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
+      if (!file) {
+        return;
+      }
+
+      this.appHelper.openInSystemExplorer(file);
+      this.close();
+    });
     this.registerKeys("open in google", () => {
       activeWindow.open(`https://www.google.com/search?q=${this.searchQuery}`);
       this.close();

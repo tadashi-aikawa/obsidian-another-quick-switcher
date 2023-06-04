@@ -7,6 +7,7 @@ import {
   LinkCache,
   MarkdownView,
   Pos,
+  TAbstractFile,
   TFile,
   TFolder,
   Vault,
@@ -65,6 +66,7 @@ interface UnsafeAppInterface {
     openPopoutLeaf(): WorkspaceLeaf;
   };
   openWithDefaultApp(path: string): unknown;
+  showInFolder(path: string): void;
   viewRegistry: {
     getTypeByExtension(ext: string): string;
   };
@@ -443,6 +445,10 @@ export class AppHelper {
 
   openFolderInDefaultApp(folder: TFolder): void {
     this.unsafeApp.openWithDefaultApp(folder.path);
+  }
+
+  openInSystemExplorer(entry: TAbstractFile): void {
+    this.unsafeApp.showInFolder(entry.path);
   }
 
   // FIXME: function name
