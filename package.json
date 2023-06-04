@@ -23,7 +23,7 @@
     "obsidian": "^1.2.5",
     "prettier": "^2.7.1",
     "tslib": "^2.4.0",
-    "typescript": "^4.7.4"
+    "typescript": "^5.1.3"
   },
   "volta": {
     "node": "18.12.1"
