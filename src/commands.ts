@@ -1,5 +1,12 @@
 import { AnotherQuickSwitcherModal } from "./ui/AnotherQuickSwitcherModal";
-import { App, Command, FileView, Notice, Platform } from "obsidian";
+import {
+  App,
+  Command,
+  FileView,
+  MarkdownView,
+  Notice,
+  Platform,
+} from "obsidian";
 import { SearchCommand, Settings } from "./settings";
 import { MoveModal } from "./ui/MoveModal";
 import { HeaderModal } from "./ui/HeaderModal";
@@ -15,13 +22,15 @@ export function showSearchDialog(
 ) {
   const activeFileLeaf =
     app.workspace.getActiveViewOfType(FileView)?.leaf ?? null;
+  const editor =
+    app.workspace.getActiveViewOfType(MarkdownView)?.editor ?? null;
 
   const modal = new AnotherQuickSwitcherModal({
     app,
     settings,
     command,
     originFile: app.workspace.getActiveFile(),
-    inputQuery: "",
+    inputQuery: editor?.getSelection() ?? "",
     navigationHistories: [],
     currentNavigationHistoryIndex: 0,
     stackHistory: true,
