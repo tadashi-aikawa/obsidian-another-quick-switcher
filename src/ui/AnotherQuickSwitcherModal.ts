@@ -451,7 +451,13 @@ export class AnotherQuickSwitcherModal
     });
     this.searchCommandEl.insertAdjacentHTML("beforeend", SEARCH);
 
-    this.searchCommandEl.appendText(`${this.command.name} ... `);
+    this.searchCommandEl.createSpan({
+      text: this.command.name,
+      cls: "another-quick-switcher__status__search-command-name",
+    });
+    this.searchCommandEl.createSpan({
+      cls: "another-quick-switcher__status__search-command-separator",
+    });
 
     if (this.command.searchBy.tag) {
       this.searchCommandEl.insertAdjacentHTML("beforeend", TAG);
