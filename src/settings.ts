@@ -101,6 +101,7 @@ export interface Settings {
   searchDelayMilliSeconds: number;
   maxNumberOfSuggestions: number;
   normalizeAccentsAndDiacritics: boolean;
+  useSelectionWordsAsDefaultInputQuery: boolean;
   // Appearance
   showDirectory: boolean;
   showDirectoryAtNewLine: boolean;
@@ -431,6 +432,7 @@ export const DEFAULT_SETTINGS: Settings = {
   searchDelayMilliSeconds: 0,
   maxNumberOfSuggestions: 50,
   normalizeAccentsAndDiacritics: false,
+  useSelectionWordsAsDefaultInputQuery: false,
   // Appearance
   showDirectory: true,
   showDirectoryAtNewLine: false,
@@ -532,6 +534,17 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         cls: "another-quick-switcher__settings__warning",
       });
     }
+
+    new Setting(containerEl)
+      .setName("Use selection words as a default input query")
+      .addToggle((tc) => {
+        tc.setValue(
+          this.plugin.settings.useSelectionWordsAsDefaultInputQuery
+        ).onChange(async (value) => {
+          this.plugin.settings.useSelectionWordsAsDefaultInputQuery = value;
+          await this.plugin.saveSettings();
+        });
+      });
   }
 
   private addAppearanceSettings(containerEl: HTMLElement) {
