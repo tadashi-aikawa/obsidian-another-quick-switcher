@@ -120,6 +120,10 @@ describe.each`
   ${"aaa [[aaa]]"}                         | ${"aaa aaa"}
   ${"aaa [[aaa]] aaa"}                     | ${"aaa aaa aaa"}
   ${"[[aaa]] [[bbb]]"}                     | ${"aaa bbb"}
+  ${"[[aaa|bbb]]"}                         | ${"bbb"}
+  ${"[[aaa|bbb]] [[aaa|ccc]]"}             | ${"bbb ccc"}
+  ${"[[aaa]] [[aaa|ccc]]"}                 | ${"aaa ccc"}
+  ${"[[aaa|bbb]] [[aaa]]"}                 | ${"bbb aaa"}
   ${"[aaa](http://aaa)"}                   | ${"aaa"}
   ${"[aaa](https://aaa)"}                  | ${"aaa"}
   ${"[aaa]"}                               | ${"aaa"}
