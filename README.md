@@ -143,6 +143,7 @@ It sorts results by modified time descending.
 #### Note
 
 - Input regards as a regex pattern
+- Grep searches only markdown files as default. If you want to search for other extensions, please update the "Grep > Extensions" settings
 
 ### 4. Customizable hotkeys
 

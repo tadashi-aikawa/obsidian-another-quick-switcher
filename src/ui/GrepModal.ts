@@ -238,8 +238,7 @@ export class GrepModal
     const rgResults = await rg(
       this.settings.ripgrepCommand,
       ...[
-        "-t",
-        "md",
+        ...this.settings.grepExtensions.flatMap((x) => ["-t", x]),
         hasCapitalLetter ? "" : "-i",
         "--",
         query,
@@ -251,7 +250,7 @@ export class GrepModal
       .map((x) => {
         return {
           order: -1,
-          file: this.appHelper.getMarkdownFileByPath(
+          file: this.appHelper.getFileByPath(
             normalizePath(x.data.path.text).replace(
               this.vaultRootPath + "/",
               ""
@@ -310,7 +309,18 @@ export class GrepModal
           "another-quick-switcher__grep__item__title_entry",
         ],
         text: item.file.basename,
+        attr: {
+          extension: item.file.extension,
+        },
       });
+      const isExcalidraw = item.file.basename.endsWith(".excalidraw");
+      if (item.file.extension !== "md" || isExcalidraw) {
+        const extDiv = createDiv({
+          cls: "another-quick-switcher__item__extension",
+          text: isExcalidraw ? "excalidraw" : item.file.extension,
+        });
+        titleDiv.appendChild(extDiv);
+      }
       entryDiv.appendChild(titleDiv);
 
       itemDiv.appendChild(entryDiv);

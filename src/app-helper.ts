@@ -312,11 +312,7 @@ export class AppHelper {
     });
   }
 
-  getMarkdownFileByPath(path: string): TFile | null {
-    if (!path.endsWith(".md")) {
-      return null;
-    }
-
+  getFileByPath(path: string): TFile | null {
     const abstractFile = this.unsafeApp.vault.getAbstractFileByPath(path);
     if (!abstractFile) {
       return null;

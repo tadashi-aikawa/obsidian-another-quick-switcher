@@ -119,6 +119,7 @@ export interface Settings {
   autoPreviewInFloatingHeaderSearch: boolean;
   // Grep
   ripgrepCommand: string;
+  grepExtensions: string[];
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
   // debug
@@ -450,6 +451,7 @@ export const DEFAULT_SETTINGS: Settings = {
   autoPreviewInFloatingHeaderSearch: true,
   // Grep
   ripgrepCommand: "rg",
+  grepExtensions: ["md"],
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
   // debug
@@ -1161,6 +1163,16 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             await this.plugin.saveSettings();
           })
       );
+
+    new Setting(containerEl).setName("Extensions").addText((tc) =>
+      tc
+        .setPlaceholder("(ex: md,html,css)")
+        .setValue(this.plugin.settings.grepExtensions.join(","))
+        .onChange(async (value) => {
+          this.plugin.settings.grepExtensions = smartCommaSplit(value);
+          await this.plugin.saveSettings();
+        })
+    );
   }
 
   private addMoveSettings(containerEl: HTMLElement) {
