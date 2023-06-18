@@ -58,6 +58,7 @@ export interface Hotkeys {
     "insert all to editor": Hotkey[];
     "show backlinks": Hotkey[];
     "show links": Hotkey[];
+    "show all results": Hotkey[];
     "navigate forward": Hotkey[];
     "navigate back": Hotkey[];
     dismiss: Hotkey[];
@@ -155,6 +156,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "insert all to editor": [{ modifiers: ["Alt", "Shift"], key: "Enter" }],
     "show backlinks": [{ modifiers: ["Mod"], key: "h" }],
     "show links": [{ modifiers: ["Mod"], key: "l" }],
+    "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     "navigate forward": [{ modifiers: ["Alt"], key: "ArrowRight" }],
     "navigate back": [{ modifiers: ["Alt"], key: "ArrowLeft" }],
     dismiss: [{ modifiers: [], key: "Escape" }],

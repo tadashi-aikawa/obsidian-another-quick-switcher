@@ -410,17 +410,12 @@ export class AnotherQuickSwitcherModal
     );
 
     this.countInputEl = createDiv({
-      text: `${Math.min(
-        items.length,
-        this.settings.maxNumberOfSuggestions
-      )} / ${items.length}`,
+      text: `${Math.min(items.length, this.limit)} / ${items.length}`,
       cls: "another-quick-switcher__status__count-input",
     });
     this.inputEl.before(this.countInputEl);
 
-    return items
-      .slice(0, this.settings.maxNumberOfSuggestions)
-      .map((x, order) => ({ ...x, order }));
+    return items.slice(0, this.limit).map((x, order) => ({ ...x, order }));
   }
 
   renderInputComponent() {
@@ -892,6 +887,12 @@ export class AnotherQuickSwitcherModal
 
     this.registerKeys("show backlinks", () => {
       navigateLinks(createDefaultBacklinkSearchCommand());
+    });
+
+    this.registerKeys("show all results", () => {
+      this.limit = Number.MAX_SAFE_INTEGER;
+      // Necessary to rerender suggestions
+      this.inputEl.dispatchEvent(new Event("input"));
     });
 
     const navigate = (index: number) => {
