@@ -19,7 +19,7 @@ export interface SuggestionItem {
   aliases: string[];
   headers: string[];
   links: string[];
-  frontMatter?: { [key: string]: string | number };
+  frontMatter?: { [key: string]: string | number | string[] | number[] };
   matchResults: MatchQueryResult[];
   phantom: boolean;
   starred: boolean;

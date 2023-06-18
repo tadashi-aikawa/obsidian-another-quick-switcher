@@ -91,7 +91,7 @@ function createItemDiv(
 }
 
 function createMetaDiv(args: {
-  frontMatter: { [key: string]: string | number };
+  frontMatter: { [key: string]: string | number | string[] | number[] };
   score: number;
   options: Options;
 }): Elements["metaDiv"] {
@@ -115,19 +115,32 @@ function createMetaDiv(args: {
   }
 
   if (options.showFrontMatter && Object.keys(frontMatter).length > 0) {
-    const frontMatterDiv = createDiv({
+    const frontMattersDiv = createDiv({
       cls: "another-quick-switcher__item__meta",
     });
     Object.entries(frontMatter).forEach(([key, value]) => {
-      const frontMatterSpan = createSpan({
+      console.log(value);
+      const frontMatterDiv = createDiv({
         cls: "another-quick-switcher__item__meta__front_matter",
         title: `${key}: ${value}`,
       });
-      frontMatterSpan.insertAdjacentHTML("beforeend", FRONT_MATTER);
-      frontMatterSpan.appendText(`${key}: ${value}`);
-      frontMatterDiv.appendChild(frontMatterSpan);
+      frontMatterDiv.insertAdjacentHTML("beforeend", FRONT_MATTER);
+      frontMatterDiv.createSpan({
+        cls: "another-quick-switcher__item__meta__front_matter__key",
+        title: key,
+        text: key,
+      });
+      [value].flat().forEach((v) => {
+        frontMatterDiv.createSpan({
+          cls: "another-quick-switcher__item__meta__front_matter__value",
+          title: v.toString(),
+          text: v.toString(),
+        });
+      });
+
+      frontMattersDiv.appendChild(frontMatterDiv);
     });
-    metaDiv.appendChild(frontMatterDiv);
+    metaDiv.appendChild(frontMattersDiv);
   }
 
   return metaDiv;

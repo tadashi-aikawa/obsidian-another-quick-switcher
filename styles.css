@@ -283,6 +283,12 @@
     align-items: center;
     margin-right: 5px;
 }
+.another-quick-switcher__item__meta__front_matter__key::after {
+    content: ":";
+}
+.another-quick-switcher__item__meta__front_matter__value {
+    margin-left: 3px;
+}
 
 .another-quick-switcher__item__meta__score {
     display: inline-flex;
