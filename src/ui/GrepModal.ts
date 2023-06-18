@@ -12,7 +12,7 @@ import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { normalizePath, normalizeRelativePath } from "../utils/path";
 import { setFloatingModal } from "./modal";
-import { capitalizeFirstLetter } from "../utils/strings";
+import { capitalizeFirstLetter, trimLineByEllipsis } from "../utils/strings";
 import { sorter } from "../utils/collection-helper";
 
 let globalInternalStorage: {
@@ -352,8 +352,12 @@ export class GrepModal
     let restLine = item.line;
     item.submatches.forEach((x) => {
       const i = restLine.indexOf(x.match.text);
+      const before = restLine.slice(0, i);
       descriptionDiv.createSpan({
-        text: restLine.slice(0, i),
+        text: trimLineByEllipsis(
+          before,
+          this.settings.maxDisplayLengthAroundMatchedWord
+        ),
       });
       descriptionDiv.createSpan({
         text: x.match.text,
@@ -362,7 +366,10 @@ export class GrepModal
       restLine = restLine.slice(i + x.match.text.length);
     });
     descriptionDiv.createSpan({
-      text: restLine,
+      text: trimLineByEllipsis(
+        restLine,
+        this.settings.maxDisplayLengthAroundMatchedWord
+      ),
     });
 
     if (item.order! < 9) {

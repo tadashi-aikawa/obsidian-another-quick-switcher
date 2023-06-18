@@ -121,6 +121,7 @@ export interface Settings {
   // Grep
   ripgrepCommand: string;
   grepExtensions: string[];
+  maxDisplayLengthAroundMatchedWord: number;
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
   // debug
@@ -454,6 +455,7 @@ export const DEFAULT_SETTINGS: Settings = {
   // Grep
   ripgrepCommand: "rg",
   grepExtensions: ["md"],
+  maxDisplayLengthAroundMatchedWord: 64,
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
   // debug
@@ -1175,6 +1177,22 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           await this.plugin.saveSettings();
         })
     );
+
+    new Setting(containerEl)
+      .setName("Max display length around matched word")
+      .setDesc(
+        "Maximum display character count before or after the matched word."
+      )
+      .addSlider((sc) =>
+        sc
+          .setLimits(1, 255, 1)
+          .setValue(this.plugin.settings.maxDisplayLengthAroundMatchedWord)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.maxDisplayLengthAroundMatchedWord = value;
+            await this.plugin.saveSettings();
+          })
+      );
   }
 
   private addMoveSettings(containerEl: HTMLElement) {

@@ -13,6 +13,7 @@ import {
   smartMicroFuzzy,
   smartStartsWith,
   smartWhitespaceSplit,
+  trimLineByEllipsis,
 } from "./strings";
 import { describe, expect, test } from "@jest/globals";
 
@@ -236,5 +237,18 @@ describe.each<{ value: string; query: string; expected: FuzzyResult }>`
 `("smartMicroFuzzy", ({ value, query, expected }) => {
   test(`smartMicroFuzzy(${value}, ${query}) = ${expected}`, () => {
     expect(smartMicroFuzzy(value, query, false)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{ value: string; max: number; expected: string }>`
+  value           | max  | expected
+  ${"1234567890"} | ${1} | ${"1 ... 0"}
+  ${"1234567890"} | ${3} | ${"123 ... 890"}
+  ${"1234567890"} | ${4} | ${"1234 ... 7890"}
+  ${"1234567890"} | ${5} | ${"1234567890"}
+  ${"1234567890"} | ${6} | ${"1234567890"}
+`("trimLineByEllipsis", ({ value, max, expected }) => {
+  test(`trimLineByEllipsis(${value}, ${max}) = ${expected}`, () => {
+    expect(trimLineByEllipsis(value, max)).toStrictEqual(expected);
   });
 });

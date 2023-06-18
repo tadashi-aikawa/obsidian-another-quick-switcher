@@ -165,3 +165,9 @@ export function smartMicroFuzzy(
     excludeSpace(normalize(query, isNormalizeAccentsDiacritics))
   );
 }
+
+export function trimLineByEllipsis(text: string, max: number): string {
+  return text.length > max * 2
+    ? `${text.slice(0, max)} ... ${text.slice(text.length - max)}`
+    : text;
+}

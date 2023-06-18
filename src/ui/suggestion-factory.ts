@@ -119,7 +119,6 @@ function createMetaDiv(args: {
       cls: "another-quick-switcher__item__meta",
     });
     Object.entries(frontMatter).forEach(([key, value]) => {
-      console.log(value);
       const frontMatterDiv = createDiv({
         cls: "another-quick-switcher__item__meta__front_matter",
         title: `${key}: ${value}`,
