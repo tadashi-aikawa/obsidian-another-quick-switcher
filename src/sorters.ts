@@ -126,7 +126,7 @@ export function sort(
   });
 }
 
-function compare<T, U extends number | string>(
+export function compare<T, U extends number | string>(
   a: T,
   b: T,
   toOrdered: (t: T) => U,

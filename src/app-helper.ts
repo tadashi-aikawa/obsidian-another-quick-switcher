@@ -70,6 +70,9 @@ interface UnsafeAppInterface {
   viewRegistry: {
     getTypeByExtension(ext: string): string;
   };
+  metadataCache: {
+    getBacklinksForFile(file: TFile): { data: Record<string, LinkCache[]> };
+  };
 }
 
 interface UnSafeLayoutChild {
@@ -239,6 +242,14 @@ export class AppHelper {
       (x) => excludeFormat(x.heading) === excludeFormat(header)
     );
     return target?.position.start.offset ?? null;
+  }
+
+  getBacklinksByFilePathInActiveFile(): Record<string, LinkCache[]> | null {
+    const f = this.getActiveFile();
+    if (!f) {
+      return null;
+    }
+    return this.unsafeApp.metadataCache.getBacklinksForFile(f).data;
   }
 
   // noinspection FunctionWithMultipleLoopsJS

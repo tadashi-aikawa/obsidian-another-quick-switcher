@@ -78,6 +78,21 @@ export interface Hotkeys {
     "toggle auto preview": Hotkey[];
     dismiss: Hotkey[];
   };
+  backlink: {
+    up: Hotkey[];
+    down: Hotkey[];
+    open: Hotkey[];
+    "open in new tab": Hotkey[];
+    "open in new pane (horizontal)": Hotkey[];
+    "open in new pane (vertical)": Hotkey[];
+    "open in new window": Hotkey[];
+    "open in popup": Hotkey[];
+    "open in new tab in background": Hotkey[];
+    "open all in new tabs": Hotkey[];
+    "show all results": Hotkey[];
+    preview: Hotkey[];
+    dismiss: Hotkey[];
+  };
   grep: {
     search: Hotkey[];
     up: Hotkey[];
@@ -118,6 +133,8 @@ export interface Settings {
   searchCommands: SearchCommand[];
   // Header search
   autoPreviewInFloatingHeaderSearch: boolean;
+  // Backlink search
+  backlinkExcludePrefixPathPatterns: string[];
   // Grep
   ripgrepCommand: string;
   grepExtensions: string[];
@@ -175,6 +192,21 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "move to next hit": [{ modifiers: [], key: "Tab" }],
     "move to previous hit": [{ modifiers: ["Shift"], key: "Tab" }],
     "toggle auto preview": [{ modifiers: ["Mod"], key: "," }],
+    dismiss: [{ modifiers: [], key: "Escape" }],
+  },
+  backlink: {
+    up: [{ modifiers: ["Mod"], key: "p" }],
+    down: [{ modifiers: ["Mod"], key: "n" }],
+    open: [{ modifiers: [], key: "Enter" }],
+    "open in new tab": [{ modifiers: ["Mod"], key: "Enter" }],
+    "open in new pane (horizontal)": [{ modifiers: ["Mod"], key: "-" }],
+    "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
+    "open in new window": [{ modifiers: ["Mod"], key: "o" }],
+    "open in popup": [],
+    "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
+    "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
+    "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
+    preview: [{ modifiers: ["Mod"], key: "," }],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   grep: {
@@ -428,7 +460,6 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     expand: false,
   },
   createDefaultLinkSearchCommand(),
-  createDefaultBacklinkSearchCommand(),
   createDefault2HopLinkSearchCommand(),
 ];
 
@@ -452,6 +483,8 @@ export const DEFAULT_SETTINGS: Settings = {
   searchCommands: createPreSettingSearchCommands(),
   // Header search
   autoPreviewInFloatingHeaderSearch: true,
+  // Backlink search
+  backlinkExcludePrefixPathPatterns: [],
   // Grep
   ripgrepCommand: "rg",
   grepExtensions: ["md"],
@@ -469,6 +502,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     main: false,
     move: false,
     header: false,
+    backlink: false,
     grep: false,
   };
 
@@ -489,6 +523,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addHotKeysInDialogSettings(containerEl);
     this.addSearchSettings(containerEl);
     this.addHeaderSearchSettings(containerEl);
+    this.addBacklinkSettings(containerEl);
     this.addGrepSettings(containerEl);
     this.addMoveSettings(containerEl);
 
@@ -756,6 +791,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     addHotkeysForDialog("main", "Main dialog");
     addHotkeysForDialog("move", "Move dialog");
     addHotkeysForDialog("header", "Header dialog");
+    addHotkeysForDialog("backlink", "Backlink dialog");
     addHotkeysForDialog("grep", "Grep dialog");
   }
 
@@ -1150,6 +1186,31 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           this.plugin.settings.autoPreviewInFloatingHeaderSearch = value;
           await this.plugin.saveSettings();
         });
+      });
+  }
+
+  private addBacklinkSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "🔍 Backlink search" });
+
+    new Setting(containerEl)
+      .setName('Exclude prefix path patterns for "Backlink search"')
+      .setDesc(
+        "If set, folders whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks"
+      )
+      .addTextArea((tc) => {
+        const el = tc
+          .setPlaceholder("Prefix match patterns")
+          .setValue(
+            this.plugin.settings.backlinkExcludePrefixPathPatterns.join("\n")
+          )
+          .onChange(async (value) => {
+            this.plugin.settings.backlinkExcludePrefixPathPatterns =
+              smartLineBreakSplit(value);
+            await this.plugin.saveSettings();
+          });
+        el.inputEl.className =
+          "another-quick-switcher__settings__ignore_path_patterns";
+        return el;
       });
   }
 
