@@ -292,6 +292,19 @@ export class AppHelper {
     );
   }
 
+  getLinksByFilePathInActiveFile(): Record<string, LinkCache[]> | null {
+    const file = this.getActiveFile();
+    if (!file) {
+      return null;
+    }
+
+    const cache = this.unsafeApp.metadataCache.getFileCache(file);
+    return groupBy(
+      [...(cache?.embeds ?? []), ...(cache?.links ?? [])],
+      (x) => this.linkText2Path(x.link) ?? this.getPathToBeCreated(x.link)
+    );
+  }
+
   async moveTo(to: Pos | number, editor?: Editor) {
     const isToOffset = typeof to === "number";
 

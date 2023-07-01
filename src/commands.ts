@@ -13,6 +13,7 @@ import { HeaderModal } from "./ui/HeaderModal";
 import { GrepModal } from "./ui/GrepModal";
 import { existsRg } from "./utils/ripgrep";
 import { BacklinkModal } from "./ui/BacklinkModal";
+import { LinkModal } from "./ui/LinkModal";
 
 const SEARCH_COMMAND_PREFIX = "search-command";
 
@@ -86,6 +87,19 @@ export async function showBacklinkDialog(app: App, settings: Settings) {
   modal.open();
 }
 
+export async function showLinkDialog(app: App, settings: Settings) {
+  if (!app.workspace.getActiveFile()) {
+    return;
+  }
+
+  const activeFileLeaf =
+    app.workspace.getActiveViewOfType(FileView)?.leaf ?? null;
+
+  const modal = new LinkModal(app, settings, activeFileLeaf);
+  await modal.init();
+  modal.open();
+}
+
 export function showHeaderDialog(
   app: App,
   settings: Settings,
@@ -154,6 +168,18 @@ export function createCommands(app: App, settings: Settings): Command[] {
         }
 
         showBacklinkDialog(app, settings);
+      },
+    },
+    {
+      id: "link",
+      name: "Link search",
+      hotkeys: [],
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return Boolean(app.workspace.getActiveFile());
+        }
+
+        showLinkDialog(app, settings);
       },
     },
     ...settings.searchCommands.map((command) => {

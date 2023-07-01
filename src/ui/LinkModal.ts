@@ -14,8 +14,7 @@ import { FOLDER } from "./icons";
 import { normalizePath } from "../utils/path";
 import { setFloatingModal } from "./modal";
 import { capitalizeFirstLetter, smartIncludes } from "../utils/strings";
-import { uniqBy } from "../utils/collection-helper";
-import { compare } from "../sorters";
+import { isPresent } from "../utils/types";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;
@@ -23,13 +22,14 @@ function buildLogMessage(message: string, msec: number) {
 
 interface SuggestionItem {
   order?: number;
-  file: TFile;
+  file?: TFile;
+  displayLink: string;
   line: string;
   lineNumber: number;
   offset: number;
 }
 
-export class BacklinkModal
+export class LinkModal
   extends SuggestModal<SuggestionItem>
   implements UnsafeModalInterface<SuggestionItem>
 {
@@ -107,25 +107,18 @@ export class BacklinkModal
   async indexingItems() {
     const ignoredItems = [];
 
-    const backlinks = this.appHelper.getBacklinksByFilePathInActiveFile();
-    if (!backlinks) {
+    const links = this.appHelper.getLinksByFilePathInActiveFile();
+    if (!links) {
       return;
     }
 
-    for (const [path, caches] of Object.entries(backlinks)) {
+    for (const [path, caches] of Object.entries(links)) {
       const file = this.appHelper.getFileByPath(path)!;
-      if (
-        this.settings.backlinkExcludePrefixPathPatterns.some((p) =>
-          file.path.startsWith(p)
-        )
-      ) {
-        continue;
-      }
-
-      const content = await this.app.vault.cachedRead(file);
+      const content = this.appHelper.getCurrentEditor()!.getValue();
       for (const cache of caches) {
         ignoredItems.push({
           file,
+          displayLink: cache.displayText!,
           line: content.split("\n").at(cache.position.start.line)!,
           lineNumber: cache.position.start.line + 1,
           offset: cache.position.start.offset,
@@ -133,10 +126,7 @@ export class BacklinkModal
       }
     }
 
-    this.ignoredItems = uniqBy(
-      ignoredItems,
-      (item) => `${item.file.path}/${item.lineNumber}`
-    );
+    this.ignoredItems = ignoredItems;
   }
 
   getSuggestions(query: string): SuggestionItem[] | Promise<SuggestionItem[]> {
@@ -162,11 +152,12 @@ export class BacklinkModal
       : this.ignoredItems.filter((x) =>
           queries.every(
             (q) =>
-              smartIncludes(
-                x.file.path,
-                q,
-                this.settings.normalizeAccentsAndDiacritics
-              ) ||
+              (x.file &&
+                smartIncludes(
+                  x.file.path,
+                  q,
+                  this.settings.normalizeAccentsAndDiacritics
+                )) ||
               smartIncludes(
                 x.line,
                 q,
@@ -184,27 +175,22 @@ export class BacklinkModal
       text: `${Math.min(matchedSuggestions.length, this.limit)} / ${
         matchedSuggestions.length
       }`,
-      cls: "another-quick-switcher__backlink__status__count-input",
+      cls: "another-quick-switcher__link__status__count-input",
     });
     this.inputEl.before(this.countInputEl);
 
     this.suggestions = matchedSuggestions
-      .sort((a, b) =>
-        compare(
-          a,
-          b,
-          (x) => this.lastOpenFileIndexByPath[x.file.path] ?? 999999,
-          "asc"
-        )
-      )
       .slice(0, this.limit)
       .map((x, order) => ({ ...x, order }));
     return this.suggestions;
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
-    const previousPath = this.suggestions[item.order! - 1]?.file.path;
-    const sameFileWithPrevious = previousPath === item.file.path;
+    const previousPath =
+      this.suggestions[item.order! - 1]?.file?.path ??
+      this.suggestions[item.order! - 1]?.displayLink;
+    const sameFileWithPrevious =
+      previousPath === (item.file?.path ?? item.displayLink);
 
     const itemDiv = createDiv({
       cls: "another-quick-switcher__item",
@@ -215,21 +201,22 @@ export class BacklinkModal
     });
 
     if (!sameFileWithPrevious) {
+      const extension = item.file?.extension ?? "md";
       const titleDiv = createDiv({
         cls: [
           "another-quick-switcher__item__title",
-          "another-quick-switcher__backlink__item__title_entry",
+          "another-quick-switcher__link__item__title_entry",
         ],
-        text: item.file.basename,
+        text: item.file?.basename ?? item.displayLink,
         attr: {
-          extension: item.file.extension,
+          extension,
         },
       });
-      const isExcalidraw = item.file.basename.endsWith(".excalidraw");
-      if (item.file.extension !== "md" || isExcalidraw) {
+      const isExcalidraw = item.file?.basename.endsWith(".excalidraw");
+      if (extension !== "md" || isExcalidraw) {
         const extDiv = createDiv({
           cls: "another-quick-switcher__item__extension",
-          text: isExcalidraw ? "excalidraw" : item.file.extension,
+          text: isExcalidraw ? "excalidraw" : extension,
         });
         titleDiv.appendChild(extDiv);
       }
@@ -242,8 +229,8 @@ export class BacklinkModal
         });
         directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
         const text = this.settings.showFullPathOfDirectory
-          ? item.file.parent?.path
-          : item.file.parent?.name;
+          ? item.file?.parent?.path
+          : item.file?.parent?.name;
         directoryDiv.appendText(` ${text}`);
         entryDiv.appendChild(directoryDiv);
 
@@ -258,7 +245,7 @@ export class BacklinkModal
     });
 
     const descriptionDiv = createDiv({
-      cls: "another-quick-switcher__backlink__item__description",
+      cls: "another-quick-switcher__link__item__description",
     });
 
     descriptionDiv.createSpan({
@@ -267,7 +254,7 @@ export class BacklinkModal
 
     if (item.order! < 9) {
       const hotKeyGuide = createSpan({
-        cls: "another-quick-switcher__backlink__item__hot-key-guide",
+        cls: "another-quick-switcher__link__item__hot-key-guide",
         text: `${item.order! + 1}`,
       });
       descriptionsDiv.appendChild(hotKeyGuide);
@@ -300,7 +287,7 @@ export class BacklinkModal
     }
     this.navigate(() =>
       this.appHelper.openFile(
-        item.file,
+        this.appHelper.getActiveFile()!,
         {
           leaf: leaf,
           line: item.lineNumber - 1,
@@ -309,7 +296,7 @@ export class BacklinkModal
         this.stateToRestore
       )
     );
-    return item.file;
+    return this.appHelper.getActiveFile()!;
   }
 
   async onChooseSuggestion(
@@ -326,10 +313,10 @@ export class BacklinkModal
   }
 
   private registerKeys(
-    key: keyof Hotkeys["backlink"],
+    key: keyof Hotkeys["link"],
     handler: () => void | Promise<void>
   ) {
-    this.settings.hotkeys.backlink[key]?.forEach((x) => {
+    this.settings.hotkeys.link[key]?.forEach((x) => {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
         if (!evt.isComposing) {
           evt.preventDefault();
@@ -356,7 +343,7 @@ export class BacklinkModal
         { command: `[↑]`, purpose: "up" },
         { command: `[↓]`, purpose: "down" },
         { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
-        ...createInstructions(this.settings.hotkeys.backlink),
+        ...createInstructions(this.settings.hotkeys.link),
       ]);
     }
 
@@ -401,8 +388,10 @@ export class BacklinkModal
       this.chooser.values
         .slice()
         .reverse()
+        .map((x) => x.file)
+        .filter(isPresent)
         .forEach((x) =>
-          this.appHelper.openFile(x.file, {
+          this.appHelper.openFile(x, {
             leaf: "new-tab-background",
           })
         );
