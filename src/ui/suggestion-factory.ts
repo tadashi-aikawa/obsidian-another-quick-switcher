@@ -101,7 +101,7 @@ function createMetaDiv(args: {
     cls: "another-quick-switcher__item__metas",
   });
 
-  if (options.showFuzzyMatchScore) {
+  if (options.showFuzzyMatchScore && args.score > 0) {
     const scoreDiv = createDiv({
       cls: "another-quick-switcher__item__meta",
     });
