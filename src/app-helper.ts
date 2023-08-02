@@ -121,8 +121,10 @@ export interface FrontMatterLinkCache
   key: string;
 }
 export type UnsafeLinkCache = LinkCache | FrontMatterLinkCache;
-export function isFrontMatterLinkCache(x: any): x is FrontMatterLinkCache {
-  return x.position == null;
+export function isFrontMatterLinkCache(
+  x: UnsafeLinkCache
+): x is FrontMatterLinkCache {
+  return (x as any).position == null;
 }
 export type UnsafeCachedMetadata = CachedMetadata & {
   frontmatterLinks?: FrontMatterLinkCache[];
@@ -252,7 +254,7 @@ export class AppHelper {
       }
     );
 
-    if (isFrontMatterLinkCache(first) || !first) {
+    if (!first || isFrontMatterLinkCache(first)) {
       return 0;
     }
 
