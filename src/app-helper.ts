@@ -1,5 +1,7 @@
 import {
   App,
+  CachedMetadata,
+  CacheItem,
   Editor,
   FileView,
   getLinkpath,
@@ -7,6 +9,7 @@ import {
   LinkCache,
   MarkdownView,
   Pos,
+  ReferenceCache,
   TAbstractFile,
   TFile,
   TFolder,
@@ -111,6 +114,19 @@ interface UnsafeCanvas {
     focus?: unknown | undefined;
   }): UnsafeCardLayout;
 }
+
+// From Obsidian 1.4.x
+export interface FrontMatterLinkCache
+  extends Omit<ReferenceCache, keyof CacheItem> {
+  key: string;
+}
+export type UnsafeLinkCache = LinkCache | FrontMatterLinkCache;
+export function isFrontMatterLinkCache(x: any): x is FrontMatterLinkCache {
+  return x.position == null;
+}
+export type UnsafeCachedMetadata = CachedMetadata & {
+  frontmatterLinks?: FrontMatterLinkCache[];
+};
 
 export type CaptureState = {
   leaf?: WorkspaceLeaf;
@@ -217,19 +233,30 @@ export class AppHelper {
   }
 
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
-    const fileCache = this.unsafeApp.metadataCache.getFileCache(file);
+    const fileCache = this.unsafeApp.metadataCache.getFileCache(
+      file
+    ) as UnsafeCachedMetadata | null;
     const links = fileCache?.links ?? [];
+    const frontmatterLinks = fileCache?.frontmatterLinks ?? [];
     const embeds = fileCache?.embeds ?? [];
 
-    return [...links, ...embeds].find((x: LinkCache) => {
-      const firstLinkPath = this.isPhantomFile(linkFile)
-        ? this.getPathToBeCreated(x.link)
-        : this.unsafeApp.metadataCache.getFirstLinkpathDest(
-            getLinkpath(x.link),
-            file.path
-          )?.path;
-      return firstLinkPath === linkFile.path;
-    })!.position.start.offset;
+    const first = [...links, ...frontmatterLinks, ...embeds].find(
+      (x: UnsafeLinkCache) => {
+        const firstLinkPath = this.isPhantomFile(linkFile)
+          ? this.getPathToBeCreated(x.link)
+          : this.unsafeApp.metadataCache.getFirstLinkpathDest(
+              getLinkpath(x.link),
+              file.path
+            )?.path;
+        return firstLinkPath === linkFile.path;
+      }
+    );
+
+    if (isFrontMatterLinkCache(first) || !first) {
+      return 0;
+    }
+
+    return first.position.start.offset;
   }
 
   findFirstHeaderOffset(file: TFile, header: string): number | null {
@@ -244,7 +271,10 @@ export class AppHelper {
     return target?.position.start.offset ?? null;
   }
 
-  getBacklinksByFilePathInActiveFile(): Record<string, LinkCache[]> | null {
+  getBacklinksByFilePathInActiveFile(): Record<
+    string,
+    UnsafeLinkCache[]
+  > | null {
     const f = this.getActiveFile();
     if (!f) {
       return null;
@@ -279,28 +309,40 @@ export class AppHelper {
   }
 
   /**
-   * @return {"<relative path from root>: LinkCache"}
+   * @return {"<relative path from root>: UnsafeLinkCache"}
    */
-  createLinksMap(file: TFile): Record<string, LinkCache> {
-    const cache = this.unsafeApp.metadataCache.getFileCache(file);
+  createLinksMap(file: TFile): Record<string, UnsafeLinkCache> {
+    const cache = this.unsafeApp.metadataCache.getFileCache(
+      file
+    ) as UnsafeCachedMetadata;
     return mapValues(
       groupBy(
-        [...(cache?.embeds ?? []), ...(cache?.links ?? [])],
+        [
+          ...(cache?.embeds ?? []),
+          ...(cache?.links ?? []),
+          ...(cache?.frontmatterLinks ?? []),
+        ],
         (x) => this.linkText2Path(x.link) ?? this.getPathToBeCreated(x.link)
       ),
       (caches) => caches[0]
     );
   }
 
-  getLinksByFilePathInActiveFile(): Record<string, LinkCache[]> | null {
+  getLinksByFilePathInActiveFile(): Record<string, UnsafeLinkCache[]> | null {
     const file = this.getActiveFile();
     if (!file) {
       return null;
     }
 
-    const cache = this.unsafeApp.metadataCache.getFileCache(file);
+    const cache = this.unsafeApp.metadataCache.getFileCache(
+      file
+    ) as UnsafeCachedMetadata;
     return groupBy(
-      [...(cache?.embeds ?? []), ...(cache?.links ?? [])],
+      [
+        ...(cache?.embeds ?? []),
+        ...(cache?.links ?? []),
+        ...(cache?.frontmatterLinks ?? []),
+      ],
       (x) => this.linkText2Path(x.link) ?? this.getPathToBeCreated(x.link)
     );
   }

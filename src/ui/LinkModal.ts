@@ -7,7 +7,12 @@ import {
   WorkspaceLeaf,
 } from "obsidian";
 import { Hotkeys, Settings } from "../settings";
-import { AppHelper, CaptureState, LeafType } from "../app-helper";
+import {
+  AppHelper,
+  CaptureState,
+  isFrontMatterLinkCache,
+  LeafType,
+} from "../app-helper";
 import { createInstructions, quickResultSelectionModifier } from "../keys";
 import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
@@ -116,13 +121,15 @@ export class LinkModal
       const file = this.appHelper.getFileByPath(path)!;
       const content = this.appHelper.getCurrentEditor()!.getValue();
       for (const cache of caches) {
-        ignoredItems.push({
-          file,
-          displayLink: cache.displayText!,
-          line: content.split("\n").at(cache.position.start.line)!,
-          lineNumber: cache.position.start.line + 1,
-          offset: cache.position.start.offset,
-        });
+        if (!isFrontMatterLinkCache(cache)) {
+          ignoredItems.push({
+            file,
+            displayLink: cache.displayText!,
+            line: content.split("\n").at(cache.position.start.line)!,
+            lineNumber: cache.position.start.line + 1,
+            offset: cache.position.start.offset,
+          });
+        }
       }
     }
 

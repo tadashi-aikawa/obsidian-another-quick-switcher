@@ -24,7 +24,13 @@ import {
   SearchCommand,
   Settings,
 } from "../settings";
-import { AppHelper, LeafType, CaptureState } from "../app-helper";
+import {
+  AppHelper,
+  LeafType,
+  CaptureState,
+  isFrontMatterLinkCache,
+  FrontMatterLinkCache,
+} from "../app-helper";
 import { stampMatchResults, SuggestionItem } from "src/matcher";
 import { createElements } from "./suggestion-factory";
 import { filterNoQueryPriorities, sort } from "../sorters";
@@ -227,7 +233,13 @@ export class AnotherQuickSwitcherModal
             ? (cache.headings ?? []).map((x) => excludeFormat(x.heading))
             : [],
           links: this.command.searchBy.link
-            ? uniq(cache.links?.map((x) => x.displayText ?? "") ?? [])
+            ? uniq(
+                [
+                  ...(cache.links ?? []),
+                  ...(((cache as any)
+                    .frontmatterLinks as FrontMatterLinkCache[]) ?? []),
+                ].map((x) => x.displayText ?? "")
+              )
             : [],
           frontMatter:
             this.command.showFrontMatter && cache.frontmatter
@@ -277,12 +289,14 @@ export class AnotherQuickSwitcherModal
           const originFileLinkMap = this.originFile
             ? this.appHelper.createLinksMap(this.originFile)
             : {};
+
           items = items
             .filter((x) => originFileLinkMap[x.file.path])
             .sort(
-              sorter(
-                (x) => originFileLinkMap[x.file.path].position.start.offset
-              )
+              sorter((x) => {
+                const c = originFileLinkMap[x.file.path];
+                return isFrontMatterLinkCache(c) ? -1 : c.position.start.offset;
+              })
             );
           break;
         case "2-hop-link":
@@ -301,11 +315,12 @@ export class AnotherQuickSwitcherModal
           items = items
             .filter((x) => filteredPaths.includes(x.file.path))
             .sort(
-              sorter(
-                (x) =>
-                  originFileLinkMap2[x.file.path]?.position.start.offset ??
-                  65535
-              )
+              sorter((x) => {
+                const c = originFileLinkMap2[x.file.path];
+                return !c || isFrontMatterLinkCache(c)
+                  ? 65535
+                  : c.position.start.offset;
+              })
             );
           break;
       }
