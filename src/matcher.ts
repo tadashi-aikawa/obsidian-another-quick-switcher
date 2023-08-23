@@ -88,7 +88,7 @@ function matchQuery(
 
   // noinspection FallThroughInSwitchStatementJS
   const fuzzyResult = smartMicroFuzzy(
-    item.file.basename, // Should calculate the score without .md
+    item.file.extension === "md" ? item.file.basename : item.file.name, // Should calculate the score without .md
     query,
     isNormalizeAccentsDiacritics
   );
