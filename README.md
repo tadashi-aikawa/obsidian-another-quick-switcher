@@ -155,9 +155,13 @@ Detailed hotkeys customization is available for each dialog.
 
 The new Backlink search enables displaying all occurrences in the same file and listing the corresponding lines' text.
 
+https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018/0ce0111a-7481-40a0-a49e-ab00a2f37b35
+
 ### 6. Link search
 
 The new Link search enables displaying all occurrences in the same file and listing the corresponding lines' text.
+
+https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018/b31034e7-7ad7-4ab5-8294-6b4950efe224
 
 ### 7. Show backlinks from the dialog
 
