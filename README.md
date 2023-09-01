@@ -151,7 +151,15 @@ Detailed hotkeys customization is available for each dialog.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/customizable-hotkeys-setting.png)
 
-### 5. Show backlinks from the dialog
+### 5. Backlink search
+
+The new Backlink search enables displaying all occurrences in the same file and listing the corresponding lines' text.
+
+### 6. Link search
+
+The new Link search enables displaying all occurrences in the same file and listing the corresponding lines' text.
+
+### 7. Show backlinks from the dialog
 
 You can show the backlinks about the suggestion in the dialog. (Default hotkey is `Mod h`)
 
@@ -159,13 +167,13 @@ It can show backlinks from not only existing notes but also phantom(not existing
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/show-backlinks-from-the-dialog.gif)
 
-### 6. Navigate outgoing/backlinks without leaving the dialog
+### 8. Navigate outgoing/backlinks without leaving the dialog
 
 You can navigate outgoing/backlinks without leaving the dialog by using the "show links", "show backlinks", "navigate forward", and "navigate back" commands.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/navigate-outgoing-backlinks-without-leaving-the-dialog.gif)
 
-### 7. Preview
+### 9. Preview
 
 You can preview the file without closing the dialog. It shows a floating view that doesn't distract the contents. Additionally, it makes the editor state before opening the dialog after previewing files and closing the dialog.
 
