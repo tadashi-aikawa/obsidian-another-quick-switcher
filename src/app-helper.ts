@@ -547,7 +547,7 @@ export class AppHelper {
   insertLinkToActiveFileBy(file: TFile, phantom: boolean) {
     const activeMarkdownView =
       this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
-    if (!activeMarkdownView) {
+    if (!activeMarkdownView?.file) {
       return;
     }
 
