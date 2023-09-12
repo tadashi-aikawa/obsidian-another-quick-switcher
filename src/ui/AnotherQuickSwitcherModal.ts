@@ -379,6 +379,10 @@ export class AnotherQuickSwitcherModal
     this.searchQuery = query.startsWith(this.command.commandPrefix)
       ? query.replace(this.command.commandPrefix, "")
       : query;
+    this.searchQuery = this.searchQuery.replace(
+      /<cd>/g,
+      this.appHelper.getCurrentDirPath()
+    );
     if (this.command.defaultInput) {
       this.searchQuery = `${this.command.defaultInput}${this.searchQuery}`;
     }
