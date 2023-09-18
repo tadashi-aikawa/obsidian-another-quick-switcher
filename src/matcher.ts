@@ -77,6 +77,9 @@ function matchQuery(
   if (!includeDir) {
     return [{ type: "not found", query }];
   }
+  if (file.length === 0) {
+    return [{ type: "directory", meta: [item.file.path], query }];
+  }
 
   let results: MatchQueryResult[] = [];
 
