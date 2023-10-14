@@ -5,6 +5,7 @@ import {
   Notice,
   parseFrontMatterAliases,
   parseFrontMatterTags,
+  Platform,
   SuggestModal,
   TFile,
   WorkspaceLeaf,
@@ -157,9 +158,22 @@ export class AnotherQuickSwitcherModal
     );
   }
 
+  close() {
+    if (Platform.isMobile) {
+      // https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues/207
+      this.onClose();
+    }
+    super.close();
+  }
+
   safeClose(): Promise<void> {
     this.close();
     return this.isClosed;
+  }
+
+  silentClose() {
+    this.willSilentClose = true;
+    this.close();
   }
 
   onOpen() {
@@ -193,11 +207,6 @@ export class AnotherQuickSwitcherModal
       this.navigate(() => this.stateToRestore!.restore());
     }
     this.navigate(this.markClosed);
-  }
-
-  silentClose() {
-    this.willSilentClose = true;
-    this.close();
   }
 
   enableFloating() {
