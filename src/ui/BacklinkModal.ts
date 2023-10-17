@@ -18,7 +18,11 @@ import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { normalizePath } from "../utils/path";
 import { setFloatingModal } from "./modal";
-import { capitalizeFirstLetter, smartIncludes } from "../utils/strings";
+import {
+  capitalizeFirstLetter,
+  smartIncludes,
+  trimLineByEllipsis,
+} from "../utils/strings";
 import { uniqBy } from "../utils/collection-helper";
 import { compare } from "../sorters";
 
@@ -42,6 +46,8 @@ export class BacklinkModal
   settings: Settings;
   ignoredItems: SuggestionItem[];
   initialLeaf: WorkspaceLeaf | null;
+  originFileBaseName: string;
+  originFileBaseNameRegExp: RegExp;
   stateToRestore: CaptureState;
   lastOpenFileIndexByPath: { [path: string]: number } = {};
 
@@ -74,6 +80,8 @@ export class BacklinkModal
     this.appHelper = new AppHelper(app);
     this.settings = settings;
     this.initialLeaf = initialLeaf;
+    this.originFileBaseName = this.appHelper.getActiveFile()!.basename;
+    this.originFileBaseNameRegExp = new RegExp(this.originFileBaseName, "g");
     this.limit = 255;
     this.app.workspace.getLastOpenFiles().forEach((v, i) => {
       this.lastOpenFileIndexByPath[v] = i;
@@ -275,8 +283,31 @@ export class BacklinkModal
       cls: "another-quick-switcher__backlink__item__description",
     });
 
+    let restLine = item.line;
+    let offset = 0;
+    Array.from(restLine.matchAll(this.originFileBaseNameRegExp))
+      .map((x) => x.index!)
+      .forEach((index) => {
+        const before = restLine.slice(0, index - offset);
+        descriptionDiv.createSpan({
+          text: trimLineByEllipsis(
+            before,
+            this.settings.maxDisplayLengthAroundMatchedWord
+          ),
+        });
+        descriptionDiv.createSpan({
+          text: this.originFileBaseName,
+          cls: "another-quick-switcher__hit_word",
+        });
+
+        offset = index - offset + this.originFileBaseName.length;
+        restLine = restLine.slice(offset);
+      });
     descriptionDiv.createSpan({
-      text: item.line,
+      text: trimLineByEllipsis(
+        restLine,
+        this.settings.maxDisplayLengthAroundMatchedWord
+      ),
     });
 
     if (item.order! < 9) {
