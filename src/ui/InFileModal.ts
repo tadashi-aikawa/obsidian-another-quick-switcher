@@ -13,6 +13,7 @@ import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { setFloatingModal } from "./modal";
 import {
   capitalizeFirstLetter,
+  escapeRegExp,
   includes,
   trimLineByEllipsis,
 } from "../utils/strings";
@@ -216,7 +217,10 @@ export class InFileModal
 
     const isQueryEmpty = query.trim() === "";
     const queries = query.trim().split(" ");
-    this.currentQueriesRegExp = new RegExp(queries.join("|"), "gi");
+    this.currentQueriesRegExp = new RegExp(
+      queries.map(escapeRegExp).join("|"),
+      "gi"
+    );
 
     const matchedSuggestions = isQueryEmpty
       ? []

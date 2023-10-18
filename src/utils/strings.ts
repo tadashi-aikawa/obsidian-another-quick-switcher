@@ -24,7 +24,7 @@ function normalize(str: string, isNormalizeAccentsDiacritics: boolean): string {
 }
 
 // Refer https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
-function escapeRegExp(str: string): string {
+export function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^=!:${}()|[\]\/\\]/g, "\\$&");
 }
 
