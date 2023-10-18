@@ -168,6 +168,7 @@ export interface Settings {
   // In file search
   inFileContextLines: number;
   autoPreviewInFloatingInFileSearch: boolean;
+  inFileMaxDisplayLengthAroundMatchedWord: number;
   // Grep
   ripgrepCommand: string;
   grepExtensions: string[];
@@ -551,6 +552,7 @@ export const DEFAULT_SETTINGS: Settings = {
   // In file search
   inFileContextLines: 2,
   autoPreviewInFloatingInFileSearch: false,
+  inFileMaxDisplayLengthAroundMatchedWord: 64,
   // Grep
   ripgrepCommand: "rg",
   grepExtensions: ["md"],
@@ -1314,6 +1316,25 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           await this.plugin.saveSettings();
         });
       });
+
+    new Setting(containerEl)
+      .setName("Max display length around matched word")
+      .setDesc(
+        "Maximum display character count before or after the matched word."
+      )
+      .addSlider((sc) =>
+        sc
+          .setLimits(1, 255, 1)
+          .setValue(
+            this.plugin.settings.inFileMaxDisplayLengthAroundMatchedWord
+          )
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.inFileMaxDisplayLengthAroundMatchedWord =
+              value;
+            await this.plugin.saveSettings();
+          })
+      );
   }
 
   private addGrepSettings(containerEl: HTMLElement) {

@@ -270,7 +270,7 @@ export class InFileModal
       lineDiv.createSpan({
         text: trimLineByEllipsis(
           line,
-          this.settings.maxDisplayLengthAroundMatchedWord
+          this.settings.inFileMaxDisplayLengthAroundMatchedWord
         ),
       });
     });
@@ -297,7 +297,7 @@ export class InFileModal
         activeLineBlockDiv.createSpan({
           text: trimLineByEllipsis(
             before,
-            this.settings.maxDisplayLengthAroundMatchedWord
+            this.settings.inFileMaxDisplayLengthAroundMatchedWord
           ),
         });
         activeLineBlockDiv.createSpan({
@@ -311,7 +311,7 @@ export class InFileModal
     activeLineBlockDiv.createSpan({
       text: trimLineByEllipsis(
         restLine,
-        this.settings.maxDisplayLengthAroundMatchedWord
+        this.settings.inFileMaxDisplayLengthAroundMatchedWord
       ),
     });
 
@@ -326,7 +326,7 @@ export class InFileModal
       lineDiv.createSpan({
         text: trimLineByEllipsis(
           line,
-          this.settings.maxDisplayLengthAroundMatchedWord
+          this.settings.inFileMaxDisplayLengthAroundMatchedWord
         ),
       });
     });
