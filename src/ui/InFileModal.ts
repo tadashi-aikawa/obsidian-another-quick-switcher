@@ -19,6 +19,7 @@ import {
 import { isPresent } from "../utils/types";
 import { Logger } from "../utils/logger";
 import { range } from "../utils/collection-helper";
+import { PREVIEW } from "./icons";
 
 let globalInternalStorage: {
   query: string;
@@ -46,12 +47,15 @@ export class InFileModal
   appHelper: AppHelper;
   settings: Settings;
   floating: boolean;
+  autoPreview: boolean;
   ignoredItems: SuggestionItem[];
   initialLeaf: WorkspaceLeaf | null;
   stateToRestore: CaptureState;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
+
+  previewIcon: Element | null;
 
   currentQueriesRegExp: RegExp;
 
@@ -78,7 +82,8 @@ export class InFileModal
     this.settings = settings;
     this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
-    this.floating = this.settings.inFileFloating;
+    this.floating = this.settings.autoPreviewInFloatingInFileSearch;
+    this.autoPreview = settings.autoPreviewInFloatingInFileSearch;
     this.limit = 255;
 
     this.setHotkeys();
@@ -101,6 +106,7 @@ export class InFileModal
     super.onOpen();
     if (this.floating) {
       this.enableFloating();
+      this.refreshPreviewIcon();
     }
 
     this.inputEl.value = globalInternalStorage.query;
@@ -130,6 +136,44 @@ export class InFileModal
       this.navigate(() => this.stateToRestore.restore());
     }
     this.navigate(this.markClosed);
+  }
+
+  select(index: number, evt?: KeyboardEvent) {
+    this.chooser.setSelectedItem(index, evt);
+    if (this.autoPreview) {
+      const p = {
+        line: this.chooser.values![index].lineNumber - 1,
+        offset: 0,
+        col: 0,
+      };
+      this.appHelper.moveTo({
+        start: p,
+        end: p,
+      });
+    }
+  }
+
+  getNextSelectIndex(): number {
+    return this.chooser.selectedItem + 1 > this.chooser.suggestions.length - 1
+      ? 0
+      : this.chooser.selectedItem + 1;
+  }
+
+  getPreviousSelectIndex(): number {
+    return this.chooser.selectedItem - 1 < 0
+      ? this.chooser.suggestions.length - 1
+      : this.chooser.selectedItem - 1;
+  }
+
+  refreshPreviewIcon() {
+    this.previewIcon?.remove();
+    if (this.autoPreview) {
+      this.previewIcon = this.inputEl.insertAdjacentElement(
+        "afterend",
+        createDiv({ cls: "another-quick-switcher__in-file__auto-preview-icon" })
+      );
+      this.previewIcon?.insertAdjacentHTML("beforeend", PREVIEW);
+    }
   }
 
   enableFloating() {
@@ -342,14 +386,14 @@ export class InFileModal
   }
 
   private registerKeys(
-    key: keyof Hotkeys["link"],
-    handler: () => void | Promise<void>
+    key: keyof Hotkeys["in-file"],
+    handler: (evt: KeyboardEvent) => void | Promise<void>
   ) {
-    this.settings.hotkeys.link[key]?.forEach((x) => {
+    this.settings.hotkeys["in-file"][key]?.forEach((x) => {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
         if (!evt.isComposing) {
           evt.preventDefault();
-          handler();
+          handler(evt);
           return false;
         }
       });
@@ -376,13 +420,33 @@ export class InFileModal
       ]);
     }
 
-    this.registerKeys("up", () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+    const navigateNext = (evt: KeyboardEvent) => {
+      this.select(this.getNextSelectIndex(), evt);
+    };
+    const navigatePrevious = (evt: KeyboardEvent) => {
+      this.select(this.getPreviousSelectIndex(), evt);
+    };
+
+    // Unregister default arrows behavior
+    this.scope.keys
+      .filter((x) => ["ArrowDown", "ArrowUp"].includes(x.key!))
+      .forEach((x) => this.scope.unregister(x));
+    this.scope.register([], "ArrowUp", (evt) => {
+      evt.preventDefault();
+      navigatePrevious(evt);
+      return false;
     });
-    this.registerKeys("down", () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
-      );
+    this.scope.register([], "ArrowDown", (evt) => {
+      evt.preventDefault();
+      navigateNext(evt);
+      return false;
+    });
+
+    this.registerKeys("up", (evt) => {
+      navigatePrevious(evt);
+    });
+    this.registerKeys("down", (evt) => {
+      navigateNext(evt);
     });
 
     this.registerKeys("open", async () => {
@@ -432,14 +496,6 @@ export class InFileModal
       this.inputEl.dispatchEvent(new Event("input"));
     });
 
-    this.registerKeys("preview", async () => {
-      // XXX: chooseCurrentSuggestionにできるか?
-      await this.chooseCurrentSuggestion("same-tab", {
-        keepOpen: true,
-      });
-      this.enableFloating();
-    });
-
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
       : "Mod";
@@ -449,6 +505,14 @@ export class InFileModal
         this.chooser.useSelectedItem({});
         return false;
       });
+    });
+
+    this.registerKeys("toggle auto preview", () => {
+      this.autoPreview = !this.autoPreview;
+      this.refreshPreviewIcon();
+      if (this.autoPreview && !this.floating) {
+        this.enableFloating();
+      }
     });
 
     this.registerKeys("dismiss", async () => {

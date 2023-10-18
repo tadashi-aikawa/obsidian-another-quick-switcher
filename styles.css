@@ -602,3 +602,9 @@
     /*noinspection CssUnresolvedCustomProperty*/
     background-color: var(--active-bg);
 }
+.another-quick-switcher__in-file__auto-preview-icon {
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
+}
+

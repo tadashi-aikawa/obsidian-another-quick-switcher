@@ -120,7 +120,7 @@ export interface Hotkeys {
     "open in new tab in background": Hotkey[];
     "open all in new tabs": Hotkey[];
     "show all results": Hotkey[];
-    preview: Hotkey[];
+    "toggle auto preview": Hotkey[];
     dismiss: Hotkey[];
   };
   grep: {
@@ -167,7 +167,7 @@ export interface Settings {
   backlinkExcludePrefixPathPatterns: string[];
   // In file search
   inFileContextLines: number;
-  inFileFloating: boolean;
+  autoPreviewInFloatingInFileSearch: boolean;
   // Grep
   ripgrepCommand: string;
   grepExtensions: string[];
@@ -269,7 +269,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
     "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
-    preview: [{ modifiers: ["Mod"], key: "," }],
+    "toggle auto preview": [{ modifiers: ["Mod"], key: "," }],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   grep: {
@@ -550,7 +550,7 @@ export const DEFAULT_SETTINGS: Settings = {
   backlinkExcludePrefixPathPatterns: [],
   // In file search
   inFileContextLines: 2,
-  inFileFloating: false,
+  autoPreviewInFloatingInFileSearch: false,
   // Grep
   ripgrepCommand: "rg",
   grepExtensions: ["md"],
@@ -1305,15 +1305,14 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       );
 
     new Setting(containerEl)
-      .setName("Floating mode")
-      .setDesc("Always show in floating mode")
+      .setName("Auto preview in the floating mode")
       .addToggle((tc) => {
-        tc.setValue(this.plugin.settings.inFileFloating).onChange(
-          async (value) => {
-            this.plugin.settings.inFileFloating = value;
-            await this.plugin.saveSettings();
-          }
-        );
+        tc.setValue(
+          this.plugin.settings.autoPreviewInFloatingInFileSearch
+        ).onChange(async (value) => {
+          this.plugin.settings.autoPreviewInFloatingInFileSearch = value;
+          await this.plugin.saveSettings();
+        });
       });
   }
 

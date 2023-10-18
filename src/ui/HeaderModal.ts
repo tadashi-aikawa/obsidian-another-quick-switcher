@@ -307,7 +307,7 @@ export class HeaderModal
     this.registerKeys("move to previous hit", (evt) => {
       moveToPreviousHit(evt);
     });
-    this.registerKeys("toggle auto preview", (evt) => {
+    this.registerKeys("toggle auto preview", () => {
       this.autoPreview = !this.autoPreview;
       this.refreshPreviewIcon();
       if (this.autoPreview && !this.floating) {
