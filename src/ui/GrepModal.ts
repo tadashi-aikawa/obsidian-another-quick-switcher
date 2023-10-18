@@ -117,8 +117,14 @@ export class GrepModal
     this.basePath = globalInternalStorage.basePath ?? "";
 
     window.setTimeout(() => {
-      if (globalInternalStorage.selected != null) {
-        this.chooser.setSelectedItem(globalInternalStorage.selected!);
+      const selected = globalInternalStorage.selected;
+      if (selected != null) {
+        this.chooser.setSelectedItem(selected);
+        this.chooser.suggestions[selected].scrollIntoView({
+          behavior: "auto",
+          block: "center",
+          inline: "center",
+        });
       }
 
       this.basePathInputEl = createEl("input", {
