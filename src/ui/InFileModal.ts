@@ -181,7 +181,12 @@ export class InFileModal
         text: String(item.lineNumber - item.lineBefore.length + i),
         cls: "another-quick-switcher__in-file__line-number",
       });
-      lineDiv.createSpan({ text: line });
+      lineDiv.createSpan({
+        text: trimLineByEllipsis(
+          line,
+          this.settings.maxDisplayLengthAroundMatchedWord
+        ),
+      });
     });
 
     const activeLineDiv = descriptionDiv.createDiv({
@@ -232,7 +237,12 @@ export class InFileModal
         text: String(item.lineNumber + i + 1),
         cls: "another-quick-switcher__in-file__line-number",
       });
-      lineDiv.createSpan({ text: line });
+      lineDiv.createSpan({
+        text: trimLineByEllipsis(
+          line,
+          this.settings.maxDisplayLengthAroundMatchedWord
+        ),
+      });
     });
 
     if (item.order! < 9) {
