@@ -13,7 +13,7 @@ import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { setFloatingModal } from "./modal";
 import {
   capitalizeFirstLetter,
-  smartIncludes,
+  includes,
   trimLineByEllipsis,
 } from "../utils/strings";
 import { isPresent } from "../utils/types";
@@ -136,11 +136,7 @@ export class InFileModal
       ? []
       : this.ignoredItems.filter((x) =>
           queries.every((q) =>
-            smartIncludes(
-              x.line,
-              q,
-              this.settings.normalizeAccentsAndDiacritics
-            )
+            includes(x.line, q, this.settings.normalizeAccentsAndDiacritics)
           )
         );
 

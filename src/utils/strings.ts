@@ -23,6 +23,16 @@ function normalize(str: string, isNormalizeAccentsDiacritics: boolean): string {
   return isNormalizeAccentsDiacritics ? normalizeAccentsDiacritics(t) : t;
 }
 
+export function includes(
+  text: string,
+  query: string,
+  isNormalizeAccentsDiacritics: boolean
+): boolean {
+  return normalize(text, isNormalizeAccentsDiacritics).includes(
+    normalize(query, isNormalizeAccentsDiacritics)
+  );
+}
+
 export function smartIncludes(
   text: string,
   query: string,

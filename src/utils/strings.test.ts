@@ -4,6 +4,7 @@ import {
   excludeFormat,
   excludeSpace,
   FuzzyResult,
+  includes,
   microFuzzy,
   normalizeAccentsDiacritics,
   smartCommaSplit,
@@ -53,6 +54,23 @@ describe.each`
 `("normalizeAccentsDiacritics", ({ text, expected }) => {
   test(`normalizeAccentsDiacritics(${text}) = ${expected}`, () => {
     expect(normalizeAccentsDiacritics(text)).toBe(expected);
+  });
+});
+
+describe.each<{ text: string; query: string; expected: boolean }>`
+  text            | query      | expected
+  ${"abcd"}       | ${"bc"}    | ${true}
+  ${"abcd"}       | ${"BC"}    | ${true}
+  ${"ABCD"}       | ${"bc"}    | ${true}
+  ${" AB CD "}    | ${"bc"}    | ${false}
+  ${"🍰Cake"}     | ${"cake"}  | ${true}
+  ${"🍰Cake"}     | ${"🍰"}    | ${true}
+  ${"🍰AB🍰CD🍰"} | ${"bc"}    | ${false}
+  ${" AB CD "}    | ${"ab bc"} | ${false}
+  ${" AB CD "}    | ${"ab cd"} | ${true}
+`("includes", ({ text, query, expected }) => {
+  test(`includes(${text}, ${query}) = ${expected}`, () => {
+    expect(includes(text, query, false)).toBe(expected);
   });
 });
 
