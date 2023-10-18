@@ -117,7 +117,7 @@ export class InFileModal
     const selected = globalInternalStorage.selected;
     if (selected != null) {
       this.chooser.setSelectedItem(selected);
-      this.chooser.suggestions[selected].scrollIntoView({
+      this.chooser.suggestions.at(selected)?.scrollIntoView({
         behavior: "auto",
         block: "center",
         inline: "center",

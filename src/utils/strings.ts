@@ -23,6 +23,11 @@ function normalize(str: string, isNormalizeAccentsDiacritics: boolean): string {
   return isNormalizeAccentsDiacritics ? normalizeAccentsDiacritics(t) : t;
 }
 
+// Refer https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^=!:${}()|[\]\/\\]/g, "\\$&");
+}
+
 export function includes(
   text: string,
   query: string,

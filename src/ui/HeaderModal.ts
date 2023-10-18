@@ -74,15 +74,16 @@ export class HeaderModal
 
   select(index: number, evt?: KeyboardEvent) {
     this.chooser.setSelectedItem(index, evt);
-    this.chooser.suggestions[index].scrollIntoView({
+    this.chooser.suggestions.at(index)?.scrollIntoView({
       behavior: "auto",
       block: "center",
       inline: "center",
     });
 
     this.unsafeSelectedIndex = index;
-    if (this.autoPreview) {
-      this.appHelper.moveTo(this.items[this.unsafeSelectedIndex].position);
+    const item = this.items.at(this.unsafeSelectedIndex);
+    if (this.autoPreview && item) {
+      this.appHelper.moveTo(item.position);
     }
   }
 
