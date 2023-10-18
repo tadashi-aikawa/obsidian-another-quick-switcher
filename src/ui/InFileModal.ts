@@ -22,8 +22,10 @@ import { range } from "../utils/collection-helper";
 
 let globalInternalStorage: {
   query: string;
+  selected?: number;
 } = {
   query: "",
+  selected: undefined,
 };
 
 interface SuggestionItem {
@@ -106,12 +108,23 @@ export class InFileModal
     this.inputEl.dispatchEvent(new Event("input"));
     this.inputEl.select();
 
+    const selected = globalInternalStorage.selected;
+    if (selected != null) {
+      this.chooser.setSelectedItem(selected);
+      this.chooser.suggestions[selected].scrollIntoView({
+        behavior: "auto",
+        block: "center",
+        inline: "center",
+      });
+    }
+
     this.opened = true;
   }
 
   onClose() {
     super.onClose();
     globalInternalStorage.query = this.inputEl.value;
+    globalInternalStorage.selected = this.chooser.selectedItem;
     if (this.stateToRestore) {
       // restore initial leaf state, undoing any previewing
       this.navigate(() => this.stateToRestore.restore());
