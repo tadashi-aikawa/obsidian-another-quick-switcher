@@ -20,10 +20,7 @@ import { normalizePath } from "../utils/path";
 import { setFloatingModal } from "./modal";
 import { capitalizeFirstLetter, smartIncludes } from "../utils/strings";
 import { isPresent } from "../utils/types";
-
-function buildLogMessage(message: string, msec: number) {
-  return `${message}: ${Math.round(msec)}[ms]`;
-}
+import { Logger } from "../utils/logger";
 
 interface SuggestionItem {
   order?: number;
@@ -38,6 +35,7 @@ export class LinkModal
   extends SuggestModal<SuggestionItem>
   implements UnsafeModalInterface<SuggestionItem>
 {
+  logger: Logger;
   appHelper: AppHelper;
   settings: Settings;
   ignoredItems: SuggestionItem[];
@@ -73,6 +71,7 @@ export class LinkModal
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
+    this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
     this.limit = 255;
     this.app.workspace.getLastOpenFiles().forEach((v, i) => {
@@ -173,9 +172,7 @@ export class LinkModal
           )
         );
 
-    this.showDebugLog(() =>
-      buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
-    );
+    this.logger.showDebugLog(`Get suggestions: ${query}`, start);
 
     this.countInputEl?.remove();
     this.countInputEl = createDiv({

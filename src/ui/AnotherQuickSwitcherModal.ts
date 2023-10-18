@@ -45,10 +45,7 @@ import { createInstructions, quickResultSelectionModifier } from "src/keys";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
 import { ExhaustiveError } from "../errors";
 import { setFloatingModal } from "./modal";
-
-function buildLogMessage(message: string, msec: number) {
-  return `${message}: ${Math.round(msec)}[ms]`;
-}
+import { Logger } from "../utils/logger";
 
 interface CustomSearchHistory {
   originFile: TFile | null;
@@ -60,6 +57,7 @@ export class AnotherQuickSwitcherModal
   extends SuggestModal<SuggestionItem>
   implements UnsafeModalInterface<SuggestionItem>
 {
+  logger: Logger;
   originItems: SuggestionItem[];
   phantomItems: SuggestionItem[];
   ignoredItems: SuggestionItem[];
@@ -118,6 +116,7 @@ export class AnotherQuickSwitcherModal
 
     this.appHelper = new AppHelper(app);
     this.settings = args.settings;
+    this.logger = Logger.of(this.settings);
     this.initialCommand = args.command;
     this.command = args.command;
     this.originFile = args.originFile;
@@ -260,17 +259,13 @@ export class AnotherQuickSwitcherModal
           tokens: x.basename.split(" "),
         };
       });
-    this.showDebugLog(() =>
-      buildLogMessage(`Indexing file items: `, performance.now() - start)
-    );
+    this.logger.showDebugLog(`Indexing file items: `, start);
 
     this.originItems = [...fileItems, ...this.phantomItems];
 
     start = performance.now();
     this.ignoredItems = this.prefilterItems(this.command);
-    this.showDebugLog(() =>
-      buildLogMessage(`Prefilter items: `, performance.now() - start)
-    );
+    this.logger.showDebugLog(`Prefilter items: `, start);
   }
 
   prefilterItems(command: SearchCommand): SuggestionItem[] {
@@ -430,11 +425,9 @@ export class AnotherQuickSwitcherModal
       lastOpenFileIndexByPath
     );
 
-    this.showDebugLog(() =>
-      buildLogMessage(
-        `Get suggestions: ${this.searchQuery} (${this.command.name})`,
-        performance.now() - start
-      )
+    this.logger.showDebugLog(
+      `Get suggestions: ${this.searchQuery} (${this.command.name})`,
+      start
     );
 
     this.countInputEl = createDiv({

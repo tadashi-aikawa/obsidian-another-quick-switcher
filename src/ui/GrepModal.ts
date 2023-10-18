@@ -14,6 +14,7 @@ import { normalizePath, normalizeRelativePath } from "../utils/path";
 import { setFloatingModal } from "./modal";
 import { capitalizeFirstLetter, trimLineByEllipsis } from "../utils/strings";
 import { sorter } from "../utils/collection-helper";
+import { Logger } from "../utils/logger";
 
 let globalInternalStorage: {
   items: SuggestionItem[];
@@ -24,10 +25,6 @@ let globalInternalStorage: {
   basePath: undefined,
   selected: undefined,
 };
-
-function buildLogMessage(message: string, msec: number) {
-  return `${message}: ${Math.round(msec)}[ms]`;
-}
 
 interface SuggestionItem {
   order: number;
@@ -48,6 +45,7 @@ export class GrepModal
   extends SuggestModal<SuggestionItem>
   implements UnsafeModalInterface<SuggestionItem>
 {
+  logger: Logger;
   appHelper: AppHelper;
   settings: Settings;
   initialLeaf: WorkspaceLeaf | null;
@@ -93,6 +91,7 @@ export class GrepModal
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
+    this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
     this.limit = 255;
 
@@ -266,9 +265,7 @@ export class GrepModal
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
       .map((x, order) => ({ ...x, order }));
 
-    this.showDebugLog(() =>
-      buildLogMessage(`getSuggestions: `, performance.now() - start)
-    );
+    this.logger.showDebugLog(`getSuggestions: `, start);
 
     return items;
   }

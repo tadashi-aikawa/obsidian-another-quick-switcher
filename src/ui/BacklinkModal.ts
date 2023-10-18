@@ -25,10 +25,7 @@ import {
 } from "../utils/strings";
 import { uniqBy } from "../utils/collection-helper";
 import { compare } from "../sorters";
-
-function buildLogMessage(message: string, msec: number) {
-  return `${message}: ${Math.round(msec)}[ms]`;
-}
+import { Logger } from "../utils/logger";
 
 interface SuggestionItem {
   order?: number;
@@ -42,6 +39,7 @@ export class BacklinkModal
   extends SuggestModal<SuggestionItem>
   implements UnsafeModalInterface<SuggestionItem>
 {
+  logger: Logger;
   appHelper: AppHelper;
   settings: Settings;
   ignoredItems: SuggestionItem[];
@@ -79,6 +77,7 @@ export class BacklinkModal
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
+    this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
     this.originFileBaseName = this.appHelper.getActiveFile()!.basename;
     this.originFileBaseNameRegExp = new RegExp(this.originFileBaseName, "g");
@@ -162,9 +161,7 @@ export class BacklinkModal
       (item) => `${item.file.path}/${item.lineNumber}`
     );
 
-    this.showDebugLog(() =>
-      buildLogMessage(`Indexing backlinks`, performance.now() - start)
-    );
+    this.logger.showDebugLog(`Indexing backlinks`, start);
   }
 
   getSuggestions(query: string): SuggestionItem[] | Promise<SuggestionItem[]> {
@@ -203,9 +200,7 @@ export class BacklinkModal
           )
         );
 
-    this.showDebugLog(() =>
-      buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
-    );
+    this.logger.showDebugLog(`Get suggestions: ${query}`, start);
 
     this.countInputEl?.remove();
     this.countInputEl = createDiv({

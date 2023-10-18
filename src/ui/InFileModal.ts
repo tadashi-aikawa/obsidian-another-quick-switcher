@@ -17,10 +17,7 @@ import {
   trimLineByEllipsis,
 } from "../utils/strings";
 import { isPresent } from "../utils/types";
-
-function buildLogMessage(message: string, msec: number) {
-  return `${message}: ${Math.round(msec)}[ms]`;
-}
+import { Logger } from "../utils/logger";
 
 interface SuggestionItem {
   order?: number;
@@ -36,6 +33,7 @@ export class InFileModal
   extends SuggestModal<SuggestionItem>
   implements UnsafeModalInterface<SuggestionItem>
 {
+  logger: Logger;
   appHelper: AppHelper;
   settings: Settings;
   ignoredItems: SuggestionItem[];
@@ -68,6 +66,7 @@ export class InFileModal
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
+    this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
     this.limit = 255;
 
@@ -145,9 +144,7 @@ export class InFileModal
           )
         );
 
-    this.showDebugLog(() =>
-      buildLogMessage(`Get suggestions: ${query}`, performance.now() - start)
-    );
+    this.logger.showDebugLog(`Get suggestions: ${query}`, start);
 
     this.countInputEl?.remove();
     this.countInputEl = createDiv({
