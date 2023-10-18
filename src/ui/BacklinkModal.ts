@@ -455,8 +455,8 @@ export class BacklinkModal
     });
 
     this.registerKeys("preview", async () => {
-      // FIXME: chooseCurrentSuggestionにできるか?
-      const file = await this.chooseCurrentSuggestion("same-tab", {
+      // XXX: chooseCurrentSuggestionにできるか?
+      await this.chooseCurrentSuggestion("same-tab", {
         keepOpen: true,
       });
     });

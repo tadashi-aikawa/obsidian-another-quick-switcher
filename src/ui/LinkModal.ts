@@ -402,7 +402,7 @@ export class LinkModal
     });
 
     this.registerKeys("preview", async () => {
-      // FIXME: chooseCurrentSuggestionにできるか?
+      // XXX: chooseCurrentSuggestionにできるか?
       await this.chooseCurrentSuggestion("same-tab", {
         keepOpen: true,
       });
