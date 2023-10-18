@@ -557,7 +557,7 @@ export class GrepModal
       : "Mod";
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
       this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
-        this.chooser.setSelectedItem(n - 1, evt, true);
+        this.chooser.setSelectedItem(n - 1, evt);
         this.chooser.useSelectedItem({});
         return false;
       });

@@ -10,7 +10,6 @@ export interface UnsafeModalInterface<SuggestionItem> {
     setSelectedItem(
       item: number,
       event?: KeyboardEvent,
-      scroll?: boolean
     ): void;
     useSelectedItem(ev: Partial<KeyboardEvent>): void;
     suggestions: Element[];
