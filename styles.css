@@ -563,6 +563,7 @@
 .another-quick-switcher__in-file__item__description {
     font-size: 0.85em;
     padding-left: 1.1rem;
+    padding-bottom: 0.5rem;
     display: inline-block;
     /*noinspection CssUnresolvedCustomProperty*/
     color: var(--text-muted);
