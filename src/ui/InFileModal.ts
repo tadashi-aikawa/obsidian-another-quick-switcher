@@ -19,6 +19,12 @@ import {
 import { isPresent } from "../utils/types";
 import { Logger } from "../utils/logger";
 
+let globalInternalStorage: {
+  query: string;
+} = {
+  query: "",
+};
+
 interface SuggestionItem {
   order?: number;
   file?: TFile;
@@ -89,11 +95,18 @@ export class InFileModal
   onOpen() {
     super.onOpen();
     setFloatingModal(this.appHelper);
+
+    this.inputEl.value = globalInternalStorage.query;
+    // Necessary to rerender suggestions
+    this.inputEl.dispatchEvent(new Event("input"));
+    this.inputEl.select();
+
     this.opened = true;
   }
 
   onClose() {
     super.onClose();
+    globalInternalStorage.query = this.inputEl.value;
     if (this.stateToRestore) {
       // restore initial leaf state, undoing any previewing
       this.navigate(() => this.stateToRestore.restore());
