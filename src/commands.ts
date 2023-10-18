@@ -14,6 +14,7 @@ import { GrepModal } from "./ui/GrepModal";
 import { existsRg } from "./utils/ripgrep";
 import { BacklinkModal } from "./ui/BacklinkModal";
 import { LinkModal } from "./ui/LinkModal";
+import { InFileModal } from "./ui/InFileModal";
 
 const SEARCH_COMMAND_PREFIX = "search-command";
 
@@ -100,6 +101,19 @@ export async function showLinkDialog(app: App, settings: Settings) {
   modal.open();
 }
 
+export async function showInFileDialog(app: App, settings: Settings) {
+  if (!app.workspace.getActiveFile()) {
+    return;
+  }
+
+  const activeFileLeaf =
+    app.workspace.getActiveViewOfType(FileView)?.leaf ?? null;
+
+  const modal = new InFileModal(app, settings, activeFileLeaf);
+  await modal.init();
+  modal.open();
+}
+
 export function showHeaderDialog(
   app: App,
   settings: Settings,
@@ -180,6 +194,18 @@ export function createCommands(app: App, settings: Settings): Command[] {
         }
 
         showLinkDialog(app, settings);
+      },
+    },
+    {
+      id: "in-file-search",
+      name: "In file search",
+      hotkeys: [],
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return Boolean(app.workspace.getActiveFile());
+        }
+
+        showInFileDialog(app, settings);
       },
     },
     ...settings.searchCommands.map((command) => {

@@ -108,6 +108,21 @@ export interface Hotkeys {
     preview: Hotkey[];
     dismiss: Hotkey[];
   };
+  "in-file": {
+    up: Hotkey[];
+    down: Hotkey[];
+    open: Hotkey[];
+    "open in new tab": Hotkey[];
+    "open in new pane (horizontal)": Hotkey[];
+    "open in new pane (vertical)": Hotkey[];
+    "open in new window": Hotkey[];
+    "open in popup": Hotkey[];
+    "open in new tab in background": Hotkey[];
+    "open all in new tabs": Hotkey[];
+    "show all results": Hotkey[];
+    preview: Hotkey[];
+    dismiss: Hotkey[];
+  };
   grep: {
     search: Hotkey[];
     up: Hotkey[];
@@ -225,6 +240,21 @@ const createDefaultHotkeys = (): Hotkeys => ({
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   link: {
+    up: [{ modifiers: ["Mod"], key: "p" }],
+    down: [{ modifiers: ["Mod"], key: "n" }],
+    open: [{ modifiers: [], key: "Enter" }],
+    "open in new tab": [{ modifiers: ["Mod"], key: "Enter" }],
+    "open in new pane (horizontal)": [{ modifiers: ["Mod"], key: "-" }],
+    "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
+    "open in new window": [{ modifiers: ["Mod"], key: "o" }],
+    "open in popup": [],
+    "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
+    "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
+    "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
+    preview: [{ modifiers: ["Mod"], key: "," }],
+    dismiss: [{ modifiers: [], key: "Escape" }],
+  },
+  "in-file": {
     up: [{ modifiers: ["Mod"], key: "p" }],
     down: [{ modifiers: ["Mod"], key: "n" }],
     open: [{ modifiers: [], key: "Enter" }],
@@ -534,6 +564,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     header: false,
     backlink: false,
     link: false,
+    "in-file": false,
     grep: false,
   };
 
@@ -824,6 +855,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     addHotkeysForDialog("header", "Header dialog");
     addHotkeysForDialog("backlink", "Backlink dialog");
     addHotkeysForDialog("link", "Link dialog");
+    addHotkeysForDialog("in-file", "In File dialog");
     addHotkeysForDialog("grep", "Grep dialog");
   }
 

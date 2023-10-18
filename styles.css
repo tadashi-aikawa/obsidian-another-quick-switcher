@@ -555,3 +555,49 @@
     right: 35px;
     top: 1.0rem;
 }
+
+.another-quick-switcher__in-file__item .another-quick-switcher__item__descriptions {
+    /*noinspection CssUnresolvedCustomProperty*/
+    border: solid 2px var(--background-modifier-border);
+}
+.another-quick-switcher__in-file__item__description {
+    font-size: 0.85em;
+    padding-left: 1.1rem;
+    display: inline-block;
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-muted);
+}
+.another-quick-switcher__in-file__item__hot-key-guide::before {
+    content: "[";
+}
+.another-quick-switcher__in-file__item__hot-key-guide {
+    padding: 0;
+    margin-left: -1.5rem;
+    margin-top: auto;
+    font-size: 75%;
+    opacity: 0.7;
+}
+.another-quick-switcher__in-file__item__hot-key-guide::after {
+    content: "]";
+}
+.another-quick-switcher__in-file__status__count-input {
+    font-size: 85%;
+    position: absolute;
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-muted);
+    right: 35px;
+    top: 1.0rem;
+}
+.another-quick-switcher__in-file__line-number {
+    /*noinspection CssUnresolvedCustomProperty*/
+    color: var(--text-muted);
+    font-weight: bold;
+    padding-right: 2rem;
+}
+.another-quick-switcher__in-file__line {
+    display: flex;
+}
+.another-quick-switcher__in-file__active-line {
+    /*noinspection CssUnresolvedCustomProperty*/
+    background-color: var(--active-bg);
+}
