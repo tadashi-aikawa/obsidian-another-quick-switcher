@@ -1,5 +1,23 @@
-import { count, equalsAsSet, intersection, omitBy } from "./collection-helper";
+import {
+  count,
+  equalsAsSet,
+  intersection,
+  omitBy,
+  range,
+} from "./collection-helper";
 import { describe, expect, test } from "@jest/globals";
+
+describe.each<{ n: number; expected: number[] }>`
+  n    | expected
+  ${0} | ${[]}
+  ${1} | ${[0]}
+  ${2} | ${[0, 1]}
+  ${3} | ${[0, 1, 2]}
+`("range", ({ n, expected }) => {
+  test(`range(${n}) = ${expected}`, () => {
+    expect(range(n)).toStrictEqual(expected);
+  });
+});
 
 describe.each<{ values: number[][]; expected: number[] }>`
   values                    | expected

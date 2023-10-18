@@ -165,6 +165,8 @@ export interface Settings {
   autoPreviewInFloatingHeaderSearch: boolean;
   // Backlink search
   backlinkExcludePrefixPathPatterns: string[];
+  // In file search
+  inFileContextLines: number;
   // Grep
   ripgrepCommand: string;
   grepExtensions: string[];
@@ -545,6 +547,8 @@ export const DEFAULT_SETTINGS: Settings = {
   autoPreviewInFloatingHeaderSearch: true,
   // Backlink search
   backlinkExcludePrefixPathPatterns: [],
+  // In file search
+  inFileContextLines: 2,
   // Grep
   ripgrepCommand: "rg",
   grepExtensions: ["md"],
@@ -586,6 +590,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addSearchSettings(containerEl);
     this.addHeaderSearchSettings(containerEl);
     this.addBacklinkSettings(containerEl);
+    this.addInFileSettings(containerEl);
     this.addGrepSettings(containerEl);
     this.addMoveSettings(containerEl);
 
@@ -1276,6 +1281,26 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           "another-quick-switcher__settings__ignore_path_patterns";
         return el;
       });
+  }
+
+  private addInFileSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "🔍 In file search" });
+
+    new Setting(containerEl)
+      .setName("Context Lines")
+      .setDesc(
+        "Specifies the number of lines to display before and after the target line. For instance, setting this to '2' would display two lines before and two lines after the target line, providing context to the selected text"
+      )
+      .addSlider((sc) =>
+        sc
+          .setLimits(0, 10, 1)
+          .setValue(this.plugin.settings.inFileContextLines)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.inFileContextLines = value;
+            await this.plugin.saveSettings();
+          })
+      );
   }
 
   private addGrepSettings(containerEl: HTMLElement) {

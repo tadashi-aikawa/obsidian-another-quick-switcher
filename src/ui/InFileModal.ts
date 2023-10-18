@@ -18,6 +18,7 @@ import {
 } from "../utils/strings";
 import { isPresent } from "../utils/types";
 import { Logger } from "../utils/logger";
+import { range } from "../utils/collection-helper";
 
 let globalInternalStorage: {
   query: string;
@@ -117,11 +118,17 @@ export class InFileModal
   async indexingItems() {
     const file = this.appHelper.getActiveFile()!;
     const lines = this.appHelper.getCurrentEditor()!.getValue().split("\n");
+
     this.ignoredItems = lines.map((line, i) => ({
       file,
-      lineBefore: [lines[i - 2], lines[i - 1]].filter(isPresent),
+      lineBefore: range(this.settings.inFileContextLines)
+        .reverse()
+        .map((x) => lines[i - x - 1])
+        .filter(isPresent),
       line,
-      lineAfter: [lines[i + 1], lines[i + 2]].filter(isPresent),
+      lineAfter: range(this.settings.inFileContextLines)
+        .map((x) => lines[i + x + 1])
+        .filter(isPresent),
       lineNumber: i + 1,
     }));
   }

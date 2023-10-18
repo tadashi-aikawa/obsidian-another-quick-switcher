@@ -1,3 +1,5 @@
+export const range = (n: number): number[] => [...Array(n).keys()];
+
 export const mapValues = <K, T, U>(
   obj: { [key: string]: T },
   to: (x: T) => U
