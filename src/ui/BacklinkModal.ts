@@ -118,6 +118,8 @@ export class BacklinkModal
   }
 
   async indexingItems() {
+    const start = performance.now();
+
     const ignoredItems = [];
 
     const backlinks = this.appHelper.getBacklinksByFilePathInActiveFile();
@@ -158,6 +160,10 @@ export class BacklinkModal
     this.ignoredItems = uniqBy(
       ignoredItems,
       (item) => `${item.file.path}/${item.lineNumber}`
+    );
+
+    this.showDebugLog(() =>
+      buildLogMessage(`Indexing backlinks`, performance.now() - start)
     );
   }
 
