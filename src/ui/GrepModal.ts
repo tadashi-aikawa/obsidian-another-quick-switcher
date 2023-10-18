@@ -423,12 +423,6 @@ export class GrepModal
     await this.chooseCurrentSuggestion("same-tab");
   }
 
-  private showDebugLog(toMessage: () => string) {
-    if (this.settings.showLogAboutPerformanceInConsole) {
-      console.log(toMessage());
-    }
-  }
-
   private registerKeys(
     key: keyof Hotkeys["grep"],
     handler: () => void | Promise<void>

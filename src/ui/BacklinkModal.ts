@@ -365,12 +365,6 @@ export class BacklinkModal
     await this.chooseCurrentSuggestion("same-tab");
   }
 
-  private showDebugLog(toMessage: () => string) {
-    if (this.settings.showLogAboutPerformanceInConsole) {
-      console.log(toMessage());
-    }
-  }
-
   private registerKeys(
     key: keyof Hotkeys["backlink"],
     handler: () => void | Promise<void>

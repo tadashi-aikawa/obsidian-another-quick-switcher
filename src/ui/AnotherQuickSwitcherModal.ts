@@ -375,10 +375,8 @@ export class AnotherQuickSwitcherModal
       (commandByPrefix || this.initialCommand !== this.command) &&
       commandByPrefix !== this.command
     ) {
-      this.showDebugLog(() => `beforeCommand: ${this.command.name}`);
       this.command = commandByPrefix ?? this.initialCommand;
       this.indexingItems(); // slow?
-      this.showDebugLog(() => `afterCommand: ${this.command.name}`);
     }
     this.searchQuery = query.startsWith(this.command.commandPrefix)
       ? query.replace(this.command.commandPrefix, "")
