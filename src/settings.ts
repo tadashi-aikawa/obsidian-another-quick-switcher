@@ -167,6 +167,7 @@ export interface Settings {
   backlinkExcludePrefixPathPatterns: string[];
   // In file search
   inFileContextLines: number;
+  inFileFloating: boolean;
   // Grep
   ripgrepCommand: string;
   grepExtensions: string[];
@@ -549,6 +550,7 @@ export const DEFAULT_SETTINGS: Settings = {
   backlinkExcludePrefixPathPatterns: [],
   // In file search
   inFileContextLines: 2,
+  inFileFloating: false,
   // Grep
   ripgrepCommand: "rg",
   grepExtensions: ["md"],
@@ -1301,6 +1303,18 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             await this.plugin.saveSettings();
           })
       );
+
+    new Setting(containerEl)
+      .setName("Floating mode")
+      .setDesc("Always show in floating mode")
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.inFileFloating).onChange(
+          async (value) => {
+            this.plugin.settings.inFileFloating = value;
+            await this.plugin.saveSettings();
+          }
+        );
+      });
   }
 
   private addGrepSettings(containerEl: HTMLElement) {

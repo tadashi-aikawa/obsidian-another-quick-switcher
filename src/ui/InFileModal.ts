@@ -43,6 +43,7 @@ export class InFileModal
   logger: Logger;
   appHelper: AppHelper;
   settings: Settings;
+  floating: boolean;
   ignoredItems: SuggestionItem[];
   initialLeaf: WorkspaceLeaf | null;
   stateToRestore: CaptureState;
@@ -75,6 +76,7 @@ export class InFileModal
     this.settings = settings;
     this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
+    this.floating = this.settings.inFileFloating;
     this.limit = 255;
 
     this.setHotkeys();
@@ -95,7 +97,9 @@ export class InFileModal
 
   onOpen() {
     super.onOpen();
-    setFloatingModal(this.appHelper);
+    if (this.floating) {
+      this.enableFloating();
+    }
 
     this.inputEl.value = globalInternalStorage.query;
     // Necessary to rerender suggestions
@@ -113,6 +117,11 @@ export class InFileModal
       this.navigate(() => this.stateToRestore.restore());
     }
     this.navigate(this.markClosed);
+  }
+
+  enableFloating() {
+    this.floating = true;
+    setFloatingModal(this.appHelper);
   }
 
   async indexingItems() {
@@ -417,10 +426,11 @@ export class InFileModal
     });
 
     this.registerKeys("preview", async () => {
-      // FIXME: chooseCurrentSuggestionにできるか?
-      const file = await this.chooseCurrentSuggestion("same-tab", {
+      // XXX: chooseCurrentSuggestionにできるか?
+      await this.chooseCurrentSuggestion("same-tab", {
         keepOpen: true,
       });
+      this.enableFloating();
     });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
