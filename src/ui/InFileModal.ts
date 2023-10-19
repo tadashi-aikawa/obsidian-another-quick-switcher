@@ -2,6 +2,7 @@ import {
   App,
   debounce,
   Debouncer,
+  Platform,
   SuggestModal,
   TFile,
   WorkspaceLeaf,
@@ -97,6 +98,14 @@ export class InFileModal
       this.settings.searchDelayMilliSeconds,
       true
     );
+  }
+
+  close() {
+    if (Platform.isMobile) {
+      // https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues/207
+      this.onClose();
+    }
+    super.close();
   }
 
   async init() {
