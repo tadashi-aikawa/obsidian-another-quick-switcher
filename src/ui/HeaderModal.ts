@@ -66,13 +66,14 @@ export class HeaderModal
       const nextIndex =
         this.hitItems.find((x) => x.index >= this.unsafeSelectedIndex)?.index ??
         this.hitItems[0].index;
+
       this.select(nextIndex, unsafeEvt);
     });
 
     this.setHotkeys();
   }
 
-  select(index: number, evt?: KeyboardEvent) {
+  select(index: number, evt?: KeyboardEvent, suppressAutoPreview?: boolean) {
     this.chooser.setSelectedItem(index, evt);
     this.chooser.suggestions.at(index)?.scrollIntoView({
       behavior: "auto",
@@ -82,7 +83,7 @@ export class HeaderModal
 
     this.unsafeSelectedIndex = index;
     const item = this.items.at(this.unsafeSelectedIndex);
-    if (this.autoPreview && item) {
+    if (this.autoPreview && item && !suppressAutoPreview) {
       this.appHelper.moveTo(item.position);
     }
   }
@@ -128,11 +129,11 @@ export class HeaderModal
     );
 
     if (firstOverIndex === -1) {
-      this.select(this.items.last()!.index);
+      this.select(this.items.last()!.index, undefined, true);
     } else if (firstOverIndex === 0) {
-      this.select(0);
+      this.select(0, undefined, true);
     } else {
-      this.select(firstOverIndex - 1);
+      this.select(firstOverIndex - 1, undefined, true);
     }
   }
 
