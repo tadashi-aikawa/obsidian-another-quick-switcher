@@ -2,6 +2,7 @@ import {
   App,
   debounce,
   Debouncer,
+  Platform,
   SuggestModal,
   TFile,
   WorkspaceLeaf,
@@ -95,7 +96,9 @@ export class LinkModal
 
   onOpen() {
     super.onOpen();
-    setFloatingModal(this.appHelper);
+    if (!Platform.isMobile) {
+      setFloatingModal(this.appHelper);
+    }
     this.opened = true;
   }
 

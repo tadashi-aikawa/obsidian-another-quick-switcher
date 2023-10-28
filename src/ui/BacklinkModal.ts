@@ -104,7 +104,9 @@ export class BacklinkModal
 
   onOpen() {
     super.onOpen();
-    setFloatingModal(this.appHelper);
+    if (!Platform.isMobile) {
+      setFloatingModal(this.appHelper);
+    }
     this.opened = true;
   }
 

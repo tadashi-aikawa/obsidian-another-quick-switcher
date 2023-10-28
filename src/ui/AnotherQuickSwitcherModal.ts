@@ -210,7 +210,9 @@ export class AnotherQuickSwitcherModal
 
   enableFloating() {
     this.floating = true;
-    setFloatingModal(this.appHelper);
+    if (!Platform.isMobile) {
+      setFloatingModal(this.appHelper);
+    }
   }
 
   indexingItems() {

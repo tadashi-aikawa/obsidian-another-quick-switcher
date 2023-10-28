@@ -1,4 +1,4 @@
-import { App, Pos, SuggestModal } from "obsidian";
+import { App, Platform, Pos, SuggestModal } from "obsidian";
 import { Hotkeys, Settings } from "../settings";
 import { AppHelper } from "../app-helper";
 import {
@@ -150,7 +150,9 @@ export class HeaderModal
 
   enableFloating() {
     this.floating = true;
-    setFloatingModal(this.appHelper);
+    if (!Platform.isMobile) {
+      setFloatingModal(this.appHelper);
+    }
   }
 
   getSuggestions(query: string): SuggestionItem[] {
