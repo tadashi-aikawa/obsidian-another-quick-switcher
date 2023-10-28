@@ -2,6 +2,7 @@ import {
   App,
   debounce,
   Debouncer,
+  Platform,
   SuggestModal,
   TFile,
   WorkspaceLeaf,
@@ -105,6 +106,14 @@ export class BacklinkModal
     super.onOpen();
     setFloatingModal(this.appHelper);
     this.opened = true;
+  }
+
+  close() {
+    if (Platform.isMobile) {
+      // https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues/207
+      this.onClose();
+    }
+    super.close();
   }
 
   onClose() {
