@@ -112,9 +112,9 @@ export class AnotherQuickSwitcherModal
     initialState?: CaptureState;
     navQueue?: Promise<void>;
   }) {
-    super(app);
+    super(args.app);
 
-    this.appHelper = new AppHelper(app);
+    this.appHelper = new AppHelper(args.app);
     this.settings = args.settings;
     this.logger = Logger.of(this.settings);
     this.initialCommand = args.command;
@@ -223,13 +223,14 @@ export class AnotherQuickSwitcherModal
     const originFilePath = this.originFile?.path;
 
     let start = performance.now();
-    const fileItems = app.vault
+    const fileItems = this.app.vault
       .getFiles()
       .filter(
-        (x) => x.path !== originFilePath && app.metadataCache.getFileCache(x)
+        (x) =>
+          x.path !== originFilePath && this.app.metadataCache.getFileCache(x)
       )
       .map((x) => {
-        const cache = app.metadataCache.getFileCache(x)!; // already filtered
+        const cache = this.app.metadataCache.getFileCache(x)!; // already filtered
         return {
           file: x,
           aliases: parseFrontMatterAliases(cache.frontmatter) ?? [],
@@ -613,17 +614,8 @@ export class AnotherQuickSwitcherModal
     return fileToOpened;
   }
 
-  async onChooseSuggestion(
-    item: SuggestionItem,
-    evt: MouseEvent | KeyboardEvent
-  ): Promise<any> {
+  async onChooseSuggestion(): Promise<any> {
     await this.chooseCurrentSuggestion("same-tab");
-  }
-
-  private showDebugLog(toMessage: () => string) {
-    if (this.settings.showLogAboutPerformanceInConsole) {
-      console.log(toMessage());
-    }
   }
 
   async handleCreateNewMarkdown(
