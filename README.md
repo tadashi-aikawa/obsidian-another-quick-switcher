@@ -167,7 +167,13 @@ The new Link search enables displaying all occurrences in the same file and list
 
 https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018/b31034e7-7ad7-4ab5-8294-6b4950efe224
 
-### 7. Show backlinks from the dialog
+### 7. In file search
+
+"In File search" allows you to search for a specific line within a file using a search keyword and displays it along with the surrounding lines.
+
+https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018/0b16c4f4-b071-4e05-9402-00ae2525e57c
+
+### 8. Show backlinks from the dialog
 
 You can show the backlinks about the suggestion in the dialog. (Default hotkey is `Mod h`)
 
@@ -175,13 +181,13 @@ It can show backlinks from not only existing notes but also phantom(not existing
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/show-backlinks-from-the-dialog.gif)
 
-### 8. Navigate outgoing/backlinks without leaving the dialog
+### 9. Navigate outgoing/backlinks without leaving the dialog
 
 You can navigate outgoing/backlinks without leaving the dialog by using the "show links", "show backlinks", "navigate forward", and "navigate back" commands.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/navigate-outgoing-backlinks-without-leaving-the-dialog.gif)
 
-### 9. Preview
+### 10. Preview
 
 You can preview the file without closing the dialog. (Default hotkey is `Mod ,`)
 
