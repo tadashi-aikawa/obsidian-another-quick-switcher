@@ -393,10 +393,7 @@ export class InFileModal
     return this.appHelper.getActiveFile()!;
   }
 
-  async onChooseSuggestion(
-    item: SuggestionItem,
-    evt: MouseEvent | KeyboardEvent
-  ): Promise<void> {
+  async onChooseSuggestion(): Promise<void> {
     await this.chooseCurrentSuggestion("same-tab");
   }
 
