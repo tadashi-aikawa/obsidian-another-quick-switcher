@@ -1,6 +1,7 @@
 import { TFile } from "obsidian";
 import { smartEquals, smartIncludes, smartMicroFuzzy } from "./utils/strings";
 import { minBy } from "./utils/collection-helper";
+import { isPresent } from "./utils/types";
 
 type MatchType =
   | "not found"
@@ -11,6 +12,7 @@ type MatchType =
   | "directory"
   | "header"
   | "link"
+  | "property"
   | "tag";
 
 export interface SuggestionItem {
@@ -42,6 +44,7 @@ function matchQuery(
     searchByTags: boolean;
     searchByHeaders: boolean;
     searchByLinks: boolean;
+    keysOfPropertyToSearch: string[];
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
     minFuzzyScore: number;
@@ -51,6 +54,7 @@ function matchQuery(
     searchByTags,
     searchByHeaders,
     searchByLinks,
+    keysOfPropertyToSearch,
     isNormalizeAccentsDiacritics,
   } = options;
 
@@ -208,6 +212,20 @@ function matchQuery(
     }
   }
 
+  if (keysOfPropertyToSearch.length > 0) {
+    const values = keysOfPropertyToSearch
+      .map((x) => item.frontMatter?.[x]?.toString())
+      .filter((x) => x && smartIncludes(x, query, isNormalizeAccentsDiacritics))
+      .filter(isPresent);
+    if (values.length > 0) {
+      results.push({
+        type: "property",
+        meta: values,
+        query,
+      });
+    }
+  }
+
   return results.length === 0 ? [{ type: "not found", query }] : results;
 }
 
@@ -218,6 +236,7 @@ function matchQueryAll(
     searchByTags: boolean;
     searchByHeaders: boolean;
     searchByLinks: boolean;
+    keysOfPropertyToSearch: string[];
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
     minFuzzyScore: number;
@@ -244,6 +263,7 @@ export function stampMatchResults(
     searchByTags: boolean;
     searchByHeaders: boolean;
     searchByLinks: boolean;
+    keysOfPropertyToSearch: string[];
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
     minFuzzyScore: number;

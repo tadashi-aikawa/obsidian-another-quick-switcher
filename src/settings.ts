@@ -14,7 +14,9 @@ export interface SearchCommand {
     tag: boolean;
     header: boolean;
     link: boolean;
+    property: boolean;
   };
+  keysOfPropertyToSearch: string[];
   searchTarget: SearchTarget;
   allowFuzzySearchForSearchTarget: boolean;
   minFuzzyMatchScore: number;
@@ -308,7 +310,9 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
     tag: false,
     link: false,
     header: false,
+    property: false,
   },
+  keysOfPropertyToSearch: [],
   searchTarget: "file",
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
@@ -330,7 +334,9 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
     tag: false,
     link: false,
     header: false,
+    property: false,
   },
+  keysOfPropertyToSearch: [],
   searchTarget: "link",
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
@@ -352,7 +358,9 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
     tag: false,
     link: false,
     header: false,
+    property: false,
   },
+  keysOfPropertyToSearch: [],
   searchTarget: "backlink",
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
@@ -374,7 +382,9 @@ export const createDefault2HopLinkSearchCommand = (): SearchCommand => ({
     tag: true,
     link: false,
     header: false,
+    property: false,
   },
+  keysOfPropertyToSearch: [],
   searchTarget: "2-hop-link",
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
@@ -403,7 +413,9 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       tag: true,
       header: false,
       link: false,
+      property: false,
     },
+    keysOfPropertyToSearch: [],
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
@@ -424,7 +436,9 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       tag: false,
       link: false,
       header: false,
+      property: false,
     },
+    keysOfPropertyToSearch: [],
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
@@ -451,7 +465,9 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       tag: false,
       link: false,
       header: false,
+      property: false,
     },
+    keysOfPropertyToSearch: [],
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: true,
     minFuzzyMatchScore: 0.5,
@@ -478,7 +494,9 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       tag: true,
       link: true,
       header: true,
+      property: false,
     },
+    keysOfPropertyToSearch: [],
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
@@ -508,7 +526,9 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       tag: false,
       link: false,
       header: false,
+      property: false,
     },
+    keysOfPropertyToSearch: [],
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
@@ -1031,14 +1051,14 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         const coloring = () => {
           bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
           bc.buttonEl.addClass(
-            command.searchBy!.tag ? buttonEnabledClass : buttonDisabledClass
+            command.searchBy.tag ? buttonEnabledClass : buttonDisabledClass
           );
         };
 
         bc.setButtonText("Tag")
           .setClass(buttonClass)
           .onClick(async () => {
-            command.searchBy!.tag = !command.searchBy!.tag;
+            command.searchBy.tag = !command.searchBy!.tag;
             coloring();
           });
         coloring();
@@ -1048,14 +1068,14 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         const coloring = () => {
           bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
           bc.buttonEl.addClass(
-            command.searchBy!.header ? buttonEnabledClass : buttonDisabledClass
+            command.searchBy.header ? buttonEnabledClass : buttonDisabledClass
           );
         };
 
         bc.setButtonText("Header")
           .setClass(buttonClass)
           .onClick(async () => {
-            command.searchBy!.header = !command.searchBy!.header;
+            command.searchBy.header = !command.searchBy!.header;
             coloring();
           });
         coloring();
@@ -1065,19 +1085,55 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         const coloring = () => {
           bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
           bc.buttonEl.addClass(
-            command.searchBy!.link ? buttonEnabledClass : buttonDisabledClass
+            command.searchBy.link ? buttonEnabledClass : buttonDisabledClass
           );
         };
 
         bc.setButtonText("Link")
           .setClass(buttonClass)
           .onClick(async () => {
-            command.searchBy!.link = !command.searchBy!.link;
+            command.searchBy.link = !command.searchBy!.link;
             coloring();
           });
         coloring();
         return bc;
+      })
+      .addButton((bc) => {
+        const coloring = () => {
+          bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
+          bc.buttonEl.addClass(
+            command.searchBy.property ? buttonEnabledClass : buttonDisabledClass
+          );
+        };
+
+        bc.setButtonText("Property")
+          .setClass(buttonClass)
+          .onClick(async () => {
+            command.searchBy.property = !command.searchBy!.property;
+            coloring();
+            this.display();
+          });
+        coloring();
+
+        return bc;
       });
+
+    if (command.searchBy.property) {
+      new Setting(div)
+        .setName("Keys of the property to search")
+        .setDesc("Multiple entries can be specified, separated by line breaks.")
+        .addTextArea((tc) => {
+          const el = tc
+            .setValue(command.keysOfPropertyToSearch!.join("\n"))
+            .onChange(async (value) => {
+              command.keysOfPropertyToSearch = smartLineBreakSplit(value);
+            });
+          el.inputEl.className =
+            "another-quick-switcher__settings__keys_of_property_to_search";
+
+          return el;
+        });
+    }
 
     new Setting(div).setName("Search target").addDropdown((dc) => {
       dc.addOptions(mirror([...searchTargetList]))

@@ -223,7 +223,7 @@ export class AnotherQuickSwitcherModal
     const originFilePath = this.originFile?.path;
 
     let start = performance.now();
-    const fileItems = this.app.vault
+    const fileItems: SuggestionItem[] = this.app.vault
       .getFiles()
       .filter(
         (x) =>
@@ -253,7 +253,8 @@ export class AnotherQuickSwitcherModal
               )
             : [],
           frontMatter:
-            this.command.showFrontMatter && cache.frontmatter
+            (this.command.showFrontMatter || this.command.searchBy.property) &&
+            cache.frontmatter
               ? omitBy(cache.frontmatter, (key, _) => key === "position")
               : undefined,
           phantom: false,
@@ -412,6 +413,9 @@ export class AnotherQuickSwitcherModal
               searchByHeaders: this.command.searchBy.header,
               searchByLinks: this.command.searchBy.link,
               searchByTags: this.command.searchBy.tag,
+              keysOfPropertyToSearch: this.command.searchBy.property
+                ? this.command.keysOfPropertyToSearch
+                : [],
               fuzzyTarget: this.command.allowFuzzySearchForSearchTarget,
               minFuzzyScore: this.command.minFuzzyMatchScore,
             })
