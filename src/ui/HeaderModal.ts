@@ -150,7 +150,7 @@ export class HeaderModal
 
   enableFloating() {
     this.floating = true;
-    if (!Platform.isMobile) {
+    if (!Platform.isPhone) {
       setFloatingModal(this.appHelper);
     }
   }

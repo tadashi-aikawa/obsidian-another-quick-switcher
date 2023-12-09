@@ -188,7 +188,7 @@ export class InFileModal
 
   enableFloating() {
     this.floating = true;
-    if (!Platform.isMobile) {
+    if (!Platform.isPhone) {
       setFloatingModal(this.appHelper);
     }
   }
