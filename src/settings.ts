@@ -78,6 +78,7 @@ export interface Hotkeys {
     "move to next hit": Hotkey[];
     "move to previous hit": Hotkey[];
     "toggle auto preview": Hotkey[];
+    "insert all to editor": Hotkey[];
     dismiss: Hotkey[];
   };
   backlink: {
@@ -228,6 +229,7 @@ const createDefaultHotkeys = (): Hotkeys => ({
     "move to next hit": [{ modifiers: [], key: "Tab" }],
     "move to previous hit": [{ modifiers: ["Shift"], key: "Tab" }],
     "toggle auto preview": [{ modifiers: ["Mod"], key: "," }],
+    "insert all to editor": [{ modifiers: ["Alt", "Shift"], key: "Enter" }],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   backlink: {

@@ -319,6 +319,16 @@ export class HeaderModal
       }
     });
 
+    this.registerKeys("insert all to editor", async () => {
+      this.close();
+
+      this.chooser.values?.forEach((x) => {
+        this.appHelper.insertStringToActiveFile(
+          `${" ".repeat((x.level - 1) * 4)}- ${x.value}\n`
+        );
+      });
+    });
+
     this.registerKeys("dismiss", async () => {
       this.close();
     });
