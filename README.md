@@ -37,7 +37,7 @@ Custom searches enables you to create your original search commands.
 | markdown                           | All markdown files                                   |
 | backlink                           | Markdown files in backlinks on the current file      |
 | link                               | Markdown files in outgoing links on the current file |
-| [2-hop-link] | Markdown files in 2-hop-links from the current file  |
+| [2-hop-link]                       | Markdown files in 2-hop-links from the current file  |
 
 #### Sort priorities
 
@@ -49,9 +49,10 @@ You can use the following names as a `Sort priorities`.
 | Prefix name match           | The file name or alias starts with a query             | 6.0.0  |
 | Name match                  | The file name or alias includes a query                | 6.0.0  |
 | Fuzzy name match            | The file name or alias matches fuzzy with a query      | 8.10.0 |
-| Tag match                   | The tag name in the file includes a query              | 6.0.0  |
-| Header match                | The header name in the file includes a query           | 6.0.0  |
-| Link match                  | The internal link name in the file includes a query    | 6.0.0  |
+| Tag match                   | The query includes the file's tag name                 | 6.0.0  |
+| Header match                | The query includes the file's header name              | 6.0.0  |
+| Link match                  | The query includes the file's internal link name       | 6.0.0  |
+| Property match              | The query includes the file's property name            | 10.1.0 |
 | Length                      | Length of the file name or alias                       | 6.0.0  |
 | Last opened                 | The time the file opened last                          | 6.0.0  |
 | Last modified               | The time the file modified last                        | 6.0.0  |
