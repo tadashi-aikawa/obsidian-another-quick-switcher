@@ -148,6 +148,7 @@ type OpenFileOption = {
   offset?: number;
   line?: number;
   inplace?: boolean;
+  preventDuplicateTabs?: boolean;
 };
 
 export class AppHelper {
@@ -445,6 +446,12 @@ export class AppHelper {
       ...option,
     };
 
+    const priorNewLeaf = option?.preventDuplicateTabs
+      ? this.unsafeApp.workspace
+          .getLeavesOfType("markdown")
+          .find((x) => x.getViewState().state.file === file.path)
+      : undefined;
+
     let leaf: WorkspaceLeaf | undefined;
     let background: boolean = false;
     switch (opt.leaf) {
@@ -452,10 +459,10 @@ export class AppHelper {
         leaf = captureState?.leaf ?? this.unsafeApp.workspace.getLeaf();
         break;
       case "new-tab":
-        leaf = this.unsafeApp.workspace.getLeaf(true);
+        leaf = priorNewLeaf ?? this.unsafeApp.workspace.getLeaf(true);
         break;
       case "new-tab-background":
-        leaf = this.unsafeApp.workspace.getLeaf(true);
+        leaf = priorNewLeaf ?? this.unsafeApp.workspace.getLeaf(true);
         background = true;
         break;
       case "new-pane-horizontal":

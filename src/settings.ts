@@ -144,6 +144,7 @@ export interface Settings {
   maxNumberOfSuggestions: number;
   normalizeAccentsAndDiacritics: boolean;
   useSelectionWordsAsDefaultInputQuery: boolean;
+  preventDuplicateTabs: boolean;
   // Appearance
   showDirectory: boolean;
   showDirectoryAtNewLine: boolean;
@@ -548,6 +549,7 @@ export const DEFAULT_SETTINGS: Settings = {
   maxNumberOfSuggestions: 50,
   normalizeAccentsAndDiacritics: false,
   useSelectionWordsAsDefaultInputQuery: false,
+  preventDuplicateTabs: false,
   // Appearance
   showDirectory: true,
   showDirectoryAtNewLine: false,
@@ -672,6 +674,20 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           this.plugin.settings.useSelectionWordsAsDefaultInputQuery = value;
           await this.plugin.saveSettings();
         });
+      });
+
+    new Setting(containerEl)
+      .setName("Prevent duplicate tabs")
+      .setDesc(
+        "If a file is already opened as a tab, it will not open in a new tab; instead, the existing tab will be activated. This option is enabled for three commands: 'open in new tab', 'open in new tab in background', and 'open all in new tabs'."
+      )
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.preventDuplicateTabs).onChange(
+          async (value) => {
+            this.plugin.settings.preventDuplicateTabs = value;
+            await this.plugin.saveSettings();
+          }
+        );
       });
   }
 

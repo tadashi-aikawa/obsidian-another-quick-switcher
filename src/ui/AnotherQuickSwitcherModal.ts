@@ -625,7 +625,12 @@ export class AnotherQuickSwitcherModal
     this.navigate(() =>
       this.appHelper.openFile(
         fileToOpened,
-        { leaf, offset, inplace: option.keepOpen },
+        {
+          leaf,
+          offset,
+          inplace: option.keepOpen,
+          preventDuplicateTabs: this.settings.preventDuplicateTabs,
+        },
         this.stateToRestore
       )
     );
@@ -749,6 +754,7 @@ export class AnotherQuickSwitcherModal
         .forEach((x) =>
           this.appHelper.openFile(x.file, {
             leaf: "new-tab-background",
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
           })
         );
     });

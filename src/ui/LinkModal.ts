@@ -299,6 +299,7 @@ export class LinkModal
           leaf: leaf,
           line: item.lineNumber - 1,
           inplace: option.keepOpen,
+          preventDuplicateTabs: this.settings.preventDuplicateTabs,
         },
         this.stateToRestore
       )
@@ -394,6 +395,7 @@ export class LinkModal
         .forEach((x) =>
           this.appHelper.openFile(x, {
             leaf: "new-tab-background",
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
           })
         );
     });

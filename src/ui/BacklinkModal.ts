@@ -362,6 +362,7 @@ export class BacklinkModal
           leaf: leaf,
           line: item.lineNumber - 1,
           inplace: option.keepOpen,
+          preventDuplicateTabs: this.settings.preventDuplicateTabs,
         },
         this.stateToRestore
       )
@@ -455,6 +456,7 @@ export class BacklinkModal
         .forEach((x) =>
           this.appHelper.openFile(x.file, {
             leaf: "new-tab-background",
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
           })
         );
     });
