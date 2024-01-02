@@ -445,11 +445,11 @@ export class AppHelper {
       ...option,
     };
 
-    let leaf: WorkspaceLeaf | undefined = captureState?.leaf,
-      background: boolean = false;
+    let leaf: WorkspaceLeaf | undefined;
+    let background: boolean = false;
     switch (opt.leaf) {
       case "same-tab":
-        leaf ??= this.unsafeApp.workspace.getLeaf();
+        leaf = captureState?.leaf ?? this.unsafeApp.workspace.getLeaf();
         break;
       case "new-tab":
         leaf = this.unsafeApp.workspace.getLeaf(true);
