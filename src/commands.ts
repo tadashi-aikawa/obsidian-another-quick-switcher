@@ -34,8 +34,8 @@ export function showSearchDialog(
     command,
     originFile: app.workspace.getActiveFile(),
     inputQuery: settings.useSelectionWordsAsDefaultInputQuery
-      ? editor?.getSelection() ?? ""
-      : "",
+      ? editor?.getSelection() ?? null
+      : null,
     navigationHistories: [],
     currentNavigationHistoryIndex: 0,
     stackHistory: true,

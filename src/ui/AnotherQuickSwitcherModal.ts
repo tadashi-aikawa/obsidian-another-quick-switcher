@@ -47,6 +47,12 @@ import { ExhaustiveError } from "../errors";
 import { setFloatingModal } from "./modal";
 import { Logger } from "../utils/logger";
 
+let globalInternalStorage: {
+  query: string;
+} = {
+  query: "",
+};
+
 interface CustomSearchHistory {
   originFile: TFile | null;
   command: SearchCommand;
@@ -63,7 +69,7 @@ export class AnotherQuickSwitcherModal
   ignoredItems: SuggestionItem[];
   appHelper: AppHelper;
   settings: Settings;
-  initialInputQuery: string;
+  initialInputQuery: string | null;
   searchQuery: string;
   originFile: TFile | null;
   navigationHistories: CustomSearchHistory[];
@@ -104,7 +110,7 @@ export class AnotherQuickSwitcherModal
     settings: Settings;
     command: SearchCommand;
     originFile: TFile | null;
-    inputQuery: string;
+    inputQuery: string | null;
     navigationHistories: CustomSearchHistory[];
     currentNavigationHistoryIndex: number;
     stackHistory: boolean;
@@ -182,9 +188,12 @@ export class AnotherQuickSwitcherModal
       this.enableFloating();
     }
 
-    this.inputEl.value = this.initialInputQuery;
+    this.inputEl.value = this.command.restoreLastInput
+      ? this.initialInputQuery ?? globalInternalStorage.query
+      : this.initialInputQuery ?? "";
     // Necessary to rerender suggestions
     this.inputEl.dispatchEvent(new Event("input"));
+    this.inputEl.select();
 
     if (this.stackHistory) {
       this.navigationHistories.push({
@@ -202,6 +211,11 @@ export class AnotherQuickSwitcherModal
     if (this.willSilentClose) {
       return;
     }
+
+    if (this.command.restoreLastInput) {
+      globalInternalStorage.query = this.inputEl.value;
+    }
+
     if (this.stateToRestore) {
       this.navigate(() => this.stateToRestore!.restore());
     }

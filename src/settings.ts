@@ -25,6 +25,7 @@ export interface SearchCommand {
   showFrontMatter: boolean;
   excludeFrontMatterKeys: string[];
   defaultInput: string;
+  restoreLastInput: boolean;
   commandPrefix: string;
   sortPriorities: SortPriority[];
   includePrefixPathPatterns: string[];
@@ -307,6 +308,7 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
+  restoreLastInput: false,
   commandPrefix: "",
   sortPriorities: [],
   includePrefixPathPatterns: [],
@@ -331,6 +333,7 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
+  restoreLastInput: false,
   commandPrefix: "",
   sortPriorities: [],
   includePrefixPathPatterns: [],
@@ -355,6 +358,7 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
+  restoreLastInput: false,
   commandPrefix: "",
   sortPriorities: ["Last opened", "Last modified"],
   includePrefixPathPatterns: [],
@@ -379,6 +383,7 @@ export const createDefault2HopLinkSearchCommand = (): SearchCommand => ({
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
+  restoreLastInput: false,
   commandPrefix: "",
   sortPriorities: [
     "Prefix name match",
@@ -410,6 +415,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
+    restoreLastInput: false,
     commandPrefix: ":e ",
     sortPriorities: ["Name match", ".md", "Last opened", "Last modified"],
     includePrefixPathPatterns: [],
@@ -433,6 +439,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
+    restoreLastInput: false,
     commandPrefix: ":f ",
     sortPriorities: [
       "Prefix name match",
@@ -462,6 +469,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
+    restoreLastInput: false,
     commandPrefix: "",
     sortPriorities: [
       "Prefix name match",
@@ -491,6 +499,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
+    restoreLastInput: false,
     commandPrefix: ":l ",
     sortPriorities: [
       "Prefix name match",
@@ -523,6 +532,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
+    restoreLastInput: false,
     commandPrefix: ":s ",
     sortPriorities: ["Star", ".md", "Last opened", "Last modified"],
     includePrefixPathPatterns: [],
@@ -1210,6 +1220,17 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             command.defaultInput = value;
           })
       );
+
+    new Setting(div)
+      .setName("Restore last input")
+      .setDesc(
+        "If enabled, this option will restore the last input, shared across all searches where it is enabled."
+      )
+      .addToggle((tc) => {
+        tc.setValue(command.restoreLastInput).onChange(async (value) => {
+          command.restoreLastInput = value;
+        });
+      });
 
     new Setting(div)
       .setName("Command prefix")
