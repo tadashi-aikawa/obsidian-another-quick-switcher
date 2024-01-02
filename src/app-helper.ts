@@ -470,15 +470,14 @@ export class AppHelper {
       case "popup":
         const hoverEditorInstance =
           this.unsafeApp.plugins.plugins["obsidian-hover-editor"];
-        if (hoverEditorInstance) {
-          leaf = hoverEditorInstance.spawnPopover();
-        } else {
-          leaf = this.unsafeApp.workspace.getLeaf(true);
-        }
+        leaf =
+          hoverEditorInstance?.spawnPopover() ??
+          this.unsafeApp.workspace.getLeaf(true);
         break;
       default:
         throw new ExhaustiveError(opt.leaf);
     }
+
     if (opt.inplace && opt.leaf === "same-tab") {
       await leaf.setViewState({
         ...leaf.getViewState(),
@@ -492,6 +491,7 @@ export class AppHelper {
         active: !background,
       });
     }
+
     if (leaf.view instanceof MarkdownView) {
       const markdownView = leaf.view;
       if (opt.offset != null) {
