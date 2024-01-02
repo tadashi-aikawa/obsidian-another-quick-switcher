@@ -52,7 +52,7 @@ You can use the following names as a `Sort priorities`.
 | Tag match                   | The query includes the file's tag name                 | 6.0.0  |
 | Header match                | The query includes the file's header name              | 6.0.0  |
 | Link match                  | The query includes the file's internal link name       | 6.0.0  |
-| Property match              | The query includes the file's property name            | 10.1.0 |
+| Property match              | The query includes the file's property name            | 11.0.0 |
 | Length                      | Length of the file name or alias                       | 6.0.0  |
 | Last opened                 | The time the file opened last                          | 6.0.0  |
 | Last modified               | The time the file modified last                        | 6.0.0  |
