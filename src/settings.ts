@@ -114,14 +114,6 @@ export interface Hotkeys {
   "in-file": {
     up: Hotkey[];
     down: Hotkey[];
-    open: Hotkey[];
-    "open in new tab": Hotkey[];
-    "open in new pane (horizontal)": Hotkey[];
-    "open in new pane (vertical)": Hotkey[];
-    "open in new window": Hotkey[];
-    "open in popup": Hotkey[];
-    "open in new tab in background": Hotkey[];
-    "open all in new tabs": Hotkey[];
     "show all results": Hotkey[];
     "toggle auto preview": Hotkey[];
     dismiss: Hotkey[];
@@ -183,7 +175,7 @@ export interface Settings {
   showFuzzyMatchScore: boolean;
 }
 
-const createDefaultHotkeys = (): Hotkeys => ({
+export const createDefaultHotkeys = (): Hotkeys => ({
   main: {
     up: [{ modifiers: ["Mod"], key: "p" }],
     down: [{ modifiers: ["Mod"], key: "n" }],
@@ -265,14 +257,6 @@ const createDefaultHotkeys = (): Hotkeys => ({
   "in-file": {
     up: [{ modifiers: ["Mod"], key: "p" }],
     down: [{ modifiers: ["Mod"], key: "n" }],
-    open: [{ modifiers: [], key: "Enter" }],
-    "open in new tab": [{ modifiers: ["Mod"], key: "Enter" }],
-    "open in new pane (horizontal)": [{ modifiers: ["Mod"], key: "-" }],
-    "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
-    "open in new window": [{ modifiers: ["Mod"], key: "o" }],
-    "open in popup": [],
-    "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
-    "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     "toggle auto preview": [{ modifiers: ["Mod"], key: "," }],
     dismiss: [{ modifiers: [], key: "Escape" }],

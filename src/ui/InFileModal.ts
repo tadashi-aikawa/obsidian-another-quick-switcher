@@ -4,14 +4,13 @@ import {
   Debouncer,
   Platform,
   SuggestModal,
-  TFile,
   WorkspaceLeaf,
 } from "obsidian";
-import { Hotkeys, Settings } from "../settings";
-import { AppHelper, CaptureState, LeafType } from "../app-helper";
+import { AppHelper } from "../app-helper";
 import { createInstructions, quickResultSelectionModifier } from "../keys";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
-import { setFloatingModal } from "./modal";
+import { Hotkeys, Settings } from "../settings";
+import { range } from "../utils/collection-helper";
+import { Logger } from "../utils/logger";
 import {
   capitalizeFirstLetter,
   escapeRegExp,
@@ -19,9 +18,9 @@ import {
   trimLineByEllipsis,
 } from "../utils/strings";
 import { isPresent } from "../utils/types";
-import { Logger } from "../utils/logger";
-import { range } from "../utils/collection-helper";
 import { PREVIEW } from "./icons";
+import { setFloatingModal } from "./modal";
+import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 let globalInternalStorage: {
   query: string;
@@ -33,7 +32,6 @@ let globalInternalStorage: {
 
 interface SuggestionItem {
   order?: number;
-  file?: TFile;
   lineBefore: string[];
   line: string;
   lineAfter: string[];
@@ -52,7 +50,6 @@ export class InFileModal
   autoPreview: boolean;
   ignoredItems: SuggestionItem[];
   initialLeaf: WorkspaceLeaf | null;
-  stateToRestore: CaptureState;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
@@ -70,12 +67,6 @@ export class InFileModal
   opened: boolean;
 
   countInputEl?: HTMLDivElement;
-
-  private markClosed: () => void;
-  isClosed: Promise<void> = new Promise((resolve) => {
-    this.markClosed = resolve;
-  });
-  navQueue: Promise<void> = Promise.resolve();
 
   constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
@@ -141,11 +132,6 @@ export class InFileModal
     super.onClose();
     globalInternalStorage.query = this.inputEl.value;
     globalInternalStorage.selected = this.chooser.selectedItem;
-    if (this.stateToRestore) {
-      // restore initial leaf state, undoing any previewing
-      this.navigate(() => this.stateToRestore.restore());
-    }
-    this.navigate(this.markClosed);
   }
 
   select(index: number, evt?: KeyboardEvent) {
@@ -194,11 +180,9 @@ export class InFileModal
   }
 
   async indexingItems() {
-    const file = this.appHelper.getActiveFile()!;
     const lines = this.appHelper.getCurrentEditor()!.getValue().split("\n");
 
     this.ignoredItems = lines.map((line, i) => ({
-      file,
       lineBefore: range(this.settings.inFileContextLines)
         .reverse()
         .map((x) => lines[i - x - 1])
@@ -360,41 +344,12 @@ export class InFileModal
     el.appendChild(itemDiv);
   }
 
-  navigate(cb: () => any) {
-    this.navQueue = this.navQueue.then(cb);
-  }
-
-  async chooseCurrentSuggestion(
-    leaf: LeafType,
-    option: { keepOpen?: boolean } = {}
-  ): Promise<TFile | null> {
-    const item = this.chooser.values?.[this.chooser.selectedItem];
-    if (!item) {
-      return null;
-    }
-
-    if (!option.keepOpen) {
-      this.close();
-      this.navigate(() => this.isClosed); // wait for close to finish before navigating
-    } else if (leaf === "same-tab") {
-      this.stateToRestore ??= this.appHelper.captureState(this.initialLeaf);
-    }
-    this.navigate(() =>
-      this.appHelper.openFile(
-        this.appHelper.getActiveFile()!,
-        {
-          leaf: leaf,
-          line: item.lineNumber - 1,
-          inplace: option.keepOpen,
-        },
-        this.stateToRestore
-      )
+  async onChooseSuggestion(item: SuggestionItem): Promise<void> {
+    this.appHelper.moveTo(
+      this.appHelper
+        .getCurrentEditor()!
+        .posToOffset({ line: item.lineNumber - 1, ch: 0 })
     );
-    return this.appHelper.getActiveFile()!;
-  }
-
-  async onChooseSuggestion(): Promise<void> {
-    await this.chooseCurrentSuggestion("same-tab");
   }
 
   private registerKeys(
@@ -413,7 +368,6 @@ export class InFileModal
   }
 
   private setHotkeys() {
-    this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Home")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "End")!);
@@ -459,47 +413,6 @@ export class InFileModal
     });
     this.registerKeys("down", (evt) => {
       navigateNext(evt);
-    });
-
-    this.registerKeys("open", async () => {
-      await this.chooseCurrentSuggestion("same-tab");
-    });
-    this.registerKeys("open in new tab", async () => {
-      await this.chooseCurrentSuggestion("new-tab");
-    });
-    this.registerKeys("open in new pane (horizontal)", async () => {
-      await this.chooseCurrentSuggestion("new-pane-horizontal");
-    });
-    this.registerKeys("open in new pane (vertical)", async () => {
-      await this.chooseCurrentSuggestion("new-pane-vertical");
-    });
-    this.registerKeys("open in new window", async () => {
-      await this.chooseCurrentSuggestion("new-window");
-    });
-    this.registerKeys("open in popup", async () => {
-      await this.chooseCurrentSuggestion("popup");
-    });
-    this.registerKeys("open in new tab in background", async () => {
-      await this.chooseCurrentSuggestion("new-tab-background", {
-        keepOpen: true,
-      });
-    });
-    this.registerKeys("open all in new tabs", () => {
-      this.close();
-      if (this.chooser.values == null) {
-        return;
-      }
-
-      this.chooser.values
-        .slice()
-        .reverse()
-        .map((x) => x.file)
-        .filter(isPresent)
-        .forEach((x) =>
-          this.appHelper.openFile(x, {
-            leaf: "new-tab-background",
-          })
-        );
     });
 
     this.registerKeys("show all results", () => {

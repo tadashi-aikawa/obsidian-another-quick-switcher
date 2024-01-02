@@ -2,12 +2,15 @@ import { Plugin } from "obsidian";
 import { createCommands } from "./commands";
 import {
   AnotherQuickSwitcherSettingTab,
+  createDefaultHotkeys,
   createDefaultSearchCommand,
   DEFAULT_SETTINGS,
+  Hotkeys,
   Settings,
 } from "./settings";
 import { AppHelper } from "./app-helper";
 import merge from "ts-deepmerge";
+import { Hotkey } from "./keys";
 
 export default class AnotherQuickSwitcher extends Plugin {
   settings: Settings;
@@ -34,6 +37,7 @@ export default class AnotherQuickSwitcher extends Plugin {
       DEFAULT_SETTINGS,
       currentSettings ?? {}
     );
+
     this.settings.searchCommands.forEach((_, i) => {
       this.settings.searchCommands[i] = merge.withOptions(
         { mergeArrays: false },
@@ -47,6 +51,19 @@ export default class AnotherQuickSwitcher extends Plugin {
       if (this.settings.searchCommands[i].searchTarget === "markdown") {
         this.settings.searchCommands[i].searchTarget = "file";
       }
+    });
+
+    // for retrieve keys
+    const defaultHotkeys = createDefaultHotkeys();
+    // Clean old keys
+    (Object.keys(defaultHotkeys) as (keyof Hotkeys)[]).forEach((dialogKey) => {
+      Object.keys(this.settings.hotkeys[dialogKey]).forEach((k) => {
+        if (!(k in defaultHotkeys[dialogKey])) {
+          delete (
+            this.settings.hotkeys[dialogKey] as { [key: string]: Hotkey[] }
+          )[k];
+        }
+      });
     });
   }
 
