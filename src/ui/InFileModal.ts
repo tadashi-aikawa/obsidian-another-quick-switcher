@@ -50,6 +50,8 @@ export class InFileModal
   autoPreview: boolean;
   ignoredItems: SuggestionItem[];
   initialLeaf: WorkspaceLeaf | null;
+  /** ⚠Not work correctly in all cases */
+  unsafeSelectedIndex = 0;
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
@@ -57,11 +59,6 @@ export class InFileModal
   previewIcon: Element | null;
 
   currentQueriesRegExp: RegExp;
-
-  debounceGetSuggestions: Debouncer<
-    [string, (items: SuggestionItem[]) => void],
-    void
-  >;
 
   suggestions: SuggestionItem[] = [];
   opened: boolean;
@@ -81,14 +78,6 @@ export class InFileModal
 
     this.setHotkeys();
     this.setPlaceholder("Type anything then shows the results");
-
-    this.debounceGetSuggestions = debounce(
-      (query: string, cb: (items: SuggestionItem[]) => void) => {
-        cb(this._getSuggestions(query));
-      },
-      this.settings.searchDelayMilliSeconds,
-      true
-    );
   }
 
   close() {
@@ -117,13 +106,25 @@ export class InFileModal
 
     const selected = globalInternalStorage.selected;
     if (selected != null) {
-      this.chooser.setSelectedItem(selected);
+      this.select(selected);
       this.chooser.suggestions.at(selected)?.scrollIntoView({
         behavior: "auto",
         block: "center",
         inline: "center",
       });
     }
+
+    this.inputEl.addEventListener("input", (evt) => {
+      const unsafeEvt = evt as KeyboardEvent;
+      if (this.suggestions.length === 0) {
+        return;
+      }
+
+      this.select(
+        Math.min(this.unsafeSelectedIndex, this.suggestions.length - 1),
+        unsafeEvt
+      );
+    });
 
     this.opened = true;
   }
@@ -136,6 +137,7 @@ export class InFileModal
 
   select(index: number, evt?: KeyboardEvent) {
     this.chooser.setSelectedItem(index, evt);
+    this.unsafeSelectedIndex = index;
     if (this.autoPreview) {
       const p = {
         line: this.chooser.values![index].lineNumber - 1,
@@ -195,19 +197,7 @@ export class InFileModal
     }));
   }
 
-  getSuggestions(query: string): SuggestionItem[] | Promise<SuggestionItem[]> {
-    if (!query || !this.opened) {
-      return this._getSuggestions(query);
-    }
-
-    return new Promise((resolve) => {
-      this.debounceGetSuggestions(query, (items) => {
-        resolve(items);
-      });
-    });
-  }
-
-  _getSuggestions(query: string): SuggestionItem[] {
+  getSuggestions(query: string): SuggestionItem[] {
     const start = performance.now();
 
     const isQueryEmpty = query.trim() === "";
@@ -435,8 +425,11 @@ export class InFileModal
     this.registerKeys("toggle auto preview", () => {
       this.autoPreview = !this.autoPreview;
       this.refreshPreviewIcon();
-      if (this.autoPreview && !this.floating) {
-        this.enableFloating();
+      if (this.autoPreview) {
+        this.select(this.unsafeSelectedIndex);
+        if (!this.floating) {
+          this.enableFloating();
+        }
       }
     });
 
