@@ -17,6 +17,7 @@ export const sortPriorityList = [
   "Fuzzy name match",
   "Star",
   "Tag match",
+  "Property match",
   "Alphabetical",
   "Alphabetical reverse",
 ] as const;
@@ -85,6 +86,8 @@ function getComparator(
       return priorityToStar;
     case "Tag match":
       return priorityToTag;
+    case "Property match":
+      return priorityToProperty;
     case "Alphabetical":
       return priorityToAlphabetical;
     case "Alphabetical reverse":
@@ -222,6 +225,19 @@ function priorityToTag(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
     (x) =>
       x.matchResults
         .filter((x) => x.type === "tag")
+        .map((x) => x.query)
+        .unique().length,
+    "desc"
+  );
+}
+
+function priorityToProperty(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
+  return compare(
+    a,
+    b,
+    (x) =>
+      x.matchResults
+        .filter((x) => x.type === "property")
         .map((x) => x.query)
         .unique().length,
     "desc"
