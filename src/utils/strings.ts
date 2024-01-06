@@ -38,6 +38,22 @@ export function includes(
   );
 }
 
+export function capitalIncludes(
+  text: string,
+  query: string,
+  isNormalizeAccentsDiacritics: boolean
+): boolean {
+  if (!hasCapitalLetter(query)) {
+    return includes(text, query, isNormalizeAccentsDiacritics);
+  }
+
+  return isNormalizeAccentsDiacritics
+    ? normalizeAccentsDiacritics(text).includes(
+        normalizeAccentsDiacritics(query)
+      )
+    : text.includes(query);
+}
+
 export function smartIncludes(
   text: string,
   query: string,

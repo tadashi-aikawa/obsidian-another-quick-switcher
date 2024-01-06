@@ -1,11 +1,4 @@
-import {
-  App,
-  debounce,
-  Debouncer,
-  Platform,
-  SuggestModal,
-  WorkspaceLeaf,
-} from "obsidian";
+import { App, Platform, SuggestModal, WorkspaceLeaf } from "obsidian";
 import { AppHelper } from "../app-helper";
 import { createInstructions, quickResultSelectionModifier } from "../keys";
 import { Hotkeys, Settings } from "../settings";
@@ -13,8 +6,8 @@ import { range } from "../utils/collection-helper";
 import { Logger } from "../utils/logger";
 import {
   capitalizeFirstLetter,
+  capitalIncludes,
   escapeRegExp,
-  includes,
   trimLineByEllipsis,
 } from "../utils/strings";
 import { isPresent } from "../utils/types";
@@ -211,7 +204,11 @@ export class InFileModal
       ? []
       : this.ignoredItems.filter((x) =>
           queries.every((q) =>
-            includes(x.line, q, this.settings.normalizeAccentsAndDiacritics)
+            capitalIncludes(
+              x.line,
+              q,
+              this.settings.normalizeAccentsAndDiacritics
+            )
           )
         );
 

@@ -1,5 +1,6 @@
 import {
   capitalizeFirstLetter,
+  capitalIncludes,
   excludeEmoji,
   excludeFormat,
   excludeSpace,
@@ -74,6 +75,39 @@ describe.each<{ text: string; query: string; expected: boolean }>`
     expect(includes(text, query, false)).toBe(expected);
   });
 });
+
+describe.each<{
+  text: string;
+  query: string;
+  isNormalizeAccentsDiacritics: boolean;
+  expected: boolean;
+}>`
+  text            | query       | isNormalizeAccentsDiacritics | expected
+  ${"abcd"}       | ${"bc"}     | ${false}                     | ${true}
+  ${"abcd"}       | ${"BC"}     | ${false}                     | ${false}
+  ${"ABCD"}       | ${"bc"}     | ${false}                     | ${true}
+  ${"ABCD"}       | ${"bC"}     | ${false}                     | ${false}
+  ${"ABCD"}       | ${"Bc"}     | ${false}                     | ${false}
+  ${"ABCD"}       | ${"BC"}     | ${false}                     | ${true}
+  ${" AB CD "}    | ${"bc"}     | ${false}                     | ${false}
+  ${"🍰Cake"}     | ${"cake"}   | ${false}                     | ${true}
+  ${"🍰Cake"}     | ${"🍰"}     | ${false}                     | ${true}
+  ${"🍰AB🍰CD🍰"} | ${"bc"}     | ${false}                     | ${false}
+  ${" AB CD "}    | ${"ab bc"}  | ${false}                     | ${false}
+  ${" AB CD "}    | ${"ab cd"}  | ${false}                     | ${true}
+  ${"àáâãäå"}     | ${"aaaaaa"} | ${false}                     | ${false}
+  ${"àáâãäå"}     | ${"aaaaaa"} | ${true}                      | ${true}
+  ${"àáâãäå"}     | ${"AAAAAA"} | ${true}                      | ${false}
+`(
+  "capitalIncludes",
+  ({ text, query, isNormalizeAccentsDiacritics, expected }) => {
+    test(`capitalIncludes(${text}, ${query}, ${isNormalizeAccentsDiacritics}) = ${expected}`, () => {
+      expect(capitalIncludes(text, query, isNormalizeAccentsDiacritics)).toBe(
+        expected
+      );
+    });
+  }
+);
 
 describe.each<{ text: string; query: string; expected: boolean }>`
   text            | query      | expected
