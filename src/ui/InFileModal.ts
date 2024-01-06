@@ -17,10 +17,10 @@ import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 let globalInternalStorage: {
   query: string;
-  selected?: number;
+  selected: number | null;
 } = {
   query: "",
-  selected: undefined,
+  selected: null,
 };
 
 interface SuggestionItem {
@@ -125,7 +125,8 @@ export class InFileModal
   onClose() {
     super.onClose();
     globalInternalStorage.query = this.inputEl.value;
-    globalInternalStorage.selected = this.chooser.selectedItem;
+    globalInternalStorage.selected =
+      this.chooser.values != null ? this.chooser.selectedItem : null;
   }
 
   select(index: number, evt?: KeyboardEvent) {
