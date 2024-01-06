@@ -12,7 +12,11 @@ import { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { normalizePath, normalizeRelativePath } from "../utils/path";
 import { setFloatingModal } from "./modal";
-import { capitalizeFirstLetter, trimLineByEllipsis } from "../utils/strings";
+import {
+  capitalizeFirstLetter,
+  hasCapitalLetter,
+  trimLineByEllipsis,
+} from "../utils/strings";
 import { sorter } from "../utils/collection-helper";
 import { Logger } from "../utils/logger";
 
@@ -233,8 +237,6 @@ export class GrepModal
     });
     this.clonedInputEl.before(this.countInputEl);
 
-    const hasCapitalLetter = query.toLowerCase() !== query;
-
     const absolutePathFromRoot = normalizeRelativePath(
       this.basePath,
       this.appHelper.getCurrentDirPath()
@@ -244,7 +246,7 @@ export class GrepModal
       this.settings.ripgrepCommand,
       ...[
         ...this.settings.grepExtensions.flatMap((x) => ["-t", x]),
-        hasCapitalLetter ? "" : "-i",
+        hasCapitalLetter(query) ? "" : "-i",
         "--",
         query,
         `${this.vaultRootPath}/${absolutePathFromRoot}`,

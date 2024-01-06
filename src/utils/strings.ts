@@ -127,6 +127,10 @@ export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+export function hasCapitalLetter(str: string) {
+  return str.toLowerCase() !== str;
+}
+
 export type FuzzyResult =
   | { type: "starts-with"; score: number }
   | { type: "includes"; score: number }

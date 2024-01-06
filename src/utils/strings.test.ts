@@ -4,6 +4,7 @@ import {
   excludeFormat,
   excludeSpace,
   FuzzyResult,
+  hasCapitalLetter,
   includes,
   microFuzzy,
   normalizeAccentsDiacritics,
@@ -218,6 +219,18 @@ describe.each`
 `("capitalizeFirstLetter", ({ text, expected }) => {
   test(`capitalizeFirstLetter(${text}) = ${expected}`, () => {
     expect(capitalizeFirstLetter(text)).toBe(expected);
+  });
+});
+
+describe.each<{ text: string; expected: boolean }>`
+  text        | expected
+  ${"abc"}    | ${false}
+  ${"Abc"}    | ${true}
+  ${"あいう"} | ${false}
+  ${"🍰🍴"}   | ${false}
+`("hasCapitalLetter", ({ text, expected }) => {
+  test(`hasCapitalLetter(${text}) = ${expected}`, () => {
+    expect(hasCapitalLetter(text)).toBe(expected);
   });
 });
 
