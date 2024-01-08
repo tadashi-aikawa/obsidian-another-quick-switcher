@@ -7,7 +7,6 @@ import {
   TFile,
   WorkspaceLeaf,
 } from "obsidian";
-import { Hotkeys, Settings } from "../settings";
 import {
   AppHelper,
   CaptureState,
@@ -15,18 +14,19 @@ import {
   LeafType,
 } from "../app-helper";
 import { createInstructions, quickResultSelectionModifier } from "../keys";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
-import { FOLDER } from "./icons";
-import { normalizePath } from "../utils/path";
-import { setFloatingModal } from "./modal";
+import { Hotkeys, Settings } from "../settings";
+import { compare } from "../sorters";
+import { uniqBy } from "../utils/collection-helper";
+import { Logger } from "../utils/logger";
+import { isExcalidraw, normalizePath } from "../utils/path";
 import {
   capitalizeFirstLetter,
   smartIncludes,
   trimLineByEllipsis,
 } from "../utils/strings";
-import { uniqBy } from "../utils/collection-helper";
-import { compare } from "../sorters";
-import { Logger } from "../utils/logger";
+import { FOLDER } from "./icons";
+import { setFloatingModal } from "./modal";
+import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 interface SuggestionItem {
   order?: number;
@@ -259,11 +259,12 @@ export class BacklinkModal
           extension: item.file.extension,
         },
       });
-      const isExcalidraw = item.file.basename.endsWith(".excalidraw");
-      if (item.file.extension !== "md" || isExcalidraw) {
+
+      const isExcalidrawFile = isExcalidraw(item.file);
+      if (item.file.extension !== "md" || isExcalidrawFile) {
         const extDiv = createDiv({
           cls: "another-quick-switcher__item__extension",
-          text: isExcalidraw ? "excalidraw" : item.file.extension,
+          text: isExcalidrawFile ? "excalidraw" : item.file.extension,
         });
         titleDiv.appendChild(extDiv);
       }

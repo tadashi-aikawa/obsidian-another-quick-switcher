@@ -2,6 +2,7 @@ import { SuggestionItem } from "../matcher";
 import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
 import { ALIAS, FOLDER, FRONT_MATTER, HEADER, LINK, SCORE, TAG } from "./icons";
 import { round } from "../utils/math";
+import { isExcalidraw } from "src/utils/path";
 
 interface Elements {
   itemDiv: HTMLDivElement;
@@ -50,11 +51,11 @@ function createItemDiv(
   });
   entryDiv.appendChild(titleDiv);
 
-  const isExcalidraw = item.file.basename.endsWith(".excalidraw");
-  if (item.file.extension !== "md" || isExcalidraw) {
+  const isExcalidrawFile = isExcalidraw(item.file);
+  if (item.file.extension !== "md" || isExcalidrawFile) {
     const extDiv = createDiv({
       cls: "another-quick-switcher__item__extension",
-      text: isExcalidraw ? "excalidraw" : item.file.extension,
+      text: isExcalidrawFile ? "excalidraw" : item.file.extension,
     });
     titleDiv.appendChild(extDiv);
   }

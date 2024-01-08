@@ -1,24 +1,28 @@
 import { App, SuggestModal, TFile, WorkspaceLeaf } from "obsidian";
-import { Hotkeys, Settings } from "../settings";
-import { AppHelper, LeafType, CaptureState } from "../app-helper";
-import { rg } from "../utils/ripgrep";
+import { AppHelper, CaptureState, LeafType } from "../app-helper";
 import {
   createInstruction,
   createInstructions,
   equalsAsHotkey,
   quickResultSelectionModifier,
 } from "../keys";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
-import { FOLDER } from "./icons";
-import { normalizePath, normalizeRelativePath } from "../utils/path";
-import { setFloatingModal } from "./modal";
+import { Hotkeys, Settings } from "../settings";
+import { sorter } from "../utils/collection-helper";
+import { Logger } from "../utils/logger";
+import {
+  isExcalidraw,
+  normalizePath,
+  normalizeRelativePath,
+} from "../utils/path";
+import { rg } from "../utils/ripgrep";
 import {
   capitalizeFirstLetter,
   hasCapitalLetter,
   trimLineByEllipsis,
 } from "../utils/strings";
-import { sorter } from "../utils/collection-helper";
-import { Logger } from "../utils/logger";
+import { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { FOLDER } from "./icons";
+import { setFloatingModal } from "./modal";
 
 let globalInternalStorage: {
   items: SuggestionItem[];
@@ -318,11 +322,12 @@ export class GrepModal
           extension: item.file.extension,
         },
       });
-      const isExcalidraw = item.file.basename.endsWith(".excalidraw");
-      if (item.file.extension !== "md" || isExcalidraw) {
+
+      const isExcalidrawFile = isExcalidraw(item.file);
+      if (item.file.extension !== "md" || isExcalidrawFile) {
         const extDiv = createDiv({
           cls: "another-quick-switcher__item__extension",
-          text: isExcalidraw ? "excalidraw" : item.file.extension,
+          text: isExcalidrawFile ? "excalidraw" : item.file.extension,
         });
         titleDiv.appendChild(extDiv);
       }
