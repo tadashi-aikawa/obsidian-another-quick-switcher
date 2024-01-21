@@ -568,11 +568,15 @@
 }
 .another-quick-switcher__in-file__item__description {
   font-size: 0.85em;
-  padding-left: 1.1rem;
+  padding-left: 0.5rem;
   padding-bottom: 0.5rem;
   display: inline-block;
   /*noinspection CssUnresolvedCustomProperty*/
   color: var(--text-muted);
+}
+.another-quick-switcher__in-file__item__hot-key-guide
+  + .another-quick-switcher__in-file__item__description {
+  padding-left: 1.1rem;
 }
 .another-quick-switcher__in-file__item__hot-key-guide::before {
   content: "[";
