@@ -76,6 +76,9 @@ export class AnotherQuickSwitcherModal
   currentNavigationHistoryIndex: number;
   stackHistory: boolean;
 
+  // unofficial
+  isOpen: boolean;
+  updateSuggestions: () => unknown;
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
@@ -182,18 +185,17 @@ export class AnotherQuickSwitcherModal
   }
 
   onOpen() {
-    super.onOpen();
+    // WARN: Instead of super.onOpen()
+    this.isOpen = true;
+    this.inputEl.value = this.command.restoreLastInput
+      ? this.initialInputQuery ?? globalInternalStorage.query
+      : this.initialInputQuery ?? "";
+    this.inputEl.select();
+    this.updateSuggestions();
 
     if (this.command.floating) {
       this.enableFloating();
     }
-
-    this.inputEl.value = this.command.restoreLastInput
-      ? this.initialInputQuery ?? globalInternalStorage.query
-      : this.initialInputQuery ?? "";
-    // Necessary to rerender suggestions
-    this.inputEl.dispatchEvent(new Event("input"));
-    this.inputEl.select();
 
     if (this.stackHistory) {
       this.navigationHistories.push({

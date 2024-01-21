@@ -44,6 +44,9 @@ export class LinkModal
   stateToRestore: CaptureState;
   lastOpenFileIndexByPath: { [path: string]: number } = {};
 
+  // unofficial
+  isOpen: boolean;
+  updateSuggestions: () => unknown;
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 

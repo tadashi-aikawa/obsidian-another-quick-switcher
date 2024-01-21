@@ -33,6 +33,9 @@ export class HeaderModal
   /** ⚠Not work correctly in all cases */
   unsafeSelectedIndex = 0;
 
+  // unofficial
+  isOpen: boolean;
+  updateSuggestions: () => unknown;
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 

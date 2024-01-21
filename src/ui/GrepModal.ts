@@ -59,6 +59,9 @@ export class GrepModal
   initialLeaf: WorkspaceLeaf | null;
   stateToRestore: CaptureState;
 
+  // unofficial
+  isOpen: boolean;
+  updateSuggestions: () => unknown;
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 

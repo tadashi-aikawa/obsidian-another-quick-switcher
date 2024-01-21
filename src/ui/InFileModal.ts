@@ -46,6 +46,9 @@ export class InFileModal
   /** ⚠Not work correctly in all cases */
   unsafeSelectedIndex = 0;
 
+  // unofficial
+  isOpen: boolean;
+  updateSuggestions: () => unknown;
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
@@ -86,16 +89,16 @@ export class InFileModal
   }
 
   onOpen() {
-    super.onOpen();
+    // WARN: Instead of super.onOpen()
+    this.isOpen = true;
+    this.inputEl.value = globalInternalStorage.query;
+    this.inputEl.select();
+    this.updateSuggestions();
+
     if (this.floating) {
       this.enableFloating();
       this.refreshPreviewIcon();
     }
-
-    this.inputEl.value = globalInternalStorage.query;
-    // Necessary to rerender suggestions
-    this.inputEl.dispatchEvent(new Event("input"));
-    this.inputEl.select();
 
     if (
       globalInternalStorage.selected != null &&

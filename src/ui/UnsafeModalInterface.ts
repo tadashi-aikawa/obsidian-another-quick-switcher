@@ -7,11 +7,10 @@ export interface UnsafeModalInterface<SuggestionItem> {
   chooser: {
     values: SuggestionItem[] | null;
     selectedItem: number;
-    setSelectedItem(
-      item: number,
-      event?: KeyboardEvent,
-    ): void;
+    setSelectedItem(item: number, event?: KeyboardEvent): void;
     useSelectedItem(ev: Partial<KeyboardEvent>): void;
     suggestions: Element[];
   };
+  isOpen: boolean;
+  updateSuggestions: () => unknown;
 }
