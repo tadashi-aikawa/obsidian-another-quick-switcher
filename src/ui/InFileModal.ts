@@ -97,8 +97,14 @@ export class InFileModal
     this.inputEl.dispatchEvent(new Event("input"));
     this.inputEl.select();
 
-    const selected = globalInternalStorage.selected;
-    if (selected != null) {
+    if (
+      globalInternalStorage.selected != null &&
+      this.chooser.suggestions.length > 0
+    ) {
+      const selected = Math.min(
+        globalInternalStorage.selected,
+        this.chooser.suggestions.length - 1
+      );
       this.select(selected);
       this.chooser.suggestions.at(selected)?.scrollIntoView({
         behavior: "auto",
