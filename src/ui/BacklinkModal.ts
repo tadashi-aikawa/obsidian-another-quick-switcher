@@ -363,7 +363,7 @@ export class BacklinkModal
       this.appHelper.openFile(
         item.file,
         {
-          leaf: leaf,
+          leafType: leaf,
           line: item.lineNumber - 1,
           inplace: option.keepOpen,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
@@ -459,7 +459,7 @@ export class BacklinkModal
         .reverse()
         .forEach((x) =>
           this.appHelper.openFile(x.file, {
-            leaf: "new-tab-background",
+            leafType: "new-tab-background",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           })
         );

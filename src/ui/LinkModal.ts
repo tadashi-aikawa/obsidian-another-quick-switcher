@@ -300,7 +300,7 @@ export class LinkModal
       this.appHelper.openFile(
         this.appHelper.getActiveFile()!,
         {
-          leaf: leaf,
+          leafType: leaf,
           line: item.lineNumber - 1,
           inplace: option.keepOpen,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
@@ -398,7 +398,7 @@ export class LinkModal
         .filter(isPresent)
         .forEach((x) =>
           this.appHelper.openFile(x, {
-            leaf: "new-tab-background",
+            leafType: "new-tab-background",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           })
         );

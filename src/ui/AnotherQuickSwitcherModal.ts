@@ -303,6 +303,10 @@ export class AnotherQuickSwitcherModal
       switch (command.searchTarget) {
         case "file":
           break;
+        case "opened file":
+          const paths = this.appHelper.getFilePathsInActiveWindow();
+          items = items.filter((x) => paths.includes(x.file.path));
+          break;
         case "backlink":
           const backlinksMap = this.appHelper.createBacklinksMap();
           items = items.filter((x) =>
@@ -579,7 +583,7 @@ export class AnotherQuickSwitcherModal
   }
 
   async chooseCurrentSuggestion(
-    leaf: LeafType,
+    leafType: LeafType,
     option: { keepOpen?: boolean } = {}
   ): Promise<TFile | null> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
@@ -593,6 +597,7 @@ export class AnotherQuickSwitcherModal
     }
 
     let offset: number | undefined;
+    let leafPriorToSameTab: WorkspaceLeaf | undefined;
     switch (this.command.searchTarget) {
       case "file":
         if (item.matchResults[0]?.type === "header") {
@@ -602,6 +607,17 @@ export class AnotherQuickSwitcherModal
             this.appHelper.findFirstHeaderOffset(item.file, firstHeader) ??
             undefined;
         }
+        break;
+      case "opened file":
+        if (item.matchResults[0]?.type === "header") {
+          // If type is "header", meta[0] is not empty
+          const firstHeader = item.matchResults[0].meta![0];
+          offset =
+            this.appHelper.findFirstHeaderOffset(item.file, firstHeader) ??
+            undefined;
+        }
+        this.appHelper.getFilePathsInActiveWindow;
+        leafPriorToSameTab = this.appHelper.findLeaf(fileToOpened);
         break;
       case "backlink":
         offset = this.appHelper.findFirstLinkOffset(
@@ -620,7 +636,7 @@ export class AnotherQuickSwitcherModal
     if (!option.keepOpen) {
       this.close();
       this.navigate(() => this.isClosed); // wait for close to finish before navigating
-    } else if (leaf === "same-tab") {
+    } else if (leafType === "same-tab") {
       this.stateToRestore ??= this.appHelper.captureState(this.initialLeaf);
     }
 
@@ -628,10 +644,11 @@ export class AnotherQuickSwitcherModal
       this.appHelper.openFile(
         fileToOpened,
         {
-          leaf,
+          leafType: leafType,
           offset,
           inplace: option.keepOpen,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          leafPriorToSameTab,
         },
         this.stateToRestore
       )
@@ -660,7 +677,7 @@ export class AnotherQuickSwitcherModal
 
     this.close();
     this.navigate(() => this.isClosed);
-    this.navigate(() => this.appHelper.openFile(file, { leaf: leafType }));
+    this.navigate(() => this.appHelper.openFile(file, { leafType: leafType }));
     return false;
   }
 
@@ -755,7 +772,7 @@ export class AnotherQuickSwitcherModal
         .reverse()
         .forEach((x) =>
           this.appHelper.openFile(x.file, {
-            leaf: "new-tab-background",
+            leafType: "new-tab-background",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           })
         );
@@ -820,7 +837,7 @@ export class AnotherQuickSwitcherModal
         activeWindow.open(urls[0]);
       } else {
         this.appHelper.openFile(fileToOpened, {
-          leaf: "same-tab",
+          leafType: "same-tab",
         });
       }
     });

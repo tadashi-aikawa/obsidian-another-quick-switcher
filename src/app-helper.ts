@@ -144,11 +144,12 @@ export type LeafType =
   | "new-window"
   | "popup";
 type OpenFileOption = {
-  leaf: LeafType;
+  leafType: LeafType;
   offset?: number;
   line?: number;
   inplace?: boolean;
   preventDuplicateTabs?: boolean;
+  leafPriorToSameTab?: WorkspaceLeaf;
 };
 
 export class AppHelper {
@@ -390,6 +391,16 @@ export class AppHelper {
     return abstractFile as TFile;
   }
 
+  getFilePathsInActiveWindow(): string[] {
+    return this.unsafeApp.workspace
+      .getLeavesOfType("markdown")
+      .filter(
+        (x) =>
+          x.getContainer() === this.unsafeApp.workspace.getLeaf().getContainer()
+      )
+      .map((x) => x.getViewState().state.file as string);
+  }
+
   captureState(initialLeaf: WorkspaceLeaf | null): CaptureState {
     const currentLeaf = this.unsafeApp.workspace.activeLeaf;
     const newLeaf = app.workspace.getLeaf();
@@ -436,33 +447,40 @@ export class AppHelper {
     return { type, state: { file: file.path } };
   }
 
+  findLeaf(file: TFile): WorkspaceLeaf | undefined {
+    return this.unsafeApp.workspace
+      .getLeavesOfType("markdown")
+      .find((x) => x.getViewState().state.file === file.path);
+  }
+
   async openFile(
     file: TFile,
     option: Partial<OpenFileOption> = {},
     captureState?: CaptureState
   ) {
     const opt: OpenFileOption = {
-      ...{ leaf: "same-tab", inplace: false },
+      ...{ leafType: "same-tab", inplace: false },
       ...option,
     };
 
-    const priorNewLeaf = option?.preventDuplicateTabs
-      ? this.unsafeApp.workspace
-          .getLeavesOfType("markdown")
-          .find((x) => x.getViewState().state.file === file.path)
+    const priorLeaf = option?.preventDuplicateTabs
+      ? this.findLeaf(file)
       : undefined;
 
     let leaf: WorkspaceLeaf | undefined;
     let background: boolean = false;
-    switch (opt.leaf) {
+    switch (opt.leafType) {
       case "same-tab":
-        leaf = captureState?.leaf ?? this.unsafeApp.workspace.getLeaf();
+        leaf =
+          option.leafPriorToSameTab ??
+          captureState?.leaf ??
+          this.unsafeApp.workspace.getLeaf();
         break;
       case "new-tab":
-        leaf = priorNewLeaf ?? this.unsafeApp.workspace.getLeaf(true);
+        leaf = priorLeaf ?? this.unsafeApp.workspace.getLeaf(true);
         break;
       case "new-tab-background":
-        leaf = priorNewLeaf ?? this.unsafeApp.workspace.getLeaf(true);
+        leaf = priorLeaf ?? this.unsafeApp.workspace.getLeaf(true);
         background = true;
         break;
       case "new-pane-horizontal":
@@ -482,10 +500,10 @@ export class AppHelper {
           this.unsafeApp.workspace.getLeaf(true);
         break;
       default:
-        throw new ExhaustiveError(opt.leaf);
+        throw new ExhaustiveError(opt.leafType);
     }
 
-    if (opt.inplace && opt.leaf === "same-tab") {
+    if (opt.inplace && opt.leafType === "same-tab") {
       await leaf.setViewState({
         ...leaf.getViewState(),
         active: !background,
