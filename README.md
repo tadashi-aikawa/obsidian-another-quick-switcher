@@ -38,6 +38,7 @@ Custom searches enables you to create your original search commands.
 | backlink                           | Markdown files in backlinks on the current file      |
 | link                               | Markdown files in outgoing links on the current file |
 | [2-hop-link]                       | Markdown files in 2-hop-links from the current file  |
+| opened file                        | Markdown files opened in the current window          |
 
 #### Sort priorities
 
