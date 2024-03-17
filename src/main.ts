@@ -18,7 +18,11 @@ export default class AnotherQuickSwitcher extends Plugin {
   async onload() {
     await this.loadSettings();
     this.addSettingTab(new AnotherQuickSwitcherSettingTab(this.app, this));
-    this.reloadCommands();
+    // Avoid referring to incorrect cache
+    const cacheResolvedRef = this.app.metadataCache.on("resolved", async () => {
+      this.reloadCommands();
+      this.app.metadataCache.offref(cacheResolvedRef);
+    });
   }
 
   reloadCommands() {
