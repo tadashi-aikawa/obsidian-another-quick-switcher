@@ -14,22 +14,31 @@ import { Hotkey } from "./keys";
 
 export default class AnotherQuickSwitcher extends Plugin {
   settings: Settings;
+  appHelper: AppHelper;
 
   async onload() {
+    this.appHelper = new AppHelper(this.app);
     await this.loadSettings();
     this.addSettingTab(new AnotherQuickSwitcherSettingTab(this.app, this));
-    // Avoid referring to incorrect cache
-    const cacheResolvedRef = this.app.metadataCache.on("resolved", async () => {
+
+    if (this.appHelper.isCacheInitialized()) {
       this.reloadCommands();
-      this.app.metadataCache.offref(cacheResolvedRef);
-    });
+    } else {
+      // Avoid referring to incorrect cache
+      const cacheResolvedRef = this.app.metadataCache.on(
+        "resolved",
+        async () => {
+          this.reloadCommands();
+          this.app.metadataCache.offref(cacheResolvedRef);
+        }
+      );
+    }
   }
 
   reloadCommands() {
-    const appHelper = new AppHelper(this.app);
-    appHelper
+    this.appHelper
       .getCommandIds(this.manifest.id)
-      .forEach((x) => appHelper.removeCommand(x));
+      .forEach((x) => this.appHelper.removeCommand(x));
     createCommands(this.app, this.settings).forEach((x) => this.addCommand(x));
   }
 

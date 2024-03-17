@@ -75,6 +75,7 @@ interface UnsafeAppInterface {
   };
   metadataCache: {
     getBacklinksForFile(file: TFile): { data: Record<string, LinkCache[]> };
+    initialized: boolean;
   };
 }
 
@@ -669,6 +670,11 @@ export class AppHelper {
 
   isActiveLeafCanvas(): boolean {
     return this.unsafeApp.workspace.getLeaf().view.getViewType() === "canvas";
+  }
+
+  // XXX: not strict
+  isCacheInitialized(): boolean {
+    return this.unsafeApp.metadataCache.initialized;
   }
 
   addFileToCanvas(
