@@ -6,6 +6,7 @@ import {
   FileView,
   getLinkpath,
   HeadingCache,
+  ItemView,
   LinkCache,
   MarkdownView,
   Pos,
@@ -164,20 +165,20 @@ export class AppHelper {
     return this.unsafeApp.workspace.getActiveFile();
   }
 
-  getFileViewInActiveLeaf(): FileView | null {
-    if (!this.unsafeApp.workspace.getActiveViewOfType(FileView)) {
-      return null;
-    }
+  getViewInActiveLeaf(): View | null {
+    return this.unsafeApp.workspace.getActiveViewOfType(View);
+  }
 
-    return this.unsafeApp.workspace.getLeaf().view as FileView;
+  getFileViewInActiveLeaf(): FileView | null {
+    return this.unsafeApp.workspace.getActiveViewOfType(FileView);
   }
 
   getMarkdownViewInActiveLeaf(): MarkdownView | null {
-    if (!this.unsafeApp.workspace.getActiveViewOfType(MarkdownView)) {
-      return null;
-    }
+    return this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
+  }
 
-    return this.unsafeApp.workspace.getLeaf().view as MarkdownView;
+  getCanvasViewInActiveLeaf(): UnsafeCanvasView | null {
+    return this.getViewInActiveLeaf() as UnsafeCanvasView;
   }
 
   getCurrentEditor(): Editor | null {
@@ -356,7 +357,7 @@ export class AppHelper {
     const isToOffset = typeof to === "number";
 
     const activeFile = this.getActiveFile();
-    const activeLeaf = this.unsafeApp.workspace.getLeaf();
+    const activeLeaf = this.unsafeApp.workspace.activeLeaf;
     if (!activeFile || !activeLeaf) {
       return;
     }
@@ -397,7 +398,8 @@ export class AppHelper {
       .getLeavesOfType("markdown")
       .filter(
         (x) =>
-          x.getContainer() === this.unsafeApp.workspace.getLeaf().getContainer()
+          x.getContainer() ===
+          this.unsafeApp.workspace.activeLeaf?.getContainer()
       )
       .map((x) => x.getViewState().state.file as string);
   }
@@ -669,7 +671,7 @@ export class AppHelper {
   }
 
   isActiveLeafCanvas(): boolean {
-    return this.unsafeApp.workspace.getLeaf().view.getViewType() === "canvas";
+    return this.getViewInActiveLeaf()?.getViewType() === "canvas";
   }
 
   // XXX: not strict
@@ -681,8 +683,7 @@ export class AppHelper {
     file: TFile,
     offset: { x: number; y: number } = { x: 0, y: 0 }
   ): UnsafeCardLayout {
-    const unsafeView = this.unsafeApp.workspace.getLeaf()
-      .view as UnsafeCanvasView;
+    const unsafeView = this.getCanvasViewInActiveLeaf()!;
     const { x, y } = unsafeView.canvas.posCenter();
     return unsafeView.canvas.createFileNode({
       file,
