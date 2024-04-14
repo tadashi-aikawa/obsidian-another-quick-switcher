@@ -4,8 +4,8 @@
   "description": "Todo",
   "main": "main.js",
   "scripts": {
-    "dev": "bun esbuild.config.mjs",
-    "build": "tsc -noEmit -skipLibCheck && bun esbuild.config.mjs production",
+    "dev": "bun esbuild.config.mts",
+    "build": "tsc -noEmit -skipLibCheck && bun esbuild.config.mts production",
     "test": "jest",
     "ci": "bun install && bun run build && bun run test",
     "release": "bun ci && bun version-bump.mts ${VERSION} && git add package.json manifest-beta.json manifest.json versions.json && git commit -m ${VERSION} && git tag ${VERSION} && git push --tags && git push",
