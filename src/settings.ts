@@ -12,7 +12,7 @@ const searchTargetList = [
   "link",
   "2-hop-link",
 ] as const;
-export type SearchTarget = typeof searchTargetList[number];
+export type SearchTarget = (typeof searchTargetList)[number];
 
 export interface SearchCommand {
   name: string;
@@ -821,7 +821,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             };
             return cb
               .setTooltip("Show hotkey guide if enabled")
-              .setValue(!dialog[command][0]?.hideHotkeyGuide ?? false)
+              .setValue(!dialog[command][0]?.hideHotkeyGuide)
               .onChange(async (showHotkeyGuide: boolean) => {
                 dialog[command] = dialog[command][0]
                   ? [

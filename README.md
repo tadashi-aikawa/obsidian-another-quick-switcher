@@ -231,21 +231,21 @@ Sorry, I would not accept the pull requests except for the following cases.
 
 ### Development
 
-[Task] is required.
+[Bun] is required.
 
 ```console
-task init
-task dev
+bun i
+bun dev
 ```
 
 ### Release
 
 ```console
 # Stable
-task release VERSION=1.2.3
+VERSION=1.2.3 bun release
 
 # Beta
-task release VERSION=1.2.3-beta1
+VERSION=1.2.3-beta1 bun release
 ```
 
 ## Appendix
@@ -313,7 +313,7 @@ flowchart LR
 ```
 
 
-[task]: https://github.com/go-task/task
+[Bun]: https://bun.sh/
 [issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
 [discussion]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/discussions
 

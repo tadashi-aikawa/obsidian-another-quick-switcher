@@ -13,7 +13,8 @@
     "importHelpers": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es5", "es6", "es7"]
+    "lib": ["dom", "es5", "es6", "es7"],
+    "types": ["@types/bun"]
   },
   "include": ["**/*.ts"]
 }

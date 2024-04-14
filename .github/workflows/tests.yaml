@@ -15,22 +15,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: arduino/setup-task@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
 
-      - run: task ci
+      - run: bun ci
 
       - name: "Discord notification (not success)"
         uses: rjstone/discord-webhook-notify@v1
         if: "! success()"
         with:
           description: "⚠ Another Quick Switcher Tests failed!"
-          footer: "Node.js v18"
+          footer: "Bun"
           severity: error
           avatarUrl: https://cdn.otamart.com/item-picture/26205822/0-1574353123758.jpg
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
@@ -45,7 +40,7 @@ jobs:
         if: always()
         with:
           description: "✅ Another Quick Switcher Tests passed!"
-          footer: "Node.js v18"
+          footer: "Bun"
           severity: info
           avatarUrl: https://cdn.otamart.com/item-picture/26205822/0-1574353123758.jpg
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
