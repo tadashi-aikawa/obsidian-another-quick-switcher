@@ -1,3 +1,4 @@
+import { describe, expect, test } from "@jest/globals";
 import {
   count,
   equalsAsSet,
@@ -10,7 +11,6 @@ import {
   range,
   uniqBy,
 } from "./collection-helper";
-import { describe, expect, test } from "@jest/globals";
 
 describe.each<{ n: number; expected: number[] }>`
   n    | expected

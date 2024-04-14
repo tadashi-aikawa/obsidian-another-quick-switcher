@@ -1,3 +1,4 @@
+import { describe, expect, test } from "@jest/globals";
 import {
   basename,
   dirname,
@@ -5,7 +6,6 @@ import {
   normalizePath,
   normalizeRelativePath,
 } from "./path";
-import { describe, expect, test } from "@jest/globals";
 
 describe.each<{ path: string; ext?: string; expected: string }>`
   path               | ext          | expected

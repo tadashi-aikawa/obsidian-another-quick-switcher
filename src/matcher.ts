@@ -1,6 +1,6 @@
 import type { TFile } from "obsidian";
-import { smartEquals, smartIncludes, smartMicroFuzzy } from "./utils/strings";
 import { minBy } from "./utils/collection-helper";
+import { smartEquals, smartIncludes, smartMicroFuzzy } from "./utils/strings";
 import { isPresent } from "./utils/types";
 
 type MatchType =
