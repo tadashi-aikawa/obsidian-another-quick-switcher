@@ -1,11 +1,11 @@
-import { App, SuggestModal, TFolder } from "obsidian";
-import { excludeItems, sorter } from "../utils/collection-helper";
-import { FOLDER } from "./icons";
-import { Hotkeys, Settings } from "../settings";
+import { type App, SuggestModal, type TFolder } from "obsidian";
 import { AppHelper } from "../app-helper";
-import { smartIncludes, smartStartsWith } from "../utils/strings";
 import { createInstructions } from "../keys";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
+import type { Hotkeys, Settings } from "../settings";
+import { excludeItems, sorter } from "../utils/collection-helper";
+import { smartIncludes, smartStartsWith } from "../utils/strings";
+import type { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { FOLDER } from "./icons";
 
 interface SuggestionItem {
   folder: TFolder;
@@ -182,13 +182,13 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     key: keyof Hotkeys["move"],
     handler: () => void | Promise<void>,
   ) {
-    this.settings.hotkeys.move[key]?.forEach((x) => {
+    for (const x of this.settings.hotkeys.move[key] ?? []) {
       this.scope.register(x.modifiers, x.key.toUpperCase(), (evt) => {
         evt.preventDefault();
         handler();
         return false;
       });
-    });
+    }
   }
 
   private setHotkeys() {
@@ -199,8 +199,8 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
         { command: "[↵]", purpose: "move to" },
-        { command: `[↑]`, purpose: "up" },
-        { command: `[↓]`, purpose: "down" },
+        { command: "[↑]", purpose: "up" },
+        { command: "[↓]", purpose: "down" },
         ...createInstructions(this.settings.hotkeys.move),
       ]);
     }

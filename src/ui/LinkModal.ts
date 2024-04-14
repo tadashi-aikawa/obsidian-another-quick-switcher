@@ -1,27 +1,27 @@
 import {
-  App,
-  debounce,
-  Debouncer,
+  type App,
+  type Debouncer,
   Platform,
   SuggestModal,
-  TFile,
-  WorkspaceLeaf,
+  type TFile,
+  type WorkspaceLeaf,
+  debounce,
 } from "obsidian";
 import {
   AppHelper,
-  CaptureState,
+  type CaptureState,
+  type LeafType,
   isFrontMatterLinkCache,
-  LeafType,
 } from "../app-helper";
 import { createInstructions, quickResultSelectionModifier } from "../keys";
-import { Hotkeys, Settings } from "../settings";
+import type { Hotkeys, Settings } from "../settings";
 import { Logger } from "../utils/logger";
 import { isExcalidraw, normalizePath } from "../utils/path";
 import { capitalizeFirstLetter, smartIncludes } from "../utils/strings";
 import { isPresent } from "../utils/types";
+import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { setFloatingModal } from "./modal";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 interface SuggestionItem {
   order?: number;
@@ -319,7 +319,7 @@ export class LinkModal
     key: keyof Hotkeys["link"],
     handler: () => void | Promise<void>,
   ) {
-    this.settings.hotkeys.link[key]?.forEach((x) => {
+    for (const x of this.settings.hotkeys.link[key] ?? []) {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
         if (!evt.isComposing) {
           evt.preventDefault();
@@ -327,7 +327,7 @@ export class LinkModal
           return false;
         }
       });
-    });
+    }
   }
 
   private setHotkeys() {
@@ -343,8 +343,8 @@ export class LinkModal
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
         { command: "[↵]", purpose: "open" },
-        { command: `[↑]`, purpose: "up" },
-        { command: `[↓]`, purpose: "down" },
+        { command: "[↑]", purpose: "up" },
+        { command: "[↓]", purpose: "down" },
         { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
         ...createInstructions(this.settings.hotkeys.link),
       ]);
@@ -388,17 +388,18 @@ export class LinkModal
         return;
       }
 
-      this.chooser.values
+      const files = this.chooser.values
         .slice()
         .reverse()
         .map((x) => x.file)
-        .filter(isPresent)
-        .forEach((x) =>
-          this.appHelper.openFile(x, {
-            leafType: "new-tab-background",
-            preventDuplicateTabs: this.settings.preventDuplicateTabs,
-          }),
-        );
+        .filter(isPresent);
+
+      for (const x of files) {
+        this.appHelper.openFile(x, {
+          leafType: "new-tab-background",
+          preventDuplicateTabs: this.settings.preventDuplicateTabs,
+        });
+      }
     });
 
     this.registerKeys("show all results", () => {
@@ -417,13 +418,13 @@ export class LinkModal
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
       : "Mod";
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
+    for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
       this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
         this.chooser.setSelectedItem(n - 1, evt);
         this.chooser.useSelectedItem({});
         return false;
       });
-    });
+    }
 
     this.registerKeys("dismiss", async () => {
       this.close();

@@ -1,4 +1,4 @@
-import { TFile } from "obsidian";
+import type { TFile } from "obsidian";
 
 export function basename(path: string, ext?: string): string {
   const name = path.match(/.+[\\/]([^\\/]+)[\\/]?$/)?.[1] ?? path;
@@ -41,7 +41,7 @@ export function normalizeRelativePath(path: string, base: string): string {
   });
 
   const r = es.filter((x) => x !== "").join("/");
-  return base[0] === "/" ? "/" + r : r;
+  return base[0] === "/" ? `/${r}` : r;
 }
 
 export function isExcalidraw(file: TFile | undefined): boolean {

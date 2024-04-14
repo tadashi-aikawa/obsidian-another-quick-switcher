@@ -1,9 +1,9 @@
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
-import AnotherQuickSwitcher from "./main";
-import { regardAsSortPriority, SortPriority } from "./sorters";
-import { smartCommaSplit, smartLineBreakSplit } from "./utils/strings";
-import { Hotkey, hotkey2String, string2Hotkey } from "./keys";
+import { type App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { type Hotkey, hotkey2String, string2Hotkey } from "./keys";
+import type AnotherQuickSwitcher from "./main";
+import { type SortPriority, regardAsSortPriority } from "./sorters";
 import { mirror } from "./utils/collection-helper";
+import { smartCommaSplit, smartLineBreakSplit } from "./utils/strings";
 
 const searchTargetList = [
   "file",
@@ -606,7 +606,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   }
 
   display(): void {
-    let { containerEl } = this;
+    const { containerEl } = this;
 
     containerEl.empty();
 
@@ -836,11 +836,10 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           });
       };
 
-      Object.keys(this.plugin.settings.hotkeys[dialogKey]).forEach(
-        (k: string) => {
-          addHotKeyItem(k, k as keyof Hotkeys[keyof Hotkeys]);
-        },
-      );
+      const keys = Object.keys(this.plugin.settings.hotkeys[dialogKey]);
+      for (const k of keys) {
+        addHotKeyItem(k, k as keyof Hotkeys[keyof Hotkeys]);
+      }
     };
 
     const addHotkeysForDialog = (

@@ -1,15 +1,33 @@
 import {
-  App,
-  debounce,
-  Debouncer,
+  type App,
+  type Debouncer,
   Notice,
-  parseFrontMatterAliases,
-  parseFrontMatterTags,
   Platform,
   SuggestModal,
-  TFile,
-  WorkspaceLeaf,
+  type TFile,
+  type WorkspaceLeaf,
+  debounce,
+  parseFrontMatterAliases,
+  parseFrontMatterTags,
 } from "obsidian";
+import { createInstructions, quickResultSelectionModifier } from "src/keys";
+import { type SuggestionItem, stampMatchResults } from "src/matcher";
+import {
+  AppHelper,
+  type CaptureState,
+  type FrontMatterLinkCache,
+  type LeafType,
+  isFrontMatterLinkCache,
+} from "../app-helper";
+import { ExhaustiveError } from "../errors";
+import {
+  type Hotkeys,
+  type SearchCommand,
+  type Settings,
+  createDefaultBacklinkSearchCommand,
+  createDefaultLinkSearchCommand,
+} from "../settings";
+import { filterNoQueryPriorities, sort } from "../sorters";
 import {
   excludeItems,
   includeItems,
@@ -18,36 +36,18 @@ import {
   sorter,
   uniq,
 } from "../utils/collection-helper";
-import {
-  createDefaultBacklinkSearchCommand,
-  createDefaultLinkSearchCommand,
-  Hotkeys,
-  SearchCommand,
-  Settings,
-} from "../settings";
-import {
-  AppHelper,
-  LeafType,
-  CaptureState,
-  isFrontMatterLinkCache,
-  FrontMatterLinkCache,
-} from "../app-helper";
-import { stampMatchResults, SuggestionItem } from "src/matcher";
-import { createElements } from "./suggestion-factory";
-import { filterNoQueryPriorities, sort } from "../sorters";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { Logger } from "../utils/logger";
 import {
   capitalizeFirstLetter,
   excludeFormat,
   smartWhitespaceSplit,
 } from "../utils/strings";
-import { createInstructions, quickResultSelectionModifier } from "src/keys";
+import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
-import { ExhaustiveError } from "../errors";
 import { setFloatingModal } from "./modal";
-import { Logger } from "../utils/logger";
+import { createElements } from "./suggestion-factory";
 
-let globalInternalStorage: {
+const globalInternalStorage: {
   query: string;
 } = {
   query: "",
@@ -99,7 +99,7 @@ export class AnotherQuickSwitcherModal
   countInputEl?: HTMLDivElement;
   floating: boolean;
   opened: boolean;
-  willSilentClose: boolean = false;
+  willSilentClose = false;
   historyRestoreStatus: "initial" | "doing" | "done" = "initial";
 
   private markClosed: () => void;
@@ -279,13 +279,13 @@ export class AnotherQuickSwitcherModal
           tokens: x.basename.split(" "),
         };
       });
-    this.logger.showDebugLog(`Indexing file items: `, start);
+    this.logger.showDebugLog("Indexing file items: ", start);
 
     this.originItems = [...fileItems, ...this.phantomItems];
 
     start = performance.now();
     this.ignoredItems = this.prefilterItems(this.command);
-    this.logger.showDebugLog(`Prefilter items: `, start);
+    this.logger.showDebugLog("Prefilter items: ", start);
   }
 
   prefilterItems(command: SearchCommand): SuggestionItem[] {
@@ -303,17 +303,19 @@ export class AnotherQuickSwitcherModal
       switch (command.searchTarget) {
         case "file":
           break;
-        case "opened file":
+        case "opened file": {
           const paths = this.appHelper.getFilePathsInActiveWindow();
           items = items.filter((x) => paths.includes(x.file.path));
           break;
-        case "backlink":
+        }
+        case "backlink": {
           const backlinksMap = this.appHelper.createBacklinksMap();
           items = items.filter((x) =>
             backlinksMap[this.originFile?.path ?? ""]?.has(x.file.path),
           );
           break;
-        case "link":
+        }
+        case "link": {
           const originFileLinkMap = this.originFile
             ? this.appHelper.createLinksMap(this.originFile)
             : {};
@@ -327,7 +329,8 @@ export class AnotherQuickSwitcherModal
               }),
             );
           break;
-        case "2-hop-link":
+        }
+        case "2-hop-link": {
           const backlinksMap2 = this.appHelper.createBacklinksMap();
           const originFileLinkMap2 = this.originFile
             ? this.appHelper.createLinksMap(this.originFile)
@@ -351,6 +354,7 @@ export class AnotherQuickSwitcherModal
               }),
             );
           break;
+        }
       }
       if (includePatterns.length > 0) {
         items = includeItems(items, includePatterns, (x) => x.file.path);
@@ -386,7 +390,7 @@ export class AnotherQuickSwitcherModal
   _getSuggestions(query: string): SuggestionItem[] {
     const start = performance.now();
 
-    let lastOpenFileIndexByPath: { [path: string]: number } = {};
+    const lastOpenFileIndexByPath: { [path: string]: number } = {};
     this.app.workspace.getLastOpenFiles().forEach((v, i) => {
       lastOpenFileIndexByPath[v] = i;
     });
@@ -685,7 +689,7 @@ export class AnotherQuickSwitcherModal
     key: keyof Hotkeys["main"],
     handler: () => void | Promise<void>,
   ) {
-    this.settings.hotkeys.main[key]?.forEach((x) => {
+    for (const x of this.settings.hotkeys.main[key] ?? []) {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
         if (!evt.isComposing) {
           evt.preventDefault();
@@ -693,7 +697,7 @@ export class AnotherQuickSwitcherModal
           return false;
         }
       });
-    });
+    }
   }
 
   private setHotkeys() {
@@ -708,8 +712,8 @@ export class AnotherQuickSwitcherModal
 
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
-        { command: `[↑]`, purpose: "up" },
-        { command: `[↓]`, purpose: "down" },
+        { command: "[↑]", purpose: "up" },
+        { command: "[↓]", purpose: "down" },
         { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
         ...createInstructions(this.settings.hotkeys.main),
       ]);
@@ -767,15 +771,13 @@ export class AnotherQuickSwitcherModal
         return;
       }
 
-      this.chooser.values
-        .slice()
-        .reverse()
-        .forEach((x) =>
-          this.appHelper.openFile(x.file, {
-            leafType: "new-tab-background",
-            preventDuplicateTabs: this.settings.preventDuplicateTabs,
-          }),
-        );
+      const items = this.chooser.values.slice().reverse();
+      for (const x of items) {
+        this.appHelper.openFile(x.file, {
+          leafType: "new-tab-background",
+          preventDuplicateTabs: this.settings.preventDuplicateTabs,
+        });
+      }
     });
 
     this.registerKeys("preview", () => {
@@ -887,7 +889,7 @@ export class AnotherQuickSwitcherModal
       await this.safeClose();
 
       let offsetX = 0;
-      this.chooser.values?.forEach((x) => {
+      for (const x of this.chooser.values ?? []) {
         if (this.appHelper.isActiveLeafCanvas()) {
           const cv = this.appHelper.addFileToCanvas(x.file, {
             x: offsetX,
@@ -898,7 +900,7 @@ export class AnotherQuickSwitcherModal
           this.appHelper.insertLinkToActiveFileBy(x.file, x.phantom);
           this.appHelper.insertStringToActiveFile("\n");
         }
-      });
+      }
     });
 
     const navigateLinks = (command: SearchCommand) => {
@@ -988,14 +990,14 @@ export class AnotherQuickSwitcherModal
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
       : "Mod";
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
+    for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
       this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
         this.chooser.setSelectedItem(n - 1, evt);
         // noinspection JSIgnoredPromiseFromCall (This call back needs to return false, not Promise<false>)
         this.chooseCurrentSuggestion("same-tab");
         return false;
       });
-    });
+    }
 
     this.registerKeys("dismiss", async () => {
       this.close();

@@ -1,4 +1,4 @@
-import { AppHelper } from "../app-helper";
+import type { AppHelper } from "../app-helper";
 
 export function setFloatingModal(appHelper: AppHelper) {
   activeWindow.activeDocument

@@ -1,16 +1,16 @@
 import { Plugin } from "obsidian";
+import merge from "ts-deepmerge";
+import { AppHelper } from "./app-helper";
 import { createCommands } from "./commands";
+import type { Hotkey } from "./keys";
 import {
   AnotherQuickSwitcherSettingTab,
+  DEFAULT_SETTINGS,
+  type Hotkeys,
+  type Settings,
   createDefaultHotkeys,
   createDefaultSearchCommand,
-  DEFAULT_SETTINGS,
-  Hotkeys,
-  Settings,
 } from "./settings";
-import { AppHelper } from "./app-helper";
-import merge from "ts-deepmerge";
-import { Hotkey } from "./keys";
 
 export default class AnotherQuickSwitcher extends Plugin {
   settings: Settings;
@@ -36,10 +36,15 @@ export default class AnotherQuickSwitcher extends Plugin {
   }
 
   reloadCommands() {
-    this.appHelper
-      .getCommandIds(this.manifest.id)
-      .forEach((x) => this.appHelper.removeCommand(x));
-    createCommands(this.app, this.settings).forEach((x) => this.addCommand(x));
+    const commandIds = this.appHelper.getCommandIds(this.manifest.id);
+    for (const x of commandIds) {
+      this.appHelper.removeCommand(x);
+    }
+
+    const commands = createCommands(this.app, this.settings);
+    for (const x of commands) {
+      this.addCommand(x);
+    }
   }
 
   async loadSettings(): Promise<void> {
@@ -69,15 +74,17 @@ export default class AnotherQuickSwitcher extends Plugin {
     // for retrieve keys
     const defaultHotkeys = createDefaultHotkeys();
     // Clean old keys
-    (Object.keys(defaultHotkeys) as (keyof Hotkeys)[]).forEach((dialogKey) => {
-      Object.keys(this.settings.hotkeys[dialogKey]).forEach((k) => {
+    const defaultDialogKeys = Object.keys(defaultHotkeys) as (keyof Hotkeys)[];
+    for (const dialogKey of defaultDialogKeys) {
+      const dialogKeys = Object.keys(this.settings.hotkeys[dialogKey]);
+      for (const k of dialogKeys) {
         if (!(k in defaultHotkeys[dialogKey])) {
           delete (
             this.settings.hotkeys[dialogKey] as { [key: string]: Hotkey[] }
           )[k];
         }
-      });
-    });
+      }
+    }
   }
 
   async saveSettings() {

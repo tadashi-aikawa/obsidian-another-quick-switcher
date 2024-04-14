@@ -1,20 +1,20 @@
-import { AnotherQuickSwitcherModal } from "./ui/AnotherQuickSwitcherModal";
 import {
-  App,
-  Command,
+  type App,
+  type Command,
   FileView,
   MarkdownView,
   Notice,
   Platform,
 } from "obsidian";
-import { SearchCommand, Settings } from "./settings";
-import { MoveModal } from "./ui/MoveModal";
-import { HeaderModal } from "./ui/HeaderModal";
-import { GrepModal } from "./ui/GrepModal";
-import { existsRg } from "./utils/ripgrep";
+import type { SearchCommand, Settings } from "./settings";
+import { AnotherQuickSwitcherModal } from "./ui/AnotherQuickSwitcherModal";
 import { BacklinkModal } from "./ui/BacklinkModal";
-import { LinkModal } from "./ui/LinkModal";
+import { GrepModal } from "./ui/GrepModal";
+import { HeaderModal } from "./ui/HeaderModal";
 import { InFileModal } from "./ui/InFileModal";
+import { LinkModal } from "./ui/LinkModal";
+import { MoveModal } from "./ui/MoveModal";
+import { existsRg } from "./utils/ripgrep";
 
 const SEARCH_COMMAND_PREFIX = "search-command";
 

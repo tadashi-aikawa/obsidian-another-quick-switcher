@@ -1,4 +1,4 @@
-import { Instruction, Modifier, Platform } from "obsidian";
+import { type Instruction, type Modifier, Platform } from "obsidian";
 import { equalsAsSet } from "./utils/collection-helper";
 
 export const MOD = Platform.isMacOS ? "Cmd" : "Ctrl";

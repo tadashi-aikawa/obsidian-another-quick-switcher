@@ -40,22 +40,29 @@ export const sorter = <T, U extends number | string>(
 export const groupBy = <T>(
   values: T[],
   toKey: (t: T) => string,
-): { [key: string]: T[] } =>
-  values.reduce(
-    (prev, cur, _1, _2, k = toKey(cur)) => (
-      (prev[k] || (prev[k] = [])).push(cur), prev
-    ),
-    {} as { [key: string]: T[] },
-  );
+): { [key: string]: T[] } => {
+  const grouped: { [key: string]: T[] } = {};
+  for (const value of values) {
+    const key = toKey(value);
+    if (!grouped[key]) {
+      grouped[key] = [];
+    }
+    grouped[key].push(value);
+  }
+  return grouped;
+};
 
 export const keyBy = <T>(
   values: T[],
   toKey: (t: T) => string,
-): { [key: string]: T } =>
-  values.reduce(
-    (prev, cur, _1, _2, k = toKey(cur)) => ((prev[k] = cur), prev),
-    {} as { [key: string]: T },
-  );
+): { [key: string]: T } => {
+  const indexing: { [key: string]: T } = {};
+  for (const value of values) {
+    const key = toKey(value);
+    indexing[key] = value;
+  }
+  return indexing;
+};
 
 export const count = (values: string[]): { [value: string]: number } => {
   const ret: { [value: string]: number } = {};
@@ -70,7 +77,10 @@ export const count = (values: string[]): { [value: string]: number } => {
 };
 
 export function flatten<T>(matrix: T[][]): T[] {
-  return matrix.reduce((a, c) => [...a, ...c], []);
+  return matrix.reduce((a, c) => {
+    a.push(...c);
+    return a;
+  }, []);
 }
 
 export function uniq<T>(values: T[]): T[] {
@@ -79,12 +89,12 @@ export function uniq<T>(values: T[]): T[] {
 
 export function uniqBy<T>(values: T[], fn: (x: T) => string | number): T[] {
   const m = new Map<string | number, T>();
-  values.forEach((x) => {
+  for (const x of values) {
     const k = fn(x);
     if (!m.has(k)) {
       m.set(k, x);
     }
-  });
+  }
   return Array.from(m.values());
 }
 
@@ -135,7 +145,14 @@ export function mirrorMap<T>(
   collection: T[],
   toValue: (t: T) => string,
 ): { [key: string]: string } {
-  return collection.reduce((p, c) => ({ ...p, [toValue(c)]: toValue(c) }), {});
+  return collection.reduce(
+    (p, c) => {
+      const v = toValue(c);
+      p[v] = v;
+      return p;
+    },
+    {} as { [key: string]: string },
+  );
 }
 
 export function mirror(collection: string[]): { [key: string]: string } {
@@ -147,11 +164,12 @@ export function omitBy<T extends { [key: string]: any }>(
   shouldOmit: (key: string, value: any) => boolean,
 ): T {
   const cloned = { ...obj };
-  Object.entries(cloned).forEach(([k, v]) => {
+
+  for (const [k, v] of Object.entries(cloned)) {
     if (shouldOmit(k, v)) {
       delete cloned[k];
     }
-  });
+  }
 
   return cloned;
 }

@@ -1,12 +1,17 @@
-import { App, SuggestModal, TFile, WorkspaceLeaf } from "obsidian";
-import { AppHelper, CaptureState, LeafType } from "../app-helper";
+import {
+  type App,
+  SuggestModal,
+  type TFile,
+  type WorkspaceLeaf,
+} from "obsidian";
+import { AppHelper, type CaptureState, type LeafType } from "../app-helper";
 import {
   createInstruction,
   createInstructions,
   equalsAsHotkey,
   quickResultSelectionModifier,
 } from "../keys";
-import { Hotkeys, Settings } from "../settings";
+import type { Hotkeys, Settings } from "../settings";
 import { sorter } from "../utils/collection-helper";
 import { Logger } from "../utils/logger";
 import {
@@ -20,11 +25,11 @@ import {
   hasCapitalLetter,
   trimLineByEllipsis,
 } from "../utils/strings";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
+import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { setFloatingModal } from "./modal";
 
-let globalInternalStorage: {
+const globalInternalStorage: {
   items: SuggestionItem[];
   basePath?: string;
   selected?: number;
@@ -152,12 +157,10 @@ export class GrepModal
 
       const basePathInputList = createEl("datalist");
       basePathInputList.setAttrs({ id: "directories" });
-      this.appHelper
-        .getFolders()
-        .filter((x) => !x.isRoot())
-        .forEach((x) => {
-          basePathInputList.appendChild(createEl("option", { value: x.path }));
-        });
+      const folders = this.appHelper.getFolders().filter((x) => !x.isRoot());
+      for (const x of folders) {
+        basePathInputList.appendChild(createEl("option", { value: x.path }));
+      }
 
       this.basePathInputElChangeEventListener = (evt: Event) => {
         this.basePath = (evt.target as any).value;
@@ -266,7 +269,7 @@ export class GrepModal
           order: -1,
           file: this.appHelper.getFileByPath(
             normalizePath(x.data.path.text).replace(
-              this.vaultRootPath + "/",
+              `${this.vaultRootPath}/`,
               "",
             ),
           )!,
@@ -280,7 +283,7 @@ export class GrepModal
       .sort(sorter((x) => x.file.stat.mtime, "desc"))
       .map((x, order) => ({ ...x, order }));
 
-    this.logger.showDebugLog(`getSuggestions: `, start);
+    this.logger.showDebugLog("getSuggestions: ", start);
 
     return items;
   }
@@ -363,7 +366,7 @@ export class GrepModal
     });
 
     let restLine = item.line;
-    item.submatches.forEach((x) => {
+    for (const x of item.submatches) {
       const i = restLine.indexOf(x.match.text);
       const before = restLine.slice(0, i);
       descriptionDiv.createSpan({
@@ -377,7 +380,7 @@ export class GrepModal
         cls: "another-quick-switcher__hit_word",
       });
       restLine = restLine.slice(i + x.match.text.length);
-    });
+    }
     descriptionDiv.createSpan({
       text: trimLineByEllipsis(
         restLine,
@@ -441,7 +444,8 @@ export class GrepModal
     key: keyof Hotkeys["grep"],
     handler: () => void | Promise<void>,
   ) {
-    this.settings.hotkeys.grep[key]?.forEach((x) => {
+    const hotkeys = this.settings.hotkeys.grep[key];
+    for (const x of hotkeys) {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
         if (!evt.isComposing) {
           evt.preventDefault();
@@ -449,7 +453,7 @@ export class GrepModal
           return false;
         }
       });
-    });
+    }
   }
 
   private setHotkeys() {
@@ -465,8 +469,8 @@ export class GrepModal
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
         { command: "[↵]", purpose: "open" },
-        { command: `[↑]`, purpose: "up" },
-        { command: `[↓]`, purpose: "down" },
+        { command: "[↑]", purpose: "up" },
+        { command: "[↓]", purpose: "down" },
         { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
         ...createInstructions(this.settings.hotkeys.grep),
       ]);
@@ -549,15 +553,13 @@ export class GrepModal
         return;
       }
 
-      this.chooser.values
-        .slice()
-        .reverse()
-        .forEach((x) =>
-          this.appHelper.openFile(x.file, {
-            leafType: "new-tab-background",
-            preventDuplicateTabs: this.settings.preventDuplicateTabs,
-          }),
-        );
+      const items = this.chooser.values.slice().reverse();
+      for (const x of items) {
+        this.appHelper.openFile(x.file, {
+          leafType: "new-tab-background",
+          preventDuplicateTabs: this.settings.preventDuplicateTabs,
+        });
+      }
     });
 
     this.registerKeys("preview", async () => {
@@ -570,13 +572,13 @@ export class GrepModal
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
       : "Mod";
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
+    for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
       this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
         this.chooser.setSelectedItem(n - 1, evt);
         this.chooser.useSelectedItem({});
         return false;
       });
-    });
+    }
 
     this.registerKeys("dismiss", async () => {
       this.close();

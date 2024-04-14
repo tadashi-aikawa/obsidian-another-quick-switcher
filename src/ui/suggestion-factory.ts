@@ -1,8 +1,8 @@
-import { SuggestionItem } from "../matcher";
-import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
-import { ALIAS, FOLDER, FRONT_MATTER, HEADER, LINK, SCORE, TAG } from "./icons";
-import { round } from "../utils/math";
 import { isExcalidraw } from "src/utils/path";
+import type { SuggestionItem } from "../matcher";
+import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
+import { round } from "../utils/math";
+import { ALIAS, FOLDER, FRONT_MATTER, HEADER, LINK, SCORE, TAG } from "./icons";
 
 interface Elements {
   itemDiv: HTMLDivElement;
@@ -119,7 +119,8 @@ function createMetaDiv(args: {
     const frontMattersDiv = createDiv({
       cls: "another-quick-switcher__item__meta",
     });
-    Object.entries(frontMatter).forEach(([key, value]) => {
+
+    for (const [key, value] of Object.entries(frontMatter)) {
       const frontMatterDiv = createDiv({
         cls: "another-quick-switcher__item__meta__front_matter",
         title: `${key}: ${value}`,
@@ -130,16 +131,17 @@ function createMetaDiv(args: {
         title: key,
         text: key,
       });
-      [value].flat().forEach((v) => {
+
+      for (const v of [value].flat()) {
         frontMatterDiv.createSpan({
           cls: "another-quick-switcher__item__meta__front_matter__value",
           title: v.toString(),
           text: v.toString(),
         });
-      });
+      }
 
       frontMattersDiv.appendChild(frontMatterDiv);
-    });
+    }
     metaDiv.appendChild(frontMattersDiv);
   }
 
@@ -179,14 +181,14 @@ function createDescriptionDiv(args: {
     const displayAliases = options.showAliasesOnTop
       ? [item.file.basename]
       : aliases;
-    displayAliases.forEach((x) => {
+    for (const x of displayAliases) {
       const aliasSpan = createSpan({
         cls: "another-quick-switcher__item__description__alias",
       });
       aliasSpan.insertAdjacentHTML("beforeend", ALIAS);
       aliasSpan.appendText(x);
       aliasDiv.appendChild(aliasSpan);
-    });
+    }
     descriptionDiv.appendChild(aliasDiv);
   }
 
@@ -194,14 +196,14 @@ function createDescriptionDiv(args: {
     const tagsDiv = createDiv({
       cls: "another-quick-switcher__item__description",
     });
-    tags.forEach((x) => {
+    for (const x of tags) {
       const tagsSpan = createSpan({
         cls: "another-quick-switcher__item__description__tag",
       });
       tagsSpan.insertAdjacentHTML("beforeend", TAG);
       tagsSpan.appendText(x.replace("#", ""));
       tagsDiv.appendChild(tagsSpan);
-    });
+    }
     descriptionDiv.appendChild(tagsDiv);
   }
 
@@ -210,24 +212,25 @@ function createDescriptionDiv(args: {
       cls: "another-quick-switcher__item__description",
     });
 
-    Object.entries(countByLink)
+    const linkAndCount = Object.entries(countByLink)
       .map(([link, n]) => ({ link, n }))
-      .sort((a, b) => b.n - a.n)
-      .forEach(({ link, n }) => {
-        const linkSpan = createSpan({
-          cls: [
-            "another-quick-switcher__item__description__link",
-            n !== linkResultsNum
-              ? "another-quick-switcher__item__description__link__dimmed"
-              : "",
-          ],
-        });
-        linkSpan.insertAdjacentHTML("beforeend", LINK);
-        linkSpan.appendChild(
-          createSpan({ text: link, attr: { style: "padding-left: 3px" } }),
-        );
-        linksDiv.appendChild(linkSpan);
+      .sort((a, b) => b.n - a.n);
+    for (const { link, n } of linkAndCount) {
+      const linkSpan = createSpan({
+        cls: [
+          "another-quick-switcher__item__description__link",
+          n !== linkResultsNum
+            ? "another-quick-switcher__item__description__link__dimmed"
+            : "",
+        ],
       });
+      linkSpan.insertAdjacentHTML("beforeend", LINK);
+      linkSpan.appendChild(
+        createSpan({ text: link, attr: { style: "padding-left: 3px" } }),
+      );
+      linksDiv.appendChild(linkSpan);
+    }
+
     descriptionDiv.appendChild(linksDiv);
   }
 
@@ -236,24 +239,24 @@ function createDescriptionDiv(args: {
       cls: "another-quick-switcher__item__description",
     });
 
-    Object.entries(countByHeader)
+    const headerAndCount = Object.entries(countByHeader)
       .map(([header, n]) => ({ header, n }))
-      .sort((a, b) => b.n - a.n)
-      .forEach(({ header, n }) => {
-        const headersSpan = createSpan({
-          cls: [
-            "another-quick-switcher__item__description__header",
-            n !== headerResultsNum
-              ? "another-quick-switcher__item__description__header__dimmed"
-              : "",
-          ],
-        });
-        headersSpan.insertAdjacentHTML("beforeend", HEADER);
-        headersSpan.appendChild(
-          createSpan({ text: header, attr: { style: "padding-left: 3px" } }),
-        );
-        headersDiv.appendChild(headersSpan);
+      .sort((a, b) => b.n - a.n);
+    for (const { header, n } of headerAndCount) {
+      const headersSpan = createSpan({
+        cls: [
+          "another-quick-switcher__item__description__header",
+          n !== headerResultsNum
+            ? "another-quick-switcher__item__description__header__dimmed"
+            : "",
+        ],
       });
+      headersSpan.insertAdjacentHTML("beforeend", HEADER);
+      headersSpan.appendChild(
+        createSpan({ text: header, attr: { style: "padding-left: 3px" } }),
+      );
+      headersDiv.appendChild(headersSpan);
+    }
     descriptionDiv.appendChild(headersDiv);
   }
 

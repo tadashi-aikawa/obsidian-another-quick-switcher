@@ -1,20 +1,20 @@
 import {
-  App,
-  debounce,
-  Debouncer,
+  type App,
+  type Debouncer,
   Platform,
   SuggestModal,
-  TFile,
-  WorkspaceLeaf,
+  type TFile,
+  type WorkspaceLeaf,
+  debounce,
 } from "obsidian";
 import {
   AppHelper,
-  CaptureState,
+  type CaptureState,
+  type LeafType,
   isFrontMatterLinkCache,
-  LeafType,
 } from "../app-helper";
 import { createInstructions, quickResultSelectionModifier } from "../keys";
-import { Hotkeys, Settings } from "../settings";
+import type { Hotkeys, Settings } from "../settings";
 import { compare } from "../sorters";
 import { uniqBy } from "../utils/collection-helper";
 import { Logger } from "../utils/logger";
@@ -24,9 +24,9 @@ import {
   smartIncludes,
   trimLineByEllipsis,
 } from "../utils/strings";
+import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { setFloatingModal } from "./modal";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 interface SuggestionItem {
   order?: number;
@@ -175,7 +175,7 @@ export class BacklinkModal
       (item) => `${item.file.path}/${item.lineNumber}`,
     );
 
-    this.logger.showDebugLog(`Indexing backlinks`, start);
+    this.logger.showDebugLog("Indexing backlinks", start);
   }
 
   getSuggestions(query: string): SuggestionItem[] | Promise<SuggestionItem[]> {
@@ -301,24 +301,25 @@ export class BacklinkModal
 
     let restLine = item.line;
     let offset = 0;
-    Array.from(restLine.matchAll(this.originFileBaseNameRegExp))
-      .map((x) => x.index!)
-      .forEach((index) => {
-        const before = restLine.slice(0, index - offset);
-        descriptionDiv.createSpan({
-          text: trimLineByEllipsis(
-            before,
-            this.settings.maxDisplayLengthAroundMatchedWord,
-          ),
-        });
-        descriptionDiv.createSpan({
-          text: this.originFileBaseName,
-          cls: "another-quick-switcher__hit_word",
-        });
-
-        offset = index - offset + this.originFileBaseName.length;
-        restLine = restLine.slice(offset);
+    const indices = Array.from(
+      restLine.matchAll(this.originFileBaseNameRegExp),
+    ).map((x) => x.index!);
+    for (const index of indices) {
+      const before = restLine.slice(0, index - offset);
+      descriptionDiv.createSpan({
+        text: trimLineByEllipsis(
+          before,
+          this.settings.maxDisplayLengthAroundMatchedWord,
+        ),
       });
+      descriptionDiv.createSpan({
+        text: this.originFileBaseName,
+        cls: "another-quick-switcher__hit_word",
+      });
+
+      offset = index - offset + this.originFileBaseName.length;
+      restLine = restLine.slice(offset);
+    }
     descriptionDiv.createSpan({
       text: trimLineByEllipsis(
         restLine,
@@ -382,7 +383,8 @@ export class BacklinkModal
     key: keyof Hotkeys["backlink"],
     handler: () => void | Promise<void>,
   ) {
-    this.settings.hotkeys.backlink[key]?.forEach((x) => {
+    const hotkeys = this.settings.hotkeys.backlink[key];
+    for (const x of hotkeys) {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
         if (!evt.isComposing) {
           evt.preventDefault();
@@ -390,7 +392,7 @@ export class BacklinkModal
           return false;
         }
       });
-    });
+    }
   }
 
   private setHotkeys() {
@@ -406,8 +408,8 @@ export class BacklinkModal
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
         { command: "[↵]", purpose: "open" },
-        { command: `[↑]`, purpose: "up" },
-        { command: `[↓]`, purpose: "down" },
+        { command: "[↑]", purpose: "up" },
+        { command: "[↓]", purpose: "down" },
         { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
         ...createInstructions(this.settings.hotkeys.backlink),
       ]);
@@ -451,15 +453,13 @@ export class BacklinkModal
         return;
       }
 
-      this.chooser.values
-        .slice()
-        .reverse()
-        .forEach((x) =>
-          this.appHelper.openFile(x.file, {
-            leafType: "new-tab-background",
-            preventDuplicateTabs: this.settings.preventDuplicateTabs,
-          }),
-        );
+      const items = this.chooser.values.slice().reverse();
+      for (const x of items) {
+        this.appHelper.openFile(x.file, {
+          leafType: "new-tab-background",
+          preventDuplicateTabs: this.settings.preventDuplicateTabs,
+        });
+      }
     });
 
     this.registerKeys("show all results", () => {
@@ -478,13 +478,13 @@ export class BacklinkModal
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
       : "Mod";
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
+    for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
       this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
         this.chooser.setSelectedItem(n - 1, evt);
         this.chooser.useSelectedItem({});
         return false;
       });
-    });
+    }
 
     this.registerKeys("dismiss", async () => {
       this.close();

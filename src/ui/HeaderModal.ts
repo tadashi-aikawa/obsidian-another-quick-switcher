@@ -1,14 +1,14 @@
-import { App, Platform, Pos, SuggestModal } from "obsidian";
-import { Hotkeys, Settings } from "../settings";
+import { type App, Platform, type Pos, SuggestModal } from "obsidian";
 import { AppHelper } from "../app-helper";
+import { createInstructions } from "../keys";
+import type { Hotkeys, Settings } from "../settings";
 import {
   capitalizeFirstLetter,
   excludeFormat,
   smartIncludes,
   smartWhitespaceSplit,
 } from "../utils/strings";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
-import { createInstructions } from "../keys";
+import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { PREVIEW } from "./icons";
 import { setFloatingModal } from "./modal";
 
@@ -191,9 +191,9 @@ export class HeaderModal
     const headerDiv = createDiv({
       cls: [
         "another-quick-switcher__item__title",
-        `another-quick-switcher__item__title__header`,
+        "another-quick-switcher__item__title__header",
         item.hit
-          ? `another-quick-switcher__item__title__header_hit`
+          ? "another-quick-switcher__item__title__header_hit"
           : "another-quick-switcher__item__title__header_no_hit",
         `another-quick-switcher__item__title__header${item.level}`,
       ],
@@ -224,7 +224,7 @@ export class HeaderModal
     key: keyof Hotkeys["header"],
     handler: (evt: KeyboardEvent) => void | Promise<void>,
   ) {
-    this.settings.hotkeys.header[key]?.forEach((x) => {
+    for (const x of this.settings.hotkeys.header[key] ?? []) {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
         if (!evt.isComposing) {
           evt.preventDefault();
@@ -232,7 +232,7 @@ export class HeaderModal
           return false;
         }
       });
-    });
+    }
   }
 
   setHotkeys() {
@@ -243,8 +243,8 @@ export class HeaderModal
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
         { command: "[↵]", purpose: "move to header" },
-        { command: `[↑]`, purpose: "up" },
-        { command: `[↓]`, purpose: "down" },
+        { command: "[↑]", purpose: "up" },
+        { command: "[↓]", purpose: "down" },
         ...createInstructions(this.settings.hotkeys.header),
       ]);
     }
@@ -287,9 +287,11 @@ export class HeaderModal
     };
 
     // Unregister default arrows behavior
-    this.scope.keys
-      .filter((x) => ["ArrowDown", "ArrowUp"].includes(x.key!))
-      .forEach((x) => this.scope.unregister(x));
+    for (const x of this.scope.keys.filter((x) =>
+      ["ArrowDown", "ArrowUp"].includes(x.key!),
+    )) {
+      this.scope.unregister(x);
+    }
     this.scope.register([], "ArrowUp", (evt) => {
       evt.preventDefault();
       navigatePrevious(evt);
@@ -329,11 +331,11 @@ export class HeaderModal
     this.registerKeys("insert all to editor", async () => {
       this.close();
 
-      this.chooser.values?.forEach((x) => {
+      for (const x of this.chooser.values ?? []) {
         this.appHelper.insertStringToActiveFile(
           `${" ".repeat((x.level - 1) * 4)}- ${x.value}\n`,
         );
-      });
+      }
     });
 
     this.registerKeys("dismiss", async () => {

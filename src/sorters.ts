@@ -1,7 +1,7 @@
-import { SuggestionItem } from "./matcher";
+import { ExhaustiveError } from "./errors";
+import type { SuggestionItem } from "./matcher";
 import { intersection } from "./utils/collection-helper";
 import { excludeEmoji } from "./utils/strings";
-import { ExhaustiveError } from "./errors";
 
 export const sortPriorityList = [
   "Header match",

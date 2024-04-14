@@ -1,4 +1,4 @@
-import { Settings } from "../settings";
+import type { Settings } from "../settings";
 
 function buildLogMessage(message: string, msec: number) {
   return `${message}: ${Math.round(msec)}[ms]`;

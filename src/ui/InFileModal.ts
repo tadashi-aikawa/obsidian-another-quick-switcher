@@ -1,21 +1,21 @@
-import { App, Platform, SuggestModal, WorkspaceLeaf } from "obsidian";
+import { type App, Platform, SuggestModal, type WorkspaceLeaf } from "obsidian";
 import { AppHelper } from "../app-helper";
 import { createInstructions, quickResultSelectionModifier } from "../keys";
-import { Hotkeys, Settings } from "../settings";
+import type { Hotkeys, Settings } from "../settings";
 import { range } from "../utils/collection-helper";
 import { Logger } from "../utils/logger";
 import {
-  capitalizeFirstLetter,
   capitalIncludes,
+  capitalizeFirstLetter,
   escapeRegExp,
   trimLineByEllipsis,
 } from "../utils/strings";
 import { isPresent } from "../utils/types";
+import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { PREVIEW } from "./icons";
 import { setFloatingModal } from "./modal";
-import { UnsafeModalInterface } from "./UnsafeModalInterface";
 
-let globalInternalStorage: {
+const globalInternalStorage: {
   query: string;
   selected: number | null;
 } = {
@@ -287,25 +287,28 @@ export class InFileModal
     const activeLineBlockDiv = activeLineDiv.createDiv();
     let restLine = item.line;
     let offset = 0;
-    Array.from(restLine.matchAll(this.currentQueriesRegExp))
-      .map((x) => ({ index: x.index!, text: x[0] }))
-      .forEach(({ index, text }) => {
-        const before = restLine.slice(0, index - offset);
 
-        activeLineBlockDiv.createSpan({
-          text: trimLineByEllipsis(
-            before,
-            this.settings.inFileMaxDisplayLengthAroundMatchedWord,
-          ),
-        });
-        activeLineBlockDiv.createSpan({
-          text,
-          cls: "another-quick-switcher__hit_word",
-        });
+    const indexAndText = Array.from(
+      restLine.matchAll(this.currentQueriesRegExp),
+    ).map((x) => ({ index: x.index!, text: x[0] }));
 
-        offset += before.length + text.length;
-        restLine = item.line.slice(offset);
+    for (const { index, text } of indexAndText) {
+      const before = restLine.slice(0, index - offset);
+
+      activeLineBlockDiv.createSpan({
+        text: trimLineByEllipsis(
+          before,
+          this.settings.inFileMaxDisplayLengthAroundMatchedWord,
+        ),
       });
+      activeLineBlockDiv.createSpan({
+        text,
+        cls: "another-quick-switcher__hit_word",
+      });
+
+      offset += before.length + text.length;
+      restLine = item.line.slice(offset);
+    }
     activeLineBlockDiv.createSpan({
       text: trimLineByEllipsis(
         restLine,
@@ -355,7 +358,7 @@ export class InFileModal
     key: keyof Hotkeys["in-file"],
     handler: (evt: KeyboardEvent) => void | Promise<void>,
   ) {
-    this.settings.hotkeys["in-file"][key]?.forEach((x) => {
+    for (const x of this.settings.hotkeys["in-file"][key] ?? []) {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
         if (!evt.isComposing) {
           evt.preventDefault();
@@ -363,7 +366,7 @@ export class InFileModal
           return false;
         }
       });
-    });
+    }
   }
 
   private setHotkeys() {
@@ -378,8 +381,8 @@ export class InFileModal
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
         { command: "[↵]", purpose: "open" },
-        { command: `[↑]`, purpose: "up" },
-        { command: `[↓]`, purpose: "down" },
+        { command: "[↑]", purpose: "up" },
+        { command: "[↓]", purpose: "down" },
         { command: `[${openNthMod} 1~9]`, purpose: "open Nth" },
         ...createInstructions(this.settings.hotkeys["in-file"]),
       ]);
@@ -393,9 +396,13 @@ export class InFileModal
     };
 
     // Unregister default arrows behavior
-    this.scope.keys
-      .filter((x) => ["ArrowDown", "ArrowUp"].includes(x.key!))
-      .forEach((x) => this.scope.unregister(x));
+    const keyHandlers = this.scope.keys.filter((x) =>
+      ["ArrowDown", "ArrowUp"].includes(x.key!),
+    );
+    for (const x of keyHandlers) {
+      this.scope.unregister(x);
+    }
+
     this.scope.register([], "ArrowUp", (evt) => {
       evt.preventDefault();
       navigatePrevious(evt);
@@ -423,13 +430,13 @@ export class InFileModal
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
       : "Mod";
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n) => {
+    for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
       this.scope.register([modifierKey], String(n), (evt: KeyboardEvent) => {
         this.chooser.setSelectedItem(n - 1, evt);
         this.chooser.useSelectedItem({});
         return false;
       });
-    });
+    }
 
     this.registerKeys("toggle auto preview", () => {
       this.autoPreview = !this.autoPreview;

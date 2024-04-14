@@ -1,9 +1,14 @@
 import {
   count,
   equalsAsSet,
+  flatten,
+  groupBy,
   intersection,
+  keyBy,
+  mirrorMap,
   omitBy,
   range,
+  uniqBy,
 } from "./collection-helper";
 import { describe, expect, test } from "@jest/globals";
 
@@ -16,6 +21,17 @@ describe.each<{ n: number; expected: number[] }>`
 `("range", ({ n, expected }) => {
   test(`range(${n}) = ${expected}`, () => {
     expect(range(n)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{ matrix: any[][]; expected: any[] }>`
+  matrix                      | expected
+  ${[["a", "b"], ["c", "d"]]} | ${["a", "b", "c", "d"]}
+  ${[["a"], ["c"]]}           | ${["a", "c"]}
+  ${[["a"]]}                  | ${["a"]}
+`("flatten", ({ matrix, expected }) => {
+  test(`flatten(${matrix}) = ${expected}`, () => {
+    expect(flatten(matrix)).toStrictEqual(expected);
   });
 });
 
@@ -70,5 +86,69 @@ describe.each<{
     expected,
   )}`, () => {
     expect(omitBy(obj, shouldOmit)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{
+  values: any;
+  toKey: (t: any) => string;
+  expected: { [key: string]: any[] };
+}>`
+  values                    | toKey                           | expected
+  ${["1", "20", "3", "40"]} | ${(t: any) => String(t.length)} | ${{ "1": ["1", "3"], "2": ["20", "40"] }}
+  ${[1, 11, 111]}           | ${(t: any) => String(t % 10)}   | ${{ "1": [1, 11, 111] }}
+`("groupBy", ({ values, toKey, expected }) => {
+  test(`groupBy(${JSON.stringify(values)}, toKey) = ${JSON.stringify(
+    expected,
+  )}`, () => {
+    expect(groupBy(values, toKey)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{
+  values: any;
+  toKey: (t: any) => string;
+  expected: { [key: string]: any };
+}>`
+  values                    | toKey                           | expected
+  ${["1", "20", "300"]}     | ${(t: any) => String(t.length)} | ${{ "1": "1", "2": "20", "3": "300" }}
+  ${[1, 12, 123]}           | ${(t: any) => String(t % 10)}   | ${{ "1": 1, "2": 12, "3": 123 }}
+  ${["1", "20", "3", "40"]} | ${(t: any) => String(t.length)} | ${{ "1": "3", "2": "40" }}
+  ${[1, 11, 111]}           | ${(t: any) => String(t % 10)}   | ${{ "1": 111 }}
+`("keyBy", ({ values, toKey, expected }) => {
+  test(`keyBy(${JSON.stringify(values)}, toKey) = ${JSON.stringify(
+    expected,
+  )}`, () => {
+    expect(keyBy(values, toKey)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{
+  values: any[];
+  fn: (t: any) => string;
+  expected: any[];
+}>`
+  values              | fn                              | expected
+  ${["1", "2", "30"]} | ${(t: any) => String(t.length)} | ${["1", "30"]}
+`("uniqBy", ({ values, fn, expected }) => {
+  test(`uniqBy(${JSON.stringify(values)}, fn) = ${JSON.stringify(
+    expected,
+  )}`, () => {
+    expect(uniqBy(values, fn)).toStrictEqual(expected);
+  });
+});
+
+describe.each<{
+  values: any[];
+  toValue: (t: any) => string;
+  expected: { [key: string]: any };
+}>`
+  values         | toValue                         | expected
+  ${["1", "20"]} | ${(t: any) => String(t.length)} | ${{ "1": "1", "2": "2" }}
+`("mirrorMap", ({ values, toValue, expected }) => {
+  test(`mirrorMap(${JSON.stringify(values)}, toValue) = ${JSON.stringify(
+    expected,
+  )}`, () => {
+    expect(mirrorMap(values, toValue)).toStrictEqual(expected);
   });
 });

@@ -1,25 +1,26 @@
 import {
-  App,
-  CachedMetadata,
-  CacheItem,
-  Editor,
+  type App,
+  type CacheItem,
+  type CachedMetadata,
+  type Editor,
   FileView,
-  getLinkpath,
-  HeadingCache,
-  ItemView,
-  LinkCache,
+  type HeadingCache,
+  type LinkCache,
   MarkdownView,
-  Pos,
-  ReferenceCache,
-  TAbstractFile,
-  TFile,
+  type Pos,
+  type ReferenceCache,
+  type TAbstractFile,
+  type TFile,
   TFolder,
-  Vault,
+  type Vault,
   View,
-  ViewState,
-  Workspace,
-  WorkspaceLeaf,
+  type ViewState,
+  type Workspace,
+  type WorkspaceLeaf,
+  getLinkpath,
 } from "obsidian";
+import merge from "ts-deepmerge";
+import { ExhaustiveError } from "./errors";
 import {
   flatten,
   groupBy,
@@ -28,8 +29,6 @@ import {
   uniq,
 } from "./utils/collection-helper";
 import { basename, dirname, extname } from "./utils/path";
-import { ExhaustiveError } from "./errors";
-import merge from "ts-deepmerge";
 import { excludeFormat } from "./utils/strings";
 
 type BookmarkItem =
@@ -472,7 +471,7 @@ export class AppHelper {
       : undefined;
 
     let leaf: WorkspaceLeaf | undefined;
-    let background: boolean = false;
+    let background = false;
     switch (opt.leafType) {
       case "same-tab":
         leaf =
@@ -496,13 +495,14 @@ export class AppHelper {
       case "new-window":
         leaf = this.unsafeApp.workspace.openPopoutLeaf();
         break;
-      case "popup":
+      case "popup": {
         const hoverEditorInstance =
           this.unsafeApp.plugins.plugins["obsidian-hover-editor"];
         leaf =
           hoverEditorInstance?.spawnPopover() ??
           this.unsafeApp.workspace.getLeaf(true);
         break;
+      }
       default:
         throw new ExhaustiveError(opt.leafType);
     }

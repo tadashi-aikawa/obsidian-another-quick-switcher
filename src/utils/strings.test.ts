@@ -1,10 +1,11 @@
+import { describe, expect, test } from "@jest/globals";
 import {
-  capitalizeFirstLetter,
+  type FuzzyResult,
   capitalIncludes,
+  capitalizeFirstLetter,
   excludeEmoji,
   excludeFormat,
   excludeSpace,
-  FuzzyResult,
   hasCapitalLetter,
   includes,
   microFuzzy,
@@ -18,7 +19,6 @@ import {
   smartWhitespaceSplit,
   trimLineByEllipsis,
 } from "./strings";
-import { describe, expect, test } from "@jest/globals";
 
 describe.each`
   text        | expected
