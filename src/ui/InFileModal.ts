@@ -106,7 +106,7 @@ export class InFileModal
     ) {
       const selected = Math.min(
         globalInternalStorage.selected,
-        this.chooser.suggestions.length - 1
+        this.chooser.suggestions.length - 1,
       );
       this.select(selected);
       this.chooser.suggestions.at(selected)?.scrollIntoView({
@@ -124,7 +124,7 @@ export class InFileModal
 
       this.select(
         Math.min(this.unsafeSelectedIndex, this.suggestions.length - 1),
-        unsafeEvt
+        unsafeEvt,
       );
     });
 
@@ -171,7 +171,9 @@ export class InFileModal
     if (this.autoPreview) {
       this.previewIcon = this.inputEl.insertAdjacentElement(
         "afterend",
-        createDiv({ cls: "another-quick-switcher__in-file__auto-preview-icon" })
+        createDiv({
+          cls: "another-quick-switcher__in-file__auto-preview-icon",
+        }),
       );
       this.previewIcon?.insertAdjacentHTML("beforeend", PREVIEW);
     }
@@ -207,7 +209,7 @@ export class InFileModal
     const queries = query.trim().split(" ");
     this.currentQueriesRegExp = new RegExp(
       queries.map(escapeRegExp).join("|"),
-      "gi"
+      "gi",
     );
 
     const matchedSuggestions = isQueryEmpty
@@ -217,9 +219,9 @@ export class InFileModal
             capitalIncludes(
               x.line,
               q,
-              this.settings.normalizeAccentsAndDiacritics
-            )
-          )
+              this.settings.normalizeAccentsAndDiacritics,
+            ),
+          ),
         );
 
     this.logger.showDebugLog(`Get suggestions: ${query}`, start);
@@ -266,7 +268,7 @@ export class InFileModal
       lineDiv.createSpan({
         text: trimLineByEllipsis(
           line,
-          this.settings.inFileMaxDisplayLengthAroundMatchedWord
+          this.settings.inFileMaxDisplayLengthAroundMatchedWord,
         ),
       });
     });
@@ -293,7 +295,7 @@ export class InFileModal
         activeLineBlockDiv.createSpan({
           text: trimLineByEllipsis(
             before,
-            this.settings.inFileMaxDisplayLengthAroundMatchedWord
+            this.settings.inFileMaxDisplayLengthAroundMatchedWord,
           ),
         });
         activeLineBlockDiv.createSpan({
@@ -307,7 +309,7 @@ export class InFileModal
     activeLineBlockDiv.createSpan({
       text: trimLineByEllipsis(
         restLine,
-        this.settings.inFileMaxDisplayLengthAroundMatchedWord
+        this.settings.inFileMaxDisplayLengthAroundMatchedWord,
       ),
     });
 
@@ -322,7 +324,7 @@ export class InFileModal
       lineDiv.createSpan({
         text: trimLineByEllipsis(
           line,
-          this.settings.inFileMaxDisplayLengthAroundMatchedWord
+          this.settings.inFileMaxDisplayLengthAroundMatchedWord,
         ),
       });
     });
@@ -345,13 +347,13 @@ export class InFileModal
     this.appHelper.moveTo(
       this.appHelper
         .getCurrentEditor()!
-        .posToOffset({ line: item.lineNumber - 1, ch: 0 })
+        .posToOffset({ line: item.lineNumber - 1, ch: 0 }),
     );
   }
 
   private registerKeys(
     key: keyof Hotkeys["in-file"],
-    handler: (evt: KeyboardEvent) => void | Promise<void>
+    handler: (evt: KeyboardEvent) => void | Promise<void>,
   ) {
     this.settings.hotkeys["in-file"][key]?.forEach((x) => {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
@@ -370,7 +372,7 @@ export class InFileModal
     this.scope.unregister(this.scope.keys.find((x) => x.key === "End")!);
 
     const openNthMod = quickResultSelectionModifier(
-      this.settings.userAltInsteadOfModForQuickResultSelection
+      this.settings.userAltInsteadOfModForQuickResultSelection,
     );
 
     if (!this.settings.hideHotkeyGuides) {

@@ -16,7 +16,7 @@ function matchQuery(
   item: SuggestionItem,
   query: string,
   matcher: (item: SuggestionItem, query: string) => boolean,
-  isNormalizeAccentsDiacritics: boolean
+  isNormalizeAccentsDiacritics: boolean,
 ): boolean {
   const qs = query.split("/");
   const folder = qs.pop()!;
@@ -25,8 +25,8 @@ function matchQuery(
       smartIncludes(
         item.folder.parent?.path!,
         dir,
-        isNormalizeAccentsDiacritics
-      )
+        isNormalizeAccentsDiacritics,
+      ),
     ) && matcher(item, folder)
   );
 }
@@ -35,17 +35,17 @@ function matchQueryAll(
   item: SuggestionItem,
   queries: string[],
   matcher: (item: SuggestionItem, query: string) => boolean,
-  isNormalizeAccentsDiacritics: boolean
+  isNormalizeAccentsDiacritics: boolean,
 ): boolean {
   return queries.every((q) =>
-    matchQuery(item, q, matcher, isNormalizeAccentsDiacritics)
+    matchQuery(item, q, matcher, isNormalizeAccentsDiacritics),
   );
 }
 
 function stampMatchType(
   item: SuggestionItem,
   queries: string[],
-  isNormalizeAccentsDiacritics: boolean
+  isNormalizeAccentsDiacritics: boolean,
 ): SuggestionItem {
   if (
     matchQueryAll(
@@ -53,7 +53,7 @@ function stampMatchType(
       queries,
       (item, query) =>
         smartStartsWith(item.folder.name, query, isNormalizeAccentsDiacritics),
-      isNormalizeAccentsDiacritics
+      isNormalizeAccentsDiacritics,
     )
   ) {
     return { ...item, matchType: "prefix-name" };
@@ -65,7 +65,7 @@ function stampMatchType(
       queries,
       (item, query) =>
         smartIncludes(item.folder.name, query, isNormalizeAccentsDiacritics),
-      isNormalizeAccentsDiacritics
+      isNormalizeAccentsDiacritics,
     )
   ) {
     return { ...item, matchType: "name" };
@@ -77,7 +77,7 @@ function stampMatchType(
       queries,
       (item, query) =>
         smartIncludes(item.folder.path, query, isNormalizeAccentsDiacritics),
-      isNormalizeAccentsDiacritics
+      isNormalizeAccentsDiacritics,
     )
   ) {
     return { ...item, matchType: "directory" };
@@ -113,7 +113,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     this.filteredItems = excludeItems(
       this.originItems,
       this.settings.moveFileExcludePrefixPathPatterns,
-      (x) => x.folder.path
+      (x) => x.folder.path,
     );
   }
 
@@ -122,7 +122,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
 
     return this.filteredItems
       .map((x) =>
-        stampMatchType(x, qs, this.settings.normalizeAccentsAndDiacritics)
+        stampMatchType(x, qs, this.settings.normalizeAccentsAndDiacritics),
       )
       .filter((x) => x.matchType)
       .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))
@@ -130,8 +130,8 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
         sorter(
           (x) =>
             x.matchType === "prefix-name" ? 1000 - x.folder.name.length : 0,
-          "desc"
-        )
+          "desc",
+        ),
       )
       .slice(0, 10);
   }
@@ -174,13 +174,13 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
 
     await this.app.fileManager.renameFile(
       activeFile,
-      `${item.folder.path}/${activeFile.name}`
+      `${item.folder.path}/${activeFile.name}`,
     );
   }
 
   private registerKeys(
     key: keyof Hotkeys["move"],
-    handler: () => void | Promise<void>
+    handler: () => void | Promise<void>,
   ) {
     this.settings.hotkeys.move[key]?.forEach((x) => {
       this.scope.register(x.modifiers, x.key.toUpperCase(), (evt) => {
@@ -210,7 +210,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     });
     this.registerKeys("down", () => {
       document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
+        new KeyboardEvent("keydown", { key: "ArrowDown" }),
       );
     });
 

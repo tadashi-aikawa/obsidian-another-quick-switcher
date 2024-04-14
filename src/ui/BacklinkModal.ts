@@ -76,7 +76,7 @@ export class BacklinkModal
   constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
     this.vaultRootPath = normalizePath(
-      (this.app.vault.adapter as any).basePath as string
+      (this.app.vault.adapter as any).basePath as string,
     );
 
     this.appHelper = new AppHelper(app);
@@ -97,7 +97,7 @@ export class BacklinkModal
         cb(this._getSuggestions(query));
       },
       this.settings.searchDelayMilliSeconds,
-      true
+      true,
     );
   }
 
@@ -144,7 +144,7 @@ export class BacklinkModal
       const file = this.appHelper.getFileByPath(path)!;
       if (
         this.settings.backlinkExcludePrefixPathPatterns.some((p) =>
-          file.path.startsWith(p)
+          file.path.startsWith(p),
         )
       ) {
         continue;
@@ -165,14 +165,14 @@ export class BacklinkModal
                 line: content.split("\n").at(cache.position.start.line)!,
                 lineNumber: cache.position.start.line + 1,
                 offset: cache.position.start.offset,
-              }
+              },
         );
       }
     }
 
     this.ignoredItems = uniqBy(
       ignoredItems,
-      (item) => `${item.file.path}/${item.lineNumber}`
+      (item) => `${item.file.path}/${item.lineNumber}`,
     );
 
     this.logger.showDebugLog(`Indexing backlinks`, start);
@@ -204,14 +204,14 @@ export class BacklinkModal
               smartIncludes(
                 x.file.path,
                 q,
-                this.settings.normalizeAccentsAndDiacritics
+                this.settings.normalizeAccentsAndDiacritics,
               ) ||
               smartIncludes(
                 x.line,
                 q,
-                this.settings.normalizeAccentsAndDiacritics
-              )
-          )
+                this.settings.normalizeAccentsAndDiacritics,
+              ),
+          ),
         );
 
     this.logger.showDebugLog(`Get suggestions: ${query}`, start);
@@ -231,8 +231,8 @@ export class BacklinkModal
           a,
           b,
           (x) => this.lastOpenFileIndexByPath[x.file.path] ?? 999999,
-          "asc"
-        )
+          "asc",
+        ),
       )
       .slice(0, this.limit)
       .map((x, order) => ({ ...x, order }));
@@ -308,7 +308,7 @@ export class BacklinkModal
         descriptionDiv.createSpan({
           text: trimLineByEllipsis(
             before,
-            this.settings.maxDisplayLengthAroundMatchedWord
+            this.settings.maxDisplayLengthAroundMatchedWord,
           ),
         });
         descriptionDiv.createSpan({
@@ -322,7 +322,7 @@ export class BacklinkModal
     descriptionDiv.createSpan({
       text: trimLineByEllipsis(
         restLine,
-        this.settings.maxDisplayLengthAroundMatchedWord
+        this.settings.maxDisplayLengthAroundMatchedWord,
       ),
     });
 
@@ -346,7 +346,7 @@ export class BacklinkModal
 
   async chooseCurrentSuggestion(
     leaf: LeafType,
-    option: { keepOpen?: boolean } = {}
+    option: { keepOpen?: boolean } = {},
   ): Promise<TFile | null> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
     if (!item) {
@@ -368,8 +368,8 @@ export class BacklinkModal
           inplace: option.keepOpen,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
         },
-        this.stateToRestore
-      )
+        this.stateToRestore,
+      ),
     );
     return item.file;
   }
@@ -380,7 +380,7 @@ export class BacklinkModal
 
   private registerKeys(
     key: keyof Hotkeys["backlink"],
-    handler: () => void | Promise<void>
+    handler: () => void | Promise<void>,
   ) {
     this.settings.hotkeys.backlink[key]?.forEach((x) => {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
@@ -400,7 +400,7 @@ export class BacklinkModal
     this.scope.unregister(this.scope.keys.find((x) => x.key === "End")!);
 
     const openNthMod = quickResultSelectionModifier(
-      this.settings.userAltInsteadOfModForQuickResultSelection
+      this.settings.userAltInsteadOfModForQuickResultSelection,
     );
 
     if (!this.settings.hideHotkeyGuides) {
@@ -418,7 +418,7 @@ export class BacklinkModal
     });
     this.registerKeys("down", () => {
       document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
+        new KeyboardEvent("keydown", { key: "ArrowDown" }),
       );
     });
 
@@ -458,7 +458,7 @@ export class BacklinkModal
           this.appHelper.openFile(x.file, {
             leafType: "new-tab-background",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
-          })
+          }),
         );
     });
 

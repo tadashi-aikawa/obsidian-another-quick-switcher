@@ -55,7 +55,7 @@ interface UnsafeAppInterface {
       "obsidian-hover-editor"?: {
         spawnPopover(
           initiatingEl?: HTMLElement,
-          onShowCallback?: () => unknown
+          onShowCallback?: () => unknown,
         ): WorkspaceLeaf;
       };
     };
@@ -124,7 +124,7 @@ export interface FrontMatterLinkCache
 }
 export type UnsafeLinkCache = LinkCache | FrontMatterLinkCache;
 export function isFrontMatterLinkCache(
-  x: UnsafeLinkCache
+  x: UnsafeLinkCache,
 ): x is FrontMatterLinkCache {
   return (x as any).position == null;
 }
@@ -240,7 +240,7 @@ export class AppHelper {
 
   findFirstLinkOffset(file: TFile, linkFile: TFile): number {
     const fileCache = this.unsafeApp.metadataCache.getFileCache(
-      file
+      file,
     ) as UnsafeCachedMetadata | null;
     const links = fileCache?.links ?? [];
     const frontmatterLinks = fileCache?.frontmatterLinks ?? [];
@@ -252,10 +252,10 @@ export class AppHelper {
           ? this.getPathToBeCreated(x.link)
           : this.unsafeApp.metadataCache.getFirstLinkpathDest(
               getLinkpath(x.link),
-              file.path
+              file.path,
             )?.path;
         return firstLinkPath === linkFile.path;
-      }
+      },
     );
 
     if (!first || isFrontMatterLinkCache(first)) {
@@ -272,7 +272,7 @@ export class AppHelper {
     }
 
     const target = cache.headings?.find(
-      (x) => excludeFormat(x.heading) === excludeFormat(header)
+      (x) => excludeFormat(x.heading) === excludeFormat(header),
     );
     return target?.position.start.offset ?? null;
   }
@@ -297,11 +297,11 @@ export class AppHelper {
 
     const unresolvedLinks = mapValues(
       this.unsafeApp.metadataCache.unresolvedLinks,
-      (innerMap) => mapKeys(innerMap, (x) => this.getPathToBeCreated(x))
+      (innerMap) => mapKeys(innerMap, (x) => this.getPathToBeCreated(x)),
     );
 
     for (const [filePath, linkMap] of Object.entries(
-      merge(this.unsafeApp.metadataCache.resolvedLinks, unresolvedLinks)
+      merge(this.unsafeApp.metadataCache.resolvedLinks, unresolvedLinks),
     ) as [string, Record<string, number>][]) {
       for (const linkPath of Object.keys(linkMap)) {
         if (!backLinksMap[linkPath]) {
@@ -319,7 +319,7 @@ export class AppHelper {
    */
   createLinksMap(file: TFile): Record<string, UnsafeLinkCache> {
     const cache = this.unsafeApp.metadataCache.getFileCache(
-      file
+      file,
     ) as UnsafeCachedMetadata;
     return mapValues(
       groupBy(
@@ -328,9 +328,9 @@ export class AppHelper {
           ...(cache?.links ?? []),
           ...(cache?.frontmatterLinks ?? []),
         ],
-        (x) => this.linkText2Path(x.link) ?? this.getPathToBeCreated(x.link)
+        (x) => this.linkText2Path(x.link) ?? this.getPathToBeCreated(x.link),
       ),
-      (caches) => caches[0]
+      (caches) => caches[0],
     );
   }
 
@@ -341,7 +341,7 @@ export class AppHelper {
     }
 
     const cache = this.unsafeApp.metadataCache.getFileCache(
-      file
+      file,
     ) as UnsafeCachedMetadata;
     return groupBy(
       [
@@ -349,7 +349,7 @@ export class AppHelper {
         ...(cache?.links ?? []),
         ...(cache?.frontmatterLinks ?? []),
       ],
-      (x) => this.linkText2Path(x.link) ?? this.getPathToBeCreated(x.link)
+      (x) => this.linkText2Path(x.link) ?? this.getPathToBeCreated(x.link),
     );
   }
 
@@ -374,7 +374,7 @@ export class AppHelper {
 
     const line = isToOffset ? targetEditor.offsetToPos(to).line : to.start.line;
     targetEditor.setCursor(
-      targetEditor.offsetToPos(isToOffset ? to : to.start.offset)
+      targetEditor.offsetToPos(isToOffset ? to : to.start.offset),
     );
     await activeLeaf.openFile(activeFile, {
       eState: {
@@ -399,7 +399,7 @@ export class AppHelper {
       .filter(
         (x) =>
           x.getContainer() ===
-          this.unsafeApp.workspace.activeLeaf?.getContainer()
+          this.unsafeApp.workspace.activeLeaf?.getContainer(),
       )
       .map((x) => x.getViewState().state.file as string);
   }
@@ -427,7 +427,7 @@ export class AppHelper {
               active: newLeaf === currentLeaf,
               popstate: true,
             } as ViewState,
-            newEState
+            newEState,
           );
 
           if (newLeaf !== currentLeaf) {
@@ -460,7 +460,7 @@ export class AppHelper {
   async openFile(
     file: TFile,
     option: Partial<OpenFileOption> = {},
-    captureState?: CaptureState
+    captureState?: CaptureState,
   ) {
     const opt: OpenFileOption = {
       ...{ leafType: "same-tab", inplace: false },
@@ -556,9 +556,9 @@ export class AppHelper {
     return uniq(
       flatten(
         Object.values(this.unsafeApp.metadataCache.unresolvedLinks).map(
-          Object.keys
-        )
-      )
+          Object.keys,
+        ),
+      ),
     ).map((x) => this.createPhantomFile(x));
   }
 
@@ -582,7 +582,7 @@ export class AppHelper {
 
     let linkText = this.unsafeApp.fileManager.generateMarkdownLink(
       file,
-      activeMarkdownView.file.path
+      activeMarkdownView.file.path,
     );
 
     if (phantom) {
@@ -592,7 +592,7 @@ export class AppHelper {
     const editor = activeMarkdownView.editor;
     editor.replaceSelection(
       // XXX: dirty hack
-      linkText.endsWith(".excalidraw]]") ? `!${linkText}` : linkText
+      linkText.endsWith(".excalidraw]]") ? `!${linkText}` : linkText,
     );
   }
 
@@ -625,7 +625,7 @@ export class AppHelper {
 
   getCommandIds(manifestId: string): string[] {
     return Object.keys(this.unsafeApp.commands.commands).filter((x) =>
-      x.startsWith(manifestId)
+      x.startsWith(manifestId),
     );
   }
 
@@ -661,7 +661,7 @@ export class AppHelper {
     return (
       this.unsafeApp.metadataCache.getFirstLinkpathDest(
         linkText,
-        activeFile.path
+        activeFile.path,
       )?.path ?? null
     );
   }
@@ -681,7 +681,7 @@ export class AppHelper {
 
   addFileToCanvas(
     file: TFile,
-    offset: { x: number; y: number } = { x: 0, y: 0 }
+    offset: { x: number; y: number } = { x: 0, y: 0 },
   ): UnsafeCardLayout {
     const unsafeView = this.getCanvasViewInActiveLeaf()!;
     const { x, y } = unsafeView.canvas.posCenter();

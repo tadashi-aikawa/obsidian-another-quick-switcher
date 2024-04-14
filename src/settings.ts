@@ -637,7 +637,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.searchDelayMilliSeconds = value;
             await this.plugin.saveSettings();
-          })
+          }),
       );
 
     new Setting(containerEl)
@@ -650,14 +650,14 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.maxNumberOfSuggestions = value;
             await this.plugin.saveSettings();
-          })
+          }),
       );
 
     new Setting(containerEl)
       .setName("Normalize accents/diacritics")
       .addToggle((tc) => {
         tc.setValue(
-          this.plugin.settings.normalizeAccentsAndDiacritics
+          this.plugin.settings.normalizeAccentsAndDiacritics,
         ).onChange(async (value) => {
           this.plugin.settings.normalizeAccentsAndDiacritics = value;
           await this.plugin.saveSettings();
@@ -675,7 +675,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       .setName("Use selection words as a default input query")
       .addToggle((tc) => {
         tc.setValue(
-          this.plugin.settings.useSelectionWordsAsDefaultInputQuery
+          this.plugin.settings.useSelectionWordsAsDefaultInputQuery,
         ).onChange(async (value) => {
           this.plugin.settings.useSelectionWordsAsDefaultInputQuery = value;
           await this.plugin.saveSettings();
@@ -685,14 +685,14 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Prevent duplicate tabs")
       .setDesc(
-        "If a file is already opened as a tab, it will not open in a new tab; instead, the existing tab will be activated. This option is enabled for three commands: 'open in new tab', 'open in new tab in background', and 'open all in new tabs'."
+        "If a file is already opened as a tab, it will not open in a new tab; instead, the existing tab will be activated. This option is enabled for three commands: 'open in new tab', 'open in new tab in background', and 'open all in new tabs'.",
       )
       .addToggle((tc) => {
         tc.setValue(this.plugin.settings.preventDuplicateTabs).onChange(
           async (value) => {
             this.plugin.settings.preventDuplicateTabs = value;
             await this.plugin.saveSettings();
-          }
+          },
         );
       });
   }
@@ -706,7 +706,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           this.plugin.settings.showDirectory = value;
           await this.plugin.saveSettings();
           this.display();
-        }
+        },
       );
     });
 
@@ -719,7 +719,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             async (value) => {
               this.plugin.settings.showDirectoryAtNewLine = value;
               await this.plugin.saveSettings();
-            }
+            },
           );
         });
       new Setting(containerEl)
@@ -730,7 +730,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             async (value) => {
               this.plugin.settings.showFullPathOfDirectory = value;
               await this.plugin.saveSettings();
-            }
+            },
           );
         });
     }
@@ -740,7 +740,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         async (value) => {
           this.plugin.settings.showAliasesOnTop = value;
           await this.plugin.saveSettings();
-        }
+        },
       );
     });
 
@@ -751,7 +751,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           async (value) => {
             this.plugin.settings.showExistingFilesOnly = value;
             await this.plugin.saveSettings();
-          }
+          },
         );
       });
 
@@ -760,7 +760,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         async (value) => {
           this.plugin.settings.hideGutterIcons = value;
           await this.plugin.saveSettings();
-        }
+        },
       );
     });
 
@@ -769,7 +769,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         async (value) => {
           this.plugin.settings.hideHotkeyGuides = value;
           await this.plugin.saveSettings();
-        }
+        },
       );
     });
   }
@@ -779,11 +779,11 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName(
-        "Use `alt 1～9` instead of `ctrl/cmd 1～9` for quick result selection"
+        "Use `alt 1～9` instead of `ctrl/cmd 1～9` for quick result selection",
       )
       .addToggle((tc) => {
         tc.setValue(
-          this.plugin.settings.userAltInsteadOfModForQuickResultSelection
+          this.plugin.settings.userAltInsteadOfModForQuickResultSelection,
         ).onChange(async (value) => {
           this.plugin.settings.userAltInsteadOfModForQuickResultSelection =
             value;
@@ -809,7 +809,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
               .onChange(async (value: string) => {
                 const hk = string2Hotkey(
                   value,
-                  dialog[command][0]?.hideHotkeyGuide ?? false
+                  dialog[command][0]?.hideHotkeyGuide ?? false,
                 );
                 dialog[command] = hk ? [hk] : [];
                 await this.plugin.saveSettings();
@@ -839,13 +839,13 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       Object.keys(this.plugin.settings.hotkeys[dialogKey]).forEach(
         (k: string) => {
           addHotKeyItem(k, k as keyof Hotkeys[keyof Hotkeys]);
-        }
+        },
       );
     };
 
     const addHotkeysForDialog = (
       dialogKey: keyof Hotkeys,
-      dialogName: string
+      dialogName: string,
     ) => {
       const div = createDiv({
         cls: "another-quick-switcher__settings__dialog-hotkey",
@@ -859,7 +859,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           text: "keycode.info",
           href: "https://keycode.info/",
         }),
-        ". (Press any key and show 'event.key')"
+        ". (Press any key and show 'event.key')",
       );
 
       const ul = createEl("ul");
@@ -883,16 +883,16 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             .setIcon(
               this.hotkeyExpandedStatus[dialogKey]
                 ? "chevron-up"
-                : "chevron-down"
+                : "chevron-down",
             )
             .setTooltip(
-              this.hotkeyExpandedStatus[dialogKey] ? "fold" : "unfold"
+              this.hotkeyExpandedStatus[dialogKey] ? "fold" : "unfold",
             )
             .onClick(() => {
               this.hotkeyExpandedStatus[dialogKey] =
                 !this.hotkeyExpandedStatus[dialogKey];
               this.display();
-            })
+            }),
         );
       addHotkeyItems(dialogKey, div);
     };
@@ -912,7 +912,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.plugin.settings.searchCommands.forEach((_, i) => {
       this.addSearchCommandSetting(
         containerEl,
-        this.plugin.settings.searchCommands[i]
+        this.plugin.settings.searchCommands[i],
       );
     });
 
@@ -924,11 +924,11 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           .setTooltip("Add a new command")
           .setCta()
           .setClass(
-            "another-quick-switcher__settings__search-command__add-button"
+            "another-quick-switcher__settings__search-command__add-button",
           )
           .onClick(async (_) => {
             this.plugin.settings.searchCommands.push(
-              createDefaultSearchCommand()
+              createDefaultSearchCommand(),
             );
             this.display();
           });
@@ -937,11 +937,11 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         btn
           .setButtonText("Save")
           .setTooltip(
-            "You must click this button to save settings before closing Obsidian"
+            "You must click this button to save settings before closing Obsidian",
           )
           .setCta()
           .setClass(
-            "another-quick-switcher__settings__search-command__save-button"
+            "another-quick-switcher__settings__search-command__save-button",
           )
           .onClick(async (_) => {
             this.plugin.settings.searchCommands =
@@ -957,7 +957,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 Invalid sort priorities:
 ${invalidValues.map((x) => `- ${x}`).join("\n")}
 `.trim(),
-                0
+                0,
               );
               return;
             }
@@ -974,7 +974,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       .setName("Reset all search commands")
       .setClass("another-quick-switcher__settings__danger")
       .setDesc(
-        "It means your customized commands will be removed. If you reset unintentionally, you can restore the search commands by closing settings and Obsidian immediately, then restart Obsidian."
+        "It means your customized commands will be removed. If you reset unintentionally, you can restore the search commands by closing settings and Obsidian immediately, then restart Obsidian.",
       )
       .addToggle((cb) => {
         cb.setValue(this.resetLock).onChange((lock) => {
@@ -983,7 +983,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         });
         if (this.resetLock) {
           cb.setTooltip(
-            "Turn off the lock, if you want to reset all search commands"
+            "Turn off the lock, if you want to reset all search commands",
           );
         }
       })
@@ -1005,7 +1005,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
 
   private addSearchCommandSetting(
     containerEl: HTMLElement,
-    command: SearchCommand
+    command: SearchCommand,
   ) {
     const div = createDiv({
       cls: "another-quick-switcher__settings__search-command",
@@ -1034,7 +1034,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             this.display();
           });
         btn.extraSettingsEl.addClass(
-          "another-quick-switcher__settings__search-command__header__delete"
+          "another-quick-switcher__settings__search-command__header__delete",
         );
         return btn;
       })
@@ -1047,7 +1047,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             this.display();
           });
         btn.extraSettingsEl.addClass(
-          "another-quick-switcher__settings__search-command__header__fold-button"
+          "another-quick-switcher__settings__search-command__header__fold-button",
         );
         return btn;
       });
@@ -1069,7 +1069,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         const coloring = () => {
           bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
           bc.buttonEl.addClass(
-            command.searchBy.tag ? buttonEnabledClass : buttonDisabledClass
+            command.searchBy.tag ? buttonEnabledClass : buttonDisabledClass,
           );
         };
 
@@ -1086,7 +1086,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         const coloring = () => {
           bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
           bc.buttonEl.addClass(
-            command.searchBy.header ? buttonEnabledClass : buttonDisabledClass
+            command.searchBy.header ? buttonEnabledClass : buttonDisabledClass,
           );
         };
 
@@ -1103,7 +1103,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         const coloring = () => {
           bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
           bc.buttonEl.addClass(
-            command.searchBy.link ? buttonEnabledClass : buttonDisabledClass
+            command.searchBy.link ? buttonEnabledClass : buttonDisabledClass,
           );
         };
 
@@ -1120,7 +1120,9 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         const coloring = () => {
           bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
           bc.buttonEl.addClass(
-            command.searchBy.property ? buttonEnabledClass : buttonDisabledClass
+            command.searchBy.property
+              ? buttonEnabledClass
+              : buttonDisabledClass,
           );
         };
 
@@ -1167,14 +1169,14 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         cb.setValue(command.allowFuzzySearchForSearchTarget).onChange(
           async (value) => {
             command.allowFuzzySearchForSearchTarget = value as boolean;
-          }
+          },
         );
       });
 
     new Setting(div)
       .setName("Min fuzzy match score")
       .setDesc(
-        "Only show suggestion those score is more than the specific score"
+        "Only show suggestion those score is more than the specific score",
       )
       .addSlider((sc) =>
         sc
@@ -1183,13 +1185,13 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setDynamicTooltip()
           .onChange(async (value) => {
             command.minFuzzyMatchScore = value;
-          })
+          }),
       );
 
     new Setting(div)
       .setName("Target extensions")
       .setDesc(
-        "If set, only files whose extension equals will be suggested. If empty, all files will be suggested. It can set multi extensions using comma."
+        "If set, only files whose extension equals will be suggested. If empty, all files will be suggested. It can set multi extensions using comma.",
       )
       .addTextArea((tc) =>
         tc
@@ -1197,7 +1199,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setValue(command.targetExtensions.join(","))
           .onChange(async (value) => {
             command.targetExtensions = smartCommaSplit(value);
-          })
+          }),
       );
 
     new Setting(div).setName("Floating").addToggle((cb) => {
@@ -1240,13 +1242,13 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setPlaceholder("(ex: #todo )")
           .onChange(async (value) => {
             command.defaultInput = value;
-          })
+          }),
       );
 
     new Setting(div)
       .setName("Restore last input")
       .setDesc(
-        "If enabled, this option will restore the last input, shared across all searches where it is enabled."
+        "If enabled, this option will restore the last input, shared across all searches where it is enabled.",
       )
       .addToggle((tc) => {
         tc.setValue(command.restoreLastInput).onChange(async (value) => {
@@ -1257,7 +1259,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(div)
       .setName("Command prefix")
       .setDesc(
-        "For example, if it sets ':r ', a query starts with ':r ' means that search as this command"
+        "For example, if it sets ':r ', a query starts with ':r ' means that search as this command",
       )
       .addText((tc) =>
         tc
@@ -1265,7 +1267,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setPlaceholder("(ex: :r )")
           .onChange(async (value) => {
             command.commandPrefix = value;
-          })
+          }),
       );
 
     const df = document.createDocumentFragment();
@@ -1274,7 +1276,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       createEl("a", {
         text: "README",
         href: "https://github.com/tadashi-aikawa/obsidian-another-quick-switcher#sort-priorities",
-      })
+      }),
     );
 
     new Setting(div)
@@ -1289,7 +1291,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             command.sortPriorities = priorities as SortPriority[];
           });
         el.inputEl.addClass(
-          "another-quick-switcher__settings__search-command__sort-priority"
+          "another-quick-switcher__settings__search-command__sort-priority",
         );
         return el;
       });
@@ -1297,7 +1299,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(div)
       .setName("Include prefix path patterns")
       .setDesc(
-        "If set, only files whose paths start with one of the patterns will be suggested. It can set multi patterns by line breaks. <current_dir> means current directory."
+        "If set, only files whose paths start with one of the patterns will be suggested. It can set multi patterns by line breaks. <current_dir> means current directory.",
       )
       .addTextArea((tc) => {
         const el = tc
@@ -1315,7 +1317,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(div)
       .setName("Exclude prefix path patterns")
       .setDesc(
-        "If set, files whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks. <current_dir> means current directory."
+        "If set, files whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks. <current_dir> means current directory.",
       )
 
       .addTextArea((tc) => {
@@ -1339,7 +1341,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       .setName("Auto preview in the floating mode")
       .addToggle((tc) => {
         tc.setValue(
-          this.plugin.settings.autoPreviewInFloatingHeaderSearch
+          this.plugin.settings.autoPreviewInFloatingHeaderSearch,
         ).onChange(async (value) => {
           this.plugin.settings.autoPreviewInFloatingHeaderSearch = value;
           await this.plugin.saveSettings();
@@ -1353,13 +1355,13 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(containerEl)
       .setName('Exclude prefix path patterns for "Backlink search"')
       .setDesc(
-        "If set, folders whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks"
+        "If set, folders whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks",
       )
       .addTextArea((tc) => {
         const el = tc
           .setPlaceholder("Prefix match patterns")
           .setValue(
-            this.plugin.settings.backlinkExcludePrefixPathPatterns.join("\n")
+            this.plugin.settings.backlinkExcludePrefixPathPatterns.join("\n"),
           )
           .onChange(async (value) => {
             this.plugin.settings.backlinkExcludePrefixPathPatterns =
@@ -1378,7 +1380,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(containerEl)
       .setName("Context Lines")
       .setDesc(
-        "Specifies the number of lines to display before and after the target line. For instance, setting this to '2' would display two lines before and two lines after the target line, providing context to the selected text"
+        "Specifies the number of lines to display before and after the target line. For instance, setting this to '2' would display two lines before and two lines after the target line, providing context to the selected text",
       )
       .addSlider((sc) =>
         sc
@@ -1388,14 +1390,14 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .onChange(async (value) => {
             this.plugin.settings.inFileContextLines = value;
             await this.plugin.saveSettings();
-          })
+          }),
       );
 
     new Setting(containerEl)
       .setName("Auto preview in the floating mode")
       .addToggle((tc) => {
         tc.setValue(
-          this.plugin.settings.autoPreviewInFloatingInFileSearch
+          this.plugin.settings.autoPreviewInFloatingInFileSearch,
         ).onChange(async (value) => {
           this.plugin.settings.autoPreviewInFloatingInFileSearch = value;
           await this.plugin.saveSettings();
@@ -1405,20 +1407,20 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(containerEl)
       .setName("Max display length around matched word")
       .setDesc(
-        "Maximum display character count before or after the matched word."
+        "Maximum display character count before or after the matched word.",
       )
       .addSlider((sc) =>
         sc
           .setLimits(1, 255, 1)
           .setValue(
-            this.plugin.settings.inFileMaxDisplayLengthAroundMatchedWord
+            this.plugin.settings.inFileMaxDisplayLengthAroundMatchedWord,
           )
           .setDynamicTooltip()
           .onChange(async (value) => {
             this.plugin.settings.inFileMaxDisplayLengthAroundMatchedWord =
               value;
             await this.plugin.saveSettings();
-          })
+          }),
       );
   }
 
@@ -1434,7 +1436,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .onChange(async (value) => {
             this.plugin.settings.ripgrepCommand = value;
             await this.plugin.saveSettings();
-          })
+          }),
       );
 
     new Setting(containerEl).setName("Extensions").addText((tc) =>
@@ -1444,13 +1446,13 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         .onChange(async (value) => {
           this.plugin.settings.grepExtensions = smartCommaSplit(value);
           await this.plugin.saveSettings();
-        })
+        }),
     );
 
     new Setting(containerEl)
       .setName("Max display length around matched word")
       .setDesc(
-        "Maximum display character count before or after the matched word."
+        "Maximum display character count before or after the matched word.",
       )
       .addSlider((sc) =>
         sc
@@ -1460,7 +1462,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .onChange(async (value) => {
             this.plugin.settings.maxDisplayLengthAroundMatchedWord = value;
             await this.plugin.saveSettings();
-          })
+          }),
       );
   }
 
@@ -1470,13 +1472,13 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     new Setting(containerEl)
       .setName('Exclude prefix path patterns for "Move file to another folder"')
       .setDesc(
-        "If set, folders whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks"
+        "If set, folders whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks",
       )
       .addTextArea((tc) => {
         const el = tc
           .setPlaceholder("Prefix match patterns")
           .setValue(
-            this.plugin.settings.moveFileExcludePrefixPathPatterns.join("\n")
+            this.plugin.settings.moveFileExcludePrefixPathPatterns.join("\n"),
           )
           .onChange(async (value) => {
             this.plugin.settings.moveFileExcludePrefixPathPatterns =
@@ -1496,7 +1498,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       .setName("Show log about performance in a console")
       .addToggle((tc) => {
         tc.setValue(
-          this.plugin.settings.showLogAboutPerformanceInConsole
+          this.plugin.settings.showLogAboutPerformanceInConsole,
         ).onChange(async (value) => {
           this.plugin.settings.showLogAboutPerformanceInConsole = value;
           await this.plugin.saveSettings();
@@ -1510,7 +1512,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           async (value) => {
             this.plugin.settings.showFuzzyMatchScore = value;
             await this.plugin.saveSettings();
-          }
+          },
         );
       });
   }

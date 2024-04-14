@@ -128,7 +128,7 @@ export class HeaderModal
     }
 
     const firstOverIndex = this.items.findIndex(
-      (x) => x.position.start.offset > offset
+      (x) => x.position.start.offset > offset,
     );
 
     if (firstOverIndex === -1) {
@@ -145,7 +145,7 @@ export class HeaderModal
     if (this.autoPreview) {
       this.previewIcon = this.inputEl.insertAdjacentElement(
         "afterend",
-        createDiv({ cls: "another-quick-switcher__header__auto-preview-icon" })
+        createDiv({ cls: "another-quick-switcher__header__auto-preview-icon" }),
       );
       this.previewIcon?.insertAdjacentHTML("beforeend", PREVIEW);
     }
@@ -165,7 +165,11 @@ export class HeaderModal
       const hit =
         qs.length > 0 &&
         qs.every((q) =>
-          smartIncludes(x.value, q, this.settings.normalizeAccentsAndDiacritics)
+          smartIncludes(
+            x.value,
+            q,
+            this.settings.normalizeAccentsAndDiacritics,
+          ),
         );
       return { ...x, hit };
     });
@@ -218,7 +222,7 @@ export class HeaderModal
 
   private registerKeys(
     key: keyof Hotkeys["header"],
-    handler: (evt: KeyboardEvent) => void | Promise<void>
+    handler: (evt: KeyboardEvent) => void | Promise<void>,
   ) {
     this.settings.hotkeys.header[key]?.forEach((x) => {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
@@ -275,7 +279,7 @@ export class HeaderModal
       }
 
       const currentIndex = this.hitItems.findIndex(
-        (x) => x.index >= this.unsafeSelectedIndex
+        (x) => x.index >= this.unsafeSelectedIndex,
       );
       const previousIndex =
         currentIndex === 0 ? this.hitItems.length - 1 : currentIndex - 1;
@@ -327,7 +331,7 @@ export class HeaderModal
 
       this.chooser.values?.forEach((x) => {
         this.appHelper.insertStringToActiveFile(
-          `${" ".repeat((x.level - 1) * 4)}- ${x.value}\n`
+          `${" ".repeat((x.level - 1) * 4)}- ${x.value}\n`,
         );
       });
     });

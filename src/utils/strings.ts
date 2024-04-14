@@ -2,7 +2,7 @@ import diacriticsMap from "./diacritics-map";
 
 const regEmoji = new RegExp(
   /[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|[\uFE0E-\uFE0F]/,
-  "g"
+  "g",
 );
 
 export function excludeSpace(text: string): string {
@@ -31,17 +31,17 @@ export function escapeRegExp(str: string): string {
 export function includes(
   text: string,
   query: string,
-  isNormalizeAccentsDiacritics: boolean
+  isNormalizeAccentsDiacritics: boolean,
 ): boolean {
   return normalize(text, isNormalizeAccentsDiacritics).includes(
-    normalize(query, isNormalizeAccentsDiacritics)
+    normalize(query, isNormalizeAccentsDiacritics),
   );
 }
 
 export function capitalIncludes(
   text: string,
   query: string,
-  isNormalizeAccentsDiacritics: boolean
+  isNormalizeAccentsDiacritics: boolean,
 ): boolean {
   if (!hasCapitalLetter(query)) {
     return includes(text, query, isNormalizeAccentsDiacritics);
@@ -49,7 +49,7 @@ export function capitalIncludes(
 
   return isNormalizeAccentsDiacritics
     ? normalizeAccentsDiacritics(text).includes(
-        normalizeAccentsDiacritics(query)
+        normalizeAccentsDiacritics(query),
       )
     : text.includes(query);
 }
@@ -57,31 +57,31 @@ export function capitalIncludes(
 export function smartIncludes(
   text: string,
   query: string,
-  isNormalizeAccentsDiacritics: boolean
+  isNormalizeAccentsDiacritics: boolean,
 ): boolean {
   return excludeSpace(normalize(text, isNormalizeAccentsDiacritics)).includes(
-    excludeSpace(normalize(query, isNormalizeAccentsDiacritics))
+    excludeSpace(normalize(query, isNormalizeAccentsDiacritics)),
   );
 }
 
 export function smartStartsWith(
   text: string,
   query: string,
-  isNormalizeAccentsDiacritics: boolean
+  isNormalizeAccentsDiacritics: boolean,
 ): boolean {
   return excludeSpace(
-    excludeEmoji(normalize(text, isNormalizeAccentsDiacritics))
+    excludeEmoji(normalize(text, isNormalizeAccentsDiacritics)),
   ).startsWith(excludeSpace(normalize(query, isNormalizeAccentsDiacritics)));
 }
 
 export function smartEquals(
   text: string,
   query: string,
-  isNormalizeAccentsDiacritics: boolean
+  isNormalizeAccentsDiacritics: boolean,
 ): boolean {
   return (
     excludeSpace(
-      excludeEmoji(normalize(text, isNormalizeAccentsDiacritics))
+      excludeEmoji(normalize(text, isNormalizeAccentsDiacritics)),
     ) === normalize(query, isNormalizeAccentsDiacritics)
   );
 }
@@ -193,11 +193,11 @@ export function microFuzzy(value: string, query: string): FuzzyResult {
 export function smartMicroFuzzy(
   text: string,
   query: string,
-  isNormalizeAccentsDiacritics: boolean
+  isNormalizeAccentsDiacritics: boolean,
 ): FuzzyResult {
   return microFuzzy(
     excludeSpace(normalize(text, isNormalizeAccentsDiacritics)),
-    excludeSpace(normalize(query, isNormalizeAccentsDiacritics))
+    excludeSpace(normalize(query, isNormalizeAccentsDiacritics)),
   );
 }
 

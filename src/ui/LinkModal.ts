@@ -70,7 +70,7 @@ export class LinkModal
   constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
     this.vaultRootPath = normalizePath(
-      (this.app.vault.adapter as any).basePath as string
+      (this.app.vault.adapter as any).basePath as string,
     );
 
     this.appHelper = new AppHelper(app);
@@ -89,7 +89,7 @@ export class LinkModal
         cb(this._getSuggestions(query));
       },
       this.settings.searchDelayMilliSeconds,
-      true
+      true,
     );
   }
 
@@ -168,14 +168,14 @@ export class LinkModal
                 smartIncludes(
                   x.file.path,
                   q,
-                  this.settings.normalizeAccentsAndDiacritics
+                  this.settings.normalizeAccentsAndDiacritics,
                 )) ||
               smartIncludes(
                 x.line,
                 q,
-                this.settings.normalizeAccentsAndDiacritics
-              )
-          )
+                this.settings.normalizeAccentsAndDiacritics,
+              ),
+          ),
         );
 
     this.logger.showDebugLog(`Get suggestions: ${query}`, start);
@@ -283,7 +283,7 @@ export class LinkModal
 
   async chooseCurrentSuggestion(
     leaf: LeafType,
-    option: { keepOpen?: boolean } = {}
+    option: { keepOpen?: boolean } = {},
   ): Promise<TFile | null> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
     if (!item) {
@@ -305,8 +305,8 @@ export class LinkModal
           inplace: option.keepOpen,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
         },
-        this.stateToRestore
-      )
+        this.stateToRestore,
+      ),
     );
     return this.appHelper.getActiveFile()!;
   }
@@ -317,7 +317,7 @@ export class LinkModal
 
   private registerKeys(
     key: keyof Hotkeys["link"],
-    handler: () => void | Promise<void>
+    handler: () => void | Promise<void>,
   ) {
     this.settings.hotkeys.link[key]?.forEach((x) => {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
@@ -337,7 +337,7 @@ export class LinkModal
     this.scope.unregister(this.scope.keys.find((x) => x.key === "End")!);
 
     const openNthMod = quickResultSelectionModifier(
-      this.settings.userAltInsteadOfModForQuickResultSelection
+      this.settings.userAltInsteadOfModForQuickResultSelection,
     );
 
     if (!this.settings.hideHotkeyGuides) {
@@ -355,7 +355,7 @@ export class LinkModal
     });
     this.registerKeys("down", () => {
       document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
+        new KeyboardEvent("keydown", { key: "ArrowDown" }),
       );
     });
 
@@ -397,7 +397,7 @@ export class LinkModal
           this.appHelper.openFile(x, {
             leafType: "new-tab-background",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
-          })
+          }),
         );
     });
 

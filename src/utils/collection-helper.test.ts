@@ -67,7 +67,7 @@ describe.each<{
   ${{ id: 4, name: "a" }} | ${(k: string, _: unknown) => true}         | ${{}}
 `("omitBy", ({ obj, shouldOmit, expected }) => {
   test(`omitBy(${JSON.stringify(obj)}, shouldOmit) = ${JSON.stringify(
-    expected
+    expected,
   )}`, () => {
     expect(omitBy(obj, shouldOmit)).toStrictEqual(expected);
   });

@@ -22,7 +22,7 @@ export const sortPriorityList = [
   "Alphabetical reverse",
 ] as const;
 export type SortPriority =
-  | typeof sortPriorityList[number]
+  | (typeof sortPriorityList)[number]
   | `#${string}`
   | `.${string}`;
 export function regardAsSortPriority(x: string) {
@@ -34,7 +34,7 @@ export function regardAsSortPriority(x: string) {
 }
 
 export function filterNoQueryPriorities(
-  priorities: SortPriority[]
+  priorities: SortPriority[],
 ): SortPriority[] {
   return priorities.filter(
     (x) =>
@@ -48,16 +48,16 @@ export function filterNoQueryPriorities(
         "Alphabetical reverse",
       ].includes(x) ||
       x.startsWith("#") ||
-      x.startsWith(".")
+      x.startsWith("."),
   );
 }
 
 function getComparator(
-  priority: SortPriority
+  priority: SortPriority,
 ): (
   a: SuggestionItem,
   b: SuggestionItem,
-  lastOpenFileIndexByPath: { [path: string]: number }
+  lastOpenFileIndexByPath: { [path: string]: number },
 ) => 0 | -1 | 1 {
   switch (priority) {
     case "Header match":
@@ -111,7 +111,7 @@ function getComparator(
 export function sort(
   items: SuggestionItem[],
   priorities: SortPriority[],
-  lastOpenFileIndexByPath: { [path: string]: number }
+  lastOpenFileIndexByPath: { [path: string]: number },
 ): SuggestionItem[] {
   const comparators = priorities.map(getComparator);
 
@@ -133,7 +133,7 @@ export function compare<T, U extends number | string>(
   a: T,
   b: T,
   toOrdered: (t: T) => U,
-  order: "asc" | "desc" = "asc"
+  order: "asc" | "desc" = "asc",
 ): -1 | 0 | 1 {
   const oA = toOrdered(a);
   const oB = toOrdered(b);
@@ -163,7 +163,7 @@ export function compare<T, U extends number | string>(
 
 function priorityToPerfectWord(
   a: SuggestionItem,
-  b: SuggestionItem
+  b: SuggestionItem,
 ): 0 | -1 | 1 {
   return compare(
     a,
@@ -173,13 +173,13 @@ function priorityToPerfectWord(
         .filter((x) => x.type === "word-perfect")
         .map((x) => x.query)
         .unique().length,
-    "desc"
+    "desc",
   );
 }
 
 function priorityToPrefixName(
   a: SuggestionItem,
-  b: SuggestionItem
+  b: SuggestionItem,
 ): 0 | -1 | 1 {
   return compare(
     a,
@@ -189,7 +189,7 @@ function priorityToPrefixName(
         .filter((x) => x.type === "prefix-name")
         .map((x) => x.query)
         .unique().length,
-    "desc"
+    "desc",
   );
 }
 
@@ -202,19 +202,19 @@ function priorityToName(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
         .filter((x) => x.type === "name")
         .map((x) => x.query)
         .unique().length,
-    "desc"
+    "desc",
   );
 }
 
 function priorityToFuzzyScore(
   a: SuggestionItem,
-  b: SuggestionItem
+  b: SuggestionItem,
 ): 0 | -1 | 1 {
   return compare(
     a,
     b,
     (x) => Math.max(...x.matchResults.map((x) => x.score ?? 0)),
-    "desc"
+    "desc",
   );
 }
 
@@ -227,7 +227,7 @@ function priorityToTag(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
         .filter((x) => x.type === "tag")
         .map((x) => x.query)
         .unique().length,
-    "desc"
+    "desc",
   );
 }
 
@@ -240,7 +240,7 @@ function priorityToProperty(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
         .filter((x) => x.type === "property")
         .map((x) => x.query)
         .unique().length,
-    "desc"
+    "desc",
   );
 }
 
@@ -253,7 +253,7 @@ function priorityToHeader(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
         .filter((x) => x.type === "header")
         .map((x) => x.query)
         .unique().length,
-    "desc"
+    "desc",
   );
 }
 
@@ -266,7 +266,7 @@ function priorityToLink(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
         .filter((x) => x.type === "link")
         .map((x) => x.query)
         .unique().length,
-    "desc"
+    "desc",
   );
 }
 
@@ -278,47 +278,47 @@ function priorityToLength(a: SuggestionItem, b: SuggestionItem): 0 | -1 | 1 {
       x.matchResults[0].alias
         ? x.matchResults[0].alias.length
         : x.file.basename.length,
-    "asc"
+    "asc",
   );
 }
 
 function priorityToLastOpened(
   a: SuggestionItem,
   b: SuggestionItem,
-  lastOpenFileIndexByPath: { [path: string]: number }
+  lastOpenFileIndexByPath: { [path: string]: number },
 ): 0 | -1 | 1 {
   return compare(
     a,
     b,
     (x) => lastOpenFileIndexByPath[x.file.path] ?? 999999,
-    "asc"
+    "asc",
   );
 }
 
 function priorityToLastModified(
   a: SuggestionItem,
-  b: SuggestionItem
+  b: SuggestionItem,
 ): 0 | -1 | 1 {
   return compare(a, b, (x) => x.file.stat.mtime, "desc");
 }
 
 function priorityToCreatedLatest(
   a: SuggestionItem,
-  b: SuggestionItem
+  b: SuggestionItem,
 ): 0 | -1 | 1 {
   return compare(a, b, (x) => x.file.stat.ctime, "desc");
 }
 
 function priorityToCreatedEarliest(
   a: SuggestionItem,
-  b: SuggestionItem
+  b: SuggestionItem,
 ): 0 | -1 | 1 {
   // ctime === 0 means Phantom files
   return compare(
     a,
     b,
     (x) => x.file.stat.ctime || Number.MAX_SAFE_INTEGER,
-    "asc"
+    "asc",
   );
 }
 
@@ -331,7 +331,7 @@ const toComparedAlphabetical = (item: SuggestionItem): string =>
 
 function priorityToAlphabetical(
   a: SuggestionItem,
-  b: SuggestionItem
+  b: SuggestionItem,
 ): 0 | -1 | 1 {
   return toComparedAlphabetical(a).localeCompare(toComparedAlphabetical(b)) as
     | 0
@@ -341,7 +341,7 @@ function priorityToAlphabetical(
 
 function priorityToAlphabeticalReverse(
   a: SuggestionItem,
-  b: SuggestionItem
+  b: SuggestionItem,
 ): 0 | -1 | 1 {
   return toComparedAlphabetical(b).localeCompare(toComparedAlphabetical(a)) as
     | 0
@@ -352,7 +352,7 @@ function priorityToAlphabeticalReverse(
 function priorityToTags(
   a: SuggestionItem,
   b: SuggestionItem,
-  tags: string[]
+  tags: string[],
 ): 0 | -1 | 1 {
   return compare(a, b, (x) => intersection([tags, x.tags]).length, "desc");
 }
@@ -360,12 +360,12 @@ function priorityToTags(
 function priorityToExtensions(
   a: SuggestionItem,
   b: SuggestionItem,
-  extensions: string[]
+  extensions: string[],
 ): 0 | -1 | 1 {
   return compare(
     a,
     b,
     (x) => Number(extensions.contains(x.file.extension)),
-    "desc"
+    "desc",
   );
 }

@@ -48,7 +48,7 @@ function matchQuery(
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
     minFuzzyScore: number;
-  }
+  },
 ): MatchQueryResult[] {
   const {
     searchByTags,
@@ -61,7 +61,7 @@ function matchQuery(
   // tag
   if (searchByTags && query.startsWith("#")) {
     const tags = item.tags.filter((tag) =>
-      smartIncludes(tag.slice(1), query.slice(1), isNormalizeAccentsDiacritics)
+      smartIncludes(tag.slice(1), query.slice(1), isNormalizeAccentsDiacritics),
     );
     return [
       {
@@ -76,7 +76,7 @@ function matchQuery(
   const file = qs.pop()!;
   const dirs = qs;
   const includeDir = dirs.every((dir) =>
-    smartIncludes(item.file.parent?.path!, dir, isNormalizeAccentsDiacritics)
+    smartIncludes(item.file.parent?.path!, dir, isNormalizeAccentsDiacritics),
   );
   if (!includeDir) {
     return [{ type: "not found", query }];
@@ -97,7 +97,7 @@ function matchQuery(
   const fuzzyResult = smartMicroFuzzy(
     item.file.extension === "md" ? item.file.basename : item.file.name, // Should calculate the score without .md
     query,
-    isNormalizeAccentsDiacritics
+    isNormalizeAccentsDiacritics,
   );
   switch (fuzzyResult.type) {
     case "starts-with":
@@ -175,7 +175,7 @@ function matchQuery(
 
   if (searchByHeaders) {
     const headers = item.headers.filter((header) =>
-      smartIncludes(header, query, isNormalizeAccentsDiacritics)
+      smartIncludes(header, query, isNormalizeAccentsDiacritics),
     );
     if (headers.length > 0) {
       results.push({
@@ -188,7 +188,7 @@ function matchQuery(
 
   if (searchByLinks) {
     const links = item.links.filter((link) =>
-      smartIncludes(link, query, isNormalizeAccentsDiacritics)
+      smartIncludes(link, query, isNormalizeAccentsDiacritics),
     );
     if (links.length > 0) {
       results.push({
@@ -201,7 +201,7 @@ function matchQuery(
 
   if (searchByTags) {
     const tags = item.tags.filter((tag) =>
-      smartIncludes(tag.slice(1), query, isNormalizeAccentsDiacritics)
+      smartIncludes(tag.slice(1), query, isNormalizeAccentsDiacritics),
     );
     if (tags.length > 0) {
       results.push({
@@ -240,7 +240,7 @@ function matchQueryAll(
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
     minFuzzyScore: number;
-  }
+  },
 ): MatchQueryResult[] {
   return queries.flatMap((q) => {
     const [query, negative] = q.startsWith("-")
@@ -267,7 +267,7 @@ export function stampMatchResults(
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
     minFuzzyScore: number;
-  }
+  },
 ): SuggestionItem {
   return {
     ...item,

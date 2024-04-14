@@ -2,18 +2,18 @@ export const range = (n: number): number[] => [...Array(n).keys()];
 
 export const mapValues = <K, T, U>(
   obj: { [key: string]: T },
-  to: (x: T) => U
+  to: (x: T) => U,
 ): { [key: string]: U } =>
   Object.fromEntries(
-    Object.entries(obj).map(([key, value]) => [key, to(value)])
+    Object.entries(obj).map(([key, value]) => [key, to(value)]),
   );
 
 export const mapKeys = <T>(
   obj: { [key: string]: T },
-  to: (x: string) => string
+  to: (x: string) => string,
 ): { [key: string]: T } =>
   Object.fromEntries(
-    Object.entries(obj).map(([key, value]) => [to(key), value])
+    Object.entries(obj).map(([key, value]) => [to(key), value]),
   );
 
 /**
@@ -21,40 +21,40 @@ export const mapKeys = <T>(
  */
 export const sorter = <T, U extends number | string>(
   toOrdered: (t: T) => U,
-  order: "asc" | "desc" = "asc"
+  order: "asc" | "desc" = "asc",
 ) => {
   return (a: T, b: T) =>
     order === "asc"
       ? toOrdered(a) > toOrdered(b)
         ? 1
         : toOrdered(b) > toOrdered(a)
-        ? -1
-        : 0
+          ? -1
+          : 0
       : toOrdered(a) < toOrdered(b)
-      ? 1
-      : toOrdered(b) < toOrdered(a)
-      ? -1
-      : 0;
+        ? 1
+        : toOrdered(b) < toOrdered(a)
+          ? -1
+          : 0;
 };
 
 export const groupBy = <T>(
   values: T[],
-  toKey: (t: T) => string
+  toKey: (t: T) => string,
 ): { [key: string]: T[] } =>
   values.reduce(
     (prev, cur, _1, _2, k = toKey(cur)) => (
       (prev[k] || (prev[k] = [])).push(cur), prev
     ),
-    {} as { [key: string]: T[] }
+    {} as { [key: string]: T[] },
   );
 
 export const keyBy = <T>(
   values: T[],
-  toKey: (t: T) => string
+  toKey: (t: T) => string,
 ): { [key: string]: T } =>
   values.reduce(
     (prev, cur, _1, _2, k = toKey(cur)) => ((prev[k] = cur), prev),
-    {} as { [key: string]: T }
+    {} as { [key: string]: T },
   );
 
 export const count = (values: string[]): { [value: string]: number } => {
@@ -110,7 +110,7 @@ export const minBy = <T>(collection: T[], toNum: (t: T) => number) => {
 export function includeItems<T>(
   items: T[],
   patterns: string[],
-  toPath: (t: T) => string
+  toPath: (t: T) => string,
 ): T[] {
   return patterns.length === 0
     ? items
@@ -120,7 +120,7 @@ export function includeItems<T>(
 export function excludeItems<T>(
   items: T[],
   patterns: string[],
-  toPath: (t: T) => string
+  toPath: (t: T) => string,
 ): T[] {
   return patterns.length === 0
     ? items
@@ -133,7 +133,7 @@ export function equalsAsSet(ary1: string[], ary2: string[]): boolean {
 
 export function mirrorMap<T>(
   collection: T[],
-  toValue: (t: T) => string
+  toValue: (t: T) => string,
 ): { [key: string]: string } {
   return collection.reduce((p, c) => ({ ...p, [toValue(c)]: toValue(c) }), {});
 }
@@ -144,7 +144,7 @@ export function mirror(collection: string[]): { [key: string]: string } {
 
 export function omitBy<T extends { [key: string]: any }>(
   obj: T,
-  shouldOmit: (key: string, value: any) => boolean
+  shouldOmit: (key: string, value: any) => boolean,
 ): T {
   const cloned = { ...obj };
   Object.entries(cloned).forEach(([k, v]) => {

@@ -15,7 +15,7 @@ export function setFloatingModal(appHelper: AppHelper) {
     const windowHeight = activeWindow.innerHeight;
 
     const modalEl = activeWindow.activeDocument.querySelector(
-      ".another-quick-switcher__floating-prompt"
+      ".another-quick-switcher__floating-prompt",
     );
     if (!modalEl) {
       console.error("Unexpected error.");
@@ -44,8 +44,8 @@ export function setFloatingModal(appHelper: AppHelper) {
       windowWidth - contentXEnd - 30 > modalWidth
         ? contentXEnd - 30
         : contentX - modalWidth - 30 > 0
-        ? contentX - modalWidth
-        : windowWidth - modalWidth - 30;
+          ? contentX - modalWidth
+          : windowWidth - modalWidth - 30;
     const top = Math.min(windowHeight - modalHeight - 10, leafY + promptY);
 
     promptEl?.setAttribute("style", `left: ${left}px; top: ${top}px`);

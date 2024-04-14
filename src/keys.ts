@@ -5,7 +5,7 @@ export const MOD = Platform.isMacOS ? "Cmd" : "Ctrl";
 export const ALT = Platform.isMacOS ? "Option" : "Alt";
 
 export const quickResultSelectionModifier = (
-  userAltInsteadOfModForQuickResultSelection: boolean
+  userAltInsteadOfModForQuickResultSelection: boolean,
 ) => (userAltInsteadOfModForQuickResultSelection ? ALT : MOD);
 
 export type Hotkey = {
@@ -24,7 +24,7 @@ export function hotkey2String(hotkey?: Hotkey): string {
 
 export function string2Hotkey(
   hotKey: string,
-  hideHotkeyGuide: boolean
+  hideHotkeyGuide: boolean,
 ): Hotkey | null {
   const keys = hotKey.split(" ");
   if (keys.length === 1) {
@@ -50,7 +50,7 @@ export function createInstructions(hotkeysByCommand: {
 
 export function createInstruction(
   commandName: string,
-  hotkey?: Hotkey
+  hotkey?: Hotkey,
 ): Instruction | null {
   if (!hotkey || hotkey.hideHotkeyGuide) {
     return null;
@@ -62,19 +62,19 @@ export function createInstruction(
     hotkey.key === "Enter"
       ? "↵"
       : hotkey.key === "ArrowUp"
-      ? "↑"
-      : hotkey.key === "ArrowDown"
-      ? "↓"
-      : hotkey.key === "Escape"
-      ? "ESC"
-      : hotkey.key;
+        ? "↑"
+        : hotkey.key === "ArrowDown"
+          ? "↓"
+          : hotkey.key === "Escape"
+            ? "ESC"
+            : hotkey.key;
   const command = mods ? `[${mods} ${key}]` : `[${key}]`;
   return { command, purpose: commandName };
 }
 
 export function equalsAsHotkey(
   hotkey: Hotkey,
-  keyDownEvent: KeyboardEvent
+  keyDownEvent: KeyboardEvent,
 ): boolean {
   const hk: Hotkey = { modifiers: [], key: keyDownEvent.key };
   if (keyDownEvent.shiftKey) {

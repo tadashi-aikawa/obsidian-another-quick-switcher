@@ -56,7 +56,7 @@ if (prod) {
 
   const pluginDir = path.join(
     VAULT_DIR,
-    ".obsidian/plugins/obsidian-another-quick-switcher"
+    ".obsidian/plugins/obsidian-another-quick-switcher",
   );
 
   console.log(`📁 Creating ${pluginDir} (if not existed)`);

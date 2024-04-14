@@ -21,7 +21,7 @@ const SEARCH_COMMAND_PREFIX = "search-command";
 export function showSearchDialog(
   app: App,
   settings: Settings,
-  command: SearchCommand
+  command: SearchCommand,
 ) {
   const activeFileLeaf =
     app.workspace.getActiveViewOfType(FileView)?.leaf ?? null;
@@ -63,7 +63,7 @@ export async function showGrepDialog(app: App, settings: Settings) {
   if (!(await existsRg(settings.ripgrepCommand))) {
     // noinspection ObjectAllocationIgnored
     new Notice(
-      `"${settings.ripgrepCommand}" was not working as a ripgrep command. If you have not installed ripgrep yet, please install it.`
+      `"${settings.ripgrepCommand}" was not working as a ripgrep command. If you have not installed ripgrep yet, please install it.`,
     );
     return;
   }
@@ -117,7 +117,7 @@ export async function showInFileDialog(app: App, settings: Settings) {
 export function showHeaderDialog(
   app: App,
   settings: Settings,
-  floating: boolean
+  floating: boolean,
 ) {
   if (!app.workspace.getActiveFile()) {
     return;

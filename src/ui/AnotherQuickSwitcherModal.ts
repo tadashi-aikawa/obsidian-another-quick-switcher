@@ -162,7 +162,7 @@ export class AnotherQuickSwitcherModal
         cb(this._getSuggestions(query));
       },
       this.settings.searchDelayMilliSeconds,
-      true
+      true,
     );
   }
 
@@ -234,7 +234,7 @@ export class AnotherQuickSwitcherModal
   indexingItems() {
     const starredPathMap = keyBy(
       this.appHelper.getStarredFilePaths(),
-      (x) => x
+      (x) => x,
     );
     const originFilePath = this.originFile?.path;
 
@@ -243,7 +243,7 @@ export class AnotherQuickSwitcherModal
       .getFiles()
       .filter(
         (x) =>
-          x.path !== originFilePath && this.app.metadataCache.getFileCache(x)
+          x.path !== originFilePath && this.app.metadataCache.getFileCache(x),
       )
       .map((x) => {
         const cache = this.app.metadataCache.getFileCache(x)!; // already filtered
@@ -265,7 +265,7 @@ export class AnotherQuickSwitcherModal
                   ...(cache.links ?? []),
                   ...(((cache as any)
                     .frontmatterLinks as FrontMatterLinkCache[]) ?? []),
-                ].map((x) => x.displayText ?? "")
+                ].map((x) => x.displayText ?? ""),
               )
             : [],
           frontMatter:
@@ -291,12 +291,12 @@ export class AnotherQuickSwitcherModal
   prefilterItems(command: SearchCommand): SuggestionItem[] {
     const filterItems = (
       includePatterns: string[],
-      excludePatterns: string[]
+      excludePatterns: string[],
     ): SuggestionItem[] => {
       let items = this.originItems;
       if (command.targetExtensions.length > 0) {
         items = items.filter((x) =>
-          command.targetExtensions.includes(x.file.extension)
+          command.targetExtensions.includes(x.file.extension),
         );
       }
 
@@ -310,7 +310,7 @@ export class AnotherQuickSwitcherModal
         case "backlink":
           const backlinksMap = this.appHelper.createBacklinksMap();
           items = items.filter((x) =>
-            backlinksMap[this.originFile?.path ?? ""]?.has(x.file.path)
+            backlinksMap[this.originFile?.path ?? ""]?.has(x.file.path),
           );
           break;
         case "link":
@@ -324,7 +324,7 @@ export class AnotherQuickSwitcherModal
               sorter((x) => {
                 const c = originFileLinkMap[x.file.path];
                 return isFrontMatterLinkCache(c) ? -1 : c.position.start.offset;
-              })
+              }),
             );
           break;
         case "2-hop-link":
@@ -336,7 +336,7 @@ export class AnotherQuickSwitcherModal
             .filter((x) => originFileLinkMap2[x.file.path])
             .map((x) => x.file.path);
           const backlinkPaths = linkPaths.flatMap((x) =>
-            Array.from(backlinksMap2[x])
+            Array.from(backlinksMap2[x]),
           );
 
           const filteredPaths = uniq([...linkPaths, ...backlinkPaths]);
@@ -348,7 +348,7 @@ export class AnotherQuickSwitcherModal
                 return !c || isFrontMatterLinkCache(c)
                   ? 65535
                   : c.position.start.offset;
-              })
+              }),
             );
           break;
       }
@@ -363,11 +363,11 @@ export class AnotherQuickSwitcherModal
 
     return filterItems(
       command.includePrefixPathPatterns.map((p) =>
-        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath())
+        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath()),
       ),
       command.excludePrefixPathPatterns.map((p) =>
-        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath())
-      )
+        p.replace(/<current_dir>/g, this.appHelper.getCurrentDirPath()),
+      ),
     );
   }
 
@@ -407,7 +407,7 @@ export class AnotherQuickSwitcherModal
       : query;
     this.searchQuery = this.searchQuery.replace(
       /<cd>/g,
-      this.appHelper.getCurrentDirPath()
+      this.appHelper.getCurrentDirPath(),
     );
     if (this.command.defaultInput) {
       this.searchQuery = `${this.command.defaultInput}${this.searchQuery}`;
@@ -438,7 +438,7 @@ export class AnotherQuickSwitcherModal
                 : [],
               fuzzyTarget: this.command.allowFuzzySearchForSearchTarget,
               minFuzzyScore: this.command.minFuzzyMatchScore,
-            })
+            }),
           )
           .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
 
@@ -447,12 +447,12 @@ export class AnotherQuickSwitcherModal
       isQueryEmpty
         ? filterNoQueryPriorities(this.command.sortPriorities)
         : this.command.sortPriorities,
-      lastOpenFileIndexByPath
+      lastOpenFileIndexByPath,
     );
 
     this.logger.showDebugLog(
       `Get suggestions: ${this.searchQuery} (${this.command.name})`,
-      start
+      start,
     );
 
     this.countInputEl = createDiv({
@@ -478,7 +478,7 @@ export class AnotherQuickSwitcherModal
       this.navigationHistoryEl.appendText(`${backHistoryLength} < `);
     }
     this.navigationHistoryEl.appendText(
-      this.originFile ? this.originFile.basename : "No file"
+      this.originFile ? this.originFile.basename : "No file",
     );
     const forwardHistoryLength =
       this.navigationHistories.length - this.currentNavigationHistoryIndex - 1;
@@ -561,7 +561,7 @@ export class AnotherQuickSwitcherModal
       cls: "another-quick-switcher__command_button",
     });
     createButton.addEventListener("click", () =>
-      this.handleCreateNewMarkdown(this.searchQuery, "same-tab")
+      this.handleCreateNewMarkdown(this.searchQuery, "same-tab"),
     );
     div.appendChild(createButton);
 
@@ -584,7 +584,7 @@ export class AnotherQuickSwitcherModal
 
   async chooseCurrentSuggestion(
     leafType: LeafType,
-    option: { keepOpen?: boolean } = {}
+    option: { keepOpen?: boolean } = {},
   ): Promise<TFile | null> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
     if (!item) {
@@ -622,7 +622,7 @@ export class AnotherQuickSwitcherModal
       case "backlink":
         offset = this.appHelper.findFirstLinkOffset(
           item.file,
-          this.originFile!
+          this.originFile!,
         );
         break;
       case "link":
@@ -650,8 +650,8 @@ export class AnotherQuickSwitcherModal
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
           leafPriorToSameTab,
         },
-        this.stateToRestore
-      )
+        this.stateToRestore,
+      ),
     );
     return fileToOpened;
   }
@@ -662,7 +662,7 @@ export class AnotherQuickSwitcherModal
 
   async handleCreateNewMarkdown(
     searchQuery: string,
-    leafType: LeafType
+    leafType: LeafType,
   ): Promise<boolean> {
     if (!searchQuery) {
       return true;
@@ -683,7 +683,7 @@ export class AnotherQuickSwitcherModal
 
   private registerKeys(
     key: keyof Hotkeys["main"],
-    handler: () => void | Promise<void>
+    handler: () => void | Promise<void>,
   ) {
     this.settings.hotkeys.main[key]?.forEach((x) => {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
@@ -703,7 +703,7 @@ export class AnotherQuickSwitcherModal
     this.scope.unregister(this.scope.keys.find((x) => x.key === "End")!);
 
     const openNthMod = quickResultSelectionModifier(
-      this.settings.userAltInsteadOfModForQuickResultSelection
+      this.settings.userAltInsteadOfModForQuickResultSelection,
     );
 
     if (!this.settings.hideHotkeyGuides) {
@@ -720,7 +720,7 @@ export class AnotherQuickSwitcherModal
     });
     this.registerKeys("down", () => {
       document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
+        new KeyboardEvent("keydown", { key: "ArrowDown" }),
       );
     });
 
@@ -774,7 +774,7 @@ export class AnotherQuickSwitcherModal
           this.appHelper.openFile(x.file, {
             leafType: "new-tab-background",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
-          })
+          }),
         );
     });
 
@@ -855,7 +855,7 @@ export class AnotherQuickSwitcherModal
       } else {
         this.appHelper.insertLinkToActiveFileBy(
           file,
-          this.chooser.values?.[this.chooser.selectedItem]?.phantom ?? false
+          this.chooser.values?.[this.chooser.selectedItem]?.phantom ?? false,
         );
       }
     });
@@ -877,7 +877,7 @@ export class AnotherQuickSwitcherModal
       } else {
         this.appHelper.insertLinkToActiveFileBy(
           file,
-          this.chooser.values?.[this.chooser.selectedItem]?.phantom ?? false
+          this.chooser.values?.[this.chooser.selectedItem]?.phantom ?? false,
         );
         this.appHelper.insertStringToActiveFile("\n");
       }
@@ -920,7 +920,7 @@ export class AnotherQuickSwitcherModal
         navigationHistories: [
           ...this.navigationHistories.slice(
             0,
-            this.currentNavigationHistoryIndex
+            this.currentNavigationHistoryIndex,
           ),
           {
             inputQuery: this.inputEl.value,

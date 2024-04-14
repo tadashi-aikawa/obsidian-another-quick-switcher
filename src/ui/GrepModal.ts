@@ -74,17 +74,17 @@ export class GrepModal
   clonedInputEl: HTMLInputElement;
   clonedInputElKeydownEventListener: (
     this: HTMLInputElement,
-    ev: HTMLElementEventMap["keydown"]
+    ev: HTMLElementEventMap["keydown"],
   ) => any;
   countInputEl?: HTMLDivElement;
   basePathInputEl: HTMLInputElement;
   basePathInputElChangeEventListener: (
     this: HTMLInputElement,
-    ev: HTMLElementEventMap["change"]
+    ev: HTMLElementEventMap["change"],
   ) => any;
   basePathInputElKeydownEventListener: (
     this: HTMLInputElement,
-    ev: HTMLElementEventMap["keydown"]
+    ev: HTMLElementEventMap["keydown"],
   ) => any;
 
   private markClosed: () => void;
@@ -97,7 +97,7 @@ export class GrepModal
     super(app);
     this.suggestions = globalInternalStorage.items;
     this.vaultRootPath = normalizePath(
-      (this.app.vault.adapter as any).basePath as string
+      (this.app.vault.adapter as any).basePath as string,
     );
 
     this.appHelper = new AppHelper(app);
@@ -115,7 +115,7 @@ export class GrepModal
       this.setPlaceholder(`Search around the vault by ${inst?.command} key`);
     } else {
       this.setPlaceholder(
-        `Please set a key about "search" in the "Grep dialog" setting`
+        `Please set a key about "search" in the "Grep dialog" setting`,
       );
     }
     this.setHotkeys();
@@ -187,11 +187,11 @@ export class GrepModal
       };
       this.basePathInputEl.addEventListener(
         "change",
-        this.basePathInputElChangeEventListener
+        this.basePathInputElChangeEventListener,
       );
       this.basePathInputEl.addEventListener(
         "keydown",
-        this.basePathInputElKeydownEventListener
+        this.basePathInputElKeydownEventListener,
       );
 
       const wrapper = createDiv({
@@ -201,7 +201,7 @@ export class GrepModal
       wrapper.appendChild(basePathInputList);
 
       const promptInputContainerEl = activeWindow.activeDocument.querySelector(
-        ".prompt-input-container"
+        ".prompt-input-container",
       );
       promptInputContainerEl?.after(wrapper);
 
@@ -216,15 +216,15 @@ export class GrepModal
     globalInternalStorage.selected = this.chooser.selectedItem;
     this.clonedInputEl.removeEventListener(
       "keydown",
-      this.clonedInputElKeydownEventListener
+      this.clonedInputElKeydownEventListener,
     );
     this.basePathInputEl.removeEventListener(
       "change",
-      this.basePathInputElChangeEventListener
+      this.basePathInputElChangeEventListener,
     );
     this.basePathInputEl.removeEventListener(
       "keydown",
-      this.basePathInputElKeydownEventListener
+      this.basePathInputElKeydownEventListener,
     );
 
     if (this.stateToRestore) {
@@ -246,7 +246,7 @@ export class GrepModal
 
     const absolutePathFromRoot = normalizeRelativePath(
       this.basePath,
-      this.appHelper.getCurrentDirPath()
+      this.appHelper.getCurrentDirPath(),
     );
 
     const rgResults = await rg(
@@ -257,7 +257,7 @@ export class GrepModal
         "--",
         query,
         `${this.vaultRootPath}/${absolutePathFromRoot}`,
-      ].filter((x) => x)
+      ].filter((x) => x),
     );
 
     const items = rgResults
@@ -267,8 +267,8 @@ export class GrepModal
           file: this.appHelper.getFileByPath(
             normalizePath(x.data.path.text).replace(
               this.vaultRootPath + "/",
-              ""
-            )
+              "",
+            ),
           )!,
           line: x.data.lines.text,
           lineNumber: x.data.line_number,
@@ -369,7 +369,7 @@ export class GrepModal
       descriptionDiv.createSpan({
         text: trimLineByEllipsis(
           before,
-          this.settings.maxDisplayLengthAroundMatchedWord
+          this.settings.maxDisplayLengthAroundMatchedWord,
         ),
       });
       descriptionDiv.createSpan({
@@ -381,7 +381,7 @@ export class GrepModal
     descriptionDiv.createSpan({
       text: trimLineByEllipsis(
         restLine,
-        this.settings.maxDisplayLengthAroundMatchedWord
+        this.settings.maxDisplayLengthAroundMatchedWord,
       ),
     });
 
@@ -405,7 +405,7 @@ export class GrepModal
 
   async chooseCurrentSuggestion(
     leaf: LeafType,
-    option: { keepOpen?: boolean } = {}
+    option: { keepOpen?: boolean } = {},
   ): Promise<TFile | null> {
     const item = this.chooser.values?.[this.chooser.selectedItem];
     if (!item) {
@@ -427,8 +427,8 @@ export class GrepModal
           inplace: option.keepOpen,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
         },
-        this.stateToRestore
-      )
+        this.stateToRestore,
+      ),
     );
     return item.file;
   }
@@ -439,7 +439,7 @@ export class GrepModal
 
   private registerKeys(
     key: keyof Hotkeys["grep"],
-    handler: () => void | Promise<void>
+    handler: () => void | Promise<void>,
   ) {
     this.settings.hotkeys.grep[key]?.forEach((x) => {
       this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
@@ -459,7 +459,7 @@ export class GrepModal
     this.scope.unregister(this.scope.keys.find((x) => x.key === "End")!);
 
     const openNthMod = quickResultSelectionModifier(
-      this.settings.userAltInsteadOfModForQuickResultSelection
+      this.settings.userAltInsteadOfModForQuickResultSelection,
     );
 
     if (!this.settings.hideHotkeyGuides) {
@@ -492,7 +492,7 @@ export class GrepModal
     };
     this.clonedInputEl.addEventListener(
       "keydown",
-      this.clonedInputElKeydownEventListener
+      this.clonedInputElKeydownEventListener,
     );
 
     this.registerKeys("up", () => {
@@ -500,7 +500,7 @@ export class GrepModal
     });
     this.registerKeys("down", () => {
       document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown" })
+        new KeyboardEvent("keydown", { key: "ArrowDown" }),
       );
     });
 
@@ -556,7 +556,7 @@ export class GrepModal
           this.appHelper.openFile(x.file, {
             leafType: "new-tab-background",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
-          })
+          }),
         );
     });
 

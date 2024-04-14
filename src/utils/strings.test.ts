@@ -34,11 +34,11 @@ describe.each`
 });
 
 describe.each`
-  text           | expected
-  ${"a🍰b"}      | ${"ab"}
-  ${"🍰pre"}     | ${"pre"}
-  ${"suf🍰"}     | ${"suf"}
-  ${"🍰both😌"}  | ${"both"}
+  text          | expected
+  ${"a🍰b"}     | ${"ab"}
+  ${"🍰pre"}    | ${"pre"}
+  ${"suf🍰"}    | ${"suf"}
+  ${"🍰both😌"} | ${"both"}
   ${"🍰a🍊ll🅰️"} | ${"all"}
 `("excludeEmoji", ({ text, expected }) => {
   test(`excludeEmoji(${text}) = ${expected}`, () => {
@@ -103,10 +103,10 @@ describe.each<{
   ({ text, query, isNormalizeAccentsDiacritics, expected }) => {
     test(`capitalIncludes(${text}, ${query}, ${isNormalizeAccentsDiacritics}) = ${expected}`, () => {
       expect(capitalIncludes(text, query, isNormalizeAccentsDiacritics)).toBe(
-        expected
+        expected,
       );
     });
-  }
+  },
 );
 
 describe.each<{ text: string; query: string; expected: boolean }>`

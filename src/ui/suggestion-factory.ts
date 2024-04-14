@@ -24,7 +24,7 @@ interface Options {
 function createItemDiv(
   item: SuggestionItem,
   aliases: string[],
-  options: Options
+  options: Options,
 ): Elements["itemDiv"] {
   const itemDiv = createDiv({
     cls: [
@@ -224,7 +224,7 @@ function createDescriptionDiv(args: {
         });
         linkSpan.insertAdjacentHTML("beforeend", LINK);
         linkSpan.appendChild(
-          createSpan({ text: link, attr: { style: "padding-left: 3px" } })
+          createSpan({ text: link, attr: { style: "padding-left: 3px" } }),
         );
         linksDiv.appendChild(linkSpan);
       });
@@ -250,7 +250,7 @@ function createDescriptionDiv(args: {
         });
         headersSpan.insertAdjacentHTML("beforeend", HEADER);
         headersSpan.appendChild(
-          createSpan({ text: header, attr: { style: "padding-left: 3px" } })
+          createSpan({ text: header, attr: { style: "padding-left: 3px" } }),
         );
         headersDiv.appendChild(headersSpan);
       });
@@ -262,11 +262,11 @@ function createDescriptionDiv(args: {
 
 export function createElements(
   item: SuggestionItem,
-  options: Options
+  options: Options,
 ): Elements {
   const aliases = uniqFlatMap(
     item.matchResults.filter((res) => res.alias),
-    (x) => x.meta ?? []
+    (x) => x.meta ?? [],
   );
   const itemDiv = createItemDiv(item, aliases, options);
 
@@ -274,12 +274,12 @@ export function createElements(
   const frontMatter = omitBy(
     item.frontMatter ?? {},
     (key, value) =>
-      options.excludeFrontMatterKeys.includes(key) || value == null
+      options.excludeFrontMatterKeys.includes(key) || value == null,
   );
 
   const maxScore = round(
     Math.max(...item.matchResults.map((a) => a.score ?? 0)),
-    6
+    6,
   );
 
   const metaDiv =
@@ -294,17 +294,17 @@ export function createElements(
   // description
   const tags = uniqFlatMap(
     item.matchResults.filter((res) => res.type === "tag"),
-    (x) => x.meta ?? []
+    (x) => x.meta ?? [],
   );
   const linkResults = item.matchResults.filter((res) => res.type === "link");
   const linkResultsNum = linkResults.length;
   const countByLink = count(linkResults.flatMap((xs) => uniq(xs.meta ?? [])));
   const headerResults = item.matchResults.filter(
-    (res) => res.type === "header"
+    (res) => res.type === "header",
   );
   const headerResultsNum = headerResults.length;
   const countByHeader = count(
-    headerResults.flatMap((xs) => uniq(xs.meta ?? []))
+    headerResults.flatMap((xs) => uniq(xs.meta ?? [])),
   );
   const descriptionDiv =
     aliases.length !== 0 ||

@@ -56,7 +56,7 @@ export async function rg(
           .map((x: string) => JSON.parse(x) as Result)
           .filter((x: Result) => x.type === "match") as MatchResult[];
         resolve(results);
-      }
+      },
     );
   });
 }

@@ -30,7 +30,7 @@ export default class AnotherQuickSwitcher extends Plugin {
         async () => {
           this.reloadCommands();
           this.app.metadataCache.offref(cacheResolvedRef);
-        }
+        },
       );
     }
   }
@@ -48,7 +48,7 @@ export default class AnotherQuickSwitcher extends Plugin {
     this.settings = merge.withOptions(
       { mergeArrays: false },
       DEFAULT_SETTINGS,
-      currentSettings ?? {}
+      currentSettings ?? {},
     );
 
     this.settings.searchCommands.forEach((_, i) => {
@@ -57,7 +57,7 @@ export default class AnotherQuickSwitcher extends Plugin {
         createDefaultSearchCommand(),
         {
           ...this.settings.searchCommands[i],
-        }
+        },
       );
 
       // @ts-ignore (v7 -> v8 backward compatibility)
