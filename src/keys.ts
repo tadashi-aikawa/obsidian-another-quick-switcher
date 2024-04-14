@@ -76,7 +76,10 @@ export function equalsAsHotkey(
   hotkey: Hotkey,
   keyDownEvent: KeyboardEvent,
 ): boolean {
-  const hk: Hotkey = { modifiers: [], key: keyDownEvent.key };
+  const hk: Hotkey = {
+    modifiers: [],
+    key: normalizeHotkeyEventKey(keyDownEvent.key),
+  };
   if (keyDownEvent.shiftKey) {
     hk.modifiers.push("Shift");
   }
@@ -94,4 +97,12 @@ export function equalsAsHotkey(
     hotkey.key.toLowerCase() === hk.key.toLowerCase() &&
     equalsAsSet(hotkey.modifiers, hk.modifiers)
   );
+}
+
+function normalizeHotkeyEventKey(key: string): string {
+  return key === " " ? "Space" : key;
+}
+
+export function normalizeKey(hotkey: string): string {
+  return hotkey === "Space" ? " " : hotkey;
 }

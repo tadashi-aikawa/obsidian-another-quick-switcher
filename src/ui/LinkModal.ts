@@ -13,7 +13,11 @@ import {
   type LeafType,
   isFrontMatterLinkCache,
 } from "../app-helper";
-import { createInstructions, quickResultSelectionModifier } from "../keys";
+import {
+  createInstructions,
+  normalizeKey,
+  quickResultSelectionModifier,
+} from "../keys";
 import type { Hotkeys, Settings } from "../settings";
 import { Logger } from "../utils/logger";
 import { isExcalidraw, normalizePath } from "../utils/path";
@@ -320,13 +324,17 @@ export class LinkModal
     handler: () => void | Promise<void>,
   ) {
     for (const x of this.settings.hotkeys.link[key] ?? []) {
-      this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
-        if (!evt.isComposing) {
-          evt.preventDefault();
-          handler();
-          return false;
-        }
-      });
+      this.scope.register(
+        x.modifiers,
+        normalizeKey(capitalizeFirstLetter(x.key)),
+        (evt) => {
+          if (!evt.isComposing) {
+            evt.preventDefault();
+            handler();
+            return false;
+          }
+        },
+      );
     }
   }
 

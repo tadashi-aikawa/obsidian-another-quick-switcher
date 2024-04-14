@@ -860,6 +860,9 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         }),
         ". (Press any key and show 'event.key')",
       );
+      li.createEl("ul").createEl("li", {
+        text: "For the space key, please set the value to 'Space'.",
+      });
 
       const ul = createEl("ul");
       ul.createEl("li", {

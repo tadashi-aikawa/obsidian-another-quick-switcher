@@ -13,7 +13,11 @@ import {
   type LeafType,
   isFrontMatterLinkCache,
 } from "../app-helper";
-import { createInstructions, quickResultSelectionModifier } from "../keys";
+import {
+  createInstructions,
+  normalizeKey,
+  quickResultSelectionModifier,
+} from "../keys";
 import type { Hotkeys, Settings } from "../settings";
 import { compare } from "../sorters";
 import { uniqBy } from "../utils/collection-helper";
@@ -385,13 +389,17 @@ export class BacklinkModal
   ) {
     const hotkeys = this.settings.hotkeys.backlink[key];
     for (const x of hotkeys) {
-      this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
-        if (!evt.isComposing) {
-          evt.preventDefault();
-          handler();
-          return false;
-        }
-      });
+      this.scope.register(
+        x.modifiers,
+        normalizeKey(capitalizeFirstLetter(x.key)),
+        (evt) => {
+          if (!evt.isComposing) {
+            evt.preventDefault();
+            handler();
+            return false;
+          }
+        },
+      );
     }
   }
 

@@ -1,6 +1,6 @@
 import { type App, Platform, type Pos, SuggestModal } from "obsidian";
 import { AppHelper } from "../app-helper";
-import { createInstructions } from "../keys";
+import { createInstructions, normalizeKey } from "../keys";
 import type { Hotkeys, Settings } from "../settings";
 import {
   capitalizeFirstLetter,
@@ -225,13 +225,17 @@ export class HeaderModal
     handler: (evt: KeyboardEvent) => void | Promise<void>,
   ) {
     for (const x of this.settings.hotkeys.header[key] ?? []) {
-      this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
-        if (!evt.isComposing) {
-          evt.preventDefault();
-          handler(evt);
-          return false;
-        }
-      });
+      this.scope.register(
+        x.modifiers,
+        normalizeKey(capitalizeFirstLetter(x.key)),
+        (evt) => {
+          if (!evt.isComposing) {
+            evt.preventDefault();
+            handler(evt);
+            return false;
+          }
+        },
+      );
     }
   }
 

@@ -10,7 +10,11 @@ import {
   parseFrontMatterAliases,
   parseFrontMatterTags,
 } from "obsidian";
-import { createInstructions, quickResultSelectionModifier } from "src/keys";
+import {
+  createInstructions,
+  normalizeKey,
+  quickResultSelectionModifier,
+} from "src/keys";
 import { type SuggestionItem, stampMatchResults } from "src/matcher";
 import {
   AppHelper,
@@ -690,13 +694,17 @@ export class AnotherQuickSwitcherModal
     handler: () => void | Promise<void>,
   ) {
     for (const x of this.settings.hotkeys.main[key] ?? []) {
-      this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
-        if (!evt.isComposing) {
-          evt.preventDefault();
-          handler();
-          return false;
-        }
-      });
+      this.scope.register(
+        x.modifiers,
+        normalizeKey(capitalizeFirstLetter(x.key)),
+        (evt) => {
+          if (!evt.isComposing) {
+            evt.preventDefault();
+            handler();
+            return false;
+          }
+        },
+      );
     }
   }
 

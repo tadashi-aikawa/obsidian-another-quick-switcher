@@ -9,6 +9,7 @@ import {
   createInstruction,
   createInstructions,
   equalsAsHotkey,
+  normalizeKey,
   quickResultSelectionModifier,
 } from "../keys";
 import type { Hotkeys, Settings } from "../settings";
@@ -446,13 +447,17 @@ export class GrepModal
   ) {
     const hotkeys = this.settings.hotkeys.grep[key];
     for (const x of hotkeys) {
-      this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
-        if (!evt.isComposing) {
-          evt.preventDefault();
-          handler();
-          return false;
-        }
-      });
+      this.scope.register(
+        x.modifiers,
+        normalizeKey(capitalizeFirstLetter(x.key)),
+        (evt) => {
+          if (!evt.isComposing) {
+            evt.preventDefault();
+            handler();
+            return false;
+          }
+        },
+      );
     }
   }
 

@@ -1,6 +1,10 @@
 import { type App, Platform, SuggestModal, type WorkspaceLeaf } from "obsidian";
 import { AppHelper } from "../app-helper";
-import { createInstructions, quickResultSelectionModifier } from "../keys";
+import {
+  createInstructions,
+  normalizeKey,
+  quickResultSelectionModifier,
+} from "../keys";
 import type { Hotkeys, Settings } from "../settings";
 import { range } from "../utils/collection-helper";
 import { Logger } from "../utils/logger";
@@ -359,13 +363,17 @@ export class InFileModal
     handler: (evt: KeyboardEvent) => void | Promise<void>,
   ) {
     for (const x of this.settings.hotkeys["in-file"][key] ?? []) {
-      this.scope.register(x.modifiers, capitalizeFirstLetter(x.key), (evt) => {
-        if (!evt.isComposing) {
-          evt.preventDefault();
-          handler(evt);
-          return false;
-        }
-      });
+      this.scope.register(
+        x.modifiers,
+        normalizeKey(capitalizeFirstLetter(x.key)),
+        (evt) => {
+          if (!evt.isComposing) {
+            evt.preventDefault();
+            handler(evt);
+            return false;
+          }
+        },
+      );
     }
   }
 
