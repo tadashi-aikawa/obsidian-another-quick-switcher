@@ -16,14 +16,15 @@ interface Options {
   showDirectory: boolean;
   showDirectoryAtNewLine: boolean;
   showFullPathOfDirectory: boolean;
-  showAliasesOnTop: boolean;
+  displayAliasAsTitleOnKeywordMatched: boolean;
+  displayAliaseAsTitle: boolean;
   hideGutterIcons: boolean;
   showFuzzyMatchScore: boolean;
 }
 
 function createItemDiv(
   item: SuggestionItem,
-  aliases: string[],
+  aliasesDisplayedAsTitle: string[],
   options: Options,
 ): Elements["itemDiv"] {
   const itemDiv = createDiv({
@@ -45,8 +46,8 @@ function createItemDiv(
   const titleDiv = createDiv({
     cls: "another-quick-switcher__item__title",
     text:
-      options.showAliasesOnTop && aliases.length > 0
-        ? aliases.join(" / ")
+      aliasesDisplayedAsTitle.length > 0
+        ? aliasesDisplayedAsTitle.join(" / ")
         : item.file.basename,
   });
   entryDiv.appendChild(titleDiv);
@@ -178,7 +179,7 @@ function createDescriptionDiv(args: {
       cls: "another-quick-switcher__item__description",
     });
 
-    const displayAliases = options.showAliasesOnTop
+    const displayAliases = options.displayAliasAsTitleOnKeywordMatched
       ? [item.file.basename]
       : aliases;
     for (const x of displayAliases) {
@@ -271,7 +272,12 @@ export function createElements(
     item.matchResults.filter((res) => res.alias),
     (x) => x.meta ?? [],
   );
-  const itemDiv = createItemDiv(item, aliases, options);
+
+  const itemDiv = createItemDiv(
+    item,
+    options.displayAliaseAsTitle ? item.aliases : aliases,
+    options,
+  );
 
   // meta
   const frontMatter = omitBy(
@@ -309,6 +315,7 @@ export function createElements(
   const countByHeader = count(
     headerResults.flatMap((xs) => uniq(xs.meta ?? [])),
   );
+
   const descriptionDiv =
     aliases.length !== 0 ||
     tags.length !== 0 ||

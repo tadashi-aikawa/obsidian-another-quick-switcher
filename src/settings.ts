@@ -155,7 +155,8 @@ export interface Settings {
   showDirectory: boolean;
   showDirectoryAtNewLine: boolean;
   showFullPathOfDirectory: boolean;
-  showAliasesOnTop: boolean;
+  showAliasesOnTop: boolean; // Display alias as title on keyword match
+  displayAliaseAsTitle: boolean; // Display the alias as the title.
   showExistingFilesOnly: boolean;
   hideGutterIcons: boolean;
   hideHotkeyGuides: boolean;
@@ -561,6 +562,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showDirectoryAtNewLine: false,
   showFullPathOfDirectory: false,
   showAliasesOnTop: false,
+  displayAliaseAsTitle: false,
   showExistingFilesOnly: false,
   hideGutterIcons: false,
   hideHotkeyGuides: false,
@@ -666,7 +668,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       });
     if (this.plugin.settings.normalizeAccentsAndDiacritics) {
       containerEl.createEl("div", {
-        text: "⚠ If enabled, it is about 2 to 5 times slower than disabled",
+        text: "! If enabled, it is about 2 to 5 times slower than disabled",
         cls: "another-quick-switcher__settings__warning",
       });
     }
@@ -735,14 +737,30 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         });
     }
 
-    new Setting(containerEl).setName("Show aliases on top").addToggle((tc) => {
-      tc.setValue(this.plugin.settings.showAliasesOnTop).onChange(
-        async (value) => {
-          this.plugin.settings.showAliasesOnTop = value;
-          await this.plugin.saveSettings();
-        },
-      );
-    });
+    new Setting(containerEl)
+      .setName("Display alias as title on keyword match")
+      .setDesc(
+        "When a keyword matches an alias, display the alias as the title.",
+      )
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.showAliasesOnTop).onChange(
+          async (value) => {
+            this.plugin.settings.showAliasesOnTop = value;
+            await this.plugin.saveSettings();
+          },
+        );
+      });
+
+    new Setting(containerEl)
+      .setName("Display the alias as the title.")
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.displayAliaseAsTitle).onChange(
+          async (value) => {
+            this.plugin.settings.displayAliaseAsTitle = value;
+            await this.plugin.saveSettings();
+          },
+        );
+      });
 
     new Setting(containerEl)
       .setName("Show existing files only")
