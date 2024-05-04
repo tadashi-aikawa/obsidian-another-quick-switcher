@@ -65,7 +65,8 @@ interface CustomSearchHistory {
 
 export class AnotherQuickSwitcherModal
   extends SuggestModal<SuggestionItem>
-  implements UnsafeModalInterface<SuggestionItem> {
+  implements UnsafeModalInterface<SuggestionItem>
+{
   logger: Logger;
   originItems: SuggestionItem[];
   phantomItems: SuggestionItem[];
@@ -147,16 +148,16 @@ export class AnotherQuickSwitcherModal
     this.phantomItems = this.settings.showExistingFilesOnly
       ? []
       : this.appHelper.searchPhantomFiles().map((x) => ({
-        file: x,
-        aliases: [],
-        tags: [],
-        headers: [],
-        links: [],
-        phantom: true,
-        starred: false,
-        matchResults: [],
-        tokens: x.basename.split(" "),
-      }));
+          file: x,
+          aliases: [],
+          tags: [],
+          headers: [],
+          links: [],
+          phantom: true,
+          starred: false,
+          matchResults: [],
+          tokens: x.basename.split(" "),
+        }));
 
     this.indexingItems();
 
@@ -255,25 +256,25 @@ export class AnotherQuickSwitcherModal
           aliases: parseFrontMatterAliases(cache.frontmatter) ?? [],
           tags: this.command.searchBy.tag
             ? uniq([
-              ...(cache.tags ?? []).map((x) => x.tag),
-              ...(parseFrontMatterTags(cache.frontmatter) ?? []),
-            ])
+                ...(cache.tags ?? []).map((x) => x.tag),
+                ...(parseFrontMatterTags(cache.frontmatter) ?? []),
+              ])
             : [],
           headers: this.command.searchBy.header
             ? (cache.headings ?? []).map((x) => excludeFormat(x.heading))
             : [],
           links: this.command.searchBy.link
             ? uniq(
-              [
-                ...(cache.links ?? []),
-                ...(((cache as any)
-                  .frontmatterLinks as FrontMatterLinkCache[]) ?? []),
-              ].map((x) => x.displayText ?? ""),
-            )
+                [
+                  ...(cache.links ?? []),
+                  ...(((cache as any)
+                    .frontmatterLinks as FrontMatterLinkCache[]) ?? []),
+                ].map((x) => x.displayText ?? ""),
+              )
             : [],
           frontMatter:
             (this.command.showFrontMatter || this.command.searchBy.property) &&
-              cache.frontmatter
+            cache.frontmatter
               ? omitBy(cache.frontmatter, (key, _) => key === "position")
               : undefined,
           phantom: false,
@@ -433,21 +434,21 @@ export class AnotherQuickSwitcherModal
     const matchedSuggestions = isQueryEmpty
       ? this.ignoredItems
       : this.ignoredItems
-        .map((x) =>
-          stampMatchResults(x, qs, {
-            isNormalizeAccentsDiacritics:
-              this.settings.normalizeAccentsAndDiacritics,
-            searchByHeaders: this.command.searchBy.header,
-            searchByLinks: this.command.searchBy.link,
-            searchByTags: this.command.searchBy.tag,
-            keysOfPropertyToSearch: this.command.searchBy.property
-              ? this.command.keysOfPropertyToSearch
-              : [],
-            fuzzyTarget: this.command.allowFuzzySearchForSearchTarget,
-            minFuzzyScore: this.command.minFuzzyMatchScore,
-          }),
-        )
-        .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
+          .map((x) =>
+            stampMatchResults(x, qs, {
+              isNormalizeAccentsDiacritics:
+                this.settings.normalizeAccentsAndDiacritics,
+              searchByHeaders: this.command.searchBy.header,
+              searchByLinks: this.command.searchBy.link,
+              searchByTags: this.command.searchBy.tag,
+              keysOfPropertyToSearch: this.command.searchBy.property
+                ? this.command.keysOfPropertyToSearch
+                : [],
+              fuzzyTarget: this.command.allowFuzzySearchForSearchTarget,
+              minFuzzyScore: this.command.minFuzzyMatchScore,
+            }),
+          )
+          .filter((x) => x.matchResults.every((x) => x.type !== "not found"));
 
     const items = sort(
       matchedSuggestions,
