@@ -19,7 +19,7 @@ This is an Obsidian plugin which is another choice of Quick switcher.
 
 You can download from `Community plugins` in Obsidian settings.
 
-## ⌨️Features
+## ⌨️ Features
 
 ### 1. Custom searches
 
