@@ -119,9 +119,9 @@ Ex: If there are three files.
 
 `hoge -md` suggests only `hoge`.
 
-##### A <cd> means the current directory
+##### `<cd>` means the current directory
 
-If a path of the active file is "/usr/local/vault/notes", The query, "<cd> obsidian" will regard as "/usr/local/vault/notes obsidian".
+If a path of the active file is "/usr/local/vault/notes", The query, "`<cd>` obsidian" will regard as "/usr/local/vault/notes obsidian".
 
 ### 2. Header floating search in file / Header search in file
 
