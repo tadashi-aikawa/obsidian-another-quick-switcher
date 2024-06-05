@@ -43,12 +43,15 @@ function createItemDiv(
     cls: "another-quick-switcher__item__entry",
   });
 
+  const shouldShowAliasAsTitle =
+    aliasesDisplayedAsTitle.length > 0 &&
+    (options.displayAliaseAsTitle ||
+      options.displayAliasAsTitleOnKeywordMatched);
   const titleDiv = createDiv({
     cls: "another-quick-switcher__item__title",
-    text:
-      aliasesDisplayedAsTitle.length > 0
-        ? aliasesDisplayedAsTitle.join(" / ")
-        : item.file.basename,
+    text: shouldShowAliasAsTitle
+      ? aliasesDisplayedAsTitle.join(" / ")
+      : item.file.basename,
   });
   entryDiv.appendChild(titleDiv);
 
