@@ -157,7 +157,7 @@ export function createCommands(app: App, settings: Settings): Command[] {
     },
     {
       id: "folder",
-      name: "Open a folder in the file tree",
+      name: "Reveal a folder in the file tree",
       hotkeys: [],
       callback: () => {
         showFolderDialog(app, settings);

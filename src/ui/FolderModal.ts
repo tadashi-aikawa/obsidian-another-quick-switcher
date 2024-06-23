@@ -191,7 +191,7 @@ export class FolderModal extends SuggestModal<SuggestionItem> {
 
     if (!this.settings.hideHotkeyGuides) {
       this.setInstructions([
-        { command: "[↵]", purpose: "open in file tree" },
+        { command: "[↵]", purpose: "reveal in file tree" },
         { command: "[↑]", purpose: "up" },
         { command: "[↓]", purpose: "down" },
         ...createInstructions(this.settings.hotkeys.folder),
