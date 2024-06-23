@@ -4,16 +4,17 @@
 [![Tests](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/workflows/Tests/badge.svg)](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/actions)
 ![downloads](https://img.shields.io/github/downloads/tadashi-aikawa/obsidian-another-quick-switcher/total)
 
-This is an Obsidian plugin which is another choice of Quick switcher.
+This is an Obsidian plugin which is another choice of Quick switcher. It offers various features, such as:
 
-- It can create custom search commands (`Custom searches`)
-- It allows you to customize the hotkeys in the quick switcher to your preference
-- It can search backlinks and move them **without leaving from a keyboard** (`Backlink search`)
-- It can move a file to another folder (`Move file to another folder`)
-- It can search **regardless of the appearance order of tokens**
-- It does not perform very fuzzy searches by default, but an option is available to enable such searches
-- It can search to **consider prefix emoji**
-- It shows file names and directory names separately
+- Creating custom search commands (`Custom searches`)
+- Customizing the hotkeys in the quick switcher to your preference
+- Searching backlinks and moving them **without leaving the keyboard** (`Backlink search`)
+- Moving a file to another folder (`Move file to another folder`)
+- Searching **regardless of the order in which tokens appear**
+- Not performing very fuzzy searches by default, but an option is available to enable them
+- Searching **considering prefix emoji**
+- Showing file names and directory names separately
+- Revealing a folder in the file tree (`Reveal a folder in the file tree`)
 
 ## ⏬ Install
 
