@@ -9,6 +9,7 @@ import {
 import type { SearchCommand, Settings } from "./settings";
 import { AnotherQuickSwitcherModal } from "./ui/AnotherQuickSwitcherModal";
 import { BacklinkModal } from "./ui/BacklinkModal";
+import { FolderModal } from "./ui/FolderModal";
 import { GrepModal } from "./ui/GrepModal";
 import { HeaderModal } from "./ui/HeaderModal";
 import { InFileModal } from "./ui/InFileModal";
@@ -41,6 +42,11 @@ export function showSearchDialog(
     stackHistory: true,
     initialLeaf: activeFileLeaf,
   });
+  modal.open();
+}
+
+export function showFolderDialog(app: App, settings: Settings) {
+  const modal = new FolderModal(app, settings);
   modal.open();
 }
 
@@ -147,6 +153,14 @@ export function createCommands(app: App, settings: Settings): Command[] {
           return Boolean(app.workspace.getActiveFile());
         }
         showHeaderDialog(app, settings, true);
+      },
+    },
+    {
+      id: "folder",
+      name: "Open a folder in the file tree",
+      hotkeys: [],
+      callback: () => {
+        showFolderDialog(app, settings);
       },
     },
     {

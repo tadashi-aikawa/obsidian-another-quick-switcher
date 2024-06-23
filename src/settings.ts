@@ -72,6 +72,12 @@ export interface Hotkeys {
     "navigate back": Hotkey[];
     dismiss: Hotkey[];
   };
+  folder: {
+    up: Hotkey[];
+    down: Hotkey[];
+    "open in default app": Hotkey[];
+    dismiss: Hotkey[];
+  };
   move: {
     up: Hotkey[];
     down: Hotkey[];
@@ -215,6 +221,12 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     "navigate forward": [{ modifiers: ["Alt"], key: "ArrowRight" }],
     "navigate back": [{ modifiers: ["Alt"], key: "ArrowLeft" }],
+    dismiss: [{ modifiers: [], key: "Escape" }],
+  },
+  folder: {
+    up: [{ modifiers: ["Mod"], key: "p" }],
+    down: [{ modifiers: ["Mod"], key: "n" }],
+    "open in default app": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   move: {
@@ -594,6 +606,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   resetLock = true;
   hotkeyExpandedStatus: Record<keyof Hotkeys, boolean> = {
     main: false,
+    folder: false,
     move: false,
     header: false,
     backlink: false,
@@ -918,7 +931,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     };
 
     addHotkeysForDialog("main", "Main dialog");
-    addHotkeysForDialog("move", "Move dialog");
+    addHotkeysForDialog("folder", "Folder dialog");
     addHotkeysForDialog("header", "Header dialog");
     addHotkeysForDialog("backlink", "Backlink dialog");
     addHotkeysForDialog("link", "Link dialog");

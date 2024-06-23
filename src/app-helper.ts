@@ -37,10 +37,18 @@ type BookmarkItem =
 
 interface UnsafeAppInterface {
   internalPlugins: {
+    getEnabledPluginById(
+      id: keyof UnsafeAppInterface["internalPlugins"]["plugins"],
+    ): boolean;
     plugins: {
       bookmarks: {
         instance: {
           getBookmarks(): BookmarkItem[];
+        };
+      };
+      "file-explorer": {
+        instance: {
+          revealInFolder(folder: TFolder): unknown;
         };
       };
     };
@@ -694,6 +702,16 @@ export class AppHelper {
       file,
       pos: { x: x + offset.x, y: y + offset.y },
     });
+  }
+
+  enableFileExplorer(): boolean {
+    return this.unsafeApp.internalPlugins.getEnabledPluginById("file-explorer");
+  }
+
+  revealInFolder(folder: TFolder): void {
+    this.unsafeApp.internalPlugins.plugins[
+      "file-explorer"
+    ].instance.revealInFolder(folder);
   }
 
   // TODO: Use another interface instead of TFile
