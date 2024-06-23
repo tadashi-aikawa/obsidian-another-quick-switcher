@@ -592,7 +592,12 @@ export class AppHelper {
     const editor = activeMarkdownView.editor;
     editor.replaceSelection(
       // XXX: dirty hack
-      linkText.endsWith(".excalidraw]]") ? `!${linkText}` : linkText,
+      linkText.endsWith(".excalidraw]]")
+        ? `!${linkText}`
+        : // ![[hoge.pdf]] -> [[hoge.pdf]]
+          linkText.endsWith(".pdf]]")
+          ? linkText.replace("!", "")
+          : linkText,
     );
   }
 
