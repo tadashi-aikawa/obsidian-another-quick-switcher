@@ -1,4 +1,5 @@
 import { type App, Platform, type Pos, SuggestModal } from "obsidian";
+import { minBy } from "src/utils/collection-helper";
 import { AppHelper } from "../app-helper";
 import { createInstructions, normalizeKey } from "../keys";
 import type { Hotkeys, Settings } from "../settings";
@@ -30,7 +31,7 @@ export class HeaderModal
   settings: Settings;
   floating: boolean;
   autoPreview: boolean;
-  /** ⚠Not work correctly in all cases */
+  /** !Not work correctly in all cases */
   unsafeSelectedIndex = 0;
 
   // unofficial
@@ -334,10 +335,15 @@ export class HeaderModal
 
     this.registerKeys("insert all to editor", async () => {
       this.close();
+      const headers = this.chooser.values;
+      if (!headers) {
+        return;
+      }
 
-      for (const x of this.chooser.values ?? []) {
+      const minLevel = minBy(headers, (x) => x.level).level;
+      for (const x of headers) {
         this.appHelper.insertStringToActiveFile(
-          `${" ".repeat((x.level - 1) * 4)}- ${x.value}\n`,
+          `${" ".repeat((x.level - minLevel) * 4)}- ${x.value}\n`,
         );
       }
     });
