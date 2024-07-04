@@ -1,4 +1,3 @@
-// biome-ignore lint/style/useNodejsImportProtocol: <explanation>
 import { execFile } from "child_process";
 
 type Result = BeginResult | EndResult | MatchResult;

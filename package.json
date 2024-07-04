@@ -7,10 +7,10 @@
     "dev": "bun esbuild.config.mts",
     "build": "tsc -noEmit -skipLibCheck && bun esbuild.config.mts production",
     "test": "jest",
-    "ci": "bun install && biome check src && bun run build && bun run test",
+    "ci": "bun install && biome check src *.mts && bun run build && bun run test",
     "release": "bun ci && bun version-bump.mts ${VERSION} && git add package.json manifest-beta.json manifest.json versions.json bun.lockb && git commit -m ${VERSION} && git tag ${VERSION} && git push --tags && git push",
     "prepare": "husky",
-    "pre:push": "tsc -noEmit -skipLibCheck && biome check src && bun run test"
+    "pre:push": "tsc -noEmit -skipLibCheck && biome check src *.mts && bun run test"
   },
   "keywords": [],
   "author": "",

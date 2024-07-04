@@ -1,9 +1,9 @@
-import esbuild from "esbuild";
-import process from "process";
-import builtins from "builtin-modules";
 import fs from "fs";
 import path from "path";
+import builtins from "builtin-modules";
 import chokidar from "chokidar";
+import esbuild from "esbuild";
+import process from "process";
 
 const VAULT_DIR = "/mnt/c/Users/syoum/work/minerva";
 const FILES = ["main.js", "manifest.json", "styles.css"];
@@ -63,17 +63,17 @@ if (prod) {
   fs.mkdirSync(pluginDir, { recursive: true });
 
   const hotreloadPath = path.join(pluginDir, ".hotreload", "");
-  console.log(`🌶️ Creating a ${hotreloadPath}`);
+  console.log(`🌶 Creating a ${hotreloadPath}`);
   fs.writeFileSync(hotreloadPath, "");
 
   const watcher = chokidar.watch(FILES, { persistent: true });
   watcher
     .on("add", (p) => {
-      console.log(`♨️  ${p} is added`);
+      console.log(`♨  ${p} is added`);
       fs.copyFileSync(p, path.join(pluginDir, p));
     })
     .on("change", (p) => {
-      console.log(`♨️  ${p} is changed`);
+      console.log(`♨  ${p} is changed`);
       fs.copyFileSync(p, path.join(pluginDir, p));
     });
 }

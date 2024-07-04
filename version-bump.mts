@@ -19,7 +19,7 @@ function updateVersion(version: string) {
   writeFileSync("manifest.json", JSON.stringify(manifest, null, "  "));
 
   // update versions.json with target version and minAppVersion from manifest.json
-  let versions = JSON.parse(readFileSync("versions.json", "utf8"));
+  const versions = JSON.parse(readFileSync("versions.json", "utf8"));
   versions[version] = minAppVersion;
   writeFileSync("versions.json", JSON.stringify(versions, null, "  "));
 }
@@ -29,7 +29,7 @@ if (!version) {
   console.error("Required: ${version} (ex: bun version 1.2.3)");
   exit(1);
 }
-if (!Boolean(version.match(/\d+\.\d+\.\d+/))) {
+if (!version.match(/\d+\.\d+\.\d+/)) {
   console.error("The version is not valid (ex: bun version 1.2.3)");
   exit(1);
 }
