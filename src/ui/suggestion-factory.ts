@@ -1,5 +1,5 @@
 import { isExcalidraw } from "src/utils/path";
-import type { SuggestionItem } from "../matcher";
+import { type SuggestionItem, getMatchedTitleAndAliases } from "../matcher";
 import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
 import { round } from "../utils/math";
 import { ALIAS, FOLDER, FRONT_MATTER, HEADER, LINK, SCORE, TAG } from "./icons";
@@ -271,14 +271,12 @@ export function createElements(
   item: SuggestionItem,
   options: Options,
 ): Elements {
-  const aliases = uniqFlatMap(
-    item.matchResults.filter((res) => res.alias),
-    (x) => x.meta ?? [],
-  );
+  const { title, aliases } = getMatchedTitleAndAliases(item);
+  const matchedAliasesOnly = title ? [] : aliases;
 
   const itemDiv = createItemDiv(
     item,
-    options.displayAliaseAsTitle ? item.aliases : aliases,
+    options.displayAliaseAsTitle ? item.aliases : matchedAliasesOnly,
     options,
   );
 
@@ -326,7 +324,7 @@ export function createElements(
     Object.keys(countByHeader).length !== 0
       ? createDescriptionDiv({
           item,
-          aliases,
+          aliases: matchedAliasesOnly,
           tags,
           countByLink,
           countByHeader,

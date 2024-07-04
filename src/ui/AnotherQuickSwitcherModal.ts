@@ -15,7 +15,11 @@ import {
   normalizeKey,
   quickResultSelectionModifier,
 } from "src/keys";
-import { type SuggestionItem, stampMatchResults } from "src/matcher";
+import {
+  type SuggestionItem,
+  getMatchedTitleAndAliases,
+  stampMatchResults,
+} from "src/matcher";
 import {
   AppHelper,
   type CaptureState,
@@ -855,7 +859,12 @@ export class AnotherQuickSwitcherModal
     });
 
     this.registerKeys("insert to editor", async () => {
-      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
+      const item = this.chooser.values?.[this.chooser.selectedItem];
+      if (!item) {
+        return;
+      }
+
+      const file = item.file;
       if (!file) {
         return;
       }
@@ -865,15 +874,22 @@ export class AnotherQuickSwitcherModal
       if (this.appHelper.isActiveLeafCanvas()) {
         this.appHelper.addFileToCanvas(file);
       } else {
+        const { title, aliases } = getMatchedTitleAndAliases(item);
         this.appHelper.insertLinkToActiveFileBy(
           file,
-          this.chooser.values?.[this.chooser.selectedItem]?.phantom ?? false,
+          item.phantom ?? false,
+          this.settings.showAliasesOnTop ? title ?? aliases.at(0) : undefined,
         );
       }
     });
 
     this.registerKeys("insert to editor in background", async () => {
-      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
+      const item = this.chooser.values?.[this.chooser.selectedItem];
+      if (!item) {
+        return;
+      }
+
+      const file = item.file;
       if (!file) {
         return;
       }
@@ -887,9 +903,11 @@ export class AnotherQuickSwitcherModal
       if (this.appHelper.isActiveLeafCanvas()) {
         this.appHelper.addFileToCanvas(file);
       } else {
+        const { title, aliases } = getMatchedTitleAndAliases(item);
         this.appHelper.insertLinkToActiveFileBy(
           file,
-          this.chooser.values?.[this.chooser.selectedItem]?.phantom ?? false,
+          item.phantom ?? false,
+          this.settings.showAliasesOnTop ? title ?? aliases.at(0) : undefined,
         );
         this.appHelper.insertStringToActiveFile("\n");
       }
@@ -907,7 +925,12 @@ export class AnotherQuickSwitcherModal
           });
           offsetX += cv.width + 30;
         } else {
-          this.appHelper.insertLinkToActiveFileBy(x.file, x.phantom);
+          const { title, aliases } = getMatchedTitleAndAliases(x);
+          this.appHelper.insertLinkToActiveFileBy(
+            x.file,
+            x.phantom,
+            this.settings.showAliasesOnTop ? title ?? aliases.at(0) : undefined,
+          );
           this.appHelper.insertStringToActiveFile("\n");
         }
       }

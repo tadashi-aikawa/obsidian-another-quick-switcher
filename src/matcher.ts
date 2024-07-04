@@ -1,5 +1,5 @@
 import type { TFile } from "obsidian";
-import { minBy } from "./utils/collection-helper";
+import { minBy, uniqFlatMap } from "./utils/collection-helper";
 import { smartEquals, smartIncludes, smartMicroFuzzy } from "./utils/strings";
 import { isPresent } from "./utils/types";
 
@@ -275,5 +275,24 @@ export function stampMatchResults(
   return {
     ...item,
     matchResults: matchQueryAll(item, queries, options),
+  };
+}
+
+export function getMatchedTitleAndAliases(item: SuggestionItem): {
+  title?: string;
+  aliases: string[];
+} {
+  const matchTitle = item.matchResults.find(
+    (x) =>
+      ["word-perfect", "prefix-name", "name", "fuzzy-name"].includes(x.type) &&
+      !x.alias,
+  );
+  const displayedAliases = uniqFlatMap(
+    item.matchResults.filter((res) => res.alias),
+    (x) => x.meta ?? [],
+  );
+  return {
+    title: matchTitle ? item.file.basename : undefined,
+    aliases: displayedAliases,
   };
 }

@@ -71,6 +71,7 @@ interface UnsafeAppInterface {
     config: {
       newFileLocation?: "root" | "current" | "folder";
       newFileFolderPath?: string;
+      useMarkdownLinks?: boolean;
     };
   };
   workspace: Workspace & {
@@ -581,7 +582,11 @@ export class AppHelper {
     editor.replaceSelection(str);
   }
 
-  insertLinkToActiveFileBy(file: TFile, phantom: boolean) {
+  insertLinkToActiveFileBy(
+    file: TFile,
+    phantom: boolean,
+    displayedString?: string,
+  ) {
     const activeMarkdownView =
       this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
     if (!activeMarkdownView?.file) {
@@ -592,6 +597,23 @@ export class AppHelper {
       file,
       activeMarkdownView.file.path,
     );
+
+    if (displayedString) {
+      if (this.unsafeApp.vault.config.useMarkdownLinks) {
+        const { text, link } = Array.from(
+          linkText.matchAll(/\[(?<text>[^\]]+)]\((?<link>.+)\)/g),
+        )[0].groups!;
+        if (text !== displayedString) {
+          linkText = `[${displayedString}](${link})`;
+        }
+      } else {
+        const text = Array.from(linkText.matchAll(/\[\[(?<text>[^\]]+)]]/g))[0]
+          .groups?.text;
+        if (text !== displayedString) {
+          linkText = `[[${text}|${displayedString}]]`;
+        }
+      }
+    }
 
     if (phantom) {
       linkText = linkText.replace(/\[\[.*\/([^\]]+)]]/, "[[$1]]");
