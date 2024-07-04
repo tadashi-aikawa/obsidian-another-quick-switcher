@@ -97,6 +97,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
 
   constructor(app: App, settings: Settings) {
     super(app);
+    this.modalEl.addClass("another-quick-switcher__modal-prompt");
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;

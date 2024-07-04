@@ -47,7 +47,7 @@ export class InFileModal
   autoPreview: boolean;
   ignoredItems: SuggestionItem[];
   initialLeaf: WorkspaceLeaf | null;
-  /** ⚠Not work correctly in all cases */
+  /** !Not work correctly in all cases */
   unsafeSelectedIndex = 0;
 
   // unofficial
@@ -67,6 +67,7 @@ export class InFileModal
 
   constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
+    this.modalEl.addClass("another-quick-switcher__modal-prompt");
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;

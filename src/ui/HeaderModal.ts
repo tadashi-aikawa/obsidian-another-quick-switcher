@@ -44,6 +44,8 @@ export class HeaderModal
 
   constructor(app: App, settings: Settings, floating: boolean) {
     super(app);
+    this.modalEl.addClass("another-quick-switcher__modal-prompt");
+
     this.limit = 1000;
 
     this.appHelper = new AppHelper(app);

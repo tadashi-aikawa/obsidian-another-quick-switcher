@@ -126,6 +126,7 @@ export class AnotherQuickSwitcherModal
     navQueue?: Promise<void>;
   }) {
     super(args.app);
+    this.modalEl.addClass("another-quick-switcher__modal-prompt");
 
     this.appHelper = new AppHelper(args.app);
     this.settings = args.settings;

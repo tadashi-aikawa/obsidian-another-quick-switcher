@@ -79,6 +79,8 @@ export class BacklinkModal
 
   constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
+    this.modalEl.addClass("another-quick-switcher__modal-prompt");
+
     this.vaultRootPath = normalizePath(
       (this.app.vault.adapter as any).basePath as string,
     );
