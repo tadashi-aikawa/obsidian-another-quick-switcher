@@ -137,6 +137,7 @@ function createMetaDiv(args: {
       });
 
       for (const v of [value].flat()) {
+        if (!v) continue;
         frontMatterDiv.createSpan({
           cls: "another-quick-switcher__item__meta__front_matter__value",
           title: v.toString(),
