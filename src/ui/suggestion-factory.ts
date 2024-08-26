@@ -1,4 +1,5 @@
 import { isExcalidraw } from "src/utils/path";
+import { isPresent } from "src/utils/types";
 import { type SuggestionItem, getMatchedTitleAndAliases } from "../matcher";
 import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
 import { round } from "../utils/math";
@@ -138,8 +139,7 @@ function createMetaDiv(args: {
         text: key,
       });
 
-      for (const v of [value].flat()) {
-        if (!v) continue;
+      for (const v of [value].flat().filter(isPresent)) {
         frontMatterDiv.createSpan({
           cls: "another-quick-switcher__item__meta__front_matter__value",
           title: v.toString(),
