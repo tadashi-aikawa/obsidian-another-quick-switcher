@@ -96,7 +96,9 @@ function createItemDiv(
 }
 
 function createMetaDiv(args: {
-  frontMatter: { [key: string]: string | number | string[] | number[] };
+  frontMatter: {
+    [key: string]: string | number | string[] | number[] | boolean | null;
+  };
   score: number;
   options: Options;
 }): Elements["metaDiv"] {

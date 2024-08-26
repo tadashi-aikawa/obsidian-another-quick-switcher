@@ -21,7 +21,9 @@ export interface SuggestionItem {
   aliases: string[];
   headers: string[];
   links: string[];
-  frontMatter?: { [key: string]: string | number | string[] | number[] };
+  frontMatter?: {
+    [key: string]: string | number | string[] | number[] | boolean | null;
+  };
   matchResults: MatchQueryResult[];
   phantom: boolean;
   starred: boolean;
