@@ -1,6 +1,6 @@
 {
   "name": "obsidian-another-quick-switcher",
-  "version": "11.6.0-beta1",
+  "version": "11.6.0",
   "description": "Todo",
   "main": "main.js",
   "scripts": {
