@@ -1,0 +1,61 @@
+name: Bug Report
+description: Bug report form.
+title: "[Bug] "
+assignees:
+  - tadashi-aikawa
+body:
+  - type: checkboxes
+    id: checkpoint
+    attributes:
+      label: Check for Commonly Missed Points
+      description: The following items are often mistaken as bugs, but they are actually part of the specification. Please review and check them.
+      options:
+        - label: Files not shown in the suggestions are not an active file. (An active file is not shown in the suggestions.)
+          required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce in the Sandbox Vault
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+    validations:
+      required: true
+  - type: input
+    id: obsidian-version
+    attributes:
+      label: Obsidian Version
+    validations:
+      required: true
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Another Quick Switcher Version
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: Windows
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
