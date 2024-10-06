@@ -1,11 +1,10 @@
 {
   "id": "obsidian-another-quick-switcher",
   "name": "Another Quick Switcher",
-  "version": "11.6.0",
+  "version": "12.0.0",
   "minAppVersion": "1.7.2",
   "description": "This is an Obsidian plugin which is another choice of Quick switcher.",
   "author": "tadashi-aikawa",
   "authorUrl": "https://github.com/tadashi-aikawa",
   "isDesktopOnly": false
 }
-
