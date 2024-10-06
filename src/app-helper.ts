@@ -229,7 +229,8 @@ export class AppHelper {
   }
 
   getLayout(): UnsafeLayouts {
-    return this.unsafeApp.workspace.getLayout() as UnsafeLayouts;
+    // WARNING: unsafe cast
+    return this.unsafeApp.workspace.getLayout() as any as UnsafeLayouts;
   }
 
   getLeftSideBarWidth(): number {
@@ -409,7 +410,7 @@ export class AppHelper {
           x.getContainer() ===
           this.unsafeApp.workspace.activeLeaf?.getContainer(),
       )
-      .map((x) => x.getViewState().state.file as string);
+      .map((x) => x.getViewState().state!.file as string);
   }
 
   captureState(initialLeaf: WorkspaceLeaf | null): CaptureState {
@@ -462,7 +463,7 @@ export class AppHelper {
   findLeaf(file: TFile): WorkspaceLeaf | undefined {
     return this.unsafeApp.workspace
       .getLeavesOfType("markdown")
-      .find((x) => x.getViewState().state.file === file.path);
+      .find((x) => x.getViewState().state!.file === file.path);
   }
 
   async openFile(
