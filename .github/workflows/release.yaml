@@ -1,30 +1,21 @@
 name: "Release"
 
-on:
-  push:
-    tags:
-      - "*"
+on: workflow_dispatch
+permissions:
+  contents: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
-
-      - run: bun ci
-
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v2
+      - uses: oven-sh/setup-bun@v2
+      - run: npm i -D --no-save conventional-changelog-conventionalcommits @semantic-release/git @semantic-release/exec
+      - uses: cycjimmy/semantic-release-action@v4
         with:
-          draft: true
-          files: |
-            main.js
-            styles.css
-            manifest.json
-            manifest-beta.json
-
+          semantic_version: 24.1.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Discord notification (not success)"
         uses: rjstone/discord-webhook-notify@v1
         if: "! success()"
