@@ -83,7 +83,7 @@ interface UnsafeAppInterface {
     getTypeByExtension(ext: string): string;
   };
   metadataCache: {
-    getBacklinksForFile(file: TFile): { data: Record<string, LinkCache[]> };
+    getBacklinksForFile(file: TFile): { data: Map<string, LinkCache[]> };
     initialized: boolean;
   };
 }
@@ -294,7 +294,11 @@ export class AppHelper {
     if (!f) {
       return null;
     }
-    return this.unsafeApp.metadataCache.getBacklinksForFile(f).data;
+
+    // INFO: There seems to be room for performance improvement
+    return Object.fromEntries(
+      this.unsafeApp.metadataCache.getBacklinksForFile(f).data,
+    );
   }
 
   // noinspection FunctionWithMultipleLoopsJS
