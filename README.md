@@ -241,13 +241,7 @@ bun dev
 
 ### Release
 
-```console
-# Stable
-VERSION=1.2.3 bun release
-
-# Beta
-VERSION=1.2.3-beta1 bun release
-```
+Run [Release Action](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/actions/workflows/release.yaml) manually.
 
 ## Appendix
 
