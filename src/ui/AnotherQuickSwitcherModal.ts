@@ -951,7 +951,7 @@ export class AnotherQuickSwitcherModal
           floating: this.floating,
         },
         originFile: file,
-        inputQuery: "",
+        inputQuery: null,
         navigationHistories: [
           ...this.navigationHistories.slice(
             0,
