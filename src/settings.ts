@@ -70,6 +70,7 @@ export interface Hotkeys {
     "show all results": Hotkey[];
     "navigate forward": Hotkey[];
     "navigate back": Hotkey[];
+    "close if opened": Hotkey[];
     dismiss: Hotkey[];
   };
   folder: {
@@ -221,6 +222,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     "navigate forward": [{ modifiers: ["Alt"], key: "ArrowRight" }],
     "navigate back": [{ modifiers: ["Alt"], key: "ArrowLeft" }],
+    "close if opened": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   folder: {

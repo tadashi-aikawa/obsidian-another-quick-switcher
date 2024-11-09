@@ -558,6 +558,16 @@ export class AppHelper {
     this.unsafeApp.showInFolder(entry.path);
   }
 
+  closeFile(file: TFile): void {
+    const targetLeaves = this.unsafeApp.workspace
+      .getLeavesOfType("markdown")
+      .filter((x) => x.getViewState().state?.file === file.path);
+
+    for (const leaf of targetLeaves) {
+      leaf.detach();
+    }
+  }
+
   // FIXME: function name
   getStarredFilePaths(): string[] {
     return this.unsafeApp.internalPlugins.plugins.bookmarks.instance

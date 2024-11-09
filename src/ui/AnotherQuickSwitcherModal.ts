@@ -1020,6 +1020,15 @@ export class AnotherQuickSwitcherModal
       navigate(this.currentNavigationHistoryIndex + 1);
     });
 
+    this.registerKeys("close if opened", () => {
+      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
+      if (!file) {
+        return;
+      }
+
+      this.appHelper.closeFile(file);
+    });
+
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
       : "Mod";
