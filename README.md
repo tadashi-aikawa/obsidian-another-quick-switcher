@@ -232,6 +232,14 @@ Sorry, I would not accept the pull requests except for the following cases.
 
 ### Development
 
+#### Set up
+
+```bash
+git config core.hooksPath hooks
+```
+
+#### Install dependencies
+
 [Bun] is required.
 
 ```console
