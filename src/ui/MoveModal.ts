@@ -1,4 +1,5 @@
-import { type App, SuggestModal, type TFolder } from "obsidian";
+import moment from "moment";
+import { type App, Notice, SuggestModal, type TFolder } from "obsidian";
 import { AppHelper } from "../app-helper";
 import { createInstructions } from "../keys";
 import type { Hotkeys, Settings } from "../settings";
@@ -173,10 +174,16 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
       return;
     }
 
-    await this.app.fileManager.renameFile(
-      activeFile,
-      `${item.folder.path}/${activeFile.name}`,
-    );
+    let newPath = `${item.folder.path}/${activeFile.name}`;
+    if (await this.appHelper.exists(newPath)) {
+      const newName = `${activeFile.basename}.${moment().format("YYYYMMDD_HHmmss_SSS")}.${activeFile.extension}`;
+      newPath = `${item.folder.path}/${newName}`;
+      new Notice(
+        `Since a file with the same name already exists in the destination directory, it will be moved and renamed ${newName}`,
+      );
+    }
+
+    await this.app.fileManager.renameFile(activeFile, newPath);
   }
 
   private registerKeys(
