@@ -172,6 +172,11 @@ export interface Settings {
   hotkeys: Hotkeys;
   // Searches
   searchCommands: SearchCommand[];
+  searchesAutoAliasTransform: {
+    enabled: boolean;
+    aliasPattern: string;
+    aliasFormat: string;
+  };
   // Header search
   autoPreviewInFloatingHeaderSearch: boolean;
   // Backlink search
@@ -585,6 +590,11 @@ export const DEFAULT_SETTINGS: Settings = {
   hotkeys: createDefaultHotkeys(),
   // Searches
   searchCommands: createPreSettingSearchCommands(),
+  searchesAutoAliasTransform: {
+    enabled: false,
+    aliasPattern: "",
+    aliasFormat: "",
+  },
   // Header search
   autoPreviewInFloatingHeaderSearch: true,
   // Backlink search
@@ -1036,6 +1046,55 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           btn.setCta();
         }
       });
+
+    new Setting(containerEl)
+      .setName("Auto alias transform")
+      .setDesc(
+        "Transforms a selected link candidate into an internal link with an aliase based on a regex-defined rule when using the insert to editor command.",
+      )
+      .addToggle((tc) => {
+        tc.setValue(
+          this.plugin.settings.searchesAutoAliasTransform.enabled,
+        ).onChange(async (value) => {
+          this.plugin.settings.searchesAutoAliasTransform.enabled = value;
+          await this.plugin.saveSettings();
+          this.display();
+        });
+      });
+
+    if (this.plugin.settings.searchesAutoAliasTransform.enabled) {
+      const ex1 = String.raw`Ex: (?<name>.+) \(.+\)$`;
+      new Setting(containerEl)
+        .setName("Alias pattern")
+        .setDesc(
+          `Specifies the regex pattern to identify parts of the link candidate for transformation into an alias. ${ex1}`,
+        )
+        .setClass("another-quick-switcher__settings__nested")
+        .addText((cb) => {
+          cb.setValue(
+            this.plugin.settings.searchesAutoAliasTransform.aliasPattern,
+          ).onChange(async (value) => {
+            this.plugin.settings.searchesAutoAliasTransform.aliasPattern =
+              value;
+            await this.plugin.saveSettings();
+          });
+        });
+
+      new Setting(containerEl)
+        .setName("Alias format")
+        .setDesc(
+          "Defines the format for the alias after transformation, using regex-captured groups from the candidate name. Ex: $<name>",
+        )
+        .setClass("another-quick-switcher__settings__nested")
+        .addText((cb) => {
+          cb.setValue(
+            this.plugin.settings.searchesAutoAliasTransform.aliasFormat,
+          ).onChange(async (value) => {
+            this.plugin.settings.searchesAutoAliasTransform.aliasFormat = value;
+            await this.plugin.saveSettings();
+          });
+        });
+    }
   }
 
   private addSearchCommandSetting(

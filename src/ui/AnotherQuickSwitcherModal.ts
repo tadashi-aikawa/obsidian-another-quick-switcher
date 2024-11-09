@@ -858,6 +858,23 @@ export class AnotherQuickSwitcherModal
       }
     });
 
+    const insertLinkToActiveMarkdownFile = (
+      file: TFile,
+      item: SuggestionItem,
+    ) => {
+      const saat = this.settings.searchesAutoAliasTransform;
+      const { title, aliases } = getMatchedTitleAndAliases(item);
+      this.appHelper.insertLinkToActiveFileBy(file, {
+        phantom: item.phantom,
+        displayedString: this.settings.showAliasesOnTop
+          ? title ?? aliases.at(0)
+          : undefined,
+        aliasTranformer: saat.enabled
+          ? { pattern: saat.aliasPattern, format: saat.aliasFormat }
+          : undefined,
+      });
+    };
+
     this.registerKeys("insert to editor", async () => {
       const item = this.chooser.values?.[this.chooser.selectedItem];
       if (!item) {
@@ -874,12 +891,7 @@ export class AnotherQuickSwitcherModal
       if (this.appHelper.isActiveLeafCanvas()) {
         this.appHelper.addFileToCanvas(file);
       } else {
-        const { title, aliases } = getMatchedTitleAndAliases(item);
-        this.appHelper.insertLinkToActiveFileBy(
-          file,
-          item.phantom ?? false,
-          this.settings.showAliasesOnTop ? title ?? aliases.at(0) : undefined,
-        );
+        insertLinkToActiveMarkdownFile(file, item);
       }
     });
 
@@ -903,12 +915,7 @@ export class AnotherQuickSwitcherModal
       if (this.appHelper.isActiveLeafCanvas()) {
         this.appHelper.addFileToCanvas(file);
       } else {
-        const { title, aliases } = getMatchedTitleAndAliases(item);
-        this.appHelper.insertLinkToActiveFileBy(
-          file,
-          item.phantom ?? false,
-          this.settings.showAliasesOnTop ? title ?? aliases.at(0) : undefined,
-        );
+        insertLinkToActiveMarkdownFile(file, item);
         this.appHelper.insertStringToActiveFile("\n");
       }
     });
@@ -925,12 +932,7 @@ export class AnotherQuickSwitcherModal
           });
           offsetX += cv.width + 30;
         } else {
-          const { title, aliases } = getMatchedTitleAndAliases(x);
-          this.appHelper.insertLinkToActiveFileBy(
-            x.file,
-            x.phantom,
-            this.settings.showAliasesOnTop ? title ?? aliases.at(0) : undefined,
-          );
+          insertLinkToActiveMarkdownFile(x.file, x);
           this.appHelper.insertStringToActiveFile("\n");
         }
       }

@@ -21,6 +21,7 @@ import {
 } from "obsidian";
 import merge from "ts-deepmerge";
 import { ExhaustiveError } from "./errors";
+import { autoAliasTransform } from "./transformer";
 import {
   flatten,
   groupBy,
@@ -599,8 +600,11 @@ export class AppHelper {
 
   insertLinkToActiveFileBy(
     file: TFile,
-    phantom: boolean,
-    displayedString?: string,
+    opts?: {
+      phantom?: boolean;
+      displayedString?: string;
+      aliasTranformer?: { pattern: string; format: string };
+    },
   ) {
     const activeMarkdownView =
       this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
@@ -613,24 +617,42 @@ export class AppHelper {
       activeMarkdownView.file.path,
     );
 
-    if (displayedString) {
-      if (this.unsafeApp.vault.config.useMarkdownLinks) {
-        const { text, link } = Array.from(
-          linkText.matchAll(/\[(?<text>[^\]]+)]\((?<link>.+)\)/g),
-        )[0].groups!;
-        if (text !== displayedString) {
-          linkText = `[${displayedString}](${link})`;
-        }
-      } else {
-        const text = Array.from(linkText.matchAll(/\[\[(?<text>[^\]]+)]]/g))[0]
-          .groups?.text;
-        if (text !== displayedString) {
-          linkText = `[[${text}|${displayedString}]]`;
-        }
+    const displayedString = opts?.displayedString;
+    const transformer = opts?.aliasTranformer;
+
+    // Force to recreate link text
+    if (this.unsafeApp.vault.config.useMarkdownLinks) {
+      const { text, link } = Array.from(
+        linkText.matchAll(/\[(?<text>[^\]]+)]\((?<link>.+)\)/g),
+      )[0].groups!;
+
+      let dispTxt = displayedString ?? text;
+      if (transformer) {
+        dispTxt = autoAliasTransform(
+          dispTxt,
+          transformer.pattern,
+          transformer.format,
+        );
       }
+
+      linkText = `[${dispTxt}](${link})`;
+    } else {
+      const text = Array.from(linkText.matchAll(/\[\[(?<text>[^\]]+)]]/g))[0]
+        .groups?.text!;
+
+      let dispTxt = displayedString ?? text;
+      if (transformer) {
+        dispTxt = autoAliasTransform(
+          dispTxt,
+          transformer.pattern,
+          transformer.format,
+        );
+      }
+
+      linkText = text === dispTxt ? `[[${text}]]` : `[[${text}|${dispTxt}]]`;
     }
 
-    if (phantom) {
+    if (opts?.phantom) {
       linkText = linkText.replace(/\[\[.*\/([^\]]+)]]/, "[[$1]]");
     }
 
