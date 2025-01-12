@@ -550,6 +550,7 @@ export class AnotherQuickSwitcherModal
       showFullPathOfDirectory: this.settings.showFullPathOfDirectory,
       displayAliasAsTitleOnKeywordMatched: this.settings.showAliasesOnTop,
       displayAliaseAsTitle: this.settings.displayAliaseAsTitle,
+      displayDescriptionBelowTitle: this.settings.displayDescriptionBelowTitle,
       hideGutterIcons: this.settings.hideGutterIcons,
       showFuzzyMatchScore: this.settings.showFuzzyMatchScore,
     });

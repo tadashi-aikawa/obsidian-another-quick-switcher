@@ -276,7 +276,6 @@
 }
 .another-quick-switcher__item__meta {
   font-size: 0.75em;
-  display: inline-block;
 }
 .another-quick-switcher__item__meta__front_matter {
   display: inline-flex;
@@ -290,6 +289,12 @@
 .another-quick-switcher__item__meta__front_matter__value
 	+ .another-quick-switcher__item__meta__front_matter__value::before {
 	content: ", ";
+}
+
+.another-quick-switcher__item__meta__description {
+  display: inline-flex;
+  font-size: 1.05em;
+  padding-bottom: 0.5rem;
 }
 
 .another-quick-switcher__item__meta__score {

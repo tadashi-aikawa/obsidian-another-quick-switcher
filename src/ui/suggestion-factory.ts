@@ -21,6 +21,7 @@ interface Options {
   displayAliaseAsTitle: boolean;
   hideGutterIcons: boolean;
   showFuzzyMatchScore: boolean;
+  displayDescriptionBelowTitle: boolean;
 }
 
 function createItemDiv(
@@ -49,7 +50,10 @@ function createItemDiv(
     (options.displayAliaseAsTitle ||
       options.displayAliasAsTitleOnKeywordMatched);
   const titleDiv = createDiv({
-    cls: "another-quick-switcher__item__title",
+    cls: [
+      "another-quick-switcher__item__title",
+      "another-quick-switcher__custom__item__title",
+    ],
     text: shouldShowAliasAsTitle
       ? aliasesDisplayedAsTitle.join(" / ")
       : item.file.basename,
@@ -109,6 +113,18 @@ function createMetaDiv(args: {
     cls: "another-quick-switcher__item__metas",
   });
 
+  if (options.displayDescriptionBelowTitle && frontMatter.description) {
+    const descriptionDiv = createDiv({
+      cls: "another-quick-switcher__item__meta",
+    });
+    const descriptionSpan = createSpan({
+      cls: "another-quick-switcher__item__meta__description",
+      text: String(frontMatter.description),
+    });
+    descriptionDiv.appendChild(descriptionSpan);
+    metaDiv.appendChild(descriptionDiv);
+  }
+
   if (options.showFuzzyMatchScore && args.score > 0) {
     const scoreDiv = createDiv({
       cls: "another-quick-switcher__item__meta",
@@ -128,6 +144,10 @@ function createMetaDiv(args: {
     });
 
     for (const [key, value] of Object.entries(frontMatter)) {
+      if (key === "description" && options.displayDescriptionBelowTitle) {
+        continue;
+      }
+
       const frontMatterDiv = createDiv({
         cls: "another-quick-switcher__item__meta__front_matter",
         title: `${key}: ${value}`,
@@ -289,7 +309,6 @@ export function createElements(
     (key, value) =>
       options.excludeFrontMatterKeys.includes(key) || value == null,
   );
-
   const maxScore = round(
     Math.max(...item.matchResults.map((a) => a.score ?? 0)),
     6,
@@ -304,7 +323,7 @@ export function createElements(
         })
       : undefined;
 
-  // description
+  // description (not description property)
   const tags = uniqFlatMap(
     item.matchResults.filter((res) => res.type === "tag"),
     (x) => x.meta ?? [],
