@@ -66,7 +66,7 @@ if (prod) {
   console.log(`🌶 Creating a ${hotreloadPath}`);
   fs.writeFileSync(hotreloadPath, "");
 
-  const watcher = chokidar.watch(FILES, { persistent: true });
+  const watcher = chokidar.watch(FILES, { usePolling: true });
   watcher
     .on("add", (p) => {
       console.log(`♨  ${p} is added`);
