@@ -55,6 +55,10 @@
   padding-right: 1rem;
 }
 
+.another-quick-switcher__custom__item__title {
+  font-weight: bold;
+}
+
 .another-quick-switcher__item__extension {
   display: inline-block;
   text-align: center;
