@@ -451,6 +451,7 @@ export class AnotherQuickSwitcherModal
                 : [],
               fuzzyTarget: this.command.allowFuzzySearchForSearchTarget,
               minFuzzyScore: this.command.minFuzzyMatchScore,
+              excludePrefix: this.settings.searchesExcludePrefix,
             }),
           )
           .filter((x) => x.matchResults.every((x) => x.type !== "not found"));

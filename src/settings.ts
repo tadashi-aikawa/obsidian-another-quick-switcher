@@ -173,6 +173,7 @@ export interface Settings {
   hotkeys: Hotkeys;
   // Searches
   searchCommands: SearchCommand[];
+  searchesExcludePrefix: string;
   searchesAutoAliasTransform: {
     enabled: boolean;
     aliasPattern: string;
@@ -592,6 +593,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hotkeys: createDefaultHotkeys(),
   // Searches
   searchCommands: createPreSettingSearchCommands(),
+  searchesExcludePrefix: "-",
   searchesAutoAliasTransform: {
     enabled: false,
     aliasPattern: "",
@@ -1061,6 +1063,20 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         if (!this.resetLock) {
           btn.setCta();
         }
+      });
+
+    new Setting(containerEl)
+      .setName("Exclude prefix")
+      .setDesc(
+        "Adding this at the beginning of a query excludes matching results.",
+      )
+      .addText((cb) => {
+        cb.setValue(this.plugin.settings.searchesExcludePrefix).onChange(
+          async (value) => {
+            this.plugin.settings.searchesExcludePrefix = value;
+            await this.plugin.saveSettings();
+          },
+        );
       });
 
     new Setting(containerEl)

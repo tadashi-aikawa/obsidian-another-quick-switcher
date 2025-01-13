@@ -107,22 +107,24 @@ You can use the following names as a `Sort priorities`.
 
 ##### Queries enclosed in double quotes are searched as is
 
-- `"ho ge"` only matches `ho ge` not `hoge`
-- `ho ge` matches both `ho ge` and `hoge`
+- `"ho ge"` matches only `ho ge` and does not match `hoge`.
+- `ho ge` matches both `ho ge` and `hoge`.
 
-##### A minus sign at the beginning excludes the matched candidates
+##### A minus sign at the beginning excludes matched candidates  
 
-Ex: If there are three files.
+Example: Suppose there are three files:  
 
-- hoge.md
-- hoge
-- mdhoge
+- `hoge.md`  
+- `hoge`  
+- `mdhoge`  
 
-`hoge -md` suggests only `hoge`.
+The input `hoge -md` will suggest only `hoge`.  
+
+Additionally, you can specify a custom string as the exclude prefix using the `Exclude prefix` setting.  
 
 ##### `<cd>` means the current directory
 
-If a path of the active file is "/usr/local/vault/notes", The query, "`<cd>` obsidian" will regard as "/usr/local/vault/notes obsidian".
+If the path of the active file is "/usr/local/vault/notes", the query "`<cd>` obsidian" will be interpreted as "/usr/local/vault/notes obsidian".
 
 ### 2. Header floating search in file / Header search in file
 

@@ -245,12 +245,14 @@ function matchQueryAll(
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
     minFuzzyScore: number;
+    excludePrefix: string;
   },
 ): MatchQueryResult[] {
   return queries.flatMap((q) => {
-    const [query, negative] = q.startsWith("-")
-      ? [q.slice(1), true]
-      : [q, false];
+    const [query, negative] =
+      options.excludePrefix && q.startsWith(options.excludePrefix)
+        ? [q.slice(options.excludePrefix.length), true]
+        : [q, false];
 
     const matched = matchQuery(item, query, options);
     if (matched[0]?.type === "not found") {
@@ -272,6 +274,7 @@ export function stampMatchResults(
     isNormalizeAccentsDiacritics: boolean;
     fuzzyTarget: boolean;
     minFuzzyScore: number;
+    excludePrefix: string;
   },
 ): SuggestionItem {
   return {
