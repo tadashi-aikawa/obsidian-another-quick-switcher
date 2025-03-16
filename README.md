@@ -104,11 +104,6 @@ You can use the following names as a `Sort priorities`.
 </details>
 
 <details>
-  <summary>Link search</summary>
-  <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/link-search-setting.webp" alt="link search" />
-</details>
-
-<details>
   <summary>2 hop link search</summary>
   <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/2-hop-link-search-setting.webp" alt="2 hop link search" />
 </details>
@@ -209,6 +204,15 @@ You can preview the file without closing the dialog. (Default hotkey is `Mod ,`)
 It shows a floating view that doesn't distract the contents. Additionally, it makes the editor state before opening the dialog after previewing files and closing the dialog.
 
 https://user-images.githubusercontent.com/9500018/216806330-daf57b52-d8a4-42e3-9803-ba7d76a93319.mp4
+
+## For users who use earlier than v13.0.0
+
+In v13, we removed `Link search` from `Preset search commands`. Please see #275 for details about this decision. If you need the previous `Link search` functionality, you can add it to `Search commands` with the configuration shown in the image below.
+
+<details>
+  <summary>Open "Link search" configuration</summary>
+  <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/link-search-setting.webp" alt="link search" />
+</details>
 
 ## For users who use earlier than v8.0.0
 

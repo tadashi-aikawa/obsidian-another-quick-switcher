@@ -345,6 +345,7 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   expand: true,
 });
 
+// Use only for "Navigate outgoing/backlinks without leaving the dialog"
 export const createDefaultLinkSearchCommand = (): SearchCommand => ({
   name: "Link search",
   searchBy: {
@@ -370,6 +371,7 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
   expand: false,
 });
 
+// Use only for "Navigate outgoing/backlinks without leaving the dialog"
 export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
   name: "Backlink search",
   searchBy: {
@@ -568,7 +570,6 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     excludePrefixPathPatterns: [],
     expand: false,
   },
-  createDefaultLinkSearchCommand(),
   createDefault2HopLinkSearchCommand(),
 ];
 
