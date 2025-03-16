@@ -877,9 +877,24 @@ export class AnotherQuickSwitcherModal
       });
     };
 
+    const insertPhantomLinkToActiveMarkdownFile = (text: string) => {
+      const saat = this.settings.searchesAutoAliasTransform;
+      this.appHelper.insertLinkToActiveFileBy(
+        this.appHelper.createPhantomFile(text),
+        {
+          phantom: true,
+          aliasTranformer: saat.enabled
+            ? { pattern: saat.aliasPattern, format: saat.aliasFormat }
+            : undefined,
+        },
+      );
+    };
+
     this.registerKeys("insert to editor", async () => {
       const item = this.chooser.values?.[this.chooser.selectedItem];
       if (!item) {
+        insertPhantomLinkToActiveMarkdownFile(this.searchQuery);
+        await this.safeClose();
         return;
       }
 

@@ -598,6 +598,10 @@ export class AppHelper {
     editor.replaceSelection(str);
   }
 
+  /**
+   * Insert a link to the active file.
+   * @param file The file to be linked.
+   */
   insertLinkToActiveFileBy(
     file: TFile,
     opts?: {
@@ -650,10 +654,16 @@ export class AppHelper {
       }
 
       linkText = text === dispTxt ? `[[${text}]]` : `[[${text}|${dispTxt}]]`;
-    }
-
-    if (opts?.phantom) {
-      linkText = linkText.replace(/\[\[.*\/([^\]]+)]]/, "[[$1]]");
+      if (opts?.phantom) {
+        const phantomLinkText = linkText
+          .replace("[[", "")
+          .replace("]]", "")
+          .split("|")
+          .map((x) => x.replace(/.*\/([^\]]+)/, "$1"))
+          .unique()
+          .join("|");
+        linkText = `[[${phantomLinkText}]]`;
+      }
     }
 
     const editor = activeMarkdownView.editor;
@@ -774,7 +784,7 @@ export class AppHelper {
   }
 
   // TODO: Use another interface instead of TFile
-  private createPhantomFile(linkText: string): TFile {
+  createPhantomFile(linkText: string): TFile {
     const linkPath = this.getPathToBeCreated(linkText);
 
     // @ts-ignore
