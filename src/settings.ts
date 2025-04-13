@@ -26,6 +26,7 @@ export interface SearchCommand {
   searchTarget: SearchTarget;
   allowFuzzySearchForSearchTarget: boolean;
   minFuzzyMatchScore: number;
+  includeCurrentFile: boolean;
   targetExtensions: string[];
   floating: boolean;
   showFrontMatter: boolean;
@@ -333,6 +334,7 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
   targetExtensions: [],
+  includeCurrentFile: false,
   floating: false,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -359,6 +361,7 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
   targetExtensions: [],
+  includeCurrentFile: false,
   floating: false,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -385,6 +388,7 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
   targetExtensions: ["md"],
+  includeCurrentFile: false,
   floating: false,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -410,6 +414,7 @@ export const createDefault2HopLinkSearchCommand = (): SearchCommand => ({
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
   targetExtensions: [],
+  includeCurrentFile: false,
   floating: false,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -442,6 +447,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
     targetExtensions: [],
+    includeCurrentFile: false,
     floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -466,6 +472,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
     targetExtensions: [],
+    includeCurrentFile: false,
     floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -496,6 +503,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     allowFuzzySearchForSearchTarget: true,
     minFuzzyMatchScore: 0.5,
     targetExtensions: [],
+    includeCurrentFile: false,
     floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -526,6 +534,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
     targetExtensions: [],
+    includeCurrentFile: false,
     floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -559,6 +568,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
     targetExtensions: [],
+    includeCurrentFile: false,
     floating: false,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
@@ -1328,6 +1338,12 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             command.targetExtensions = smartCommaSplit(value);
           }),
       );
+
+    new Setting(div).setName("Include current file").addToggle((cb) => {
+      cb.setValue(command.includeCurrentFile).onChange(async (value) => {
+        command.includeCurrentFile = value as boolean;
+      });
+    });
 
     new Setting(div).setName("Floating").addToggle((cb) => {
       cb.setValue(command.floating).onChange(async (value) => {

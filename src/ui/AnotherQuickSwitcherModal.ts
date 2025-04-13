@@ -252,7 +252,8 @@ export class AnotherQuickSwitcherModal
       .getFiles()
       .filter(
         (x) =>
-          x.path !== originFilePath && this.app.metadataCache.getFileCache(x),
+          (this.command.includeCurrentFile || x.path !== originFilePath) &&
+          this.app.metadataCache.getFileCache(x),
       )
       .map((x) => {
         const cache = this.app.metadataCache.getFileCache(x)!; // already filtered
