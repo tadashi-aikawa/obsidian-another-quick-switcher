@@ -4,14 +4,6 @@ title: "[Bug] "
 assignees:
   - tadashi-aikawa
 body:
-  - type: checkboxes
-    id: checkpoint
-    attributes:
-      label: Check for Commonly Missed Points
-      description: The following items are often mistaken as bugs, but they are actually part of the specification. Please review and check them.
-      options:
-        - label: Files not shown in the suggestions are not an active file. (An active file is not shown in the suggestions.)
-          required: true
   - type: textarea
     id: summary
     attributes:
