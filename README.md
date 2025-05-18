@@ -152,7 +152,8 @@ It sorts results by modified time descending.
 
 #### Default hotkeys
 
-- `TAB`: Search (not realtime)
+- `TAB`: Search
+    - If you want to search in real-time, please set the "Grep search delay milli-seconds" option to 1 or more
 - `Ctrl+,`: preview
 
 #### Note
