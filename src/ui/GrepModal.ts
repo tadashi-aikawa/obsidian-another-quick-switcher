@@ -1,8 +1,10 @@
 import {
   type App,
+  Debouncer,
   SuggestModal,
   type TFile,
   type WorkspaceLeaf,
+  debounce,
 } from "obsidian";
 import { AppHelper, type CaptureState, type LeafType } from "../app-helper";
 import {
@@ -81,6 +83,10 @@ export class GrepModal
   clonedInputElKeydownEventListener: (
     this: HTMLInputElement,
     ev: HTMLElementEventMap["keydown"],
+  ) => any;
+  clonedInputElInputEventListener: (
+    this: HTMLInputElement,
+    ev: HTMLElementEventMap["input"],
   ) => any;
   countInputEl?: HTMLDivElement;
   basePathInputEl: HTMLInputElement;
@@ -223,6 +229,10 @@ export class GrepModal
     this.clonedInputEl.removeEventListener(
       "keydown",
       this.clonedInputElKeydownEventListener,
+    );
+    this.clonedInputEl.removeEventListener(
+      "input",
+      this.clonedInputElInputEventListener,
     );
     this.basePathInputEl.removeEventListener(
       "change",
@@ -505,6 +515,23 @@ export class GrepModal
       "keydown",
       this.clonedInputElKeydownEventListener,
     );
+
+    if (this.settings.grepSearchDelayMilliSeconds > 0) {
+      this.clonedInputElInputEventListener = debounce(
+        () => {
+          this.currentQuery = this.clonedInputEl!.value;
+          this.inputEl.value = this.currentQuery;
+          // Necessary to rerender suggestions
+          this.inputEl.dispatchEvent(new Event("input"));
+        },
+        this.settings.grepSearchDelayMilliSeconds,
+        true,
+      );
+      this.clonedInputEl.addEventListener(
+        "input",
+        this.clonedInputElInputEventListener,
+      );
+    }
 
     this.registerKeys("up", () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));

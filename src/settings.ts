@@ -190,6 +190,7 @@ export interface Settings {
   inFileMaxDisplayLengthAroundMatchedWord: number;
   // Grep
   ripgrepCommand: string;
+  grepSearchDelayMilliSeconds: number;
   grepExtensions: string[];
   maxDisplayLengthAroundMatchedWord: number;
   // Move file to another folder
@@ -620,6 +621,7 @@ export const DEFAULT_SETTINGS: Settings = {
   inFileMaxDisplayLengthAroundMatchedWord: 64,
   // Grep
   ripgrepCommand: "rg",
+  grepSearchDelayMilliSeconds: 0,
   grepExtensions: ["md"],
   maxDisplayLengthAroundMatchedWord: 64,
   // Move file to another folder
@@ -1581,6 +1583,26 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             await this.plugin.saveSettings();
           }),
       );
+
+    new Setting(containerEl)
+      .setName("Grep search delay milli-seconds")
+      .setDesc(
+        "If set to 1 or more, the search will be executed automatically after the specified milliseconds have passed since entering a keyword. If set to 0, the search will only be executed when the hotkey is pressed.",
+      )
+      .addSlider((sc) =>
+        sc
+          .setLimits(0, 1000, 10)
+          .setValue(this.plugin.settings.grepSearchDelayMilliSeconds)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.grepSearchDelayMilliSeconds = value;
+            await this.plugin.saveSettings();
+          }),
+      );
+    containerEl.createEl("div", {
+      text: "! Please note that on Windows, the initial file access speed may be significantly slower.",
+      cls: "another-quick-switcher__settings__warning",
+    });
 
     new Setting(containerEl).setName("Extensions").addText((tc) =>
       tc
