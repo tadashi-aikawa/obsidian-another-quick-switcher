@@ -5,7 +5,7 @@ import chokidar from "chokidar";
 import esbuild from "esbuild";
 import process from "process";
 
-const VAULT_DIR = "/mnt/c/Users/syoum/work/minerva";
+const VAULT_DIR = "/Users/tadashi-aikawa/work/minerva";
 const FILES = ["main.js", "manifest.json", "styles.css"];
 
 // ---
