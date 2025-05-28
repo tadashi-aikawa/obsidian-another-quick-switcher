@@ -3,6 +3,7 @@ import {
   type CacheItem,
   type CachedMetadata,
   type Editor,
+  type EditorPosition,
   FileView,
   type HeadingCache,
   type LinkCache,
@@ -367,7 +368,17 @@ export class AppHelper {
     );
   }
 
-  async moveTo(to: Pos | number, editor?: Editor) {
+  /**
+   * Moves the cursor to the specified position.
+   * @param to The position to move to, either as a Pos object or an offset.
+   * @param editor The editor to move in, defaults to the current editor.
+   * @param fromPos The position from which the jump is made, used for Vim jump list.
+   */
+  async moveTo(
+    to: Pos | number,
+    editor?: Editor,
+    editorPosition?: EditorPosition,
+  ) {
     const isToOffset = typeof to === "number";
 
     const activeFile = this.getActiveFile();
@@ -387,6 +398,11 @@ export class AppHelper {
     }
 
     const line = isToOffset ? targetEditor.offsetToPos(to).line : to.start.line;
+
+    if (editorPosition) {
+      this.addToJumpList(targetEditor, editorPosition, { line, ch: 0 });
+    }
+
     targetEditor.setCursor(
       targetEditor.offsetToPos(isToOffset ? to : to.start.offset),
     );
@@ -810,5 +826,20 @@ export class AppHelper {
         size: 0,
       },
     };
+  }
+
+  // Unsafe
+  private addToJumpList(
+    editor: Editor,
+    editorPosition: EditorPosition,
+    to: EditorPosition,
+  ) {
+    const cm = (editor as any).cm?.cm;
+    const jumpList = cm?.constructor?.Vim?.getVimGlobalState_?.()?.jumpList;
+    if (!jumpList) {
+      return;
+    }
+
+    jumpList.add(cm, editorPosition, to);
   }
 }

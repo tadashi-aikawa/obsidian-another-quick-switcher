@@ -1,5 +1,12 @@
-import { type App, Platform, SuggestModal, type WorkspaceLeaf } from "obsidian";
+import {
+  type App,
+  type EditorPosition,
+  Platform,
+  SuggestModal,
+  type WorkspaceLeaf,
+} from "obsidian";
 import { AppHelper } from "../app-helper";
+import type { CaptureState } from "../app-helper";
 import {
   createInstructions,
   normalizeKey,
@@ -65,6 +72,10 @@ export class InFileModal
 
   countInputEl?: HTMLDivElement;
 
+  stateToRestore: CaptureState;
+  initialCursor: EditorPosition;
+  navQueue: Promise<void>;
+
   constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
     this.modalEl.addClass("another-quick-switcher__modal-prompt");
@@ -75,6 +86,9 @@ export class InFileModal
     this.initialLeaf = initialLeaf;
     this.floating = this.settings.autoPreviewInFloatingInFileSearch;
     this.autoPreview = settings.autoPreviewInFloatingInFileSearch;
+    this.stateToRestore = this.appHelper.captureState(this.initialLeaf);
+    this.initialCursor = this.appHelper.getCurrentEditor()!.getCursor();
+    this.navQueue = Promise.resolve();
     this.limit = 255;
 
     this.setHotkeys();
@@ -91,6 +105,10 @@ export class InFileModal
 
   async init() {
     await this.indexingItems();
+  }
+
+  navigate(cb: () => any) {
+    this.navQueue = this.navQueue.then(cb);
   }
 
   onOpen() {
@@ -141,6 +159,10 @@ export class InFileModal
     globalInternalStorage.query = this.inputEl.value;
     globalInternalStorage.selected =
       this.chooser.values != null ? this.chooser.selectedItem : null;
+
+    if (this.stateToRestore) {
+      this.navigate(() => this.stateToRestore!.restore());
+    }
   }
 
   select(index: number, evt?: KeyboardEvent) {
@@ -356,6 +378,8 @@ export class InFileModal
       this.appHelper
         .getCurrentEditor()!
         .posToOffset({ line: item.lineNumber - 1, ch: 0 }),
+      undefined,
+      this.initialCursor,
     );
   }
 
