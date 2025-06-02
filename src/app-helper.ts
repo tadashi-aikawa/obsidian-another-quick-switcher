@@ -470,6 +470,29 @@ export class AppHelper {
     };
   }
 
+  // https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues/284#event-17898469302
+  captureStateInFile(initialLeaf: WorkspaceLeaf | null): CaptureState {
+    const leaf = this.unsafeApp.workspace.getMostRecentLeaf()!;
+    const state = leaf.getViewState();
+    const eState = leaf.getEphemeralState();
+
+    const unsafeApp = this.unsafeApp;
+    return {
+      async restore() {
+        await leaf.setViewState(
+          {
+            ...state,
+            active: true,
+            popstate: true,
+          } as ViewState,
+          eState,
+        );
+        unsafeApp.workspace.setActiveLeaf(leaf!, { focus: true });
+        this.leaf = undefined;
+      },
+    };
+  }
+
   getOpenState(leaf: WorkspaceLeaf, file: TFile) {
     let type = this.unsafeApp.viewRegistry.getTypeByExtension(file.extension);
     if (

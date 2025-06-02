@@ -86,7 +86,7 @@ export class InFileModal
     this.initialLeaf = initialLeaf;
     this.floating = this.settings.autoPreviewInFloatingInFileSearch;
     this.autoPreview = settings.autoPreviewInFloatingInFileSearch;
-    this.stateToRestore = this.appHelper.captureState(this.initialLeaf);
+    this.stateToRestore = this.appHelper.captureStateInFile(this.initialLeaf);
     this.initialCursor = this.appHelper.getCurrentEditor()!.getCursor();
     this.navQueue = Promise.resolve();
     this.limit = 255;
