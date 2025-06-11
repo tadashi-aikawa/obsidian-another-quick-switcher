@@ -1,12 +1,14 @@
 import {
   type App,
   type Debouncer,
+  type LinkCache,
   Platform,
   SuggestModal,
   type TFile,
   type WorkspaceLeaf,
   debounce,
 } from "obsidian";
+import { uniqBy } from "src/utils/collection-helper";
 import {
   AppHelper,
   type CaptureState,
@@ -131,7 +133,15 @@ export class LinkModal
     for (const [path, caches] of Object.entries(links)) {
       const file = this.appHelper.getFileByPath(path)!;
       const content = this.appHelper.getCurrentEditor()!.getValue();
-      for (const cache of caches) {
+
+      const noFrontmatterLinkCaches = caches.filter(
+        (x) => !isFrontMatterLinkCache(x),
+      ) as LinkCache[];
+      const uniqueCaches = uniqBy(
+        noFrontmatterLinkCaches,
+        (x) => x.position.start.line,
+      );
+      for (const cache of uniqueCaches) {
         if (!isFrontMatterLinkCache(cache)) {
           ignoredItems.push({
             file,
