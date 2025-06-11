@@ -53,7 +53,6 @@ export class InFileModal
   floating: boolean;
   autoPreview: boolean;
   ignoredItems: SuggestionItem[];
-  initialLeaf: WorkspaceLeaf | null;
   /** !Not work correctly in all cases */
   unsafeSelectedIndex = 0;
 
@@ -76,17 +75,18 @@ export class InFileModal
   initialCursor: EditorPosition;
   navQueue: Promise<void>;
 
-  constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
+  constructor(app: App, settings: Settings) {
     super(app);
     this.modalEl.addClass("another-quick-switcher__modal-prompt");
 
     this.appHelper = new AppHelper(app);
     this.settings = settings;
     this.logger = Logger.of(this.settings);
-    this.initialLeaf = initialLeaf;
     this.floating = this.settings.autoPreviewInFloatingInFileSearch;
     this.autoPreview = settings.autoPreviewInFloatingInFileSearch;
-    this.stateToRestore = this.appHelper.captureStateInFile(this.initialLeaf);
+    this.stateToRestore = this.appHelper.captureStateInFile(
+      this.appHelper.getActiveFileLeaf(),
+    );
     this.initialCursor = this.appHelper.getCurrentEditor()!.getCursor();
     this.navQueue = Promise.resolve();
     this.limit = 255;
@@ -160,9 +160,7 @@ export class InFileModal
     globalInternalStorage.selected =
       this.chooser.values != null ? this.chooser.selectedItem : null;
 
-    if (this.stateToRestore) {
-      this.navigate(() => this.stateToRestore!.restore());
-    }
+    this.navigate(() => this.stateToRestore.restore());
   }
 
   select(index: number, evt?: KeyboardEvent) {

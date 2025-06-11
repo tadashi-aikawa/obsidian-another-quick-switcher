@@ -183,6 +183,10 @@ export class AppHelper {
     return this.unsafeApp.workspace.getActiveViewOfType(FileView);
   }
 
+  getActiveFileLeaf(): WorkspaceLeaf | null {
+    return this.getFileViewInActiveLeaf()?.leaf ?? null;
+  }
+
   getMarkdownViewInActiveLeaf(): MarkdownView | null {
     return this.unsafeApp.workspace.getActiveViewOfType(MarkdownView);
   }

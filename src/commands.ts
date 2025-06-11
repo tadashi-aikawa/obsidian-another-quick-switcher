@@ -112,10 +112,7 @@ export async function showInFileDialog(app: App, settings: Settings) {
     return;
   }
 
-  const activeFileLeaf =
-    app.workspace.getActiveViewOfType(FileView)?.leaf ?? null;
-
-  const modal = new InFileModal(app, settings, activeFileLeaf);
+  const modal = new InFileModal(app, settings);
   await modal.init();
   modal.open();
 }
