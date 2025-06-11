@@ -122,7 +122,7 @@ export class LinkModal
     this.navigate(this.markClosed);
   }
 
-  async indexingItems() {
+  indexingItems() {
     const ignoredItems = [];
 
     const links = this.appHelper.getLinksByFilePathInActiveFile();
@@ -137,20 +137,19 @@ export class LinkModal
       const noFrontmatterLinkCaches = caches.filter(
         (x) => !isFrontMatterLinkCache(x),
       ) as LinkCache[];
+      // Do not display duplicates if there are two or more links on one line
       const uniqueCaches = uniqBy(
         noFrontmatterLinkCaches,
         (x) => x.position.start.line,
       );
       for (const cache of uniqueCaches) {
-        if (!isFrontMatterLinkCache(cache)) {
-          ignoredItems.push({
-            file,
-            displayLink: cache.displayText!,
-            line: content.split("\n").at(cache.position.start.line)!,
-            lineNumber: cache.position.start.line + 1,
-            offset: cache.position.start.offset,
-          });
-        }
+        ignoredItems.push({
+          file,
+          displayLink: cache.displayText!,
+          line: content.split("\n").at(cache.position.start.line)!,
+          lineNumber: cache.position.start.line + 1,
+          offset: cache.position.start.offset,
+        });
       }
     }
 
