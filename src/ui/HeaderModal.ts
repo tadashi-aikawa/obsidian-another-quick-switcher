@@ -1,6 +1,12 @@
-import { type App, Platform, type Pos, SuggestModal } from "obsidian";
+import {
+  type App,
+  type EditorPosition,
+  Platform,
+  type Pos,
+  SuggestModal,
+} from "obsidian";
 import { minBy } from "src/utils/collection-helper";
-import { AppHelper } from "../app-helper";
+import { AppHelper, type CaptureState } from "../app-helper";
 import { createInstructions, normalizeKey } from "../keys";
 import type { Hotkeys, Settings } from "../settings";
 import {
@@ -42,6 +48,10 @@ export class HeaderModal
 
   previewIcon: Element | null;
 
+  stateToRestore: CaptureState;
+  initialCursor: EditorPosition;
+  navQueue: Promise<void>;
+
   constructor(app: App, settings: Settings, floating: boolean) {
     super(app);
     this.modalEl.addClass("another-quick-switcher__modal-prompt");
@@ -52,6 +62,12 @@ export class HeaderModal
     this.settings = settings;
     this.floating = floating;
     this.autoPreview = settings.autoPreviewInFloatingHeaderSearch && floating;
+
+    this.stateToRestore = this.appHelper.captureStateInFile(
+      this.appHelper.getActiveFileLeaf(),
+    );
+    this.initialCursor = this.appHelper.getCurrentEditor()!.getCursor();
+    this.navQueue = Promise.resolve();
 
     this.items = this.appHelper.getHeadersInActiveFile().map((x, i) => ({
       value: excludeFormat(x.heading),
@@ -77,6 +93,15 @@ export class HeaderModal
     });
 
     this.setHotkeys();
+  }
+
+  navigate(cb: () => any) {
+    this.navQueue = this.navQueue.then(cb);
+  }
+
+  onClose() {
+    super.onClose();
+    this.navigate(() => this.stateToRestore.restore());
   }
 
   select(index: number, evt?: KeyboardEvent, suppressAutoPreview?: boolean) {
@@ -220,7 +245,7 @@ export class HeaderModal
   }
 
   async onChooseSuggestion(item: SuggestionItem): Promise<void> {
-    this.appHelper.moveTo(item.position);
+    this.appHelper.moveTo(item.position, undefined, this.initialCursor);
   }
 
   private registerKeys(
