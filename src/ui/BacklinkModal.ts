@@ -457,7 +457,7 @@ export class BacklinkModal
         keepOpen: true,
       });
     });
-    this.registerKeys("open all in new tabs", () => {
+    this.registerKeys("open all in new tabs", async () => {
       this.close();
       if (this.chooser.values == null) {
         return;
@@ -465,10 +465,12 @@ export class BacklinkModal
 
       const items = this.chooser.values.slice().reverse();
       for (const x of items) {
-        this.appHelper.openFile(x.file, {
+        await this.appHelper.openFile(x.file, {
           leafType: "new-tab-background",
+          line: x.lineNumber - 1,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
         });
+        await sleep(50);
       }
     });
 
