@@ -34,13 +34,15 @@ Custom searches enables you to create your original search commands.
 
 #### Search target
 
+
 | Name                               | Description                                          |
 | ---------------------------------- | ---------------------------------------------------- |
-| markdown                           | All markdown files                                   |
-| backlink                           | Markdown files in backlinks on the current file      |
-| link                               | Markdown files in outgoing links on the current file |
-| [2-hop-link]                       | Markdown files in 2-hop-links from the current file  |
-| opened file                        | Markdown files opened in the current window          |
+| file                               | All files in the Vault                               |
+| backlink                           | Markdown files that link to the current file         |
+| link                               | Files linked from the current file                   |
+| [2-hop-link]                       | 2-hop links from the current file                    |
+| opened file                        | Files currently open in the window                   |
+
 
 #### Sort priorities
 
