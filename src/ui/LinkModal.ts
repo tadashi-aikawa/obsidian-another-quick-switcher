@@ -392,23 +392,20 @@ export class LinkModal
         keepOpen: true,
       });
     });
-    this.registerKeys("open all in new tabs", () => {
+    this.registerKeys("open all in new tabs", async () => {
       this.close();
       if (this.chooser.values == null) {
         return;
       }
 
-      const files = this.chooser.values
-        .slice()
-        .reverse()
-        .map((x) => x.file)
-        .filter(isPresent);
-
-      for (const x of files) {
-        this.appHelper.openFile(x, {
+      const items = this.chooser.values.slice().reverse();
+      for (const item of items) {
+        await this.appHelper.openFile(this.appHelper.getActiveFile()!, {
           leafType: "new-tab-background",
+          line: item.lineNumber - 1,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
         });
+        await sleep(50);
       }
     });
 
