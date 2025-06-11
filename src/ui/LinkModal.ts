@@ -410,11 +410,11 @@ export class LinkModal
       const items = this.chooser.values.slice().reverse();
       for (const item of items) {
         await this.appHelper.openFile(this.appHelper.getActiveFile()!, {
-          leafType: "new-tab-background",
+          leafType: "new-tab",
           line: item.lineNumber - 1,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
         });
-        await sleep(50);
+        await sleep(0);
       }
     });
 

@@ -466,11 +466,11 @@ export class BacklinkModal
       const items = this.chooser.values.slice().reverse();
       for (const x of items) {
         await this.appHelper.openFile(x.file, {
-          leafType: "new-tab-background",
+          leafType: "new-tab",
           line: x.lineNumber - 1,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
         });
-        await sleep(50);
+        await sleep(0);
       }
     });
 
