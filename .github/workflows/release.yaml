@@ -16,27 +16,3 @@ jobs:
           semantic_version: 24.1.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: "Discord notification (not success)"
-        uses: rjstone/discord-webhook-notify@v1
-        if: "! success()"
-        with:
-          description: "⚠ Another Quick Switcher Release failed!"
-          details: "${{ github.ref }}"
-          severity: error
-          avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-
-  notify:
-    needs: release
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: "Discord notification (success)"
-        uses: rjstone/discord-webhook-notify@v1
-        if: always()
-        with:
-          description: "🚀 Another Quick Switcher Release finished!"
-          details: "${{ github.ref }}"
-          severity: info
-          avatarUrl: https://www.suruga-ya.jp/database/pics_light/game/871005085.jpg
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
