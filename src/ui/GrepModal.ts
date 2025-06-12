@@ -6,6 +6,7 @@ import {
   type WorkspaceLeaf,
   debounce,
 } from "obsidian";
+import { fd } from "src/utils/fd";
 import { AppHelper, type CaptureState, type LeafType } from "../app-helper";
 import {
   createInstruction,
@@ -276,7 +277,25 @@ export class GrepModal
       ].filter((x) => x),
     );
 
-    const items = rgResults
+    const fdResults = this.settings.includeFilenameInGrepSearch
+      ? await fd(
+          this.settings.fdCommand,
+          ...[
+            query,
+            "--absolute-path",
+            "--type",
+            "file",
+            "--type",
+            "symlink",
+            "--follow",
+            ...this.settings.grepExtensions.flatMap((x) => ["--extension", x]),
+            hasCapitalLetter(query) ? "--case-sensitive" : "",
+            `${this.vaultRootPath}/${absolutePathFromRoot}`,
+          ].filter((x) => x),
+        )
+      : [];
+
+    const rgItems: SuggestionItem[] = rgResults
       .map((x) => {
         return {
           order: -1,
@@ -293,12 +312,33 @@ export class GrepModal
         };
       })
       .filter((x) => x.file != null)
-      .sort(sorter((x) => x.file.stat.mtime, "desc"))
-      .map((x, order) => ({ ...x, order }));
+      .sort(sorter((x) => x.file.stat.mtime, "desc"));
+
+    const fdItems: SuggestionItem[] = fdResults
+      .map((x) => {
+        const file = this.appHelper.getFileByPath(
+          normalizePath(x).replace(`${this.vaultRootPath}/`, ""),
+        );
+        if (!file) {
+          throw new Error(
+            `File not found for path: ${x} (basePath: ${this.basePath})`,
+          );
+        }
+        return {
+          order: -1,
+          file,
+          line: "",
+          lineNumber: 0,
+          offset: 0,
+          submatches: [],
+        };
+      })
+      .filter((x) => x != null)
+      .sort(sorter((x) => x.file.stat.mtime, "desc"));
 
     this.logger.showDebugLog("getSuggestions: ", start);
 
-    return items;
+    return fdItems.concat(rgItems).map((x, order) => ({ ...x, order }));
   }
 
   async getSuggestions(query: string): Promise<SuggestionItem[]> {

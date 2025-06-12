@@ -193,6 +193,9 @@ export interface Settings {
   grepSearchDelayMilliSeconds: number;
   grepExtensions: string[];
   maxDisplayLengthAroundMatchedWord: number;
+  includeFilenameInGrepSearch: boolean;
+  fdCommand: string;
+
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
   // debug
@@ -624,6 +627,8 @@ export const DEFAULT_SETTINGS: Settings = {
   grepSearchDelayMilliSeconds: 0,
   grepExtensions: ["md"],
   maxDisplayLengthAroundMatchedWord: 64,
+  includeFilenameInGrepSearch: false,
+  fdCommand: "fd",
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
   // debug
@@ -1629,6 +1634,36 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             await this.plugin.saveSettings();
           }),
       );
+
+    new Setting(containerEl)
+      .setName("Include file name in search")
+      .setDesc(
+        "If enabled, file names are also included in the search target. fd is required.",
+      )
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.includeFilenameInGrepSearch).onChange(
+          async (value) => {
+            this.plugin.settings.includeFilenameInGrepSearch = value;
+            await this.plugin.saveSettings();
+            this.display();
+          },
+        );
+      });
+
+    if (this.plugin.settings.includeFilenameInGrepSearch) {
+      new Setting(containerEl)
+        .setName("fd command")
+        .setClass("another-quick-switcher__settings__nested")
+        .setDesc("Commands that can execute fd")
+        .addText((tc) =>
+          tc
+            .setValue(this.plugin.settings.fdCommand)
+            .onChange(async (value) => {
+              this.plugin.settings.fdCommand = value;
+              await this.plugin.saveSettings();
+            }),
+        );
+    }
   }
 
   private addMoveSettings(containerEl: HTMLElement) {

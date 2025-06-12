@@ -162,6 +162,7 @@ It sorts results by modified time descending.
 
 - Input regards as a regex pattern
 - Grep searches only markdown files as default. If you want to search for other extensions, please update the "Grep > Extensions" settings
+- If you want to include file names in the search, enable the "Include file name in search" setting. Note that [fd](https://github.com/sharkdp/fd) is required
 
 ### 4. Customizable hotkeys
 
