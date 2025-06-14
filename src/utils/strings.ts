@@ -1,5 +1,7 @@
 import diacriticsMap from "./diacritics-map";
 
+type Range = { start: number; end: number };
+
 const regEmoji = new RegExp(
   // biome-ignore lint/suspicious/noMisleadingCharacterClass: <explanation>
   /[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|[\uFE0E-\uFE0F]/,
@@ -207,4 +209,23 @@ export function trimLineByEllipsis(text: string, max: number): string {
   return text.length > max * 2
     ? `${text.slice(0, max)} ... ${text.slice(text.length - max)}`
     : text;
+}
+
+/**
+ * Get the results of pattern matching with one type of pattern as a list of strings and positions.
+ */
+export function getSinglePatternMatchingLocations(
+  text: string,
+  pattern: RegExp,
+): {
+  text: string;
+  range: Range;
+}[] {
+  return Array.from(text.matchAll(pattern)).map((x) => ({
+    text: x[0],
+    range: {
+      start: x.index!,
+      end: x.index! + x[0].length - 1,
+    },
+  }));
 }

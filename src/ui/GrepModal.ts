@@ -1,6 +1,5 @@
 import {
   type App,
-  Debouncer,
   SuggestModal,
   type TFile,
   type WorkspaceLeaf,
@@ -26,6 +25,7 @@ import {
 import { rg } from "../utils/ripgrep";
 import {
   capitalizeFirstLetter,
+  getSinglePatternMatchingLocations,
   hasCapitalLetter,
   trimLineByEllipsis,
 } from "../utils/strings";
@@ -50,6 +50,7 @@ interface SuggestionItem {
   lineNumber: number;
   offset: number;
   submatches: {
+    type: "title" | "text";
     match: {
       text: string;
     };
@@ -292,7 +293,12 @@ export class GrepModal
             hasCapitalLetter(query) ? "--case-sensitive" : "",
             `${this.vaultRootPath}/${absolutePathFromRoot}`,
           ].filter((x) => x),
-        )
+        ).catch((err: string) => {
+          if (err.includes("regex parse error")) {
+            return [];
+          }
+          throw err;
+        })
       : [];
 
     const rgItems: SuggestionItem[] = rgResults
@@ -308,12 +314,16 @@ export class GrepModal
           line: x.data.lines.text,
           lineNumber: x.data.line_number,
           offset: x.data.absolute_offset,
-          submatches: x.data.submatches,
+          submatches: x.data.submatches.map((x) => ({
+            ...x,
+            type: "text" as const,
+          })),
         };
       })
       .filter((x) => x.file != null)
       .sort(sorter((x) => x.file.stat.mtime, "desc"));
 
+    const regexpOption = hasCapitalLetter(query) ? "g" : "gi";
     const fdItems: SuggestionItem[] = fdResults
       .map((x) => {
         const file = this.appHelper.getFileByPath(
@@ -324,13 +334,26 @@ export class GrepModal
             `File not found for path: ${x} (basePath: ${this.basePath})`,
           );
         }
+
+        // Only exact match
+        // const start = file.basename.toLowerCase().indexOf(query.toLowerCase());
+        const matches = getSinglePatternMatchingLocations(
+          file.basename,
+          new RegExp(query, regexpOption),
+        );
+
         return {
           order: -1,
           file,
           line: "",
           lineNumber: 0,
           offset: 0,
-          submatches: [],
+          submatches: matches.map((x) => ({
+            type: "title" as const,
+            match: { text: x.text },
+            start: x.range.start,
+            end: x.range.end,
+          })),
         };
       })
       .filter((x) => x != null)
@@ -376,10 +399,26 @@ export class GrepModal
           "another-quick-switcher__item__title",
           "another-quick-switcher__grep__item__title_entry",
         ],
-        text: item.file.basename,
         attr: {
           extension: item.file.extension,
         },
+      });
+
+      let restLine = item.file.basename;
+      for (const x of item.submatches.filter((s) => s.type === "title")) {
+        const i = restLine.indexOf(x.match.text);
+        const before = restLine.slice(0, i);
+        titleDiv.createSpan({
+          text: before,
+        });
+        titleDiv.createSpan({
+          text: x.match.text,
+          cls: "another-quick-switcher__hit_word",
+        });
+        restLine = restLine.slice(i + x.match.text.length);
+      }
+      titleDiv.createSpan({
+        text: restLine,
       });
 
       const isExcalidrawFile = isExcalidraw(item.file);
@@ -419,7 +458,7 @@ export class GrepModal
     });
 
     let restLine = item.line;
-    for (const x of item.submatches) {
+    for (const x of item.submatches.filter((s) => s.type === "text")) {
       const i = restLine.indexOf(x.match.text);
       const before = restLine.slice(0, i);
       descriptionDiv.createSpan({
