@@ -60,6 +60,13 @@ This is an Obsidian plugin called "Another Quick Switcher" that provides advance
 - Jest for testing with esbuild transformer
 - Obsidian plugin API version 1.7.2+
 
+### Modal Development Guidelines
+
+- Use `safeClose()` for modal transitions to ensure proper state restoration
+- New hotkeys in settings should have empty default arrays `[]` (no default shortcuts)
+- For GrepModal modifications, initialize after `onOpen()` when `basePath` is available
+- Follow existing patterns in `setHotkeys()` for registering new hotkey handlers
+
 ## Settings Architecture
 
 The plugin has a complex settings system supporting:
@@ -80,3 +87,11 @@ Tests are located alongside source files with `.test.ts` suffix. Focus on:
 - `strings.test.ts` - String processing
 
 Run tests before any significant changes to ensure compatibility.
+
+## Commit Guidelines
+
+- Use Conventional Commits format: `feat(scope):`, `fix(scope):`, etc.
+- Scope examples: `main`, `grep`, `header`, `backlink`, `settings`
+- Keep first line concise and user-focused (appears in release notes)
+- Add bullet points for implementation details only when necessary
+- No default hotkey assignments for new features (user configurable only)
