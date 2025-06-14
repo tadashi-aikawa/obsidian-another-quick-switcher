@@ -54,6 +54,7 @@ import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
 import { setFloatingModal } from "./modal";
 import { createElements } from "./suggestion-factory";
+import { showGrepDialog } from "../commands";
 
 const globalInternalStorage: {
   query: string;
@@ -1060,6 +1061,12 @@ export class AnotherQuickSwitcherModal
         return false;
       });
     }
+
+    this.registerKeys("launch grep", async () => {
+      const currentQuery = this.inputEl.value.trim();
+      await this.safeClose();
+      await showGrepDialog(this.app, this.settings, currentQuery || undefined);
+    });
 
     this.registerKeys("dismiss", async () => {
       this.close();

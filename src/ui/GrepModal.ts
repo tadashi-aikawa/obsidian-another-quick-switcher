@@ -67,6 +67,7 @@ export class GrepModal
   appHelper: AppHelper;
   settings: Settings;
   initialLeaf: WorkspaceLeaf | null;
+  initialQuery?: string;
   stateToRestore: CaptureState;
 
   // unofficial
@@ -107,7 +108,7 @@ export class GrepModal
   });
   navQueue: Promise<void> = Promise.resolve();
 
-  constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
+  constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null, initialQuery?: string) {
     super(app);
     this.modalEl.addClass("another-quick-switcher__modal-prompt");
 
@@ -135,6 +136,9 @@ export class GrepModal
       );
     }
     this.setHotkeys();
+    
+    // Store initial query for later use in onOpen
+    this.initialQuery = initialQuery;
   }
 
   onOpen() {
@@ -142,6 +146,15 @@ export class GrepModal
     setFloatingModal(this.appHelper);
 
     this.basePath = globalInternalStorage.basePath ?? "";
+
+    // Set initial query if provided, after basePath is initialized
+    if (this.initialQuery) {
+      this.clonedInputEl.value = this.initialQuery;
+      this.currentQuery = this.initialQuery;
+      this.inputEl.value = this.initialQuery;
+      // Trigger input event to initialize suggestions
+      this.inputEl.dispatchEvent(new Event("input"));
+    }
 
     window.setTimeout(() => {
       const selected = globalInternalStorage.selected;

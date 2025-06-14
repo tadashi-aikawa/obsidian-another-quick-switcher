@@ -72,6 +72,7 @@ export interface Hotkeys {
     "navigate forward": Hotkey[];
     "navigate back": Hotkey[];
     "close if opened": Hotkey[];
+    "launch grep": Hotkey[];
     dismiss: Hotkey[];
   };
   folder: {
@@ -235,6 +236,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "navigate forward": [{ modifiers: ["Alt"], key: "ArrowRight" }],
     "navigate back": [{ modifiers: ["Alt"], key: "ArrowLeft" }],
     "close if opened": [],
+    "launch grep": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   folder: {

@@ -60,7 +60,7 @@ export function showMoveDialog(app: App, settings: Settings) {
   modal.open();
 }
 
-export async function showGrepDialog(app: App, settings: Settings) {
+export async function showGrepDialog(app: App, settings: Settings, initialQuery?: string) {
   if (!Platform.isDesktop) {
     // noinspection ObjectAllocationIgnored
     new Notice("Grep is not supported on mobile.");
@@ -88,7 +88,7 @@ export async function showGrepDialog(app: App, settings: Settings) {
   const activeFileLeaf =
     app.workspace.getActiveViewOfType(FileView)?.leaf ?? null;
 
-  const modal = new GrepModal(app, settings, activeFileLeaf);
+  const modal = new GrepModal(app, settings, activeFileLeaf, initialQuery);
   modal.open();
 }
 

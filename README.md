@@ -158,6 +158,13 @@ It sorts results by modified time descending.
     - If you want to search in real-time, please set the "Grep search delay milli-seconds" option to 1 or more
 - `Ctrl+,`: preview
 
+#### Launch Grep from Quick Switcher
+
+You can launch the Grep dialog directly from the main Quick Switcher with the current query carried over. This allows for seamless transition from file searching to content searching.
+
+- Configure the hotkey for "launch grep" in the main dialog settings
+- The current search query will be automatically transferred to the Grep dialog
+
 #### Note
 
 - Input regards as a regex pattern
