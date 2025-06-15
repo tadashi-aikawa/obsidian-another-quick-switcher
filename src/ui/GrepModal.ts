@@ -108,7 +108,12 @@ export class GrepModal
   });
   navQueue: Promise<void> = Promise.resolve();
 
-  constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null, initialQuery?: string) {
+  constructor(
+    app: App,
+    settings: Settings,
+    initialLeaf: WorkspaceLeaf | null,
+    initialQuery?: string,
+  ) {
     super(app);
     this.modalEl.addClass("another-quick-switcher__modal-prompt");
 
@@ -136,7 +141,7 @@ export class GrepModal
       );
     }
     this.setHotkeys();
-    
+
     // Store initial query for later use in onOpen
     this.initialQuery = initialQuery;
   }
@@ -145,7 +150,8 @@ export class GrepModal
     super.onOpen();
     setFloatingModal(this.appHelper);
 
-    this.basePath = globalInternalStorage.basePath ?? "";
+    this.basePath =
+      globalInternalStorage.basePath ?? this.settings.defaultGrepFolder;
 
     // Set initial query if provided, after basePath is initialized
     if (this.initialQuery) {

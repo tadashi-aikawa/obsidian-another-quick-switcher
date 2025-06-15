@@ -196,6 +196,7 @@ export interface Settings {
   maxDisplayLengthAroundMatchedWord: number;
   includeFilenameInGrepSearch: boolean;
   fdCommand: string;
+  defaultGrepFolder: string;
 
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
@@ -631,6 +632,7 @@ export const DEFAULT_SETTINGS: Settings = {
   maxDisplayLengthAroundMatchedWord: 64,
   includeFilenameInGrepSearch: false,
   fdCommand: "fd",
+  defaultGrepFolder: "",
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
   // debug
@@ -1620,6 +1622,21 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           await this.plugin.saveSettings();
         }),
     );
+
+    new Setting(containerEl)
+      .setName("Default folder")
+      .setDesc(
+        "Default folder path for grep searches. Leave empty to use vault root. Use ./ for current directory.",
+      )
+      .addText((tc) =>
+        tc
+          .setPlaceholder("(ex: ./, folder/subfolder)")
+          .setValue(this.plugin.settings.defaultGrepFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.defaultGrepFolder = value;
+            await this.plugin.saveSettings();
+          }),
+      );
 
     new Setting(containerEl)
       .setName("Max display length around matched word")

@@ -60,7 +60,11 @@ export function showMoveDialog(app: App, settings: Settings) {
   modal.open();
 }
 
-export async function showGrepDialog(app: App, settings: Settings, initialQuery?: string) {
+export async function showGrepDialog(
+  app: App,
+  settings: Settings,
+  initialQuery?: string,
+) {
   if (!Platform.isDesktop) {
     // noinspection ObjectAllocationIgnored
     new Notice("Grep is not supported on mobile.");
