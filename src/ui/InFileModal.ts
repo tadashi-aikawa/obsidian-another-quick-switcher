@@ -19,6 +19,7 @@ import {
   capitalIncludes,
   capitalizeFirstLetter,
   escapeRegExp,
+  smartWhitespaceSplit,
   trimLineByEllipsis,
 } from "../utils/strings";
 import { isPresent } from "../utils/types";
@@ -231,7 +232,9 @@ export class InFileModal
     const start = performance.now();
 
     const isQueryEmpty = query.trim() === "";
-    const queries = query.trim().split(" ");
+    const queries = smartWhitespaceSplit(query.trim());
+
+    // Create RegExp for highlighting matched terms
     this.currentQueriesRegExp = new RegExp(
       queries.map(escapeRegExp).join("|"),
       "gi",

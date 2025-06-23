@@ -193,6 +193,10 @@ https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018
 
 "In File search" allows you to search for a specific line within a file using a search keyword and displays it along with the surrounding lines.
 
+- Queries enclosed in double quotes are searched as is
+    - `"hello world"` only matches `hello world` not lines containing both `hello` and `world` separately
+    - `hello world` matches lines containing both `hello` and `world` anywhere in the line
+
 https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018/0b16c4f4-b071-4e05-9402-00ae2525e57c
 
 ### 8. Show backlinks from the dialog
