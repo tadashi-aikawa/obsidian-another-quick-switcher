@@ -32,13 +32,14 @@ This is an Obsidian plugin called "Another Quick Switcher" that provides advance
 - `src/ui/BacklinkModal.ts` - Backlink navigation
 - `src/ui/LinkModal.ts` - Outgoing link navigation  
 - `src/ui/HeaderModal.ts` - In-file header navigation
-- `src/ui/InFileModal.ts` - In-file text search
+- `src/ui/InFileModal.ts` - In-file text search with quoted phrase support
 - `src/ui/FolderModal.ts` & `MoveModal.ts` - File system operations
 
 **Core Systems:**
 - `src/matcher.ts` - Text matching and scoring algorithms
 - `src/sorters.ts` - 20+ configurable sort priorities
 - `src/transformer.ts` - Data transformation for search results
+- `src/utils/strings.ts` - String processing utilities including `smartWhitespaceSplit` for quoted phrase parsing
 
 ### Key Patterns
 
@@ -66,6 +67,8 @@ This is an Obsidian plugin called "Another Quick Switcher" that provides advance
 - New hotkeys in settings should have empty default arrays `[]` (no default shortcuts)
 - For GrepModal modifications, initialize after `onOpen()` when `basePath` is available
 - Follow existing patterns in `setHotkeys()` for registering new hotkey handlers
+- Use `smartWhitespaceSplit()` instead of `split(" ")` for query parsing to support quoted phrases
+- Quoted phrase functionality: `"hello world"` searches for exact match, `hello world` searches for both words
 
 ## Settings Architecture
 
