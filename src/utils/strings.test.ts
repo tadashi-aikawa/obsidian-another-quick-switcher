@@ -236,6 +236,14 @@ describe.each<{ text: string; expected: string[] }>`
   ${'"aa bb" "bb cc"'}      | ${["aa bb", "bb cc"]}
   ${'"aa bb" dd "bb cc"'}   | ${["aa bb", "dd", "bb cc"]}
   ${'c"aa bb"d'}            | ${["caa bbd"]}
+  ${'search \\"quote'}      | ${['search', '"quote']}
+  ${'search \\" test'}      | ${['search', '"', 'test']}
+  ${'\\"hello world\\"'}    | ${['"hello', 'world"']}
+  ${'pre \\"mid\\" post'}   | ${['pre', '"mid"', 'post']}
+  ${'aa \\"bb cc\\" dd'}    | ${['aa', '"bb', 'cc"', 'dd']}
+  ${'\\"'}                  | ${['"']}
+  ${'\\"\\"'}               | ${['""']}
+  ${'test \\"'}             | ${['test', '"']}
 `("smartWhitespaceSplit", ({ text, expected }) => {
   test(`smartWhitespaceSplit(${text}) = ${expected}`, () => {
     expect(smartWhitespaceSplit(text)).toStrictEqual(expected);
