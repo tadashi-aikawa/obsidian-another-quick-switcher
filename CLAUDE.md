@@ -60,6 +60,7 @@ This is an Obsidian plugin called "Another Quick Switcher" that provides advance
 - Biome for linting and formatting (spaces, not tabs)
 - Jest for testing with esbuild transformer
 - Obsidian plugin API version 1.7.2+
+- **IMPORTANT**: Always run `biome check src` after making code changes to avoid CI failures
 
 ### Modal Development Guidelines
 
@@ -99,3 +100,9 @@ Run tests before any significant changes to ensure compatibility.
 - Keep first line concise and user-focused (appears in release notes)
 - Add bullet points for implementation details only when necessary
 - No default hotkey assignments for new features (user configurable only)
+- Use `chore:` for formatting-only changes (not `fix:`) to avoid user confusion
+- Format commit messages concisely - avoid unnecessary details for maintenance tasks
+
+## Memory
+
+- Always ask for clarification when there are ambiguous instructions or potential risks to the project
