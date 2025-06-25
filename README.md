@@ -117,6 +117,7 @@ You can use the following names as a `Sort priorities`.
 
 - `"ho ge"` matches only `ho ge` and does not match `hoge`.
 - `ho ge` matches both `ho ge` and `hoge`.
+- Use `\"` to search for literal quote characters.
 
 ##### A minus sign at the beginning excludes matched candidates  
 
@@ -143,6 +144,7 @@ If the path of the active file is "/usr/local/vault/notes", the query "`<cd>` ob
 - Queries enclosed in double quotes are searched as is
     - `"ho ge"` only matches `ho ge` not `hoge`
     - `ho ge` matches both `ho ge` and `hoge`
+    - Use `\"` to search for literal quote characters
 
 ### 3. Grep
 
@@ -196,6 +198,7 @@ https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018
 - Queries enclosed in double quotes are searched as is
     - `"hello world"` only matches `hello world` not lines containing both `hello` and `world` separately
     - `hello world` matches lines containing both `hello` and `world` anywhere in the line
+    - Use `\"` to search for literal quote characters (e.g., `search \"quote` finds `search "quote`)
 
 https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018/0b16c4f4-b071-4e05-9402-00ae2525e57c
 

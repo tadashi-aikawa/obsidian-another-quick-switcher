@@ -69,6 +69,7 @@ This is an Obsidian plugin called "Another Quick Switcher" that provides advance
 - Follow existing patterns in `setHotkeys()` for registering new hotkey handlers
 - Use `smartWhitespaceSplit()` instead of `split(" ")` for query parsing to support quoted phrases
 - Quoted phrase functionality: `"hello world"` searches for exact match, `hello world` searches for both words
+- Escape functionality: `\"` allows searching for literal quote characters (e.g., `search \"` finds `search "`)
 
 ## Settings Architecture
 

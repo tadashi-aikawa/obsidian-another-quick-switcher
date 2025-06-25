@@ -220,22 +220,22 @@ describe.each<{ text: string; expected: string[] }>`
 });
 
 describe.each<{ text: string; expected: string[] }>`
-  text                    | expected
-  ${"aa"}                 | ${["aa"]}
-  ${"aa "}                | ${["aa"]}
-  ${"aa bb"}              | ${["aa", "bb"]}
-  ${" aa bb"}             | ${["aa", "bb"]}
-  ${"aa bb "}             | ${["aa", "bb"]}
-  ${" aa bb "}            | ${["aa", "bb"]}
-  ${"aa bb cc"}           | ${["aa", "bb", "cc"]}
-  ${" aa bb cc"}          | ${["aa", "bb", "cc"]}
-  ${" aa bb cc "}         | ${["aa", "bb", "cc"]}
-  ${'"aa bb" cc'}         | ${["aa bb", "cc"]}
-  ${'aa "bb cc"'}         | ${["aa", "bb cc"]}
-  ${'"aa bb cc"'}         | ${["aa bb cc"]}
-  ${'"aa bb" "bb cc"'}    | ${["aa bb", "bb cc"]}
-  ${'"aa bb" dd "bb cc"'} | ${["aa bb", "dd", "bb cc"]}
-  ${'c"aa bb"d'}          | ${["caa bbd"]}
+  text                      | expected
+  ${"aa"}                   | ${["aa"]}
+  ${"aa "}                  | ${["aa"]}
+  ${"aa bb"}                | ${["aa", "bb"]}
+  ${" aa bb"}               | ${["aa", "bb"]}
+  ${"aa bb "}               | ${["aa", "bb"]}
+  ${" aa bb "}              | ${["aa", "bb"]}
+  ${"aa bb cc"}             | ${["aa", "bb", "cc"]}
+  ${" aa bb cc"}            | ${["aa", "bb", "cc"]}
+  ${" aa bb cc "}           | ${["aa", "bb", "cc"]}
+  ${'"aa bb" cc'}           | ${["aa bb", "cc"]}
+  ${'aa "bb cc"'}           | ${["aa", "bb cc"]}
+  ${'"aa bb cc"'}           | ${["aa bb cc"]}
+  ${'"aa bb" "bb cc"'}      | ${["aa bb", "bb cc"]}
+  ${'"aa bb" dd "bb cc"'}   | ${["aa bb", "dd", "bb cc"]}
+  ${'c"aa bb"d'}            | ${["caa bbd"]}
 `("smartWhitespaceSplit", ({ text, expected }) => {
   test(`smartWhitespaceSplit(${text}) = ${expected}`, () => {
     expect(smartWhitespaceSplit(text)).toStrictEqual(expected);

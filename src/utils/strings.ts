@@ -121,8 +121,19 @@ export function smartWhitespaceSplit(text: string): string[] {
 
   for (let i = 0; i < text.length; i++) {
     const ch = text[i];
+    const nextCh = text[i + 1];
+
     switch (ch) {
-      case `"`:
+      case "\\":
+        // Handle escaped characters
+        if (nextCh === '"') {
+          str += '"';
+          i++; // Skip the next character (the escaped quote)
+        } else {
+          str += ch;
+        }
+        break;
+      case '"':
         hasQuote = !hasQuote;
         break;
       case " ":
