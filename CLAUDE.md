@@ -106,3 +106,4 @@ Run tests before any significant changes to ensure compatibility.
 ## Memory
 
 - Always ask for clarification when there are ambiguous instructions or potential risks to the project
+- lintやformatのチェックをするときは `bun pre:push` を実行してください。まとめて確認できるので便利です。そして、bunのformatによって意図した改行が失われてしまう場合は、bunのformatを無視するコメントを入れてください。
