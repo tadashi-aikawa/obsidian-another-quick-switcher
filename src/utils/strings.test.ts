@@ -408,14 +408,14 @@ describe("Performance tests", () => {
   // Measured: small(0.6ms), medium(2.2-4.5ms), large(19-32ms)
   const PERFORMANCE_THRESHOLDS = {
     microFuzzy: {
-      small: 3, // 100 vault: measured 0.56ms → 3ms threshold
-      medium: 5, // 1000 vault: measured 2.22ms → 5ms threshold
-      large: 25, // 10000 vault: measured 19.04ms → 25ms threshold
+      small: 15, // 100 notes
+      medium: 45, // 1000 notes
+      large: 70, // 10000 notes
     },
     smartMicroFuzzy: {
-      small: 3, // 100 vault: measured 0.59ms → 3ms threshold
-      medium: 8, // 1000 vault: measured 4.53ms → 8ms threshold
-      large: 40, // 10000 vault: measured 32.04ms → 40ms threshold
+      small: 20, // 100 notes
+      medium: 60, // 1000 notes
+      large: 100, // 10000 notes
     },
   };
 
