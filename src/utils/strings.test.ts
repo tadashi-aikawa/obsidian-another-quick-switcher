@@ -376,6 +376,119 @@ test("smartMicroFuzzy prioritizes emoji+text prefix correctly", () => {
   expect(result.score).toBeGreaterThan(0.05); // Confirmed working value
 });
 
+describe("Performance tests", () => {
+  const generateTestData = (size: number): string[] => {
+    // biome-ignore format: Keep arrays compact for readability
+    const bases = [
+      "file", "document", "note", "memo", "page", "article", "draft", "text",
+      "📝memo", "📘book", "🔧config", "📊data", "🌟star", "💡idea", "📋list", "🎯target",
+      "プロジェクト", "ドキュメント", "メモ", "ファイル", "設定", "データ", "リスト", "目標",
+      "Café", "résumé", "naïve", "façade", "piñata", "señor", "cañon", "niño"
+    ];
+    // biome-ignore format: Keep arrays compact for readability
+    const extensions = [".md", ".txt", ".json", ".yml", ".csv", ".log"];
+    // biome-ignore format: Keep arrays compact for readability
+    const prefixes = ["Draft", "Final", "Review", "Archive", "Backup", "Import", "Export"];
+    // biome-ignore format: Keep arrays compact for readability
+    const suffixes = ["v1", "v2", "backup", "old", "new", "temp", "final", "copy"];
+
+    const result: string[] = [];
+    for (let i = 0; i < size; i++) {
+      const base = bases[i % bases.length];
+      const ext = extensions[i % extensions.length];
+      const prefix = i % 3 === 0 ? `${prefixes[i % prefixes.length]} ` : "";
+      const suffix = i % 4 === 0 ? ` ${suffixes[i % suffixes.length]}` : "";
+      result.push(`${prefix}${base}${suffix}${ext}`);
+    }
+    return result;
+  };
+
+  // Performance thresholds based on actual AnotherQuickSwitcherModal usage
+  // Reference: AnotherQuickSwitcherModal.ts:469 debug log timing
+  // Measured: small(0.6ms), medium(2.2-4.5ms), large(19-32ms)
+  const PERFORMANCE_THRESHOLDS = {
+    microFuzzy: {
+      small: 3, // 100 vault: measured 0.56ms → 3ms threshold
+      medium: 5, // 1000 vault: measured 2.22ms → 5ms threshold
+      large: 25, // 10000 vault: measured 19.04ms → 25ms threshold
+    },
+    smartMicroFuzzy: {
+      small: 3, // 100 vault: measured 0.59ms → 3ms threshold
+      medium: 8, // 1000 vault: measured 4.53ms → 8ms threshold
+      large: 40, // 10000 vault: measured 32.04ms → 40ms threshold
+    },
+  };
+
+  const measurePerformance = (fn: () => void, iterations = 1): number => {
+    const start = performance.now();
+    for (let i = 0; i < iterations; i++) {
+      fn();
+    }
+    const end = performance.now();
+    return end - start;
+  };
+
+  describe.each([
+    { name: "small", size: 100, iterations: 10 },
+    { name: "medium", size: 1000, iterations: 10 },
+    { name: "large", size: 10000, iterations: 10 },
+  ])("$name dataset ($size items)", ({ name, size, iterations }) => {
+    const testData = generateTestData(size);
+
+    test(`microFuzzy performance should be under ${PERFORMANCE_THRESHOLDS.microFuzzy[name as keyof typeof PERFORMANCE_THRESHOLDS.microFuzzy]}ms`, () => {
+      // Simulate real usage: single query against all data (like typing in search)
+      const query = "test"; // Representative query
+      const executionTime = measurePerformance(() => {
+        for (const data of testData) {
+          microFuzzy(data, query);
+        }
+      }, iterations);
+
+      const threshold =
+        PERFORMANCE_THRESHOLDS.microFuzzy[
+          name as keyof typeof PERFORMANCE_THRESHOLDS.microFuzzy
+        ];
+      expect(executionTime).toBeLessThan(threshold);
+    });
+
+    test(`smartMicroFuzzy performance should be under ${PERFORMANCE_THRESHOLDS.smartMicroFuzzy[name as keyof typeof PERFORMANCE_THRESHOLDS.smartMicroFuzzy]}ms`, () => {
+      // Simulate real usage: single query against all data (like typing in search)
+      const query = "test"; // Representative query
+      const executionTime = measurePerformance(() => {
+        for (const data of testData) {
+          smartMicroFuzzy(data, query, false);
+        }
+      }, iterations);
+
+      const threshold =
+        PERFORMANCE_THRESHOLDS.smartMicroFuzzy[
+          name as keyof typeof PERFORMANCE_THRESHOLDS.smartMicroFuzzy
+        ];
+      expect(executionTime).toBeLessThan(threshold);
+    });
+  });
+
+  test("Score consistency - results should be deterministic", () => {
+    const testCases = [
+      { text: "abcde", query: "ace" },
+      { text: "📝memo", query: "mem" },
+      { text: "Insert mode", query: "insertmode" },
+      { text: "プロジェクト", query: "プロ" },
+      { text: "Café résumé", query: "cafe" },
+    ];
+
+    for (const { text, query } of testCases) {
+      const results1 = [1, 2, 3].map(() => microFuzzy(text, query));
+      const results2 = [1, 2, 3].map(() => smartMicroFuzzy(text, query, false));
+
+      expect(results1[0]).toEqual(results1[1]);
+      expect(results1[1]).toEqual(results1[2]);
+      expect(results2[0]).toEqual(results2[1]);
+      expect(results2[1]).toEqual(results2[2]);
+    }
+  });
+});
+
 describe.each<{ value: string; max: number; expected: string }>`
   value           | max  | expected
   ${"1234567890"} | ${1} | ${"1 ... 0"}

@@ -170,22 +170,22 @@ export type FuzzyResult =
 
 /**
  * Performs fuzzy matching on strings with emoji normalization.
- * 
+ *
  * **Performance-optimized implementation**: This function prioritizes speed over code
  * readability, using low-level constructs like indexed loops, `indexOf` instead of
  * `includes`, and mutable state to minimize allocations and function calls.
- * 
+ *
  * **Important**: This function operates on emoji-removed text for performance.
  * Position ranges in the result refer to positions in the emoji-removed string,
  * not the original string with emojis.
- * 
+ *
  * For example:
  * - `microFuzzy("📝memo", "memo")` returns ranges based on "memo" (emoji removed)
  * - `microFuzzy("📝memo", "📝")` treats "📝memo" as "memo" and won't match "📝"
- * 
+ *
  * Use `smartMicroFuzzy` if you need accurate positions in the original string
  * with proper emoji handling.
- * 
+ *
  * @param value - The string to search in
  * @param query - The search query
  * @returns FuzzyResult with ranges based on emoji-removed coordinates
@@ -254,25 +254,25 @@ export function microFuzzy(value: string, query: string): FuzzyResult {
 
 /**
  * Performs advanced fuzzy matching with accurate position mapping.
- * 
+ *
  * **Performance-optimized implementation**: Like `microFuzzy`, this function uses
  * low-level optimizations including mutable state, indexed loops, and side effects
  * within callbacks to achieve maximum performance for large-scale search operations.
- * 
+ *
  * Unlike `microFuzzy`, this function returns position ranges that correspond
  * to the original string with emojis and spaces intact. It handles:
  * - Emoji positioning with proper UTF-16 surrogate pair consideration
  * - Space normalization with position mapping back to original coordinates
  * - Mixed emoji+text queries with appropriate scoring
- * 
+ *
  * For example:
  * - `smartMicroFuzzy("📝memo", "memo", false)` returns ranges [2, 5] (after emoji)
  * - `smartMicroFuzzy("📝memo", "📝", false)` returns ranges [0, 1] (emoji position)
  * - `smartMicroFuzzy("Insert mode", "insertmode", false)` handles space removal
- * 
+ *
  * Use this function when you need accurate positions for UI highlighting.
  * Use `microFuzzy` for performance-critical search operations.
- * 
+ *
  * @param text - The string to search in
  * @param query - The search query
  * @param isNormalizeAccentsDiacritics - Whether to normalize accents/diacritics
