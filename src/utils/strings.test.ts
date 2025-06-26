@@ -278,17 +278,17 @@ describe.each<{ text: string; expected: boolean }>`
 
 describe.each<{ value: string; query: string; expected: FuzzyResult }>`
   value                 | query       | expected
-  ${"abcde"}            | ${"ab"}     | ${{ type: "starts-with", score: 0.8 }}
-  ${"abcde"}            | ${"bc"}     | ${{ type: "includes", score: 0.8 }}
-  ${"abcde"}            | ${"ace"}    | ${{ type: "fuzzy", score: 1.2 }}
-  ${"abcde"}            | ${"abcde"}  | ${{ type: "starts-with", score: 6.4 }}
+  ${"abcde"}            | ${"ab"}     | ${{ type: "starts-with", score: 0.8, ranges: [{ start: 0, end: 1 }] }}
+  ${"abcde"}            | ${"bc"}     | ${{ type: "includes", score: 0.8, ranges: [{ start: 1, end: 2 }] }}
+  ${"abcde"} | ${"ace"} | ${{ type: "fuzzy", score: 1.2, ranges: [{ start: 0, end: 0 }, { start: 2, end: 2 }, { start: 4, end: 4 }] }}
+  ${"abcde"}            | ${"abcde"}  | ${{ type: "starts-with", score: 6.4, ranges: [{ start: 0, end: 4 }] }}
   ${"abcde"}            | ${"abcdf"}  | ${{ type: "none", score: 0 }}
   ${"abcde"}            | ${"abcdef"} | ${{ type: "none", score: 0 }}
-  ${"abcde"}            | ${"bd"}     | ${{ type: "fuzzy", score: 0.8 }}
+  ${"abcde"} | ${"bd"} | ${{ type: "fuzzy", score: 0.8, ranges: [{ start: 1, end: 1 }, { start: 3, end: 3 }] }}
   ${"abcde"}            | ${"ba"}     | ${{ type: "none", score: 0 }}
-  ${"fuzzy name match"} | ${"match"}  | ${{ type: "includes", score: 2 }}
-  ${"📝memo"}           | ${"mem"}    | ${{ type: "starts-with", score: 1.3333333333333333 }}
-  ${"📝memo"}           | ${"📝"}     | ${{ type: "starts-with", score: 0.6666666666666666 }}
+  ${"fuzzy name match"} | ${"match"}  | ${{ type: "includes", score: 2, ranges: [{ start: 11, end: 15 }] }}
+  ${"📝memo"}           | ${"mem"}    | ${{ type: "starts-with", score: 1.3333333333333333, ranges: [{ start: 0, end: 2 }] }}
+  ${"📝memo"}           | ${"📝"}     | ${{ type: "starts-with", score: 0.6666666666666666, ranges: [{ start: 0, end: 1 }] }}
 `("microFuzzy", ({ value, query, expected }) => {
   test(`microFuzzy(${value}, ${query}) = ${expected}`, () => {
     expect(microFuzzy(value, query)).toStrictEqual(expected);
@@ -297,20 +297,83 @@ describe.each<{ value: string; query: string; expected: FuzzyResult }>`
 
 describe.each<{ value: string; query: string; expected: FuzzyResult }>`
   value                 | query       | expected
-  ${"abcde"}            | ${"ab"}     | ${{ type: "starts-with", score: 0.8 }}
-  ${"abcde"}            | ${"bc"}     | ${{ type: "includes", score: 0.8 }}
-  ${"abcde"}            | ${"ace"}    | ${{ type: "fuzzy", score: 1.2 }}
-  ${"abcde"}            | ${"abcde"}  | ${{ type: "starts-with", score: 6.4 }}
+  ${"abcde"}            | ${"ab"}     | ${{ type: "starts-with", score: 0.8, ranges: [{ start: 0, end: 1 }] }}
+  ${"abcde"}            | ${"bc"}     | ${{ type: "includes", score: 0.8, ranges: [{ start: 1, end: 2 }] }}
+  ${"abcde"} | ${"ace"} | ${{ type: "fuzzy", score: 1.2, ranges: [{ start: 0, end: 0 }, { start: 2, end: 2 }, { start: 4, end: 4 }] }}
+  ${"abcde"}            | ${"abcde"}  | ${{ type: "starts-with", score: 6.4, ranges: [{ start: 0, end: 4 }] }}
   ${"abcde"}            | ${"abcdef"} | ${{ type: "none", score: 0 }}
-  ${"abcde"}            | ${"bd"}     | ${{ type: "fuzzy", score: 0.8 }}
+  ${"abcde"} | ${"bd"} | ${{ type: "fuzzy", score: 0.8, ranges: [{ start: 1, end: 1 }, { start: 3, end: 3 }] }}
   ${"abcde"}            | ${"ba"}     | ${{ type: "none", score: 0 }}
-  ${"fuzzy name match"} | ${"match"}  | ${{ type: "includes", score: 2.2857142857142856 }}
-  ${"📝memo"}           | ${"mem"}    | ${{ type: "starts-with", score: 1.3333333333333333 }}
-  ${"📝memo"}           | ${"📝"}     | ${{ type: "starts-with", score: 0.6666666666666666 }}
+  ${"fuzzy name match"} | ${"match"}  | ${{ type: "includes", score: 2.2857142857142856, ranges: [{ start: 11, end: 15 }] }}
+  ${"📝memo"}           | ${"mem"}    | ${{ type: "starts-with", score: 2, ranges: [{ start: 2, end: 4 }] }}
+  ${"📝memo"}           | ${"📝"}     | ${{ type: "starts-with", score: 0.25, ranges: [{ start: 0, end: 1 }] }}
 `("smartMicroFuzzy", ({ value, query, expected }) => {
   test(`smartMicroFuzzy(${value}, ${query}) = ${expected}`, () => {
     expect(smartMicroFuzzy(value, query, false)).toStrictEqual(expected);
   });
+});
+
+// Test case for the Insert mode bug
+test("smartMicroFuzzy handles space correctly", () => {
+  const result = smartMicroFuzzy("Insert mode", "insertmode", false);
+
+  // The query "insertmode" should match "Insert mode" as a starts-with match
+  // since "insertmode" exactly matches "Insert mode" with space removed
+  expect(result.type).toBe("starts-with");
+  expect(result.ranges).toEqual([
+    { start: 0, end: 5 }, // "Insert"
+    { start: 7, end: 10 }, // "mode"
+  ]);
+});
+
+// Test case for multiple word queries
+test("Multiple word queries should work correctly", () => {
+  const insertResult = smartMicroFuzzy("Insert mode", "insert", false);
+  const modeResult = smartMicroFuzzy("Insert mode", "mode", false);
+
+  expect(insertResult.type).toBe("starts-with");
+  expect(insertResult.ranges).toEqual([{ start: 0, end: 5 }]); // "Insert"
+
+  expect(modeResult.type).toBe("includes");
+  expect(modeResult.ranges).toEqual([{ start: 7, end: 10 }]); // "mode"
+});
+
+// Test case for emoji handling
+test("smartMicroFuzzy handles emoji correctly", () => {
+  const text = "📘Obsidian Publishの運営戦略";
+
+  const obsidianResult = smartMicroFuzzy(text, "obsidian", false);
+  const publishResult = smartMicroFuzzy(text, "publish", false);
+
+  expect(obsidianResult.type).toBe("starts-with");
+  // The emoji 📘 takes positions 0-1 (surrogate pair), so "Obsidian" is at positions 2-9
+  expect(obsidianResult.ranges).toEqual([{ start: 2, end: 9 }]); // "Obsidian" after emoji
+
+  expect(publishResult.type).toBe("includes");
+  expect(publishResult.ranges).toEqual([{ start: 11, end: 17 }]); // "Publish" after space
+});
+
+test("smartMicroFuzzy handles emoji + text query correctly", () => {
+  const result = smartMicroFuzzy(
+    "📜2025-06-20 Claude CodeでDeepWikiのリモートMCPサーバーを使ってみる",
+    "📜 claude",
+    false,
+  );
+  expect(result.type).toBe("includes");
+  expect(result.ranges).toEqual([
+    { start: 13, end: 18 }, // "Claude" part only - emoji part handled separately
+  ]);
+});
+
+test("smartMicroFuzzy prioritizes emoji+text prefix correctly", () => {
+  const result = smartMicroFuzzy(
+    "📜2025-06-20 Claude CodeでDeepWikiのリモートMCPサーバーを使ってみる",
+    "📜2",
+    false,
+  );
+  expect(result.type).toBe("starts-with");
+  expect(result.ranges).toEqual([{ start: 0, end: 2 }]); // "📜2" at the beginning
+  expect(result.score).toBeGreaterThan(0.05); // Confirmed working value
 });
 
 describe.each<{ value: string; max: number; expected: string }>`

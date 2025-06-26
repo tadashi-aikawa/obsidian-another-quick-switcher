@@ -37,6 +37,7 @@ export interface MatchQueryResult {
   query: string;
   meta?: string[];
   score?: number;
+  ranges?: { start: number; end: number }[];
 }
 
 function matchQuery(
@@ -103,10 +104,20 @@ function matchQuery(
   switch (fuzzyResult.type) {
     // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
     case "starts-with":
-      results.push({ type: "prefix-name", meta: [item.file.name], query });
+      results.push({
+        type: "prefix-name",
+        meta: [item.file.name],
+        query,
+        ranges: fuzzyResult.ranges,
+      });
     // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
     case "includes":
-      results.push({ type: "name", meta: [item.file.name], query });
+      results.push({
+        type: "name",
+        meta: [item.file.name],
+        query,
+        ranges: fuzzyResult.ranges,
+      });
     case "fuzzy":
       if (options.fuzzyTarget) {
         if (fuzzyResult.score > options.minFuzzyScore) {
@@ -115,30 +126,42 @@ function matchQuery(
             meta: [item.file.name],
             query,
             score: fuzzyResult.score,
+            ranges: fuzzyResult.ranges,
           });
         }
       }
   }
 
-  const prefixNameMatchedAliases: string[] = [];
-  const nameMatchedAliases: string[] = [];
-  const fuzzyNameMatchedAliases: { value: string; score: number }[] = [];
+  const prefixNameMatchedAliases: {
+    value: string;
+    ranges?: { start: number; end: number }[];
+  }[] = [];
+  const nameMatchedAliases: {
+    value: string;
+    ranges?: { start: number; end: number }[];
+  }[] = [];
+  const fuzzyNameMatchedAliases: {
+    value: string;
+    score: number;
+    ranges?: { start: number; end: number }[];
+  }[] = [];
   for (const al of item.aliases) {
     const r = smartMicroFuzzy(al, file, isNormalizeAccentsDiacritics);
     // noinspection FallThroughInSwitchStatementJS
     switch (r.type) {
       // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
       case "starts-with":
-        prefixNameMatchedAliases.push(al);
+        prefixNameMatchedAliases.push({ value: al, ranges: r.ranges });
       // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
       case "includes":
-        nameMatchedAliases.push(al);
+        nameMatchedAliases.push({ value: al, ranges: r.ranges });
       case "fuzzy":
         if (options.fuzzyTarget) {
           if (r.score > options.minFuzzyScore) {
             fuzzyNameMatchedAliases.push({
               value: al,
               score: r.score,
+              ranges: r.ranges,
             });
           }
         }
@@ -146,29 +169,34 @@ function matchQuery(
   }
 
   if (prefixNameMatchedAliases.length > 0) {
+    const bestMatch = minBy(prefixNameMatchedAliases, (x) => x.value.length);
     results.push({
       type: "prefix-name",
-      meta: prefixNameMatchedAliases,
-      alias: minBy(prefixNameMatchedAliases, (x) => x.length),
+      meta: prefixNameMatchedAliases.map((x) => x.value),
+      alias: bestMatch.value,
       query,
+      ranges: bestMatch.ranges,
     });
   }
   if (nameMatchedAliases.length > 0) {
+    const bestMatch = minBy(nameMatchedAliases, (x) => x.value.length);
     results.push({
       type: "name",
-      meta: nameMatchedAliases,
-      alias: minBy(nameMatchedAliases, (x) => x.length),
+      meta: nameMatchedAliases.map((x) => x.value),
+      alias: bestMatch.value,
       query,
+      ranges: bestMatch.ranges,
     });
   }
   if (options.fuzzyTarget && fuzzyNameMatchedAliases.length > 0) {
-    const m = minBy(fuzzyNameMatchedAliases, (x) => x.score);
+    const bestMatch = minBy(fuzzyNameMatchedAliases, (x) => x.score);
     results.push({
       type: "fuzzy-name",
       meta: fuzzyNameMatchedAliases.map((x) => x.value),
-      alias: m.value,
-      score: m.score,
+      alias: bestMatch.value,
+      score: bestMatch.score,
       query,
+      ranges: bestMatch.ranges,
     });
   }
 

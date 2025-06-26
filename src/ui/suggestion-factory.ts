@@ -24,6 +24,95 @@ interface Options {
   displayDescriptionBelowTitle: boolean;
 }
 
+/**
+ * Merges overlapping or adjacent ranges into consolidated ranges.
+ */
+function mergeRanges(
+  ranges: { start: number; end: number }[],
+): { start: number; end: number }[] {
+  if (ranges.length === 0) return [];
+
+  // Sort ranges by start position
+  const sorted = [...ranges].sort((a, b) => a.start - b.start);
+  const merged: { start: number; end: number }[] = [];
+
+  let current = sorted[0];
+
+  for (let i = 1; i < sorted.length; i++) {
+    const next = sorted[i];
+
+    // Check if ranges overlap or are adjacent
+    if (next.start <= current.end + 1) {
+      // Merge ranges
+      current = {
+        start: current.start,
+        end: Math.max(current.end, next.end),
+      };
+    } else {
+      // No overlap, push current and move to next
+      merged.push(current);
+      current = next;
+    }
+  }
+
+  // Push the last range
+  merged.push(current);
+  return merged;
+}
+
+/**
+ * Creates text content with highlighted portions based on given ranges.
+ * Returns DocumentFragment containing text nodes and highlighted spans.
+ */
+function createHighlightedText(
+  text: string,
+  ranges?: { start: number; end: number }[],
+): DocumentFragment {
+  const fragment = document.createDocumentFragment();
+
+  if (!ranges || ranges.length === 0) {
+    fragment.appendChild(document.createTextNode(text));
+    return fragment;
+  }
+
+  // Merge overlapping ranges to avoid duplicate highlighting
+  const mergedRanges = mergeRanges(ranges);
+
+  let lastEnd = -1;
+
+  for (const range of mergedRanges) {
+    // Add text before this range
+    if (range.start > lastEnd + 1) {
+      const beforeText = text.slice(lastEnd + 1, range.start);
+      if (beforeText) {
+        fragment.appendChild(document.createTextNode(beforeText));
+      }
+    }
+
+    // Add highlighted text
+    const highlightedText = text.slice(range.start, range.end + 1);
+    if (highlightedText) {
+      const highlightSpan = createSpan({
+        cls: "another-quick-switcher__hit_word",
+        text: highlightedText,
+      });
+      fragment.appendChild(highlightSpan);
+    }
+
+    lastEnd = range.end;
+  }
+
+  // Add remaining text after last range
+  if (lastEnd + 1 < text.length) {
+    const remainingText = text.slice(lastEnd + 1);
+    if (remainingText) {
+      fragment.appendChild(document.createTextNode(remainingText));
+    }
+  }
+
+  return fragment;
+}
+
 function createItemDiv(
   item: SuggestionItem,
   aliasesDisplayedAsTitle: string[],
@@ -49,15 +138,41 @@ function createItemDiv(
     aliasesDisplayedAsTitle.length > 0 &&
     (options.displayAliaseAsTitle ||
       options.displayAliasAsTitleOnKeywordMatched);
+
+  // Get title text and apply highlighting if match results exist
+  const titleText = shouldShowAliasAsTitle
+    ? aliasesDisplayedAsTitle.join(" / ")
+    : item.file.basename;
+
+  // Find relevant match results for title highlighting
+  const titleMatchResults = item.matchResults.filter(
+    (result) =>
+      result.type === "name" ||
+      result.type === "prefix-name" ||
+      result.type === "fuzzy-name",
+  );
+
   const titleDiv = createDiv({
     cls: [
       "another-quick-switcher__item__title",
       "another-quick-switcher__custom__item__title",
     ],
-    text: shouldShowAliasAsTitle
-      ? aliasesDisplayedAsTitle.join(" / ")
-      : item.file.basename,
   });
+
+  // Apply highlighting using DocumentFragment
+  // Collect all ranges from all match results
+  const allRanges: { start: number; end: number }[] = [];
+  for (const result of titleMatchResults) {
+    if (result.ranges) {
+      allRanges.push(...result.ranges);
+    }
+  }
+
+  const highlightedContent = createHighlightedText(
+    titleText,
+    allRanges.length > 0 ? allRanges : undefined,
+  );
+  titleDiv.appendChild(highlightedContent);
   entryDiv.appendChild(titleDiv);
 
   const isExcalidrawFile = isExcalidraw(item.file);
