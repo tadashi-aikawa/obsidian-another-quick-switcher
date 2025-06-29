@@ -141,6 +141,7 @@ export interface Hotkeys {
     "clear input": Hotkey[];
     "clear path": Hotkey[];
     "set ./ to path": Hotkey[];
+    "toggle input": Hotkey[];
     open: Hotkey[];
     "open in new tab": Hotkey[];
     "open in new pane (horizontal)": Hotkey[];
@@ -306,6 +307,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "clear input": [{ modifiers: ["Mod"], key: "d" }],
     "clear path": [{ modifiers: ["Alt"], key: "d" }],
     "set ./ to path": [{ modifiers: ["Alt"], key: "c" }],
+    "toggle input": [],
     open: [{ modifiers: [], key: "Enter" }],
     "open in new tab": [{ modifiers: ["Mod"], key: "Enter" }],
     "open in new pane (horizontal)": [{ modifiers: ["Mod"], key: "-" }],

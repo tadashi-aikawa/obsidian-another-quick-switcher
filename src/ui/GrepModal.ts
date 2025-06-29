@@ -551,6 +551,14 @@ export class GrepModal
     await this.chooseCurrentSuggestion("same-tab");
   }
 
+  private toggleInput(): void {
+    if (document.activeElement === this.clonedInputEl) {
+      this.basePathInputEl.focus();
+    } else {
+      this.clonedInputEl.focus();
+    }
+  }
+
   private registerKeys(
     key: keyof Hotkeys["grep"],
     handler: () => void | Promise<void>,
@@ -654,6 +662,10 @@ export class GrepModal
     this.registerKeys("set ./ to path", () => {
       this.basePathInputEl.value = "./";
       this.basePathInputEl.dispatchEvent(new InputEvent("change"));
+    });
+
+    this.registerKeys("toggle input", () => {
+      this.toggleInput();
     });
 
     this.registerKeys("open", async () => {

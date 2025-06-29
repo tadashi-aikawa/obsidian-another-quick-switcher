@@ -154,11 +154,20 @@ This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) and set t
 
 It sorts results by modified time descending.
 
-#### Default hotkeys
+#### Additional hotkeys
 
-- `TAB`: Search
-    - If you want to search in real-time, please set the "Grep search delay milli-seconds" option to 1 or more
-- `Ctrl+,`: preview
+
+| Command | Description | Default Hotkey |
+|---------|-------------|----------------|
+| Search | Execute search | `TAB` |
+| Preview | Preview selected file | `Ctrl+,` |
+| Toggle input focus | Switch focus between search query and path input | _(customizable)_ |
+| Clear input | Clear the search query input | _(customizable)_ |
+| Clear path | Clear the path input | _(customizable)_ |
+| Set ./ to path | Set current directory to path input | _(customizable)_ |
+
+
+**Note**: If you want to search in real-time, please set the "Grep search delay milli-seconds" option to 1 or more.
 
 #### Launch Grep from Quick Switcher
 
