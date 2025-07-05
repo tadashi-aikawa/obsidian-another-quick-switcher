@@ -119,3 +119,6 @@ Run tests before any significant changes to ensure compatibility.
 
 - Always ask for clarification when there are ambiguous instructions or potential risks to the project
 - lintやformatのチェックをするときは `bun pre:push` を実行してください。まとめて確認できるので便利です。そして、bunのformatによって意図した改行が失われてしまう場合は、bunのformatを無視するコメントを入れてください。
+- **MoveModalのfuzzy検索とハイライト実装パターン**: 他のModalと一貫性を保つため、`smartMicroFuzzy`、`createHighlightedText`、`another-quick-switcher__hit_word`CSSクラスを使用。`SuggestionItem`に`score`、`ranges`、マッチタイプ固有のranges（例: `directoryRanges`）を追加。
+- **「Recently used」設定時の並び順**: マッチタイプ優先度よりも設定された並び順（Recently used、Alphabetical等）を優先する。特に「Recently used」設定では、`isRecentlyUsed`プロパティによる明示的な区別が重要。
+- **設定値の範囲外アイテムへの影響**: 「Max recently used folders」などの設定値により、一部のアイテムが意図した挙動にならない場合がある。設定値の確認が必要。
