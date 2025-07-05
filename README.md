@@ -235,7 +235,13 @@ https://user-images.githubusercontent.com/9500018/216806330-daf57b52-d8a4-42e3-9
 
 ### 11. Move file to another folder
 
-The "Move file to another folder" command allows you to quickly move the current file to a different folder with enhanced sorting capabilities.
+The "Move file to another folder" command allows you to quickly move the current file to a different folder with enhanced sorting capabilities and smart search features.
+
+#### Search Features
+
+- **Fuzzy Search**: Find folders even with partial or out-of-order characters (e.g., "proj" matches "Projects")
+- **Highlighted Matches**: Search terms are highlighted in both folder names and directory paths
+- **Multiple Match Types**: Supports prefix matching, substring matching, and fuzzy matching
 
 #### Folder Sort Options
 

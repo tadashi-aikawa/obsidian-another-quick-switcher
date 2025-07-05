@@ -4,15 +4,111 @@ import { AppHelper } from "../app-helper";
 import { createInstructions } from "../keys";
 import type { Hotkeys, MoveFolderSortPriority, Settings } from "../settings";
 import { excludeItems, sorter } from "../utils/collection-helper";
-import { smartIncludes, smartStartsWith } from "../utils/strings";
+import {
+  smartIncludes,
+  smartMicroFuzzy,
+  smartStartsWith,
+} from "../utils/strings";
 import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 
+/**
+ * Merges overlapping or adjacent ranges into consolidated ranges.
+ */
+function mergeRanges(
+  ranges: { start: number; end: number }[],
+): { start: number; end: number }[] {
+  if (ranges.length === 0) return [];
+
+  // Sort ranges by start position
+  const sorted = [...ranges].sort((a, b) => a.start - b.start);
+  const merged: { start: number; end: number }[] = [];
+
+  let current = sorted[0];
+
+  for (let i = 1; i < sorted.length; i++) {
+    const next = sorted[i];
+
+    // Check if ranges overlap or are adjacent
+    if (next.start <= current.end + 1) {
+      // Merge ranges
+      current = {
+        start: current.start,
+        end: Math.max(current.end, next.end),
+      };
+    } else {
+      // No overlap, push current and move to next
+      merged.push(current);
+      current = next;
+    }
+  }
+
+  // Push the last range
+  merged.push(current);
+  return merged;
+}
+
+/**
+ * Creates text content with highlighted portions based on given ranges.
+ * Returns DocumentFragment containing text nodes and highlighted spans.
+ */
+function createHighlightedText(
+  text: string,
+  ranges?: { start: number; end: number }[],
+): DocumentFragment {
+  const fragment = document.createDocumentFragment();
+
+  if (!ranges || ranges.length === 0) {
+    fragment.appendChild(document.createTextNode(text));
+    return fragment;
+  }
+
+  // Merge overlapping ranges to avoid duplicate highlighting
+  const mergedRanges = mergeRanges(ranges);
+
+  let lastEnd = -1;
+
+  for (const range of mergedRanges) {
+    // Add text before this range
+    if (range.start > lastEnd + 1) {
+      const beforeText = text.slice(lastEnd + 1, range.start);
+      if (beforeText) {
+        fragment.appendChild(document.createTextNode(beforeText));
+      }
+    }
+
+    // Add highlighted text
+    const highlightedText = text.slice(range.start, range.end + 1);
+    if (highlightedText) {
+      const highlightSpan = createSpan({
+        cls: "another-quick-switcher__hit_word",
+        text: highlightedText,
+      });
+      fragment.appendChild(highlightSpan);
+    }
+
+    lastEnd = range.end;
+  }
+
+  // Add remaining text after last range
+  if (lastEnd + 1 < text.length) {
+    const remainingText = text.slice(lastEnd + 1);
+    if (remainingText) {
+      fragment.appendChild(document.createTextNode(remainingText));
+    }
+  }
+
+  return fragment;
+}
+
 interface SuggestionItem {
   folder: TFolder;
-  matchType?: "name" | "prefix-name" | "directory";
+  matchType?: "name" | "prefix-name" | "directory" | "fuzzy-name";
   isRecentlyUsed?: boolean;
   recentlyUsedIndex?: number;
+  score?: number;
+  ranges?: { start: number; end: number }[];
+  directoryRanges?: { start: number; end: number }[];
 }
 
 function matchQuery(
@@ -50,30 +146,39 @@ function stampMatchType(
   queries: string[],
   isNormalizeAccentsDiacritics: boolean,
 ): SuggestionItem {
-  if (
-    matchQueryAll(
-      item,
-      queries,
-      (item, query) =>
-        smartStartsWith(item.folder.name, query, isNormalizeAccentsDiacritics),
-      isNormalizeAccentsDiacritics,
-    )
-  ) {
-    return { ...item, matchType: "prefix-name" };
+  // Check fuzzy match against folder name
+  const combinedQuery = queries.join(" ");
+  const fuzzyResult = smartMicroFuzzy(
+    item.folder.name,
+    combinedQuery,
+    isNormalizeAccentsDiacritics,
+  );
+
+  switch (fuzzyResult.type) {
+    case "starts-with":
+      return {
+        ...item,
+        matchType: "prefix-name",
+        score: fuzzyResult.score,
+        ranges: fuzzyResult.ranges,
+      };
+    case "includes":
+      return {
+        ...item,
+        matchType: "name",
+        score: fuzzyResult.score,
+        ranges: fuzzyResult.ranges,
+      };
+    case "fuzzy":
+      return {
+        ...item,
+        matchType: "fuzzy-name",
+        score: fuzzyResult.score,
+        ranges: fuzzyResult.ranges,
+      };
   }
 
-  if (
-    matchQueryAll(
-      item,
-      queries,
-      (item, query) =>
-        smartIncludes(item.folder.name, query, isNormalizeAccentsDiacritics),
-      isNormalizeAccentsDiacritics,
-    )
-  ) {
-    return { ...item, matchType: "name" };
-  }
-
+  // Check directory path match
   if (
     matchQueryAll(
       item,
@@ -83,7 +188,19 @@ function stampMatchType(
       isNormalizeAccentsDiacritics,
     )
   ) {
-    return { ...item, matchType: "directory" };
+    // Calculate ranges for directory highlighting
+    const parentName = item.folder.parent?.name || "";
+    const directoryFuzzyResult = smartMicroFuzzy(
+      parentName,
+      combinedQuery,
+      isNormalizeAccentsDiacritics,
+    );
+
+    return {
+      ...item,
+      matchType: "directory",
+      directoryRanges: directoryFuzzyResult.ranges,
+    };
   }
 
   return item;
@@ -249,15 +366,35 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
 
     const folderDiv = createDiv({
       cls: "another-quick-switcher__item__title",
-      text: item.folder.name,
     });
+
+    // Apply highlighting using DocumentFragment
+    const highlightedContent = createHighlightedText(
+      item.folder.name,
+      item.ranges,
+    );
+    folderDiv.appendChild(highlightedContent);
+
     entryDiv.appendChild(folderDiv);
 
     const directoryDiv = createDiv({
       cls: "another-quick-switcher__item__directory",
     });
     directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
-    directoryDiv.appendText(` ${item.folder.parent?.name}`);
+
+    // Apply highlighting to directory name if it's a directory match
+    const parentName = item.folder.parent?.name || "";
+    if (item.matchType === "directory" && item.directoryRanges) {
+      directoryDiv.appendText(" ");
+      const directoryHighlightedContent = createHighlightedText(
+        parentName,
+        item.directoryRanges,
+      );
+      directoryDiv.appendChild(directoryHighlightedContent);
+    } else {
+      directoryDiv.appendText(` ${parentName}`);
+    }
+
     entryDiv.appendChild(directoryDiv);
 
     itemDiv.appendChild(entryDiv);
