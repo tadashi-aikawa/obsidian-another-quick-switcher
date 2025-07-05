@@ -233,6 +233,38 @@ It shows a floating view that doesn't distract the contents. Additionally, it ma
 
 https://user-images.githubusercontent.com/9500018/216806330-daf57b52-d8a4-42e3-9803-ba7d76a93319.mp4
 
+### 11. Move file to another folder
+
+The "Move file to another folder" command allows you to quickly move the current file to a different folder with enhanced sorting capabilities.
+
+#### Folder Sort Options
+
+
+| Option               | Description                                              |
+| -------------------- | -------------------------------------------------------- |
+| Recently used        | Folders you've recently moved files to appear at the top |
+| Alphabetical         | Sort folders alphabetically (A-Z)                        |
+| Alphabetical reverse | Sort folders in reverse alphabetical order (Z-A)         |
+
+
+#### Settings
+
+
+| Setting                         | Description                                                    | Default          |
+| ------------------------------- | -------------------------------------------------------------- | ---------------- |
+| Folder sort priority            | Choose how folders are sorted in the move dialog               | Recently used    |
+| Recently used folders file path | Customize where the folder usage history is stored<sup>*</sup> | _(auto)_         |
+| Max recently used folders       | Maximum number of recently used folders to remember            | 10 (range: 5-50) |
+| Exclude prefix path patterns    | Exclude certain folder paths from appearing in the move dialog | _(none)_         |
+
+<sup>*</sup> When left empty, defaults to `.obsidian/plugins/obsidian-another-quick-switcher/recently-used-folders.json`
+
+#### Features
+
+- **Recently used folder tracking**: The plugin remembers which folders you've used recently and prioritizes them
+- **Persistent history**: Recently used folder history is stored in your vault and syncs across devices
+- **Configurable storage**: Customize where the folder usage history is stored within your vault
+
 ## For users who use earlier than v13.0.0
 
 In v13, we removed `Link search` from `Preset search commands`. Please see #275 for details about this decision. If you need the previous `Link search` functionality, you can add it to `Search commands` with the configuration shown in the image below.

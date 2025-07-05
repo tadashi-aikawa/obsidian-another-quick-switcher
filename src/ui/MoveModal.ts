@@ -2,7 +2,7 @@ import moment from "moment";
 import { type App, Notice, SuggestModal, type TFolder } from "obsidian";
 import { AppHelper } from "../app-helper";
 import { createInstructions } from "../keys";
-import type { Hotkeys, Settings } from "../settings";
+import type { Hotkeys, MoveFolderSortPriority, Settings } from "../settings";
 import { excludeItems, sorter } from "../utils/collection-helper";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import type { UnsafeModalInterface } from "./UnsafeModalInterface";
@@ -11,6 +11,8 @@ import { FOLDER } from "./icons";
 interface SuggestionItem {
   folder: TFolder;
   matchType?: "name" | "prefix-name" | "directory";
+  isRecentlyUsed?: boolean;
+  recentlyUsedIndex?: number;
 }
 
 function matchQuery(
@@ -87,11 +89,48 @@ function stampMatchType(
   return item;
 }
 
+function stampRecentlyUsed(
+  item: SuggestionItem,
+  recentFolders: string[],
+): SuggestionItem {
+  const index = recentFolders.indexOf(item.folder.path);
+  if (index !== -1) {
+    return {
+      ...item,
+      isRecentlyUsed: true,
+      recentlyUsedIndex: index,
+    };
+  }
+  return item;
+}
+
+function sortFolders(
+  items: SuggestionItem[],
+  priority: MoveFolderSortPriority,
+): SuggestionItem[] {
+  return items.sort((a, b) => {
+    switch (priority) {
+      case "Recently used": {
+        const aIndex = a.recentlyUsedIndex ?? 999999;
+        const bIndex = b.recentlyUsedIndex ?? 999999;
+        return aIndex - bIndex;
+      }
+      case "Alphabetical":
+        return a.folder.name.localeCompare(b.folder.name);
+      case "Alphabetical reverse":
+        return b.folder.name.localeCompare(a.folder.name);
+      default:
+        return 0;
+    }
+  });
+}
+
 export class MoveModal extends SuggestModal<SuggestionItem> {
   originItems: SuggestionItem[];
   filteredItems: SuggestionItem[];
   appHelper: AppHelper;
   settings: Settings;
+  recentFolders: string[] = [];
 
   chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
   scope: UnsafeModalInterface<SuggestionItem>["scope"];
@@ -119,23 +158,81 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     );
   }
 
+  async onOpen(): Promise<void> {
+    await this.loadRecentlyUsedFolders();
+    super.onOpen();
+  }
+
+  private getRecentlyUsedFilePath(): string {
+    return (
+      this.settings.moveFileRecentlyUsedFilePath ||
+      ".obsidian/plugins/obsidian-another-quick-switcher/recently-used-folders.json"
+    );
+  }
+
+  private async loadRecentlyUsedFolders(): Promise<void> {
+    const filePath = this.getRecentlyUsedFilePath();
+    try {
+      if (await this.app.vault.adapter.exists(filePath)) {
+        const content = await this.app.vault.adapter.read(filePath);
+        this.recentFolders = JSON.parse(content);
+      }
+    } catch (error) {
+      console.warn("Failed to load recently used folders:", error);
+      this.recentFolders = [];
+    }
+  }
+
+  private async saveRecentlyUsedFolders(): Promise<void> {
+    const filePath = this.getRecentlyUsedFilePath();
+    try {
+      const dir = filePath.substring(0, filePath.lastIndexOf("/"));
+      if (!(await this.app.vault.adapter.exists(dir))) {
+        await this.app.vault.adapter.mkdir(dir);
+      }
+
+      await this.app.vault.adapter.write(
+        filePath,
+        JSON.stringify(this.recentFolders, null, 2),
+      );
+    } catch (error) {
+      console.warn("Failed to save recently used folders:", error);
+    }
+  }
+
+  private async updateRecentlyUsedFolder(folderPath: string): Promise<void> {
+    const index = this.recentFolders.indexOf(folderPath);
+    if (index > -1) {
+      this.recentFolders.splice(index, 1);
+    }
+    this.recentFolders.unshift(folderPath);
+
+    if (
+      this.recentFolders.length > this.settings.moveFileMaxRecentlyUsedFolders
+    ) {
+      this.recentFolders.pop();
+    }
+
+    await this.saveRecentlyUsedFolders();
+  }
+
   getSuggestions(query: string): SuggestionItem[] {
     const qs = query.split(" ").filter((x) => x);
 
-    return this.filteredItems
+    const matchedItems = this.filteredItems
       .map((x) =>
         stampMatchType(x, qs, this.settings.normalizeAccentsAndDiacritics),
       )
       .filter((x) => x.matchType)
-      .sort(sorter((x) => (x.matchType === "directory" ? 1 : 0)))
-      .sort(
-        sorter(
-          (x) =>
-            x.matchType === "prefix-name" ? 1000 - x.folder.name.length : 0,
-          "desc",
-        ),
-      )
-      .slice(0, 10);
+      .map((x) => stampRecentlyUsed(x, this.recentFolders));
+
+    // Apply sorting using the configured priority
+    const sortedItems = sortFolders(
+      matchedItems,
+      this.settings.moveFolderSortPriority,
+    );
+
+    return sortedItems.slice(0, 10);
   }
 
   renderSuggestion(item: SuggestionItem, el: HTMLElement) {
@@ -184,6 +281,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     }
 
     await this.app.fileManager.renameFile(activeFile, newPath);
+    await this.updateRecentlyUsedFolder(item.folder.path);
   }
 
   private registerKeys(

@@ -62,6 +62,18 @@ This is an Obsidian plugin called "Another Quick Switcher" that provides advance
 - Obsidian plugin API version 1.7.2+
 - **IMPORTANT**: Always run `biome check src` after making code changes to avoid CI failures
 
+### Architecture Guidelines
+
+- **sorters.ts is NOT a generic sort utility**: This file defines only the sort priorities available in the main Search Commands' "Sort priorities" setting. Do not add generic sorting functions or priorities that are specific to individual modals.
+- **Modal-specific sorting**: Each modal (like MoveModal) should implement its own sorting logic if it needs custom sorting behavior that differs from the main search priorities.
+- **Settings patterns**: Use the `mirror()` utility pattern for dropdown settings, following the same pattern as SearchTarget (e.g., `mirror([...optionsList])` for readonly arrays).
+
+### Implementation Guidelines
+
+- **Single choice over multiple choices**: When designing settings, prefer single-choice dropdowns over multi-choice text areas. This eliminates the need to handle invalid values and simplifies algorithms.
+- **Default value handling**: For file path settings, use empty string as default and implement fallback logic in code rather than hardcoding paths in settings. This allows for automatic path selection while still enabling customization.
+- **Feature scope validation**: Remove non-functional features early rather than keeping them as placeholders. Half-implemented features cause user confusion.
+
 ### Modal Development Guidelines
 
 - Use `safeClose()` for modal transitions to ensure proper state restoration

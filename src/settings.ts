@@ -14,6 +14,14 @@ const searchTargetList = [
 ] as const;
 export type SearchTarget = (typeof searchTargetList)[number];
 
+const moveFolderSortPriorityList = [
+  "Recently used",
+  "Alphabetical",
+  "Alphabetical reverse",
+] as const;
+export type MoveFolderSortPriority =
+  (typeof moveFolderSortPriorityList)[number];
+
 export interface SearchCommand {
   name: string;
   searchBy: {
@@ -201,6 +209,9 @@ export interface Settings {
 
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
+  moveFolderSortPriority: MoveFolderSortPriority;
+  moveFileRecentlyUsedFilePath: string;
+  moveFileMaxRecentlyUsedFolders: number;
   // debug
   showLogAboutPerformanceInConsole: boolean;
   showFuzzyMatchScore: boolean;
@@ -637,6 +648,9 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultGrepFolder: "",
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
+  moveFolderSortPriority: "Recently used",
+  moveFileRecentlyUsedFilePath: "",
+  moveFileMaxRecentlyUsedFolders: 10,
   // debug
   showLogAboutPerformanceInConsole: false,
   showFuzzyMatchScore: false,
@@ -1709,6 +1723,47 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         el.inputEl.className =
           "another-quick-switcher__settings__ignore_path_patterns";
         return el;
+      });
+
+    new Setting(containerEl)
+      .setName("Folder sort priority")
+      .setDesc("How to sort folders in move dialog")
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions(mirror([...moveFolderSortPriorityList]))
+          .setValue(this.plugin.settings.moveFolderSortPriority)
+          .onChange(async (value) => {
+            this.plugin.settings.moveFolderSortPriority =
+              value as MoveFolderSortPriority;
+            await this.plugin.saveSettings();
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName("Recently used folders file path")
+      .setDesc("Path within vault to store recently used folders history")
+      .addText((tc) => {
+        tc.setPlaceholder(
+          ".obsidian/plugins/obsidian-another-quick-switcher/recently-used-folders.json",
+        )
+          .setValue(this.plugin.settings.moveFileRecentlyUsedFilePath)
+          .onChange(async (value) => {
+            this.plugin.settings.moveFileRecentlyUsedFilePath = value;
+            await this.plugin.saveSettings();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Max recently used folders")
+      .setDesc("Maximum number of recently used folders to remember")
+      .addSlider((sc) => {
+        sc.setLimits(5, 50, 5)
+          .setValue(this.plugin.settings.moveFileMaxRecentlyUsedFolders)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.moveFileMaxRecentlyUsedFolders = value;
+            await this.plugin.saveSettings();
+          });
       });
   }
 
