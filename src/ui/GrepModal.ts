@@ -5,7 +5,6 @@ import {
   type WorkspaceLeaf,
   debounce,
 } from "obsidian";
-import { fd } from "src/utils/fd";
 import { AppHelper, type CaptureState, type LeafType } from "../app-helper";
 import {
   createInstruction,
@@ -16,17 +15,23 @@ import {
 } from "../keys";
 import type { Hotkeys, Settings } from "../settings";
 import { sorter } from "../utils/collection-helper";
+import {
+  convertSubmatchesToCharPositions,
+  mergeAndFilterResults,
+  mergeOverlappingSubmatches,
+} from "../utils/grep-utils";
 import { Logger } from "../utils/logger";
 import {
   isExcalidraw,
   normalizePath,
   normalizeRelativePath,
 } from "../utils/path";
-import { rg } from "../utils/ripgrep";
+import { type MatchResult, rg, rgFiles } from "../utils/ripgrep";
 import {
   capitalizeFirstLetter,
   getSinglePatternMatchingLocations,
   hasCapitalLetter,
+  smartWhitespaceSplit,
   trimLineByEllipsis,
 } from "../utils/strings";
 import type { UnsafeModalInterface } from "./UnsafeModalInterface";
@@ -286,32 +291,50 @@ export class GrepModal
       this.appHelper.getCurrentDirPath(),
     );
 
-    const rgResults = await rg(
-      this.settings.ripgrepCommand,
-      ...[
-        ...this.settings.grepExtensions.flatMap((x) => ["-t", x]),
-        hasCapitalLetter(query) ? "" : "-i",
-        "--",
-        query,
-        `${this.vaultRootPath}/${absolutePathFromRoot}`,
-      ].filter((x) => x),
-    );
+    // Parse query for AND search
+    const queries = smartWhitespaceSplit(query.trim());
+    let rgResults: MatchResult[];
 
-    const fdResults = this.settings.includeFilenameInGrepSearch
-      ? await fd(
-          this.settings.fdCommand,
+    if (queries.length > 1) {
+      // AND search: run ripgrep for each query separately and merge results
+      const allResults: MatchResult[][] = [];
+
+      for (const singleQuery of queries) {
+        const results = await rg(
+          this.settings.ripgrepCommand,
           ...[
-            query,
-            "--absolute-path",
-            "--type",
-            "file",
-            "--type",
-            "symlink",
-            "--follow",
-            ...this.settings.grepExtensions.flatMap((x) => ["--extension", x]),
-            hasCapitalLetter(query) ? "--case-sensitive" : "",
+            ...this.settings.grepExtensions.flatMap((x) => ["-t", x]),
+            hasCapitalLetter(singleQuery) ? "" : "-i",
+            "--",
+            singleQuery,
             `${this.vaultRootPath}/${absolutePathFromRoot}`,
           ].filter((x) => x),
+        );
+        allResults.push(results);
+      }
+
+      // Merge results with AND logic
+      rgResults = mergeAndFilterResults(allResults);
+    } else {
+      // Single query: use parsed query
+      const singleQuery = queries[0];
+      const rgArgs = [
+        ...this.settings.grepExtensions.flatMap((x) => ["-t", x]),
+        hasCapitalLetter(singleQuery) ? "" : "-i",
+        "--",
+        singleQuery,
+        `${this.vaultRootPath}/${absolutePathFromRoot}`,
+      ].filter((x) => x);
+
+      rgResults = await rg(this.settings.ripgrepCommand, ...rgArgs);
+    }
+
+    const fileResults = this.settings.includeFilenameInGrepSearch
+      ? await rgFiles(
+          this.settings.ripgrepCommand,
+          queries, // Use ALL queries for AND search
+          `${this.vaultRootPath}/${absolutePathFromRoot}`,
+          this.settings.grepExtensions,
         ).catch((err: string) => {
           if (err.includes("regex parse error")) {
             return [];
@@ -333,8 +356,14 @@ export class GrepModal
           line: x.data.lines.text,
           lineNumber: x.data.line_number,
           offset: x.data.absolute_offset,
-          submatches: x.data.submatches.map((x) => ({
-            ...x,
+          submatches: mergeOverlappingSubmatches(
+            convertSubmatchesToCharPositions(
+              x.data.submatches,
+              x.data.lines.text,
+            ),
+            x.data.lines.text,
+          ).map((submatch) => ({
+            ...submatch,
             type: "text" as const,
           })),
         };
@@ -342,24 +371,36 @@ export class GrepModal
       .filter((x) => x.file != null)
       .sort(sorter((x) => x.file.stat.mtime, "desc"));
 
-    const regexpOption = hasCapitalLetter(query) ? "g" : "gi";
-    const fdItems: SuggestionItem[] = fdResults
-      .map((x) => {
+    // Create file items with AND search highlighting
+    const fileItems: SuggestionItem[] = fileResults
+      .map((filePath) => {
         const file = this.appHelper.getFileByPath(
-          normalizePath(x).replace(`${this.vaultRootPath}/`, ""),
+          normalizePath(filePath).replace(`${this.vaultRootPath}/`, ""),
         );
         if (!file) {
-          throw new Error(
-            `File not found for path: ${x} (basePath: ${this.basePath})`,
-          );
+          return null;
         }
 
-        // Only exact match
-        // const start = file.basename.toLowerCase().indexOf(query.toLowerCase());
-        const matches = getSinglePatternMatchingLocations(
-          file.basename,
-          new RegExp(query, regexpOption),
-        );
+        // Find all matches for all queries in the filename
+        const allMatches: { text: string; start: number; end: number }[] = [];
+
+        for (const query of queries) {
+          if (!query.trim()) continue;
+
+          const regexpOption = hasCapitalLetter(query) ? "g" : "gi";
+          const queryMatches = getSinglePatternMatchingLocations(
+            file.basename,
+            new RegExp(query, regexpOption),
+          );
+
+          allMatches.push(
+            ...queryMatches.map((match) => ({
+              text: match.text,
+              start: match.range.start,
+              end: match.range.end,
+            })),
+          );
+        }
 
         return {
           order: -1,
@@ -367,11 +408,16 @@ export class GrepModal
           line: "",
           lineNumber: 0,
           offset: 0,
-          submatches: matches.map((x) => ({
+          submatches: mergeOverlappingSubmatches(
+            allMatches.map((x) => ({
+              match: { text: x.text },
+              start: x.start,
+              end: x.end,
+            })),
+            file.basename,
+          ).map((submatch) => ({
+            ...submatch,
             type: "title" as const,
-            match: { text: x.text },
-            start: x.range.start,
-            end: x.range.end,
           })),
         };
       })
@@ -380,7 +426,7 @@ export class GrepModal
 
     this.logger.showDebugLog("getSuggestions: ", start);
 
-    return fdItems.concat(rgItems).map((x, order) => ({ ...x, order }));
+    return fileItems.concat(rgItems).map((x, order) => ({ ...x, order }));
   }
 
   async getSuggestions(query: string): Promise<SuggestionItem[]> {
@@ -476,28 +522,44 @@ export class GrepModal
       cls: "another-quick-switcher__grep__item__description",
     });
 
-    let restLine = item.line;
-    for (const x of item.submatches.filter((s) => s.type === "text")) {
-      const i = restLine.indexOf(x.match.text);
-      const before = restLine.slice(0, i);
+    // Sort submatches by start position and ensure no overlaps remain
+    const textSubmatches = mergeOverlappingSubmatches(
+      item.submatches.filter((s) => s.type === "text"),
+      item.line,
+    ).sort((a, b) => a.start - b.start);
+
+    let currentPos = 0;
+    for (const submatch of textSubmatches) {
+      // Add text before the match
+      if (submatch.start > currentPos) {
+        const beforeText = item.line.slice(currentPos, submatch.start);
+        descriptionDiv.createSpan({
+          text: trimLineByEllipsis(
+            beforeText,
+            this.settings.maxDisplayLengthAroundMatchedWord,
+          ),
+        });
+      }
+
+      // Add the highlighted match
+      descriptionDiv.createSpan({
+        text: submatch.match.text,
+        cls: "another-quick-switcher__hit_word",
+      });
+
+      currentPos = submatch.end;
+    }
+
+    // Add remaining text after the last match
+    if (currentPos < item.line.length) {
+      const remainingText = item.line.slice(currentPos);
       descriptionDiv.createSpan({
         text: trimLineByEllipsis(
-          before,
+          remainingText,
           this.settings.maxDisplayLengthAroundMatchedWord,
         ),
       });
-      descriptionDiv.createSpan({
-        text: x.match.text,
-        cls: "another-quick-switcher__hit_word",
-      });
-      restLine = restLine.slice(i + x.match.text.length);
     }
-    descriptionDiv.createSpan({
-      text: trimLineByEllipsis(
-        restLine,
-        this.settings.maxDisplayLengthAroundMatchedWord,
-      ),
-    });
 
     if (item.order! < 9) {
       const hotKeyGuide = createSpan({

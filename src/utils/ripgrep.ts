@@ -60,3 +60,43 @@ export async function rg(
     );
   });
 }
+
+/**
+ * Search for files by filename using ripgrep with AND logic for multiple queries
+ */
+export async function rgFiles(
+  cmd: string,
+  queries: string[],
+  searchPath: string,
+  extensions: string[],
+): Promise<string[]> {
+  return new Promise((resolve, _) => {
+    // Use --files to get all files first
+    const filesArgs = [
+      "--files",
+      ...extensions.flatMap((x) => ["-t", x]),
+      searchPath,
+    ].filter((x) => x);
+
+    execFile(
+      cmd,
+      filesArgs,
+      { maxBuffer: 100 * 1024 * 1024 },
+      (_, stdout, _stderr) => {
+        let files = stdout.split("\n").filter((x: string) => x);
+
+        // Apply AND search for each query
+        for (const query of queries) {
+          if (!query.trim()) continue;
+
+          files = files.filter((filePath) => {
+            const basename = filePath.split("/").pop() || "";
+            return basename.toLowerCase().includes(query.toLowerCase());
+          });
+        }
+
+        resolve(files);
+      },
+    );
+  });
+}
