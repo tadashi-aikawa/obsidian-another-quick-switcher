@@ -46,12 +46,11 @@ This is an Obsidian plugin called "Another Quick Switcher" that provides advance
 1. **Command-Based Architecture** - All functionality exposed through registered Obsidian commands
 2. **Settings-Driven Configuration** - Highly customizable behavior through comprehensive settings
 3. **Modal Specialization** - Different modal classes for specific search types
-4. **External Tool Integration** - Uses ripgrep and fd for performance-critical operations
+4. **External Tool Integration** - Uses ripgrep for performance-critical search operations
 
 ### External Dependencies
 
-- **ripgrep** - Required for grep functionality, set path in "Ripgrep command" setting
-- **fd** - Optional for file name search in grep mode, enable "Include file name in search"
+- **ripgrep** - Required for grep functionality (both content and filename search), set path in "Ripgrep command" setting
 
 ## Development Notes
 
@@ -122,3 +121,7 @@ Run tests before any significant changes to ensure compatibility.
 - **MoveModalのfuzzy検索とハイライト実装パターン**: 他のModalと一貫性を保つため、`smartMicroFuzzy`、`createHighlightedText`、`another-quick-switcher__hit_word`CSSクラスを使用。`SuggestionItem`に`score`、`ranges`、マッチタイプ固有のranges（例: `directoryRanges`）を追加。
 - **「Recently used」設定時の並び順**: マッチタイプ優先度よりも設定された並び順（Recently used、Alphabetical等）を優先する。特に「Recently used」設定では、`isRecentlyUsed`プロパティによる明示的な区別が重要。
 - **設定値の範囲外アイテムへの影響**: 「Max recently used folders」などの設定値により、一部のアイテムが意図した挙動にならない場合がある。設定値の確認が必要。
+- **GrepModalのAND検索実装**: スペース区切りクエリはAND検索として動作。`smartWhitespaceSplit`でパース、複数ripgrep実行して`mergeAndFilterResults`で結合。ファイル名検索は`rgFiles`関数でripgrepの`--files`オプション使用。fdは削除済み。
+- **文字位置変換の重要性**: ripgrepはUTF-8バイト位置を返すが、JavaScriptはUTF-16文字位置。`byteToCharPosition`で変換が必要。絵文字のサロゲートペア対応も重要。
+- **テストファイルの判断基準**: Mock化が困難で実用価値が低いテストファイル（例: execFileを使う関数のテスト）は削除する。実装と異なるロジックをテストするのは意味がない。
+- **外部依存削除時の注意点**: 設定インターフェース、デフォルト値、UI、チェック処理、説明文、READMEまで一貫して更新。部分的な削除は起動エラーを引き起こす。

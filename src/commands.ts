@@ -15,7 +15,6 @@ import { HeaderModal } from "./ui/HeaderModal";
 import { InFileModal } from "./ui/InFileModal";
 import { LinkModal } from "./ui/LinkModal";
 import { MoveModal } from "./ui/MoveModal";
-import { existsFd } from "./utils/fd";
 import { existsRg } from "./utils/ripgrep";
 
 const SEARCH_COMMAND_PREFIX = "search-command";
@@ -75,16 +74,6 @@ export async function showGrepDialog(
     // noinspection ObjectAllocationIgnored
     new Notice(
       `"${settings.ripgrepCommand}" was not working as a ripgrep command. If you have not installed ripgrep yet, please install it.`,
-    );
-    return;
-  }
-  if (
-    settings.includeFilenameInGrepSearch &&
-    !(await existsFd(settings.fdCommand))
-  ) {
-    // noinspection ObjectAllocationIgnored
-    new Notice(
-      `"${settings.fdCommand}" was not working as a fd command. If you have not installed fd yet, please install it.`,
     );
     return;
   }

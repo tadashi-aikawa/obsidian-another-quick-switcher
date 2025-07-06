@@ -180,7 +180,8 @@ You can launch the Grep dialog directly from the main Quick Switcher with the cu
 
 - Input regards as a regex pattern
 - Grep searches only markdown files as default. If you want to search for other extensions, please update the "Grep > Extensions" settings
-- If you want to include file names in the search, enable the "Include file name in search" setting. Note that [fd](https://github.com/sharkdp/fd) is required
+- If you want to include file names in the search, enable the "Include file name in search" setting
+- Space-separated terms are searched with AND logic (e.g., `hello world` finds content containing both "hello" and "world")
 
 ### 4. Customizable hotkeys
 
