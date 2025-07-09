@@ -239,6 +239,19 @@
   top: 20px;
 }
 
+.another-quick-switcher__grep__count-input--error {
+  /*noinspection CssUnresolvedCustomProperty*/
+  color: var(--text-error);
+  font-weight: bold;
+}
+
+.another-quick-switcher__grep__input--invalid {
+  /*noinspection CssUnresolvedCustomProperty*/
+  border-color: var(--text-error) !important;
+  /*noinspection CssUnresolvedCustomProperty*/
+  box-shadow: 0 0 0 2px var(--text-error-hover) !important;
+}
+
 .another-quick-switcher__grep__path-input {
   width: 100%;
   padding-left: 0.3rem;

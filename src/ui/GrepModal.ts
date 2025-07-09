@@ -26,11 +26,12 @@ import {
   normalizePath,
   normalizeRelativePath,
 } from "../utils/path";
-import { type MatchResult, rg, rgFiles } from "../utils/ripgrep";
+import { type MatchResult, type RgResult, rg, rgFiles } from "../utils/ripgrep";
 import {
   capitalizeFirstLetter,
   getSinglePatternMatchingLocations,
   hasCapitalLetter,
+  isValidRegex,
   smartWhitespaceSplit,
   trimLineByEllipsis,
 } from "../utils/strings";
@@ -279,13 +280,6 @@ export class GrepModal
   async searchSuggestions(query: string): Promise<SuggestionItem[]> {
     const start = performance.now();
 
-    this.countInputEl?.remove();
-    this.countInputEl = createDiv({
-      text: "searching...",
-      cls: "another-quick-switcher__grep__count-input",
-    });
-    this.clonedInputEl.before(this.countInputEl);
-
     const absolutePathFromRoot = normalizeRelativePath(
       this.basePath,
       this.appHelper.getCurrentDirPath(),
@@ -294,6 +288,27 @@ export class GrepModal
     // Parse query for AND search
     const queries = smartWhitespaceSplit(query.trim());
     let rgResults: MatchResult[];
+
+    // Check if any query has invalid regex
+    for (const singleQuery of queries) {
+      if (!isValidRegex(singleQuery)) {
+        this.countInputEl?.remove();
+        this.countInputEl = createDiv({
+          text: `Invalid regex pattern: ${singleQuery}`,
+          cls: "another-quick-switcher__grep__count-input another-quick-switcher__grep__count-input--error",
+        });
+        this.clonedInputEl.before(this.countInputEl);
+        return [];
+      }
+    }
+
+    // Show searching message only after validation passes
+    this.countInputEl?.remove();
+    this.countInputEl = createDiv({
+      text: "searching...",
+      cls: "another-quick-switcher__grep__count-input",
+    });
+    this.clonedInputEl.before(this.countInputEl);
 
     if (queries.length > 1) {
       // AND search: run ripgrep for each query separately and merge results
@@ -310,7 +325,19 @@ export class GrepModal
             `${this.vaultRootPath}/${absolutePathFromRoot}`,
           ].filter((x) => x),
         );
-        allResults.push(results);
+        
+        // Handle regex error
+        if (Array.isArray(results)) {
+          allResults.push(results);
+        } else if (results.type === "error" && results.errorType === "regex_parse_error") {
+          this.countInputEl?.remove();
+          this.countInputEl = createDiv({
+            text: `Invalid regex pattern: ${singleQuery}`,
+            cls: "another-quick-switcher__grep__count-input another-quick-switcher__grep__count-input--error",
+          });
+          this.clonedInputEl.before(this.countInputEl);
+          return [];
+        }
       }
 
       // Merge results with AND logic
@@ -326,7 +353,22 @@ export class GrepModal
         `${this.vaultRootPath}/${absolutePathFromRoot}`,
       ].filter((x) => x);
 
-      rgResults = await rg(this.settings.ripgrepCommand, ...rgArgs);
+      const results = await rg(this.settings.ripgrepCommand, ...rgArgs);
+      
+      // Handle regex error
+      if (Array.isArray(results)) {
+        rgResults = results;
+      } else if (results.type === "error" && results.errorType === "regex_parse_error") {
+        this.countInputEl?.remove();
+        this.countInputEl = createDiv({
+          text: `Invalid regex pattern: ${singleQuery}`,
+          cls: "another-quick-switcher__grep__count-input another-quick-switcher__grep__count-input--error",
+        });
+        this.clonedInputEl.before(this.countInputEl);
+        return [];
+      } else {
+        rgResults = [];
+      }
     }
 
     const fileResults = this.settings.includeFilenameInGrepSearch
@@ -433,14 +475,17 @@ export class GrepModal
     if (query) {
       this.suggestions = await this.searchSuggestions(query);
 
-      this.countInputEl?.remove();
-      this.countInputEl = createDiv({
-        text: `${Math.min(this.suggestions.length, this.limit)} / ${
-          this.suggestions.length
-        }`,
-        cls: "another-quick-switcher__grep__count-input",
-      });
-      this.clonedInputEl.before(this.countInputEl);
+      // Don't update count display if there's an error message
+      if (!this.countInputEl?.classList.contains("another-quick-switcher__grep__count-input--error")) {
+        this.countInputEl?.remove();
+        this.countInputEl = createDiv({
+          text: `${Math.min(this.suggestions.length, this.limit)} / ${
+            this.suggestions.length
+          }`,
+          cls: "another-quick-switcher__grep__count-input",
+        });
+        this.clonedInputEl.before(this.countInputEl);
+      }
     }
 
     return this.suggestions;
@@ -621,6 +666,49 @@ export class GrepModal
     }
   }
 
+  private validateRegexInput(): void {
+    const query = this.clonedInputEl?.value?.trim();
+    if (!query) {
+      this.clonedInputEl?.classList.remove("another-quick-switcher__grep__input--invalid");
+      // Clear error message when input is empty
+      if (this.countInputEl?.classList.contains("another-quick-switcher__grep__count-input--error")) {
+        this.countInputEl?.remove();
+        this.countInputEl = undefined;
+      }
+      return;
+    }
+
+    const queries = smartWhitespaceSplit(query);
+    let hasInvalidRegex = false;
+    let invalidQuery = '';
+
+    for (const singleQuery of queries) {
+      if (!isValidRegex(singleQuery)) {
+        hasInvalidRegex = true;
+        invalidQuery = singleQuery;
+        break;
+      }
+    }
+
+    if (hasInvalidRegex) {
+      this.clonedInputEl?.classList.add("another-quick-switcher__grep__input--invalid");
+      // Show error message immediately
+      this.countInputEl?.remove();
+      this.countInputEl = createDiv({
+        text: `Invalid regex pattern: ${invalidQuery}`,
+        cls: "another-quick-switcher__grep__count-input another-quick-switcher__grep__count-input--error",
+      });
+      this.clonedInputEl.before(this.countInputEl);
+    } else {
+      this.clonedInputEl?.classList.remove("another-quick-switcher__grep__input--invalid");
+      // Clear error message when regex becomes valid
+      if (this.countInputEl?.classList.contains("another-quick-switcher__grep__count-input--error")) {
+        this.countInputEl?.remove();
+        this.countInputEl = undefined;
+      }
+    }
+  }
+
   private registerKeys(
     key: keyof Hotkeys["grep"],
     handler: () => void | Promise<void>,
@@ -689,12 +777,25 @@ export class GrepModal
         () => {
           this.currentQuery = this.clonedInputEl!.value;
           this.inputEl.value = this.currentQuery;
+          
+          // Real-time regex validation
+          this.validateRegexInput();
+          
           // Necessary to rerender suggestions
           this.inputEl.dispatchEvent(new Event("input"));
         },
         this.settings.grepSearchDelayMilliSeconds,
         true,
       );
+      this.clonedInputEl.addEventListener(
+        "input",
+        this.clonedInputElInputEventListener,
+      );
+    } else {
+      // Add real-time validation for immediate input
+      this.clonedInputElInputEventListener = () => {
+        this.validateRegexInput();
+      };
       this.clonedInputEl.addEventListener(
         "input",
         this.clonedInputElInputEventListener,

@@ -29,6 +29,14 @@ export interface MatchResult {
   };
 }
 
+export interface RgError {
+  type: "error";
+  errorType: "regex_parse_error" | "other";
+  message: string;
+}
+
+export type RgResult = MatchResult[] | RgError;
+
 export async function existsRg(cmd: string): Promise<boolean> {
   return new Promise((resolve, _) => {
     execFile(cmd, ["--version"], (error, _stdout, _stderr) => {
@@ -43,7 +51,7 @@ export async function existsRg(cmd: string): Promise<boolean> {
 export async function rg(
   cmd: string,
   ...args: string[]
-): Promise<MatchResult[]> {
+): Promise<RgResult> {
   return new Promise((resolve, _) => {
     execFile(
       cmd,
@@ -51,6 +59,16 @@ export async function rg(
       { maxBuffer: 1024 * 1024 * 1024 },
       (error, stdout, stderr) => {
         if (error) {
+          // Check if it's a regex parse error
+          if (error.message.includes('regex parse error')) {
+            resolve({
+              type: "error",
+              errorType: "regex_parse_error",
+              message: error.message,
+            });
+            return;
+          }
+          
           console.error('ripgrep error:', error);
           resolve([]);
           return;

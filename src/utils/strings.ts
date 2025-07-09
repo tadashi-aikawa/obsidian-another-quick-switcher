@@ -455,3 +455,15 @@ export function getSinglePatternMatchingLocations(
     },
   }));
 }
+
+/**
+ * Check if a string is a valid regular expression pattern
+ */
+export function isValidRegex(pattern: string): boolean {
+  try {
+    new RegExp(pattern);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
