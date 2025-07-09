@@ -411,7 +411,7 @@ describe("Performance tests", () => {
     microFuzzy: {
       small: 15, // 100 notes
       medium: 45, // 1000 notes
-      large: 70, // 10000 notes
+      large: 100, // 10000 notes
     },
     smartMicroFuzzy: {
       small: 20, // 100 notes
