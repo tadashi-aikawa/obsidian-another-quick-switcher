@@ -504,28 +504,28 @@ describe.each<{ value: string; max: number; expected: string }>`
 });
 
 describe.each`
-  pattern        | expected
-  ${"test"}      | ${true}
-  ${"test.*"}    | ${true}
-  ${"^test$"}    | ${true}
-  ${"[a-z]+"}    | ${true}
-  ${"(test)"}    | ${true}
-  ${"test("}     | ${false}
-  ${"test)"}     | ${false}
-  ${"test["}     | ${false}
-  ${"test]"}     | ${true}
-  ${"test{"}     | ${true}
-  ${"test}"}     | ${true}
-  ${"test\\"}    | ${false}
-  ${"test*"}     | ${true}
-  ${"test+"}     | ${true}
-  ${"test?"}     | ${true}
-  ${"test|"}     | ${true}
-  ${""}          | ${true}
-  ${"deno ("}    | ${false}
-  ${"deno )"}    | ${false}
-  ${"deno ["}    | ${false}
-  ${"deno {"}    | ${true}
+  pattern     | expected
+  ${"test"}   | ${true}
+  ${"test.*"} | ${true}
+  ${"^test$"} | ${true}
+  ${"[a-z]+"} | ${true}
+  ${"(test)"} | ${true}
+  ${"test("}  | ${false}
+  ${"test)"}  | ${false}
+  ${"test["}  | ${false}
+  ${"test]"}  | ${true}
+  ${"test{"}  | ${true}
+  ${"test}"}  | ${true}
+  ${"test\\"} | ${false}
+  ${"test*"}  | ${true}
+  ${"test+"}  | ${true}
+  ${"test?"}  | ${true}
+  ${"test|"}  | ${true}
+  ${""}       | ${true}
+  ${"deno ("} | ${false}
+  ${"deno )"} | ${false}
+  ${"deno ["} | ${false}
+  ${"deno {"} | ${true}
 `("isValidRegex", ({ pattern, expected }) => {
   test(`isValidRegex(${pattern}) = ${expected}`, () => {
     expect(isValidRegex(pattern as string)).toBe(expected);

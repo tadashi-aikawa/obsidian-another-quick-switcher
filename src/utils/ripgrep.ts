@@ -48,10 +48,7 @@ export async function existsRg(cmd: string): Promise<boolean> {
   });
 }
 
-export async function rg(
-  cmd: string,
-  ...args: string[]
-): Promise<RgResult> {
+export async function rg(cmd: string, ...args: string[]): Promise<RgResult> {
   return new Promise((resolve, _) => {
     execFile(
       cmd,
@@ -60,7 +57,7 @@ export async function rg(
       (error, stdout, stderr) => {
         if (error) {
           // Check if it's a regex parse error
-          if (error.message.includes('regex parse error')) {
+          if (error.message.includes("regex parse error")) {
             resolve({
               type: "error",
               errorType: "regex_parse_error",
@@ -68,12 +65,12 @@ export async function rg(
             });
             return;
           }
-          
-          console.error('ripgrep error:', error);
+
+          console.error("ripgrep error:", error);
           resolve([]);
           return;
         }
-        
+
         const results = stdout
           .split("\n")
           .filter((x: string) => x)
@@ -81,11 +78,13 @@ export async function rg(
             try {
               return JSON.parse(x) as Result;
             } catch (e) {
-              console.warn('JSON parse error for line:', x);
+              console.warn("JSON parse error for line:", x);
               return null;
             }
           })
-          .filter((x: Result | null) => x !== null && x.type === "match") as MatchResult[];
+          .filter(
+            (x: Result | null) => x !== null && x.type === "match",
+          ) as MatchResult[];
         resolve(results);
       },
     );
@@ -115,11 +114,11 @@ export async function rgFiles(
       { maxBuffer: 1024 * 1024 * 1024 },
       (error, stdout, stderr) => {
         if (error) {
-          console.error('ripgrep files error:', error);
+          console.error("ripgrep files error:", error);
           resolve([]);
           return;
         }
-        
+
         let files = stdout.split("\n").filter((x: string) => x);
 
         // Apply AND search for each query

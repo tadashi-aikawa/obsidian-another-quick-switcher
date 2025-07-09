@@ -325,11 +325,14 @@ export class GrepModal
             `${this.vaultRootPath}/${absolutePathFromRoot}`,
           ].filter((x) => x),
         );
-        
+
         // Handle regex error
         if (Array.isArray(results)) {
           allResults.push(results);
-        } else if (results.type === "error" && results.errorType === "regex_parse_error") {
+        } else if (
+          results.type === "error" &&
+          results.errorType === "regex_parse_error"
+        ) {
           this.countInputEl?.remove();
           this.countInputEl = createDiv({
             text: `Invalid regex pattern: ${singleQuery}`,
@@ -354,11 +357,14 @@ export class GrepModal
       ].filter((x) => x);
 
       const results = await rg(this.settings.ripgrepCommand, ...rgArgs);
-      
+
       // Handle regex error
       if (Array.isArray(results)) {
         rgResults = results;
-      } else if (results.type === "error" && results.errorType === "regex_parse_error") {
+      } else if (
+        results.type === "error" &&
+        results.errorType === "regex_parse_error"
+      ) {
         this.countInputEl?.remove();
         this.countInputEl = createDiv({
           text: `Invalid regex pattern: ${singleQuery}`,
@@ -476,7 +482,11 @@ export class GrepModal
       this.suggestions = await this.searchSuggestions(query);
 
       // Don't update count display if there's an error message
-      if (!this.countInputEl?.classList.contains("another-quick-switcher__grep__count-input--error")) {
+      if (
+        !this.countInputEl?.classList.contains(
+          "another-quick-switcher__grep__count-input--error",
+        )
+      ) {
         this.countInputEl?.remove();
         this.countInputEl = createDiv({
           text: `${Math.min(this.suggestions.length, this.limit)} / ${
@@ -669,9 +679,15 @@ export class GrepModal
   private validateRegexInput(): void {
     const query = this.clonedInputEl?.value?.trim();
     if (!query) {
-      this.clonedInputEl?.classList.remove("another-quick-switcher__grep__input--invalid");
+      this.clonedInputEl?.classList.remove(
+        "another-quick-switcher__grep__input--invalid",
+      );
       // Clear error message when input is empty
-      if (this.countInputEl?.classList.contains("another-quick-switcher__grep__count-input--error")) {
+      if (
+        this.countInputEl?.classList.contains(
+          "another-quick-switcher__grep__count-input--error",
+        )
+      ) {
         this.countInputEl?.remove();
         this.countInputEl = undefined;
       }
@@ -680,7 +696,7 @@ export class GrepModal
 
     const queries = smartWhitespaceSplit(query);
     let hasInvalidRegex = false;
-    let invalidQuery = '';
+    let invalidQuery = "";
 
     for (const singleQuery of queries) {
       if (!isValidRegex(singleQuery)) {
@@ -691,7 +707,9 @@ export class GrepModal
     }
 
     if (hasInvalidRegex) {
-      this.clonedInputEl?.classList.add("another-quick-switcher__grep__input--invalid");
+      this.clonedInputEl?.classList.add(
+        "another-quick-switcher__grep__input--invalid",
+      );
       // Show error message immediately
       this.countInputEl?.remove();
       this.countInputEl = createDiv({
@@ -700,9 +718,15 @@ export class GrepModal
       });
       this.clonedInputEl.before(this.countInputEl);
     } else {
-      this.clonedInputEl?.classList.remove("another-quick-switcher__grep__input--invalid");
+      this.clonedInputEl?.classList.remove(
+        "another-quick-switcher__grep__input--invalid",
+      );
       // Clear error message when regex becomes valid
-      if (this.countInputEl?.classList.contains("another-quick-switcher__grep__count-input--error")) {
+      if (
+        this.countInputEl?.classList.contains(
+          "another-quick-switcher__grep__count-input--error",
+        )
+      ) {
         this.countInputEl?.remove();
         this.countInputEl = undefined;
       }
@@ -777,10 +801,10 @@ export class GrepModal
         () => {
           this.currentQuery = this.clonedInputEl!.value;
           this.inputEl.value = this.currentQuery;
-          
+
           // Real-time regex validation
           this.validateRegexInput();
-          
+
           // Necessary to rerender suggestions
           this.inputEl.dispatchEvent(new Event("input"));
         },
