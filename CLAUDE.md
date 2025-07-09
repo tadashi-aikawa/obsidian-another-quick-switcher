@@ -125,3 +125,4 @@ Run tests before any significant changes to ensure compatibility.
 - **文字位置変換の重要性**: ripgrepはUTF-8バイト位置を返すが、JavaScriptはUTF-16文字位置。`byteToCharPosition`で変換が必要。絵文字のサロゲートペア対応も重要。
 - **テストファイルの判断基準**: Mock化が困難で実用価値が低いテストファイル（例: execFileを使う関数のテスト）は削除する。実装と異なるロジックをテストするのは意味がない。
 - **外部依存削除時の注意点**: 設定インターフェース、デフォルト値、UI、チェック処理、説明文、READMEまで一貫して更新。部分的な削除は起動エラーを引き起こす。
+- **ripgrepのexecFileバッファ制限**: 大量の検索結果（`'deno .*'`など）でJSONパースエラーが発生する場合、`maxBuffer`の不足が原因。100MBから1GBに増加で解決。同時にexecFileのエラーハンドリングとJSON.parseのtry-catch処理を追加してより堅牢に。
