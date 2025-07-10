@@ -127,3 +127,4 @@ Run tests before any significant changes to ensure compatibility.
 - **外部依存削除時の注意点**: 設定インターフェース、デフォルト値、UI、チェック処理、説明文、READMEまで一貫して更新。部分的な削除は起動エラーを引き起こす。
 - **ripgrepのexecFileバッファ制限**: 大量の検索結果（`'deno .*'`など）でJSONパースエラーが発生する場合、`maxBuffer`の不足が原因。100MBから1GBに増加で解決。同時にexecFileのエラーハンドリングとJSON.parseのtry-catch処理を追加してより堅牢に。
 - **正規表現エラーハンドリングの実装パターン**: 不正な正規表現（`'deno ('`など）でripgrepエラーが発生する問題の解決方法。1) `isValidRegex`関数で事前チェック、2) ripgrepエラーをキャッチして構造化、3) UIでエラーメッセージ表示、4) リアルタイムバリデーション。エラーメッセージはカウント表示エリアに表示し、結果数メッセージで上書きされないよう条件分岐が重要。
+- **ファイルパスコピー機能の実装パターン**: GitHub Issue #292の実装で学んだパターン。1) `settings.ts`のHotkeysインターフェースに新しいキーを追加、2) `createDefaultHotkeys`関数で空配列`[]`をデフォルト値として設定、3) `AnotherQuickSwitcherModal`の`setHotkeys`メソッドで`registerKeys`を使用してハンドラを実装。Vault絶対パス取得には`AppHelper.getNormalizeVaultRootPath()`を使用（`this.app.vault.adapter`の直接アクセスは型エラーの原因）。コマンド名の命名では、曖昧さを避けるために明確な名前を使用（例: `"copy vault path"`と`"copy absolute file path"`）。

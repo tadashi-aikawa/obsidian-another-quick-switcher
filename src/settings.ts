@@ -80,6 +80,8 @@ export interface Hotkeys {
     "navigate forward": Hotkey[];
     "navigate back": Hotkey[];
     "close if opened": Hotkey[];
+    "copy file vault path": Hotkey[];
+    "copy absolute file path": Hotkey[];
     "launch grep": Hotkey[];
     dismiss: Hotkey[];
   };
@@ -248,6 +250,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "navigate forward": [{ modifiers: ["Alt"], key: "ArrowRight" }],
     "navigate back": [{ modifiers: ["Alt"], key: "ArrowLeft" }],
     "close if opened": [],
+    "copy file vault path": [],
+    "copy absolute file path": [],
     "launch grep": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },

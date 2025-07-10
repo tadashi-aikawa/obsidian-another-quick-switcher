@@ -30,7 +30,7 @@ import {
   mapValues,
   uniq,
 } from "./utils/collection-helper";
-import { basename, dirname, extname } from "./utils/path";
+import { basename, dirname, extname, normalizePath } from "./utils/path";
 import { excludeFormat } from "./utils/strings";
 
 type BookmarkItem =
@@ -74,6 +74,9 @@ interface UnsafeAppInterface {
       newFileLocation?: "root" | "current" | "folder";
       newFileFolderPath?: string;
       useMarkdownLinks?: boolean;
+    };
+    adapter: {
+      basePath: string;
     };
   };
   workspace: Workspace & {
@@ -752,6 +755,10 @@ export class AppHelper {
     return Object.keys(this.unsafeApp.commands.commands).filter((x) =>
       x.startsWith(manifestId),
     );
+  }
+
+  getNormalizeVaultRootPath(): string {
+    return normalizePath(this.unsafeApp.vault.adapter.basePath);
   }
 
   getPathToBeCreated(linkText: string): string {

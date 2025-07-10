@@ -1068,6 +1068,35 @@ export class AnotherQuickSwitcherModal
       await showGrepDialog(this.app, this.settings, currentQuery || undefined);
     });
 
+    this.registerKeys("copy file vault path", async () => {
+      const item = this.chooser.values?.[this.chooser.selectedItem];
+      if (!item) {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(item.file.path);
+        new Notice("Vault path copied to clipboard");
+      } catch (error) {
+        new Notice("Failed to copy vault path to clipboard");
+      }
+    });
+
+    this.registerKeys("copy absolute file path", async () => {
+      const item = this.chooser.values?.[this.chooser.selectedItem];
+      if (!item) {
+        return;
+      }
+
+      try {
+        const basePath = this.appHelper.getNormalizeVaultRootPath();
+        await navigator.clipboard.writeText(`${basePath}/${item.file.path}`);
+        new Notice("Absolute file path copied to clipboard");
+      } catch (error) {
+        new Notice("Failed to copy absolute file path to clipboard");
+      }
+    });
+
     this.registerKeys("dismiss", async () => {
       this.close();
     });
