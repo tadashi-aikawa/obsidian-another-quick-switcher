@@ -130,6 +130,19 @@ export async function rgFiles(
       { maxBuffer: 1024 * 1024 * 1024 },
       (error, stdout, stderr) => {
         if (error) {
+          if (error.message.includes("No such file or directory")) {
+            resolve([]);
+            return;
+          }
+          if (stdout) {
+            const j = JSON.parse(stdout) as Result;
+            if (j.type === "summary" && j.data.stats.matches === 0) {
+              // If no matches found, return an empty array
+              resolve([]);
+              return;
+            }
+          }
+
           console.error("ripgrep files error:", error);
           resolve([]);
           return;
