@@ -1,6 +1,6 @@
 import { execFile } from "child_process";
 
-type Result = BeginResult | EndResult | MatchResult;
+type Result = BeginResult | EndResult | MatchResult | SummaryResult;
 interface BeginResult {
   type: "begin";
 }
@@ -8,6 +8,14 @@ interface EndResult {
   type: "end";
 }
 
+export interface SummaryResult {
+  type: "summary";
+  data: {
+    stats: {
+      matches: number;
+    };
+  };
+}
 export interface MatchResult {
   type: "match";
   data: {
@@ -64,6 +72,14 @@ export async function rg(cmd: string, ...args: string[]): Promise<RgResult> {
               message: error.message,
             });
             return;
+          }
+          if (stdout) {
+            const j = JSON.parse(stdout) as Result;
+            if (j.type === "summary" && j.data.stats.matches === 0) {
+              // If no matches found, return an empty array
+              resolve([]);
+              return;
+            }
           }
 
           console.error("ripgrep error:", error);
