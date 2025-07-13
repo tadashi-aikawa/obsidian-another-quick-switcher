@@ -874,8 +874,12 @@ export class GrepModal
 
               this.validateRegexInput();
 
-              // Necessary to rerender suggestions
-              this.inputEl.dispatchEvent(new Event("input"));
+              if (
+                this.currentQuery.length >= this.settings.grepMinQueryLength
+              ) {
+                // Necessary to rerender suggestions
+                this.inputEl.dispatchEvent(new Event("input"));
+              }
             },
             this.settings.grepSearchDelayMilliSeconds,
             true,

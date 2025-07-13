@@ -203,6 +203,7 @@ export interface Settings {
   // Grep
   ripgrepCommand: string;
   grepSearchDelayMilliSeconds: number;
+  grepMinQueryLength: number;
   grepExtensions: string[];
   maxDisplayLengthAroundMatchedWord: number;
   includeFilenameInGrepSearch: boolean;
@@ -646,6 +647,7 @@ export const DEFAULT_SETTINGS: Settings = {
   // Grep
   ripgrepCommand: "rg",
   grepSearchDelayMilliSeconds: 0,
+  grepMinQueryLength: 1,
   grepExtensions: ["md"],
   maxDisplayLengthAroundMatchedWord: 64,
   includeFilenameInGrepSearch: false,
@@ -1615,6 +1617,11 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           }),
       );
 
+    containerEl.createEl("div", {
+      text: "! Please note that on Windows, the initial file access speed may be significantly slower.",
+      cls: "another-quick-switcher__settings__warning",
+    });
+
     new Setting(containerEl)
       .setName("Grep search delay milli-seconds")
       .setDesc(
@@ -1630,10 +1637,22 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             await this.plugin.saveSettings();
           }),
       );
-    containerEl.createEl("div", {
-      text: "! Please note that on Windows, the initial file access speed may be significantly slower.",
-      cls: "another-quick-switcher__settings__warning",
-    });
+
+    new Setting(containerEl)
+      .setName("Minimum query length for auto search")
+      .setDesc(
+        "The minimum number of characters required to start an automatic search.",
+      )
+      .addSlider((sc) =>
+        sc
+          .setLimits(1, 10, 1)
+          .setValue(this.plugin.settings.grepMinQueryLength)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.grepMinQueryLength = value;
+            await this.plugin.saveSettings();
+          }),
+      );
 
     new Setting(containerEl).setName("Extensions").addText((tc) =>
       tc
