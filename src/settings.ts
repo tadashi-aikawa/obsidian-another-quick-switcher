@@ -1707,6 +1707,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     if (this.plugin.settings.autoPreviewInGrepSearch) {
       new Setting(containerEl)
         .setName("Auto preview delay milli-seconds")
+        .setClass("another-quick-switcher__settings__nested")
         .setDesc(
           "Delay before auto preview is triggered when selection changes.",
         )
