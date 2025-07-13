@@ -207,6 +207,8 @@ export interface Settings {
   maxDisplayLengthAroundMatchedWord: number;
   includeFilenameInGrepSearch: boolean;
   defaultGrepFolder: string;
+  autoPreviewInGrepSearch: boolean;
+  grepAutoPreviewDelayMilliSeconds: number;
 
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
@@ -648,6 +650,8 @@ export const DEFAULT_SETTINGS: Settings = {
   maxDisplayLengthAroundMatchedWord: 64,
   includeFilenameInGrepSearch: false,
   defaultGrepFolder: "",
+  autoPreviewInGrepSearch: false,
+  grepAutoPreviewDelayMilliSeconds: 300,
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
   moveFolderSortPriority: "Recently used",
@@ -1684,6 +1688,39 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           },
         );
       });
+
+    new Setting(containerEl)
+      .setName("Auto preview")
+      .setDesc(
+        "If enabled, automatically shows preview when selecting candidates.",
+      )
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.autoPreviewInGrepSearch).onChange(
+          async (value) => {
+            this.plugin.settings.autoPreviewInGrepSearch = value;
+            await this.plugin.saveSettings();
+            this.display();
+          },
+        );
+      });
+
+    if (this.plugin.settings.autoPreviewInGrepSearch) {
+      new Setting(containerEl)
+        .setName("Auto preview delay milli-seconds")
+        .setDesc(
+          "Delay before auto preview is triggered when selection changes.",
+        )
+        .addSlider((sc) =>
+          sc
+            .setLimits(0, 1000, 50)
+            .setValue(this.plugin.settings.grepAutoPreviewDelayMilliSeconds)
+            .setDynamicTooltip()
+            .onChange(async (value) => {
+              this.plugin.settings.grepAutoPreviewDelayMilliSeconds = value;
+              await this.plugin.saveSettings();
+            }),
+        );
+    }
   }
 
   private addMoveSettings(containerEl: HTMLElement) {

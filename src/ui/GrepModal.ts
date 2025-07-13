@@ -1,5 +1,6 @@
 import {
   type App,
+  type Debouncer,
   SuggestModal,
   type TFile,
   type WorkspaceLeaf,
@@ -26,7 +27,7 @@ import {
   normalizePath,
   normalizeRelativePath,
 } from "../utils/path";
-import { type MatchResult, type RgResult, rg, rgFiles } from "../utils/ripgrep";
+import { type MatchResult, rg, rgFiles } from "../utils/ripgrep";
 import {
   capitalizeFirstLetter,
   getSinglePatternMatchingLocations,
@@ -93,10 +94,8 @@ export class GrepModal
     this: HTMLInputElement,
     ev: HTMLElementEventMap["keydown"],
   ) => any;
-  clonedInputElInputEventListener: (
-    this: HTMLInputElement,
-    ev: HTMLElementEventMap["input"],
-  ) => any;
+  debounceInputEvent: Debouncer<[], void>;
+  clonedInputElInputEventListener: () => void;
   countInputEl?: HTMLDivElement;
   basePathInputEl: HTMLInputElement;
   basePathInputElChangeEventListener: (
@@ -113,6 +112,10 @@ export class GrepModal
     this.markClosed = resolve;
   });
   navQueue: Promise<void> = Promise.resolve();
+
+  debouncePreview?: Debouncer<[], void>;
+  debouncePreviewCancelListener: () => void;
+  debouncePreviewSearchCancelListener: () => void;
 
   constructor(
     app: App,
@@ -169,16 +172,6 @@ export class GrepModal
     }
 
     window.setTimeout(() => {
-      const selected = globalInternalStorage.selected;
-      if (selected != null) {
-        this.chooser.setSelectedItem(selected);
-        this.chooser.suggestions.at(selected)?.scrollIntoView({
-          behavior: "auto",
-          block: "center",
-          inline: "center",
-        });
-      }
-
       this.basePathInputEl = createEl("input", {
         value: this.basePath,
         placeholder:
@@ -245,14 +238,67 @@ export class GrepModal
       promptInputContainerEl?.after(wrapper);
 
       wrapper.insertAdjacentHTML("afterbegin", FOLDER);
+
+      if (this.settings.autoPreviewInGrepSearch) {
+        this.debouncePreview = debounce(
+          this.preview,
+          this.settings.grepAutoPreviewDelayMilliSeconds,
+          true,
+        );
+        this.debouncePreviewCancelListener = () => {
+          this.debouncePreview?.cancel();
+        };
+        this.debouncePreviewSearchCancelListener = () => {
+          this.debouncePreview?.cancel();
+          this.debounceInputEvent.cancel();
+        };
+
+        const originalSetSelectedItem = this.chooser.setSelectedItem.bind(
+          this.chooser,
+        );
+        this.chooser.setSelectedItem = (selectedIndex: number, evt?: any) => {
+          originalSetSelectedItem(selectedIndex, evt);
+          this.debouncePreview?.();
+        };
+
+        this.clonedInputEl.addEventListener(
+          "keydown",
+          this.debouncePreviewCancelListener,
+        );
+        this.clonedInputEl.addEventListener(
+          "focusout",
+          this.debouncePreviewSearchCancelListener,
+        );
+        this.basePathInputEl.addEventListener(
+          "keydown",
+          this.debouncePreviewCancelListener,
+        );
+        this.basePathInputEl.addEventListener(
+          "focusout",
+          this.debouncePreviewSearchCancelListener,
+        );
+      }
+
+      const selected = globalInternalStorage.selected;
+      if (selected != null) {
+        this.chooser.setSelectedItem(selected);
+        this.chooser.suggestions.at(selected)?.scrollIntoView({
+          behavior: "auto",
+          block: "center",
+          inline: "center",
+        });
+      }
     }, 0);
   }
 
   onClose() {
     super.onClose();
+    this.debouncePreview?.cancel();
+
     globalInternalStorage.items = this.suggestions;
     globalInternalStorage.basePath = this.basePath;
     globalInternalStorage.selected = this.chooser.selectedItem;
+
     this.clonedInputEl.removeEventListener(
       "keydown",
       this.clonedInputElKeydownEventListener,
@@ -261,6 +307,15 @@ export class GrepModal
       "input",
       this.clonedInputElInputEventListener,
     );
+    this.clonedInputEl.removeEventListener(
+      "keydown",
+      this.debouncePreviewCancelListener,
+    );
+    this.clonedInputEl.removeEventListener(
+      "focusout",
+      this.debouncePreviewSearchCancelListener,
+    );
+
     this.basePathInputEl.removeEventListener(
       "change",
       this.basePathInputElChangeEventListener,
@@ -268,6 +323,14 @@ export class GrepModal
     this.basePathInputEl.removeEventListener(
       "keydown",
       this.basePathInputElKeydownEventListener,
+    );
+    this.basePathInputEl.removeEventListener(
+      "keydown",
+      this.debouncePreviewCancelListener,
+    );
+    this.basePathInputEl.removeEventListener(
+      "focusout",
+      this.debouncePreviewSearchCancelListener,
     );
 
     if (this.stateToRestore) {
@@ -753,6 +816,12 @@ export class GrepModal
     }
   }
 
+  private async preview() {
+    await this.chooseCurrentSuggestion("same-tab", {
+      keepOpen: true,
+    });
+  }
+
   private setHotkeys() {
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
@@ -796,35 +865,35 @@ export class GrepModal
       this.clonedInputElKeydownEventListener,
     );
 
-    if (this.settings.grepSearchDelayMilliSeconds > 0) {
-      this.clonedInputElInputEventListener = debounce(
-        () => {
-          this.currentQuery = this.clonedInputEl!.value;
-          this.inputEl.value = this.currentQuery;
+    this.debounceInputEvent =
+      this.settings.grepSearchDelayMilliSeconds > 0
+        ? debounce(
+            () => {
+              this.currentQuery = this.clonedInputEl!.value;
+              this.inputEl.value = this.currentQuery;
 
-          // Real-time regex validation
-          this.validateRegexInput();
+              this.validateRegexInput();
 
-          // Necessary to rerender suggestions
-          this.inputEl.dispatchEvent(new Event("input"));
-        },
-        this.settings.grepSearchDelayMilliSeconds,
-        true,
-      );
-      this.clonedInputEl.addEventListener(
-        "input",
-        this.clonedInputElInputEventListener,
-      );
-    } else {
-      // Add real-time validation for immediate input
-      this.clonedInputElInputEventListener = () => {
-        this.validateRegexInput();
-      };
-      this.clonedInputEl.addEventListener(
-        "input",
-        this.clonedInputElInputEventListener,
-      );
-    }
+              // Necessary to rerender suggestions
+              this.inputEl.dispatchEvent(new Event("input"));
+            },
+            this.settings.grepSearchDelayMilliSeconds,
+            true,
+          )
+        : debounce(
+            () => {
+              this.validateRegexInput();
+            },
+            0,
+            true,
+          );
+    this.clonedInputElInputEventListener = () => {
+      this.debounceInputEvent();
+    };
+    this.clonedInputEl.addEventListener(
+      "input",
+      this.clonedInputElInputEventListener,
+    );
 
     this.registerKeys("up", () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
@@ -895,12 +964,7 @@ export class GrepModal
       }
     });
 
-    this.registerKeys("preview", async () => {
-      // XXX: chooseCurrentSuggestionにできるか?
-      await this.chooseCurrentSuggestion("same-tab", {
-        keepOpen: true,
-      });
-    });
+    this.registerKeys("preview", this.preview);
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"

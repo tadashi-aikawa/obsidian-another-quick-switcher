@@ -169,6 +169,14 @@ It sorts results by modified time descending.
 
 **Note**: If you want to search in real-time, please set the "Grep search delay milli-seconds" option to 1 or more.
 
+#### Auto Preview
+
+You can enable automatic preview functionality in Grep search to see file contents without manually triggering preview:
+
+- **Auto preview**: Automatically shows preview when selecting candidates in search results
+- **Auto preview delay**: Configure the delay (0-1000ms) before auto preview is triggered when selection changes
+- This feature provides seamless file browsing while searching through content
+
 #### Launch Grep from Quick Switcher
 
 You can launch the Grep dialog directly from the main Quick Switcher with the current query carried over. This allows for seamless transition from file searching to content searching.
