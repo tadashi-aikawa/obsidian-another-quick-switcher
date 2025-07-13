@@ -383,6 +383,7 @@ export class GrepModal
           ...[
             ...this.settings.grepExtensions.flatMap((x) => ["-t", x]),
             hasCapitalLetter(singleQuery) ? "" : "-i",
+            "--follow",
             "--",
             singleQuery,
             `${this.vaultRootPath}/${absolutePathFromRoot}`,
@@ -414,6 +415,7 @@ export class GrepModal
       const rgArgs = [
         ...this.settings.grepExtensions.flatMap((x) => ["-t", x]),
         hasCapitalLetter(singleQuery) ? "" : "-i",
+        "--follow",
         "--",
         singleQuery,
         `${this.vaultRootPath}/${absolutePathFromRoot}`,

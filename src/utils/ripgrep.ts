@@ -120,6 +120,7 @@ export async function rgFiles(
     // Use --files to get all files first
     const filesArgs = [
       "--files",
+      "--follow",
       ...extensions.flatMap((x) => ["-t", x]),
       searchPath,
     ].filter((x) => x);
