@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## **重要事項**
+
+- コードを編集したら必ず `bun check` を実行してください
+    - フォーマット・リント・未使用import削除 および 可能な範囲で自動修正を行うコマンドです
+
 ## Project Overview
 
 This is an Obsidian plugin called "Another Quick Switcher" that provides advanced file and content navigation capabilities. It offers multiple search modes including file search, grep, header navigation, backlinks, and custom search commands.
