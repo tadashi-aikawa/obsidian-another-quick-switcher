@@ -1,6 +1,6 @@
 {
   "name": "obsidian-another-quick-switcher",
-  "version": "13.14.0",
+  "version": "13.15.0",
   "description": "Todo",
   "main": "main.js",
   "scripts": {
@@ -33,4 +33,3 @@
   },
   "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
 }
-
