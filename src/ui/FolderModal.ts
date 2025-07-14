@@ -2,7 +2,7 @@ import { type App, Notice, SuggestModal, type TFolder } from "obsidian";
 import { AppHelper } from "../app-helper";
 import { createInstructions } from "../keys";
 import type { Hotkeys, Settings } from "../settings";
-import { excludeItems, sorter } from "../utils/collection-helper";
+import { sorter } from "../utils/collection-helper";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
 import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";

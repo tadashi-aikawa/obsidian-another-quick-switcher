@@ -3,12 +3,8 @@ import { type App, Notice, SuggestModal, type TFolder } from "obsidian";
 import { AppHelper } from "../app-helper";
 import { createInstructions } from "../keys";
 import type { Hotkeys, MoveFolderSortPriority, Settings } from "../settings";
-import { excludeItems, sorter } from "../utils/collection-helper";
-import {
-  smartIncludes,
-  smartMicroFuzzy,
-  smartStartsWith,
-} from "../utils/strings";
+import { excludeItems } from "../utils/collection-helper";
+import { smartIncludes, smartMicroFuzzy } from "../utils/strings";
 import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 

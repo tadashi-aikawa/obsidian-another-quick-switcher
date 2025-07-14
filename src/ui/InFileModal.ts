@@ -3,7 +3,6 @@ import {
   type EditorPosition,
   Platform,
   SuggestModal,
-  type WorkspaceLeaf,
 } from "obsidian";
 import { AppHelper } from "../app-helper";
 import type { CaptureState } from "../app-helper";
