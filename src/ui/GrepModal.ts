@@ -22,6 +22,7 @@ import {
   mergeOverlappingSubmatches,
 } from "../utils/grep-utils";
 import { Logger } from "../utils/logger";
+import { toLeafType } from "../utils/mouse";
 import {
   isExcalidraw,
   normalizePath,
@@ -729,8 +730,8 @@ export class GrepModal
     return item.file;
   }
 
-  async onChooseSuggestion(): Promise<void> {
-    await this.chooseCurrentSuggestion("same-tab");
+  async onChooseSuggestion(item: any, evt: MouseEvent): Promise<void> {
+    await this.chooseCurrentSuggestion(toLeafType(evt));
   }
 
   private toggleInput(): void {

@@ -22,9 +22,9 @@ import {
 } from "../keys";
 import type { Hotkeys, Settings } from "../settings";
 import { Logger } from "../utils/logger";
+import { toLeafType } from "../utils/mouse";
 import { isExcalidraw, normalizePath } from "../utils/path";
 import { capitalizeFirstLetter, smartIncludes } from "../utils/strings";
-import { isPresent } from "../utils/types";
 import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { setFloatingModal } from "./modal";
@@ -326,8 +326,8 @@ export class LinkModal
     return this.appHelper.getActiveFile()!;
   }
 
-  async onChooseSuggestion(): Promise<void> {
-    await this.chooseCurrentSuggestion("same-tab");
+  async onChooseSuggestion(item: any, evt: MouseEvent): Promise<void> {
+    await this.chooseCurrentSuggestion(toLeafType(evt));
   }
 
   private registerKeys(

@@ -46,6 +46,7 @@ import {
   uniq,
 } from "../utils/collection-helper";
 import { Logger } from "../utils/logger";
+import { toLeafType } from "../utils/mouse";
 import {
   capitalizeFirstLetter,
   excludeFormat,
@@ -674,8 +675,8 @@ export class AnotherQuickSwitcherModal
     return fileToOpened;
   }
 
-  async onChooseSuggestion(): Promise<any> {
-    await this.chooseCurrentSuggestion("same-tab");
+  async onChooseSuggestion(item: any, evt: MouseEvent): Promise<any> {
+    await this.chooseCurrentSuggestion(toLeafType(evt));
   }
 
   async handleCreateNewMarkdown(
