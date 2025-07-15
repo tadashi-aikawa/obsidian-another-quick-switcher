@@ -121,18 +121,23 @@ Run tests before any significant changes to ensure compatibility.
 
 ## Memory
 
-- Always ask for clarification when there are ambiguous instructions or potential risks to the project
-- lintやformatのチェックをするときは `bun pre:push` を実行してください。まとめて確認できるので便利です。そして、bunのformatによって意図した改行が失われてしまう場合は、bunのformatを無視するコメントを入れてください。
-- **MoveModalのfuzzy検索とハイライト実装パターン**: 他のModalと一貫性を保つため、`smartMicroFuzzy`、`createHighlightedText`、`another-quick-switcher__hit_word`CSSクラスを使用。`SuggestionItem`に`score`、`ranges`、マッチタイプ固有のranges（例: `directoryRanges`）を追加。
-- **「Recently used」設定時の並び順**: マッチタイプ優先度よりも設定された並び順（Recently used、Alphabetical等）を優先する。特に「Recently used」設定では、`isRecentlyUsed`プロパティによる明示的な区別が重要。
-- **設定値の範囲外アイテムへの影響**: 「Max recently used folders」などの設定値により、一部のアイテムが意図した挙動にならない場合がある。設定値の確認が必要。
-- **GrepModalのAND検索実装**: スペース区切りクエリはAND検索として動作。`smartWhitespaceSplit`でパース、複数ripgrep実行して`mergeAndFilterResults`で結合。ファイル名検索は`rgFiles`関数でripgrepの`--files`オプション使用。fdは削除済み。
-- **文字位置変換の重要性**: ripgrepはUTF-8バイト位置を返すが、JavaScriptはUTF-16文字位置。`byteToCharPosition`で変換が必要。絵文字のサロゲートペア対応も重要。
-- **テストファイルの判断基準**: Mock化が困難で実用価値が低いテストファイル（例: execFileを使う関数のテスト）は削除する。実装と異なるロジックをテストするのは意味がない。
-- **外部依存削除時の注意点**: 設定インターフェース、デフォルト値、UI、チェック処理、説明文、READMEまで一貫して更新。部分的な削除は起動エラーを引き起こす。
-- **ripgrepのexecFileバッファ制限**: 大量の検索結果（`'deno .*'`など）でJSONパースエラーが発生する場合、`maxBuffer`の不足が原因。100MBから1GBに増加で解決。同時にexecFileのエラーハンドリングとJSON.parseのtry-catch処理を追加してより堅牢に。
-- **正規表現エラーハンドリングの実装パターン**: 不正な正規表現（`'deno ('`など）でripgrepエラーが発生する問題の解決方法。1) `isValidRegex`関数で事前チェック、2) ripgrepエラーをキャッチして構造化、3) UIでエラーメッセージ表示、4) リアルタイムバリデーション。エラーメッセージはカウント表示エリアに表示し、結果数メッセージで上書きされないよう条件分岐が重要。
-- **ファイルパスコピー機能の実装パターン**: GitHub Issue #292の実装で学んだパターン。1) `settings.ts`のHotkeysインターフェースに新しいキーを追加、2) `createDefaultHotkeys`関数で空配列`[]`をデフォルト値として設定、3) `AnotherQuickSwitcherModal`の`setHotkeys`メソッドで`registerKeys`を使用してハンドラを実装。Vault絶対パス取得には`AppHelper.getNormalizeVaultRootPath()`を使用（`this.app.vault.adapter`の直接アクセスは型エラーの原因）。コマンド名の命名では、曖昧さを避けるために明確な名前を使用（例: `"copy vault path"`と`"copy absolute file path"`）。
-- **リリース作業時のコミット対象判定**: リリースノートに記載されているコミットのみが対象。過去のリリースに既に含まれているコミット（コミットログの時系列で前回リリースより古いもの）は、コミットメッセージに#付きissue番号があっても今回のリリース対象外。関連issueへのコメントは今回リリースに含まれるコミットに対してのみ行う。
-- **Grep検索の最小文字数設定実装パターン（2025/07/13 23:44:57）**: 自動検索の負荷軽減のため最小文字数設定を追加。1) `settings.ts`でインターフェースとデフォルト値を定義、2) 設定UIにスライダー追加、3) `GrepModal.ts`の`debounceInputEvent`と`getSuggestions`の両方で文字数チェック実装。デフォルト値は0（制限なし）とし、既存の動作を維持しつつ設定可能にする。
-- **ripgrepコマンドの--followフラグ追加（2025/07/13 23:44:57）**: シンボリックリンクのサポートのため`--follow`フラグを追加。`GrepModal.ts`の複数箇所（単一クエリ・AND検索）と`rgFiles`関数で一貫して追加。コミットメッセージは実装詳細（--followフラグ）ではなくユーザー価値（Support symbolic links）で記述する。
+### 開発環境・ツール
+- `bun check`: フォーマット・リント・未使用import削除および自動修正
+- `bun pre:push`: lint/format一括チェック
+- Always ask for clarification when there are ambiguous instructions
+
+### アーキテクチャパターン
+- **Modal実装**: `smartMicroFuzzy`、`createHighlightedText`、`another-quick-switcher__hit_word`CSSクラスで統一
+- **設定追加**: `settings.ts`でインターフェース定義 → UI追加 → Modal実装
+- **ホットキー**: `setHotkeys`メソッドで`registerKeys`使用、デフォルト値は空配列`[]`
+- **共通UI機能**: `src/utils/`に共通関数作成（例: `mouse.ts`のCtrl+click処理）
+
+### GrepModal特有
+- AND検索: `smartWhitespaceSplit` → 複数ripgrep実行 → `mergeAndFilterResults`
+- 文字位置変換: UTF-8バイト→UTF-16文字位置で`byteToCharPosition`必須
+- エラーハンドリング: `isValidRegex`事前チェック + 構造化エラー表示
+
+### 重要な考慮事項
+- 外部依存削除時: 設定・UI・チェック処理・説明文・READMEまで一貫更新
+- ripgrepバッファ: 大量結果でJSONパースエラー→`maxBuffer`を1GBに増加
+- リリース作業: リリースノート記載コミットのみが対象、過去コミットは除外
