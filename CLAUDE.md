@@ -141,3 +141,4 @@ Run tests before any significant changes to ensure compatibility.
 - 外部依存削除時: 設定・UI・チェック処理・説明文・READMEまで一貫更新
 - ripgrepバッファ: 大量結果でJSONパースエラー→`maxBuffer`を1GBに増加
 - リリース作業: リリースノート記載コミットのみが対象、過去コミットは除外
+- アロー関数メソッド: 既に正しい`this`コンテキストを持つため`bind(this)`は不要 (2025/07/17 08:15:00)

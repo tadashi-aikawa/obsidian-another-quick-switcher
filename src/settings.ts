@@ -211,6 +211,10 @@ export interface Settings {
   autoPreviewInGrepSearch: boolean;
   grepAutoPreviewDelayMilliSeconds: number;
 
+  // Backlink
+  autoPreviewInBacklinkSearch: boolean;
+  backlinkAutoPreviewDelayMilliSeconds: number;
+
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: string[];
   moveFolderSortPriority: MoveFolderSortPriority;
@@ -654,6 +658,9 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultGrepFolder: "",
   autoPreviewInGrepSearch: false,
   grepAutoPreviewDelayMilliSeconds: 300,
+  // Backlink
+  autoPreviewInBacklinkSearch: false,
+  backlinkAutoPreviewDelayMilliSeconds: 300,
   // Move file to another folder
   moveFileExcludePrefixPathPatterns: [],
   moveFolderSortPriority: "Recently used",
@@ -1550,6 +1557,39 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           "another-quick-switcher__settings__ignore_path_patterns";
         return el;
       });
+
+    new Setting(containerEl)
+      .setName("Auto preview")
+      .setDesc(
+        "If enabled, automatically shows preview when selecting candidates.",
+      )
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.autoPreviewInBacklinkSearch).onChange(
+          async (value) => {
+            this.plugin.settings.autoPreviewInBacklinkSearch = value;
+            await this.plugin.saveSettings();
+            this.display();
+          },
+        );
+      });
+
+    if (this.plugin.settings.autoPreviewInBacklinkSearch) {
+      new Setting(containerEl)
+        .setName("Auto preview delay milli-seconds")
+        .setDesc(
+          "Delay before auto preview is triggered when selection changes.",
+        )
+        .addSlider((sc) =>
+          sc
+            .setLimits(0, 1000, 50)
+            .setValue(this.plugin.settings.backlinkAutoPreviewDelayMilliSeconds)
+            .setDynamicTooltip()
+            .onChange(async (value) => {
+              this.plugin.settings.backlinkAutoPreviewDelayMilliSeconds = value;
+              await this.plugin.saveSettings();
+            }),
+        );
+    }
   }
 
   private addInFileSettings(containerEl: HTMLElement) {

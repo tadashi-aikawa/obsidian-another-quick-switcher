@@ -78,6 +78,8 @@ export class BacklinkModal
   });
   navQueue: Promise<void> = Promise.resolve();
 
+  debouncePreview?: Debouncer<[], void>;
+
   constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
     this.modalEl.addClass("another-quick-switcher__modal-prompt");
@@ -118,6 +120,25 @@ export class BacklinkModal
       setFloatingModal(this.appHelper);
     }
     this.opened = true;
+
+    // Initialize auto preview functionality
+    if (this.settings.autoPreviewInBacklinkSearch) {
+      this.debouncePreview = debounce(
+        this.preview,
+        this.settings.backlinkAutoPreviewDelayMilliSeconds,
+        true,
+      );
+
+      const originalSetSelectedItem = this.chooser.setSelectedItem.bind(
+        this.chooser,
+      );
+      this.chooser.setSelectedItem = (selectedIndex: number, evt?: any) => {
+        originalSetSelectedItem(selectedIndex, evt);
+        this.debouncePreview?.();
+      };
+
+      this.debouncePreview?.();
+    }
   }
 
   close() {
@@ -130,6 +151,7 @@ export class BacklinkModal
 
   onClose() {
     super.onClose();
+    this.debouncePreview?.cancel();
     if (this.stateToRestore) {
       // restore initial leaf state, undoing any previewing
       this.navigate(() => this.stateToRestore.restore());
@@ -386,6 +408,12 @@ export class BacklinkModal
     await this.chooseCurrentSuggestion(toLeafType(evt));
   }
 
+  private async preview() {
+    await this.chooseCurrentSuggestion("same-tab", {
+      keepOpen: true,
+    });
+  }
+
   private registerKeys(
     key: keyof Hotkeys["backlink"],
     handler: () => void | Promise<void>,
@@ -481,12 +509,7 @@ export class BacklinkModal
       this.inputEl.dispatchEvent(new Event("input"));
     });
 
-    this.registerKeys("preview", async () => {
-      // XXX: chooseCurrentSuggestionにできるか?
-      await this.chooseCurrentSuggestion("same-tab", {
-        keepOpen: true,
-      });
-    });
+    this.registerKeys("preview", this.preview.bind(this));
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
