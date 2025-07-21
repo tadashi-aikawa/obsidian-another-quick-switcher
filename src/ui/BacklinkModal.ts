@@ -79,6 +79,7 @@ export class BacklinkModal
   navQueue: Promise<void> = Promise.resolve();
 
   debouncePreview?: Debouncer<[], void>;
+  debouncePreviewCancelListener: () => void;
 
   constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
@@ -129,6 +130,10 @@ export class BacklinkModal
         true,
       );
 
+      this.debouncePreviewCancelListener = () => {
+        this.debouncePreview?.cancel();
+      };
+
       const originalSetSelectedItem = this.chooser.setSelectedItem.bind(
         this.chooser,
       );
@@ -136,6 +141,11 @@ export class BacklinkModal
         originalSetSelectedItem(selectedIndex, evt);
         this.debouncePreview?.();
       };
+
+      this.inputEl.addEventListener(
+        "keydown",
+        this.debouncePreviewCancelListener,
+      );
 
       this.debouncePreview?.();
     }
@@ -152,6 +162,12 @@ export class BacklinkModal
   onClose() {
     super.onClose();
     this.debouncePreview?.cancel();
+
+    this.inputEl.removeEventListener(
+      "keydown",
+      this.debouncePreviewCancelListener,
+    );
+
     if (this.stateToRestore) {
       // restore initial leaf state, undoing any previewing
       this.navigate(() => this.stateToRestore.restore());

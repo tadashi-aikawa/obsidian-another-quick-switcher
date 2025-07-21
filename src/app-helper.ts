@@ -569,9 +569,10 @@ export class AppHelper {
     }
 
     if (opt.inplace && opt.leafType === "same-tab") {
+      // Preview
       await leaf.setViewState({
         ...leaf.getViewState(),
-        active: !background,
+        active: false, // avoid for conflict
         popstate: true,
         ...this.getOpenState(leaf, file),
       } as ViewState);
