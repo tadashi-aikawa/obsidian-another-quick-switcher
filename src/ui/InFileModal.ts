@@ -454,6 +454,22 @@ export class InFileModal
       navigateNext(evt);
     });
 
+    this.registerKeys("insert to editor", async () => {
+      const item = this.chooser.values?.[this.chooser.selectedItem];
+      if (!item) {
+        return;
+      }
+
+      const editor = this.appHelper.getCurrentEditor();
+      if (!editor) {
+        return;
+      }
+
+      editor.setCursor(this.initialCursor);
+      this.appHelper.insertStringToActiveFile(item.line);
+      this.close();
+    });
+
     this.registerKeys("show all results", () => {
       this.limit = Number.MAX_SAFE_INTEGER;
       // Necessary to rerender suggestions

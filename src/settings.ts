@@ -140,6 +140,7 @@ export interface Hotkeys {
   "in-file": {
     up: Hotkey[];
     down: Hotkey[];
+    "insert to editor": Hotkey[];
     "show all results": Hotkey[];
     "toggle auto preview": Hotkey[];
     dismiss: Hotkey[];
@@ -317,6 +318,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
   "in-file": {
     up: [{ modifiers: ["Mod"], key: "p" }],
     down: [{ modifiers: ["Mod"], key: "n" }],
+    "insert to editor": [],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     "toggle auto preview": [{ modifiers: ["Mod"], key: "," }],
     dismiss: [{ modifiers: [], key: "Escape" }],

@@ -218,6 +218,10 @@ https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018
     - `hello world` matches lines containing both `hello` and `world` anywhere in the line
     - Use `\"` to search for literal quote characters (e.g., `search \"quote` finds `search "quote`)
 
+#### Additional Features
+
+- **Insert to Editor**: You can insert the selected line directly into the current editor at the cursor position using the configurable "insert to editor" hotkey
+
 https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018/0b16c4f4-b071-4e05-9402-00ae2525e57c
 
 ### 8. Show backlinks from the dialog
