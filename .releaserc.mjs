@@ -40,7 +40,7 @@ export default {
     [
       "@semantic-release/exec",
       {
-        prepareCmd: "bun ci && bun version-bump.mts ${nextRelease.version}",
+        prepareCmd: "bun run ci && bun version-bump.mts ${nextRelease.version}",
       },
     ],
     [
