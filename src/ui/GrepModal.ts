@@ -971,7 +971,7 @@ export class GrepModal
       }
     });
 
-    this.registerKeys("preview", this.preview);
+    this.registerKeys("preview", () => this.preview());
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"

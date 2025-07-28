@@ -525,7 +525,7 @@ export class BacklinkModal
       this.inputEl.dispatchEvent(new Event("input"));
     });
 
-    this.registerKeys("preview", this.preview.bind(this));
+    this.registerKeys("preview", () => this.preview());
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
       ? "Alt"
