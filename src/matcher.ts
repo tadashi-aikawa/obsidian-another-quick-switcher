@@ -38,6 +38,11 @@ export interface MatchQueryResult {
   meta?: string[];
   score?: number;
   ranges?: { start: number; end: number }[];
+  // All alias ranges for highlighting purposes (only used for alias matches)
+  allAliasRanges?: {
+    alias: string;
+    ranges: { start: number; end: number }[];
+  }[];
 }
 
 function matchQuery(
@@ -176,6 +181,10 @@ function matchQuery(
       alias: bestMatch.value,
       query,
       ranges: bestMatch.ranges,
+      allAliasRanges: prefixNameMatchedAliases.map((x) => ({
+        alias: x.value,
+        ranges: x.ranges || [],
+      })),
     });
   }
   if (nameMatchedAliases.length > 0) {
@@ -186,6 +195,10 @@ function matchQuery(
       alias: bestMatch.value,
       query,
       ranges: bestMatch.ranges,
+      allAliasRanges: nameMatchedAliases.map((x) => ({
+        alias: x.value,
+        ranges: x.ranges || [],
+      })),
     });
   }
   if (options.fuzzyTarget && fuzzyNameMatchedAliases.length > 0) {
@@ -197,6 +210,10 @@ function matchQuery(
       score: bestMatch.score,
       query,
       ranges: bestMatch.ranges,
+      allAliasRanges: fuzzyNameMatchedAliases.map((x) => ({
+        alias: x.value,
+        ranges: x.ranges || [],
+      })),
     });
   }
 

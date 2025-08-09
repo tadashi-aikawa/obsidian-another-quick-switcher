@@ -85,7 +85,9 @@ function createHighlightedText(
     if (range.start > lastEnd + 1) {
       const beforeText = text.slice(lastEnd + 1, range.start);
       if (beforeText) {
-        fragment.appendChild(document.createTextNode(beforeText));
+        // Wrap text nodes in span to ensure proper display in flex containers
+        const textSpan = createSpan({ text: beforeText });
+        fragment.appendChild(textSpan);
       }
     }
 
@@ -106,7 +108,9 @@ function createHighlightedText(
   if (lastEnd + 1 < text.length) {
     const remainingText = text.slice(lastEnd + 1);
     if (remainingText) {
-      fragment.appendChild(document.createTextNode(remainingText));
+      // Wrap text nodes in span to ensure proper display in flex containers
+      const textSpan = createSpan({ text: remainingText });
+      fragment.appendChild(textSpan);
     }
   }
 
@@ -145,12 +149,23 @@ function createItemDiv(
     : item.file.basename;
 
   // Find relevant match results for title highlighting
-  const titleMatchResults = item.matchResults.filter(
-    (result) =>
-      result.type === "name" ||
-      result.type === "prefix-name" ||
-      result.type === "fuzzy-name",
-  );
+  // When showing alias as title, use alias match results
+  // When showing file name as title, use only file name match results (not alias matches)
+  const titleMatchResults = shouldShowAliasAsTitle
+    ? item.matchResults.filter(
+        (result) =>
+          (result.type === "name" ||
+            result.type === "prefix-name" ||
+            result.type === "fuzzy-name") &&
+          result.alias,
+      )
+    : item.matchResults.filter(
+        (result) =>
+          (result.type === "name" ||
+            result.type === "prefix-name" ||
+            result.type === "fuzzy-name") &&
+          !result.alias,
+      );
 
   const titleDiv = createDiv({
     cls: [
@@ -299,6 +314,10 @@ function createDescriptionDiv(args: {
   linkResultsNum: number;
   headerResultsNum: number;
   options: Options;
+  aliasMatchDetails: {
+    alias: string;
+    ranges: { start: number; end: number }[];
+  }[];
 }): Elements["descriptionDiv"] {
   const {
     item,
@@ -309,6 +328,7 @@ function createDescriptionDiv(args: {
     linkResultsNum,
     headerResultsNum,
     options,
+    aliasMatchDetails,
   } = args;
 
   const descriptionDiv = createDiv({
@@ -328,7 +348,25 @@ function createDescriptionDiv(args: {
         cls: "another-quick-switcher__item__description__alias",
       });
       aliasSpan.insertAdjacentHTML("beforeend", ALIAS);
-      aliasSpan.appendText(x);
+
+      // Find matching ranges for this specific alias using allAliasRanges
+      const ranges: { start: number; end: number }[] = [];
+
+      // Collect all ranges for this specific alias from allAliasRanges
+      for (const result of item.matchResults) {
+        if (result.allAliasRanges) {
+          for (const aliasRange of result.allAliasRanges) {
+            if (aliasRange.alias === x) {
+              ranges.push(...aliasRange.ranges);
+            }
+          }
+        }
+      }
+
+      // Apply highlighting using createHighlightedText
+      const highlightedContent = createHighlightedText(x, ranges);
+      aliasSpan.appendChild(highlightedContent);
+
       aliasDiv.appendChild(aliasSpan);
     }
     descriptionDiv.appendChild(aliasDiv);
@@ -454,6 +492,14 @@ export function createElements(
     headerResults.flatMap((xs) => uniq(xs.meta ?? [])),
   );
 
+  // Extract alias match details for highlighting in description
+  const aliasMatchDetails: {
+    alias: string;
+    ranges: { start: number; end: number }[];
+  }[] = item.matchResults
+    .filter((result) => result.allAliasRanges)
+    .flatMap((result) => result.allAliasRanges!);
+
   const descriptionDiv =
     aliases.length !== 0 ||
     tags.length !== 0 ||
@@ -468,6 +514,7 @@ export function createElements(
           linkResultsNum,
           headerResultsNum,
           options,
+          aliasMatchDetails,
         })
       : undefined;
 
