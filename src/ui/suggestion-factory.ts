@@ -365,7 +365,11 @@ function createDescriptionDiv(args: {
 
       // Apply highlighting using createHighlightedText
       const highlightedContent = createHighlightedText(x, ranges);
-      aliasSpan.appendChild(highlightedContent);
+      const aliasInnerSpan = createSpan({
+        cls: "another-quick-switcher__item__description__alias__inner",
+      });
+      aliasInnerSpan.appendChild(highlightedContent);
+      aliasSpan.appendChild(aliasInnerSpan);
 
       aliasDiv.appendChild(aliasSpan);
     }
