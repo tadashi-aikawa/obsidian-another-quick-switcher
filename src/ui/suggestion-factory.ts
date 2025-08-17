@@ -289,13 +289,17 @@ function createMetaDiv(args: {
         text: key,
       });
 
+      const frontMatterValueDiv = createDiv({
+        cls: "another-quick-switcher__item__meta__front_matter__values",
+      });
       for (const v of [value].flat().filter(isPresent)) {
-        frontMatterDiv.createSpan({
+        frontMatterValueDiv.createSpan({
           cls: "another-quick-switcher__item__meta__front_matter__value",
           title: v.toString(),
           text: v.toString(),
         });
       }
+      frontMatterDiv.appendChild(frontMatterValueDiv);
 
       frontMattersDiv.appendChild(frontMatterDiv);
     }
