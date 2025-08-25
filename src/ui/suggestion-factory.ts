@@ -3,7 +3,16 @@ import { isPresent } from "src/utils/types";
 import { type SuggestionItem, getMatchedTitleAndAliases } from "../matcher";
 import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
 import { round } from "../utils/math";
-import { ALIAS, FOLDER, FRONT_MATTER, HEADER, LINK, SCORE, TAG } from "./icons";
+import {
+  ALIAS,
+  FILE,
+  FOLDER,
+  FRONT_MATTER,
+  HEADER,
+  LINK,
+  SCORE,
+  TAG,
+} from "./icons";
 
 interface Elements {
   itemDiv: HTMLDivElement;
@@ -161,7 +170,6 @@ function createItemDiv(
     (options.displayAliaseAsTitle ||
       (!isTitleMatched && options.displayAliasAsTitleOnKeywordMatched));
 
-  // FIXME: あとはここが問題
   const titleText = shouldShowAliasAsTitle
     ? aliases.join(" | ")
     : item.file.basename;
@@ -176,10 +184,6 @@ function createItemDiv(
             (a) => a.alias === alias,
           );
           if (aliasRange) {
-            // TODO: aliasesごとにoffsetを定義する
-            // aliases[0] なら0
-            // aliases[1] なら aliases[0].length + 3 ( " | " )
-            // aliases[2] なら aliases[0].length + aliases[1].length + 6 ( " | " )
             const offset = aliases
               .slice(0, aliases.indexOf(alias))
               .reduce((acc, cur) => acc + cur.length + 3, 0);
@@ -189,7 +193,6 @@ function createItemDiv(
                 end: range.end + offset,
               });
             }
-            // allRanges.push(...aliasRange.ranges);
           }
         }
       }
@@ -198,6 +201,10 @@ function createItemDiv(
         allRanges.push(...result.ranges);
       }
     }
+  }
+
+  if (shouldShowAliasAsTitle) {
+    titleDiv.insertAdjacentHTML("beforeend", ALIAS);
   }
 
   const highlightedContent = createHighlightedText(
@@ -370,7 +377,11 @@ function createDescriptionDiv(args: {
       const aliasSpan = createSpan({
         cls: "another-quick-switcher__item__description__alias",
       });
-      aliasSpan.insertAdjacentHTML("beforeend", ALIAS);
+
+      aliasSpan.insertAdjacentHTML(
+        "beforeend",
+        shouldShowFileAsDescription ? FILE : ALIAS,
+      );
 
       const ranges: { start: number; end: number }[] = [];
       for (const result of item.matchResults) {
