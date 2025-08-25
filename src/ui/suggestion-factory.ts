@@ -117,9 +117,19 @@ function createHighlightedText(
   return fragment;
 }
 
+// WARNING: Must refactoring
 function createItemDiv(
   item: SuggestionItem,
-  aliasesDisplayedAsTitle: string[],
+
+  /** 『どこかに』表示すべきエイリアス情報 */
+  // INFO:呼び出し元の値情報
+  // エイリアスをタイトルとして表示するオプション?
+  //   - yes: ファイルのエイリアスすべて
+  //   - no:  マッチしたエイリアス(複数)
+  aliases: string[],
+  /** タイトルがマッチしたかどうか */
+  isTitleMatched: boolean,
+
   options: Options,
 ): Elements["itemDiv"] {
   const itemDiv = createDiv({
@@ -133,40 +143,9 @@ function createItemDiv(
       extension: item.file.extension,
     },
   });
-
   const entryDiv = createDiv({
     cls: "another-quick-switcher__item__entry",
   });
-
-  const shouldShowAliasAsTitle =
-    aliasesDisplayedAsTitle.length > 0 &&
-    (options.displayAliaseAsTitle ||
-      options.displayAliasAsTitleOnKeywordMatched);
-
-  // Get title text and apply highlighting if match results exist
-  const titleText = shouldShowAliasAsTitle
-    ? aliasesDisplayedAsTitle.join(" / ")
-    : item.file.basename;
-
-  // Find relevant match results for title highlighting
-  // When showing alias as title, use alias match results
-  // When showing file name as title, use only file name match results (not alias matches)
-  const titleMatchResults = shouldShowAliasAsTitle
-    ? item.matchResults.filter(
-        (result) =>
-          (result.type === "name" ||
-            result.type === "prefix-name" ||
-            result.type === "fuzzy-name") &&
-          result.alias,
-      )
-    : item.matchResults.filter(
-        (result) =>
-          (result.type === "name" ||
-            result.type === "prefix-name" ||
-            result.type === "fuzzy-name") &&
-          !result.alias,
-      );
-
   const titleDiv = createDiv({
     cls: [
       "another-quick-switcher__item__title",
@@ -174,12 +153,50 @@ function createItemDiv(
     ],
   });
 
-  // Apply highlighting using DocumentFragment
-  // Collect all ranges from all match results
+  // INFO: エイリアス情報を『タイトル欄』に表示スべきかの判定
+  // - displayAliaseAsTitle: true ならもちろん
+  // - displayAliasAsTitleOnKeywordMatched : true なら、マッチしたエイリアスがある場合のみだが、引数 aliases の制約により displayAliaseAsTitle: false の場合はマッチしたエイリアスしか渡ってこないようになっている
+  const shouldShowAliasAsTitle =
+    aliases.length > 0 &&
+    (options.displayAliaseAsTitle ||
+      (!isTitleMatched && options.displayAliasAsTitleOnKeywordMatched));
+
+  // FIXME: あとはここが問題
+  const titleText = shouldShowAliasAsTitle
+    ? aliases.join(" | ")
+    : item.file.basename;
+
   const allRanges: { start: number; end: number }[] = [];
-  for (const result of titleMatchResults) {
-    if (result.ranges) {
-      allRanges.push(...result.ranges);
+  for (const result of item.matchResults) {
+    if (shouldShowAliasAsTitle) {
+      // WARN: aliasesを使いたいけどrangesがないから。。
+      if (result.allAliasRanges) {
+        for (const alias of aliases) {
+          const aliasRange = result.allAliasRanges.find(
+            (a) => a.alias === alias,
+          );
+          if (aliasRange) {
+            // TODO: aliasesごとにoffsetを定義する
+            // aliases[0] なら0
+            // aliases[1] なら aliases[0].length + 3 ( " | " )
+            // aliases[2] なら aliases[0].length + aliases[1].length + 6 ( " | " )
+            const offset = aliases
+              .slice(0, aliases.indexOf(alias))
+              .reduce((acc, cur) => acc + cur.length + 3, 0);
+            for (const range of aliasRange.ranges) {
+              allRanges.push({
+                start: range.start + offset,
+                end: range.end + offset,
+              });
+            }
+            // allRanges.push(...aliasRange.ranges);
+          }
+        }
+      }
+    } else {
+      if (result.ranges) {
+        allRanges.push(...result.ranges);
+      }
     }
   }
 
@@ -309,6 +326,7 @@ function createMetaDiv(args: {
   return metaDiv;
 }
 
+// WARNING: Must refactoring
 function createDescriptionDiv(args: {
   item: SuggestionItem;
   aliases: string[];
@@ -317,11 +335,8 @@ function createDescriptionDiv(args: {
   countByHeader: { [header: string]: number };
   linkResultsNum: number;
   headerResultsNum: number;
+  isTitleMatched: boolean;
   options: Options;
-  aliasMatchDetails: {
-    alias: string;
-    ranges: { start: number; end: number }[];
-  }[];
 }): Elements["descriptionDiv"] {
   const {
     item,
@@ -331,20 +346,24 @@ function createDescriptionDiv(args: {
     countByHeader,
     linkResultsNum,
     headerResultsNum,
+    isTitleMatched,
     options,
-    aliasMatchDetails,
   } = args;
 
   const descriptionDiv = createDiv({
     cls: "another-quick-switcher__item__descriptions",
   });
 
+  const shouldShowFileAsDescription =
+    (!isTitleMatched && options.displayAliasAsTitleOnKeywordMatched) ||
+    options.displayAliaseAsTitle;
+
   if (aliases.length > 0) {
     const aliasDiv = createDiv({
       cls: "another-quick-switcher__item__description",
     });
 
-    const displayAliases = options.displayAliasAsTitleOnKeywordMatched
+    const displayAliases = shouldShowFileAsDescription
       ? [item.file.basename]
       : aliases;
     for (const x of displayAliases) {
@@ -353,21 +372,25 @@ function createDescriptionDiv(args: {
       });
       aliasSpan.insertAdjacentHTML("beforeend", ALIAS);
 
-      // Find matching ranges for this specific alias using allAliasRanges
       const ranges: { start: number; end: number }[] = [];
-
-      // Collect all ranges for this specific alias from allAliasRanges
       for (const result of item.matchResults) {
-        if (result.allAliasRanges) {
-          for (const aliasRange of result.allAliasRanges) {
-            if (aliasRange.alias === x) {
-              ranges.push(...aliasRange.ranges);
+        if (shouldShowFileAsDescription) {
+          if (result.ranges) {
+            for (const range of result.ranges) {
+              ranges.push(range);
+            }
+          }
+        } else {
+          if (result.allAliasRanges) {
+            for (const aliasRange of result.allAliasRanges) {
+              if (aliasRange.alias === x) {
+                ranges.push(...aliasRange.ranges);
+              }
             }
           }
         }
       }
 
-      // Apply highlighting using createHighlightedText
       const highlightedContent = createHighlightedText(x, ranges);
       const aliasInnerSpan = createSpan({
         cls: "another-quick-switcher__item__description__alias__inner",
@@ -455,14 +478,20 @@ export function createElements(
   item: SuggestionItem,
   options: Options,
 ): Elements {
-  const { title, aliases } = getMatchedTitleAndAliases(item);
-  const matchedAliasesOnly = title ? [] : aliases;
+  // マッチした『ファイル名』『エイリアス』の情報表示
+  const { title, aliases: matchedAliases } = getMatchedTitleAndAliases(item);
+  const isTitleMatched = Boolean(title);
 
-  const itemDiv = createItemDiv(
-    item,
-    options.displayAliaseAsTitle ? item.aliases : matchedAliasesOnly,
-    options,
-  );
+  // INFO:
+  // エイリアスをタイトルとして表示するオプション?
+  //   - yes: ファイルのエイリアスすべて
+  //   - no:  マッチしたエイリアス(複数)
+  const essenceAliases = options.displayAliaseAsTitle
+    ? item.aliases
+    : matchedAliases;
+
+  // WARNING: Must refactoring
+  const itemDiv = createItemDiv(item, essenceAliases, isTitleMatched, options);
 
   // meta
   const frontMatter = omitBy(
@@ -500,35 +529,23 @@ export function createElements(
     headerResults.flatMap((xs) => uniq(xs.meta ?? [])),
   );
 
-  // Extract alias match details for highlighting in description
-  const aliasMatchDetails: {
-    alias: string;
-    ranges: { start: number; end: number }[];
-  }[] = item.matchResults
-    .filter((result) => result.allAliasRanges)
-    .flatMap((result) => result.allAliasRanges!);
-
   const descriptionDiv =
-    aliases.length !== 0 ||
+    essenceAliases.length !== 0 ||
     tags.length !== 0 ||
     Object.keys(countByLink).length !== 0 ||
     Object.keys(countByHeader).length !== 0
       ? createDescriptionDiv({
           item,
-          aliases: matchedAliasesOnly,
+          aliases: essenceAliases,
           tags,
           countByLink,
           countByHeader,
           linkResultsNum,
           headerResultsNum,
+          isTitleMatched,
           options,
-          aliasMatchDetails,
         })
       : undefined;
 
-  return {
-    itemDiv,
-    metaDiv: metaDiv,
-    descriptionDiv,
-  };
+  return { itemDiv, metaDiv, descriptionDiv };
 }

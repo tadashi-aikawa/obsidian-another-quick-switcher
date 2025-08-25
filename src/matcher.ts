@@ -37,6 +37,7 @@ export interface MatchQueryResult {
   query: string;
   meta?: string[];
   score?: number;
+  // File name match ranges for highlighting purposes (only used for name/prefix-name/fuzzy-name matches)
   ranges?: { start: number; end: number }[];
   // All alias ranges for highlighting purposes (only used for alias matches)
   allAliasRanges?: {
@@ -156,10 +157,16 @@ function matchQuery(
     switch (r.type) {
       // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
       case "starts-with":
-        prefixNameMatchedAliases.push({ value: al, ranges: r.ranges });
+        prefixNameMatchedAliases.push({
+          value: al,
+          ranges: r.ranges,
+        });
       // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
       case "includes":
-        nameMatchedAliases.push({ value: al, ranges: r.ranges });
+        nameMatchedAliases.push({
+          value: al,
+          ranges: r.ranges,
+        });
       case "fuzzy":
         if (options.fuzzyTarget) {
           if (r.score > options.minFuzzyScore) {
@@ -180,7 +187,7 @@ function matchQuery(
       meta: prefixNameMatchedAliases.map((x) => x.value),
       alias: bestMatch.value,
       query,
-      ranges: bestMatch.ranges,
+      ranges: undefined,
       allAliasRanges: prefixNameMatchedAliases.map((x) => ({
         alias: x.value,
         ranges: x.ranges || [],
@@ -194,7 +201,7 @@ function matchQuery(
       meta: nameMatchedAliases.map((x) => x.value),
       alias: bestMatch.value,
       query,
-      ranges: bestMatch.ranges,
+      ranges: undefined,
       allAliasRanges: nameMatchedAliases.map((x) => ({
         alias: x.value,
         ranges: x.ranges || [],
@@ -209,7 +216,7 @@ function matchQuery(
       alias: bestMatch.value,
       score: bestMatch.score,
       query,
-      ranges: bestMatch.ranges,
+      ranges: undefined,
       allAliasRanges: fuzzyNameMatchedAliases.map((x) => ({
         alias: x.value,
         ranges: x.ranges || [],
