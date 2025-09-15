@@ -1,7 +1,6 @@
 import {
   type App,
   type Debouncer,
-  SuggestModal,
   type TFile,
   type WorkspaceLeaf,
   debounce,
@@ -37,7 +36,7 @@ import {
   smartWhitespaceSplit,
   trimLineByEllipsis,
 } from "../utils/strings";
-import type { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
 import { FOLDER } from "./icons";
 import { setFloatingModal } from "./modal";
 
@@ -67,22 +66,13 @@ interface SuggestionItem {
   }[];
 }
 
-export class GrepModal
-  extends SuggestModal<SuggestionItem>
-  implements UnsafeModalInterface<SuggestionItem>
-{
+export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
   logger: Logger;
   appHelper: AppHelper;
   settings: Settings;
   initialLeaf: WorkspaceLeaf | null;
   initialQuery?: string;
   stateToRestore: CaptureState;
-
-  // unofficial
-  isOpen: boolean;
-  updateSuggestions: () => unknown;
-  chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
-  scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   vaultRootPath: string;
   currentQuery: string;
@@ -117,6 +107,10 @@ export class GrepModal
   debouncePreview?: Debouncer<[], void>;
   debouncePreviewCancelListener: () => void;
   debouncePreviewSearchCancelListener: () => void;
+
+  toKey(item: SuggestionItem): string {
+    return `${item.file.path}:${item.lineNumber}`;
+  }
 
   constructor(
     app: App,
@@ -572,7 +566,12 @@ export class GrepModal
     const sameFileWithPrevious = previousPath === item.file.path;
 
     const itemDiv = createDiv({
-      cls: "another-quick-switcher__item",
+      cls: [
+        "another-quick-switcher__item",
+        this.selectedItemMap[this.toKey(item)]
+          ? "another-quick-switcher__item__selected"
+          : "",
+      ].filter((x) => x),
     });
 
     const entryDiv = createDiv({
@@ -704,7 +703,7 @@ export class GrepModal
     leaf: LeafType,
     option: { keepOpen?: boolean } = {},
   ): Promise<TFile | null> {
-    const item = this.chooser.values?.[this.chooser.selectedItem];
+    const item = this.getSelectedItem();
     if (!item) {
       return null;
     }
@@ -932,7 +931,20 @@ export class GrepModal
     });
 
     this.registerKeys("open", async () => {
-      await this.chooseCurrentSuggestion("same-tab");
+      const items = this.getCheckedItems();
+      if (items.length > 0) {
+        this.close();
+        for (const x of items.slice()) {
+          await this.appHelper.openFile(x.file, {
+            leafType: "new-tab",
+            line: x.lineNumber - 1,
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          });
+          await sleep(0);
+        }
+      } else {
+        await this.chooseCurrentSuggestion("same-tab");
+      }
     });
     this.registerKeys("open in new tab", async () => {
       await this.chooseCurrentSuggestion("new-tab");
@@ -969,6 +981,19 @@ export class GrepModal
         });
         await sleep(0);
       }
+    });
+
+    this.registerKeys("check/uncheck", async () => {
+      await this.toggleCheckedItem();
+    });
+    this.registerKeys("check/uncheck and next", async () => {
+      await this.toggleCheckedItem({ moveNext: true });
+    });
+    this.registerKeys("check all", () => {
+      this.checkAll();
+    });
+    this.registerKeys("uncheck all", () => {
+      this.uncheckAll();
     });
 
     this.registerKeys("preview", () => this.preview());

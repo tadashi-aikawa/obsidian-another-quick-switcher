@@ -31,6 +31,7 @@ interface Options {
   hideGutterIcons: boolean;
   showFuzzyMatchScore: boolean;
   displayDescriptionBelowTitle: boolean;
+  selected: boolean;
 }
 
 /**
@@ -144,6 +145,7 @@ function createItemDiv(
   const itemDiv = createDiv({
     cls: [
       "another-quick-switcher__item",
+      options.selected ? "another-quick-switcher__item__selected" : "",
       item.phantom ? "another-quick-switcher__phantom_item" : "",
       item.starred ? "another-quick-switcher__starred_item" : "",
       options.hideGutterIcons ? "another-quick-switcher__gutter_hidden" : "",

@@ -284,7 +284,189 @@ The "Move file to another folder" command allows you to quickly move the current
 - **Persistent history**: Recently used folder history is stored in your vault and syncs across devices
 - **Configurable storage**: Customize where the folder usage history is stored within your vault
 
-## For users who use earlier than v13.0.0
+### 12. Check/Uncheck items (multi-select)
+
+You can multi-select suggestions in the main Quick Switcher, Backlink search, and Grep.
+
+- Toggle selection: use the configurable hotkeys "check/uncheck" or "check/uncheck and next" (moves the cursor to the next item).
+- Select all / Clear all: "check all" and "uncheck all" hotkeys (configurable).
+- Visual cue: checked items show a left accent bar in the list.
+- Batch actions: when items are checked, actions like Open will apply to all checked items. For example, Open opens all checked targets in new tabs; other supported actions (e.g., close if opened, open in default app, show in system explorer) also work for checked items.
+
+<div style="text-align: center">🎥 <b>Demo movie (YouTube)</b>👇</div>
+
+[![YouTube Video IPHZu87sd2w](https://img.youtube.com/vi/IPHZu87sd2w/maxresdefault.jpg)](https://www.youtube.com/watch?v=IPHZu87sd2w)
+
+Tip: Assign convenient keys in Settings to quickly mark a range (e.g., bind "check/uncheck and next").
+
+
+![Setting](./demo/check-uncheck-items-settings.webp)
+
+## ⌘ Dialog Commands
+
+Below are dialog-specific command tables with default keybindings.
+
+The MC column indicates multi-check support: "✅" applies to all checked items, "⛔" affects only the current selection, and "-" is not applicable (e.g., toggle commands).
+
+### Main dialog
+
+
+| Command                        | Default Keybinding | MC |
+| ------------------------------ | ------------------ | -- |
+| open                           | `Enter`            | ✅  |
+| open in new tab                | `Mod+Enter`        | ⛔  |
+| open in new pane (horizontal)  | `Mod+-`            | ⛔  |
+| open in new pane (vertical)    | `Mod+i`            | ⛔  |
+| open in new window             | `Mod+o`            | ⛔  |
+| open in popup                  | _(none)_           | ⛔  |
+| open in new tab in background  | `Alt+o`            | ⛔  |
+| open all in new tabs           | `Mod+Shift+Alt+o`  | ⛔  |
+| preview                        | `Mod+,`            | ⛔  |
+| create                         | `Shift+Enter`      | ⛔  |
+| create in new tab              | `Mod+Shift+Enter`  | ⛔  |
+| create in new window           | `Mod+Shift+o`      | ⛔  |
+| create in new popup            | _(none)_           | ⛔  |
+| check/uncheck                  | _(none)_           | -  |
+| check/uncheck and next         | _(none)_           | -  |
+| check all                      | _(none)_           | -  |
+| uncheck all                    | _(none)_           | -  |
+| insert to editor               | `Alt+Enter`        | ✅  |
+| insert to editor in background | _(none)_           | ⛔  |
+| insert all to editor           | `Alt+Shift+Enter`  | ⛔  |
+| open in default app            | _(none)_           | ✅  |
+| show in system explorer        | _(none)_           | ✅  |
+| open in google                 | `Mod+g`            | ⛔  |
+| open first URL                 | `Mod+]`            | ✅  |
+| close if opened                | _(none)_           | ✅  |
+| show links                     | `Mod+l`            | ⛔  |
+| show backlinks                 | `Mod+h`            | ⛔  |
+| show all results               | `Shift+Alt+a`      | ⛔  |
+| navigate back                  | `Alt+ArrowLeft`    | ⛔  |
+| navigate forward               | `Alt+ArrowRight`   | ⛔  |
+| launch grep                    | _(none)_           | ⛔  |
+| copy file vault path           | _(none)_           | ⛔  |
+| copy absolute file path        | _(none)_           | ⛔  |
+| up                             | `Mod+p`            | ⛔  |
+| down                           | `Mod+n`            | ⛔  |
+| clear input                    | `Mod+d`            | ⛔  |
+| replace input                  | `Tab`              | ⛔  |
+| dismiss                        | `Escape`           | ⛔  |
+
+
+### Folder dialog
+
+
+| Command             | Default Keybinding | MC |
+| ------------------- | ------------------ | -- |
+| up                  | `Mod+p`            | ⛔  |
+| down                | `Mod+n`            | ⛔  |
+| open in default app | _(none)_           | ⛔  |
+| dismiss             | `Escape`           | ⛔  |
+
+
+### Header dialog
+
+
+| Command              | Default Keybinding | MC |
+| -------------------- | ------------------ | -- |
+| up                   | `Mod+p`            | ⛔  |
+| down                 | `Mod+n`            | ⛔  |
+| clear input          | `Mod+d`            | ⛔  |
+| move to next hit     | `Tab`              | ⛔  |
+| move to previous hit | `Shift+Tab`        | ⛔  |
+| toggle auto preview  | `Mod+,`            | ⛔  |
+| insert all to editor | `Alt+Shift+Enter`  | ⛔  |
+| dismiss              | `Escape`           | ⛔  |
+
+
+### Backlink dialog
+
+
+| Command                       | Default Keybinding | MC |
+| ----------------------------- | ------------------ | -- |
+| open                          | `Enter`            | ✅  |
+| open in new tab               | `Mod+Enter`        | ⛔  |
+| open in new pane (horizontal) | `Mod+-`            | ⛔  |
+| open in new pane (vertical)   | `Mod+i`            | ⛔  |
+| open in new window            | `Mod+o`            | ⛔  |
+| open in popup                 | _(none)_           | ⛔  |
+| open in new tab in background | `Alt+o`            | ⛔  |
+| open all in new tabs          | `Mod+Shift+Alt+o`  | ⛔  |
+| check/uncheck                 | _(none)_           | -  |
+| check/uncheck and next        | _(none)_           | -  |
+| check all                     | _(none)_           | -  |
+| uncheck all                   | _(none)_           | -  |
+| show all results              | `Shift+Alt+a`      | ⛔  |
+| preview                       | `Mod+,`            | ⛔  |
+| up                            | `Mod+p`            | ⛔  |
+| down                          | `Mod+n`            | ⛔  |
+| dismiss                       | `Escape`           | ⛔  |
+
+
+### Link dialog
+
+
+| Command                       | Default Keybinding | MC |
+| ----------------------------- | ------------------ | -- |
+| open                          | `Enter`            | ⛔  |
+| open in new tab               | `Mod+Enter`        | ⛔  |
+| open in new pane (horizontal) | `Mod+-`            | ⛔  |
+| open in new pane (vertical)   | `Mod+i`            | ⛔  |
+| open in new window            | `Mod+o`            | ⛔  |
+| open in popup                 | _(none)_           | ⛔  |
+| open in new tab in background | `Alt+o`            | ⛔  |
+| open all in new tabs          | `Mod+Shift+Alt+o`  | ⛔  |
+| show all results              | `Shift+Alt+a`      | ⛔  |
+| preview                       | `Mod+,`            | ⛔  |
+| up                            | `Mod+p`            | ⛔  |
+| down                          | `Mod+n`            | ⛔  |
+| dismiss                       | `Escape`           | ⛔  |
+
+
+### In File dialog
+
+
+| Command            | Default Keybinding | MC |
+| ------------------ | ------------------ | -- |
+| up                 | `Mod+p`            | ⛔  |
+| down               | `Mod+n`            | ⛔  |
+| insert to editor   | _(none)_           | ⛔  |
+| show all results   | `Shift+Alt+a`      | ⛔  |
+| toggle auto preview| `Mod+,`            | ⛔  |
+| dismiss            | `Escape`           | ⛔  |
+
+
+### Grep dialog
+
+
+| Command                       | Default Keybinding | MC |
+| ----------------------------- | ------------------ | -- |
+| open                          | `Enter`            | ✅  |
+| open in new tab               | `Mod+Enter`        | ⛔  |
+| open in new pane (horizontal) | `Mod+-`            | ⛔  |
+| open in new pane (vertical)   | `Mod+i`            | ⛔  |
+| open in new window            | `Mod+o`            | ⛔  |
+| open in popup                 | _(none)_           | ⛔  |
+| open in new tab in background | `Alt+o`            | ⛔  |
+| open all in new tabs          | `Mod+Shift+Alt+o`  | ⛔  |
+| check/uncheck                 | _(none)_           | -  |
+| check/uncheck and next        | _(none)_           | -  |
+| check all                     | _(none)_           | -  |
+| uncheck all                   | _(none)_           | -  |
+| preview                       | `Mod+,`            | ⛔  |
+| clear input                   | `Mod+d`            | ⛔  |
+| clear path                    | `Alt+d`            | ⛔  |
+| set ./ to path                | `Alt+c`            | ⛔  |
+| toggle input                  | _(none)_           | ⛔  |
+| up                            | `Mod+p`            | ⛔  |
+| down                          | `Mod+n`            | ⛔  |
+| search                        | `Tab`              | ⛔  |
+| dismiss                       | `Escape`           | ⛔  |
+
+
+## 💥 Major Breaking Changes
+
+### For users who use earlier than v13.0.0
 
 In v13, we removed `Link search` from `Preset search commands`. Please see #275 for details about this decision. If you need the previous `Link search` functionality, you can add it to `Search commands` with the configuration shown in the image below.
 
@@ -293,15 +475,15 @@ In v13, we removed `Link search` from `Preset search commands`. Please see #275 
   <img src="https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/link-search-setting.webp" alt="link search" />
 </details>
 
-## For users who use earlier than v8.0.0
+### For users who use earlier than v8.0.0
 
 Please read a "🔥 Breaking changes" section in the [Release note](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/tag/8.0.0).
 
-## For users who use earlier than v7.0.0
+### For users who use earlier than v7.0.0
 
 Please read a "🔥 Breaking changes" section in the [Release note](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/tag/7.0.0).
 
-## For users who use earlier than v6.0.0
+### For users who use earlier than v6.0.0
 
 Please read a "🔥 Breaking changes" section in the [Release note](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/releases/tag/6.0.0).
 
@@ -309,7 +491,7 @@ Please read a "🔥 Breaking changes" section in the [Release note](https://gith
 
 It both supports desktop and mobile.
 
-## Feature requests / Bugs
+## 💬 Feature requests / Bugs
 
 Please create a new [issue].
 
@@ -346,7 +528,7 @@ bun dev
 
 Run [Release Action](https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/actions/workflows/release.yaml) manually.
 
-## Appendix
+## 📜 Appendix
 
 ### What is the "2-hop-link"?
 

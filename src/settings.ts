@@ -62,6 +62,10 @@ export interface Hotkeys {
     "open in popup": Hotkey[];
     "open in new tab in background": Hotkey[];
     "open all in new tabs": Hotkey[];
+    "check/uncheck": Hotkey[];
+    "check/uncheck and next": Hotkey[];
+    "check all": Hotkey[];
+    "uncheck all": Hotkey[];
     preview: Hotkey[];
     create: Hotkey[];
     "create in new tab": Hotkey[];
@@ -118,6 +122,10 @@ export interface Hotkeys {
     "open in popup": Hotkey[];
     "open in new tab in background": Hotkey[];
     "open all in new tabs": Hotkey[];
+    "check/uncheck": Hotkey[];
+    "check/uncheck and next": Hotkey[];
+    "check all": Hotkey[];
+    "uncheck all": Hotkey[];
     "show all results": Hotkey[];
     preview: Hotkey[];
     dismiss: Hotkey[];
@@ -161,6 +169,10 @@ export interface Hotkeys {
     "open in popup": Hotkey[];
     "open in new tab in background": Hotkey[];
     "open all in new tabs": Hotkey[];
+    "check/uncheck": Hotkey[];
+    "check/uncheck and next": Hotkey[];
+    "check all": Hotkey[];
+    "uncheck all": Hotkey[];
     preview: Hotkey[];
     dismiss: Hotkey[];
   };
@@ -240,6 +252,10 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in popup": [],
     "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
     "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
+    "check/uncheck": [],
+    "check/uncheck and next": [],
+    "check all": [],
+    "uncheck all": [],
     preview: [{ modifiers: ["Mod"], key: "," }],
     create: [{ modifiers: ["Shift"], key: "Enter" }],
     "create in new tab": [{ modifiers: ["Mod", "Shift"], key: "Enter" }],
@@ -296,6 +312,10 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in popup": [],
     "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
     "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
+    "check/uncheck": [],
+    "check/uncheck and next": [],
+    "check all": [],
+    "uncheck all": [],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     preview: [{ modifiers: ["Mod"], key: "," }],
     dismiss: [{ modifiers: [], key: "Escape" }],
@@ -339,6 +359,10 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in popup": [],
     "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
     "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
+    "check/uncheck": [],
+    "check/uncheck and next": [],
+    "check all": [],
+    "uncheck all": [],
     preview: [{ modifiers: ["Mod"], key: "," }],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },

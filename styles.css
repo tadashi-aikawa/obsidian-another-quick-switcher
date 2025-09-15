@@ -14,6 +14,13 @@
   padding-left: 1rem;
 }
 
+.another-quick-switcher__modal-prompt .suggestion-item:has(.another-quick-switcher__item__selected) {
+  border-left: solid var(--interactive-accent) var(--size-2-3);
+  padding-left: var(--size-2-3);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
 .another-quick-switcher__phantom_item {
   /*noinspection CssUnresolvedCustomProperty*/
   color: var(--text-faint);

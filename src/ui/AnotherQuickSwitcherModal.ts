@@ -3,7 +3,6 @@ import {
   type Debouncer,
   Notice,
   Platform,
-  SuggestModal,
   type TFile,
   type WorkspaceLeaf,
   debounce,
@@ -52,7 +51,7 @@ import {
   excludeFormat,
   smartWhitespaceSplit,
 } from "../utils/strings";
-import type { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
 import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
 import { setFloatingModal } from "./modal";
 import { createElements } from "./suggestion-factory";
@@ -69,10 +68,7 @@ interface CustomSearchHistory {
   inputQuery: string;
 }
 
-export class AnotherQuickSwitcherModal
-  extends SuggestModal<SuggestionItem>
-  implements UnsafeModalInterface<SuggestionItem>
-{
+export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<SuggestionItem> {
   logger: Logger;
   originItems: SuggestionItem[];
   phantomItems: SuggestionItem[];
@@ -85,12 +81,6 @@ export class AnotherQuickSwitcherModal
   navigationHistories: CustomSearchHistory[];
   currentNavigationHistoryIndex: number;
   stackHistory: boolean;
-
-  // unofficial
-  isOpen: boolean;
-  updateSuggestions: () => unknown;
-  chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
-  scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   debounceGetSuggestions: Debouncer<
     [string, (items: SuggestionItem[]) => void],
@@ -117,6 +107,10 @@ export class AnotherQuickSwitcherModal
     this.markClosed = resolve;
   });
   navQueue: Promise<void>;
+
+  toKey(item: SuggestionItem): string {
+    return item.file.path;
+  }
 
   constructor(args: {
     app: App;
@@ -557,6 +551,7 @@ export class AnotherQuickSwitcherModal
       displayDescriptionBelowTitle: this.settings.displayDescriptionBelowTitle,
       hideGutterIcons: this.settings.hideGutterIcons,
       showFuzzyMatchScore: this.settings.showFuzzyMatchScore,
+      selected: Boolean(this.selectedItemMap[this.toKey(item)]),
     });
 
     if (metaDiv?.hasChildNodes()) {
@@ -605,7 +600,7 @@ export class AnotherQuickSwitcherModal
     leafType: LeafType,
     option: { keepOpen?: boolean } = {},
   ): Promise<TFile | null> {
-    const item = this.chooser.values?.[this.chooser.selectedItem];
+    const item = this.getSelectedItem();
     if (!item) {
       return null;
     }
@@ -762,7 +757,18 @@ export class AnotherQuickSwitcherModal
     });
 
     this.registerKeys("open", async () => {
-      await this.chooseCurrentSuggestion("same-tab");
+      const items = this.getCheckedItems();
+      if (items.length > 0) {
+        this.close();
+        for (const x of items) {
+          this.appHelper.openFile(x.file, {
+            leafType: "new-tab",
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          });
+        }
+      } else {
+        await this.chooseCurrentSuggestion("same-tab");
+      }
     });
     this.registerKeys("open in new tab", async () => {
       await this.chooseCurrentSuggestion("new-tab");
@@ -786,13 +792,13 @@ export class AnotherQuickSwitcherModal
     });
     this.registerKeys("open all in new tabs", () => {
       this.close();
-      if (this.chooser.values == null) {
+      const items = this.getItems();
+      if (!items) {
         return;
       }
 
-      const items = this.chooser.values.slice().reverse();
-      for (const x of items) {
-        this.appHelper.openFile(x.file, {
+      for (const item of items) {
+        this.appHelper.openFile(item.file, {
           leafType: "new-tab-background",
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
         });
@@ -821,22 +827,29 @@ export class AnotherQuickSwitcherModal
       await this.handleCreateNewMarkdown(this.searchQuery, "popup");
     });
 
-    this.registerKeys("open in default app", () => {
-      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
-      if (!file) {
-        return;
-      }
+    this.registerKeys("check/uncheck", async () => {
+      await this.toggleCheckedItem();
+    });
+    this.registerKeys("check/uncheck and next", async () => {
+      await this.toggleCheckedItem({ moveNext: true });
+    });
+    this.registerKeys("check all", () => {
+      this.checkAll();
+    });
+    this.registerKeys("uncheck all", () => {
+      this.uncheckAll();
+    });
 
-      this.appHelper.openFileInDefaultApp(file);
+    this.registerKeys("open in default app", () => {
+      this.actionMultiItems((item) => {
+        this.appHelper.openFileInDefaultApp(item.file);
+      });
       this.close();
     });
     this.registerKeys("show in system explorer", () => {
-      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
-      if (!file) {
-        return;
-      }
-
-      this.appHelper.openInSystemExplorer(file);
+      this.actionMultiItems((item) => {
+        this.appHelper.openInSystemExplorer(item.file);
+      });
       this.close();
     });
     this.registerKeys("open in google", () => {
@@ -844,23 +857,19 @@ export class AnotherQuickSwitcherModal
       this.close();
     });
     this.registerKeys("open first URL", async () => {
-      const fileToOpened =
-        this.chooser.values?.[this.chooser.selectedItem]?.file;
-      if (!fileToOpened) {
-        return;
-      }
-
       this.close();
       await this.isClosed;
 
-      const urls = await this.appHelper.findExternalLinkUrls(fileToOpened);
-      if (urls.length > 0) {
-        activeWindow.open(urls[0]);
-      } else {
-        this.appHelper.openFile(fileToOpened, {
-          leafType: "same-tab",
-        });
-      }
+      this.actionMultiItems(async (item, mode) => {
+        const urls = await this.appHelper.findExternalLinkUrls(item.file);
+        if (urls.length > 0) {
+          activeWindow.open(urls[0]);
+        } else {
+          this.appHelper.openFile(item.file, {
+            leafType: mode === "select" ? "same-tab" : "new-tab",
+          });
+        }
+      });
     });
 
     const insertLinkToActiveMarkdownFile = (
@@ -894,25 +903,40 @@ export class AnotherQuickSwitcherModal
     };
 
     this.registerKeys("insert to editor", async () => {
-      const item = this.chooser.values?.[this.chooser.selectedItem];
-      if (!item) {
-        insertPhantomLinkToActiveMarkdownFile(this.searchQuery);
-        await this.safeClose();
-        return;
-      }
+      let offsetX = 0;
 
-      const file = item.file;
-      if (!file) {
-        return;
-      }
-
-      await this.safeClose();
-
-      if (this.appHelper.isActiveLeafCanvas()) {
-        this.appHelper.addFileToCanvas(file);
-      } else {
-        insertLinkToActiveMarkdownFile(file, item);
-      }
+      this.actionMultiItems(
+        async (item, mode) => {
+          await this.safeClose();
+          switch (mode) {
+            case "select":
+              if (this.appHelper.isActiveLeafCanvas()) {
+                this.appHelper.addFileToCanvas(item.file);
+              } else {
+                insertLinkToActiveMarkdownFile(item.file, item);
+              }
+              break;
+            case "check":
+              if (this.appHelper.isActiveLeafCanvas()) {
+                const cv = this.appHelper.addFileToCanvas(item.file, {
+                  x: offsetX,
+                  y: 0,
+                });
+                offsetX += cv.width + 30;
+              } else {
+                insertLinkToActiveMarkdownFile(item.file, item);
+                this.appHelper.insertStringToActiveFile("\n");
+              }
+              break;
+            default:
+              throw new ExhaustiveError(mode);
+          }
+        },
+        async () => {
+          insertPhantomLinkToActiveMarkdownFile(this.searchQuery);
+          await this.safeClose();
+        },
+      );
     });
 
     this.registerKeys("insert to editor in background", async () => {
@@ -1043,12 +1067,12 @@ export class AnotherQuickSwitcherModal
     });
 
     this.registerKeys("close if opened", () => {
-      const file = this.chooser.values?.[this.chooser.selectedItem]?.file;
-      if (!file) {
-        return;
-      }
-
-      this.appHelper.closeFile(file);
+      this.actionMultiItems(async (item, mode) => {
+        this.appHelper.closeFile(item.file);
+        if (mode === "check") {
+          this.close();
+        }
+      });
     });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection

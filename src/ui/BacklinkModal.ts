@@ -2,7 +2,6 @@ import {
   type App,
   type Debouncer,
   Platform,
-  SuggestModal,
   type TFile,
   type WorkspaceLeaf,
   debounce,
@@ -29,7 +28,7 @@ import {
   smartIncludes,
   trimLineByEllipsis,
 } from "../utils/strings";
-import type { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
 import { FOLDER } from "./icons";
 import { setFloatingModal } from "./modal";
 
@@ -41,10 +40,7 @@ interface SuggestionItem {
   offset: number;
 }
 
-export class BacklinkModal
-  extends SuggestModal<SuggestionItem>
-  implements UnsafeModalInterface<SuggestionItem>
-{
+export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
   logger: Logger;
   appHelper: AppHelper;
   settings: Settings;
@@ -54,12 +50,6 @@ export class BacklinkModal
   originFileBaseNameRegExp: RegExp;
   stateToRestore: CaptureState;
   lastOpenFileIndexByPath: { [path: string]: number } = {};
-
-  // unofficial
-  isOpen: boolean;
-  updateSuggestions: () => unknown;
-  chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
-  scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   debounceGetSuggestions: Debouncer<
     [string, (items: SuggestionItem[]) => void],
@@ -80,6 +70,10 @@ export class BacklinkModal
 
   debouncePreview?: Debouncer<[], void>;
   debouncePreviewCancelListener: () => void;
+
+  toKey(item: SuggestionItem): string {
+    return `${item.file.path}:${item.lineNumber}`;
+  }
 
   constructor(app: App, settings: Settings, initialLeaf: WorkspaceLeaf | null) {
     super(app);
@@ -289,7 +283,12 @@ export class BacklinkModal
     const sameFileWithPrevious = previousPath === item.file.path;
 
     const itemDiv = createDiv({
-      cls: "another-quick-switcher__item",
+      cls: [
+        "another-quick-switcher__item",
+        this.selectedItemMap[this.toKey(item)]
+          ? "another-quick-switcher__item__selected"
+          : "",
+      ].filter((x) => x),
     });
 
     const entryDiv = createDiv({
@@ -394,7 +393,7 @@ export class BacklinkModal
     leaf: LeafType,
     option: { keepOpen?: boolean } = {},
   ): Promise<TFile | null> {
-    const item = this.chooser.values?.[this.chooser.selectedItem];
+    const item = this.getSelectedItem();
     if (!item) {
       return null;
     }
@@ -480,7 +479,20 @@ export class BacklinkModal
     });
 
     this.registerKeys("open", async () => {
-      await this.chooseCurrentSuggestion("same-tab");
+      const items = this.getCheckedItems();
+      if (items.length > 0) {
+        this.close();
+        for (const x of items.slice()) {
+          await this.appHelper.openFile(x.file, {
+            leafType: "new-tab",
+            line: x.lineNumber - 1,
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          });
+          await sleep(0);
+        }
+      } else {
+        await this.chooseCurrentSuggestion("same-tab");
+      }
     });
     this.registerKeys("open in new tab", async () => {
       await this.chooseCurrentSuggestion("new-tab");
@@ -504,19 +516,33 @@ export class BacklinkModal
     });
     this.registerKeys("open all in new tabs", async () => {
       this.close();
-      if (this.chooser.values == null) {
+      const items = this.getItems();
+      if (!items) {
         return;
       }
 
-      const items = this.chooser.values.slice().reverse();
-      for (const x of items) {
-        await this.appHelper.openFile(x.file, {
+      this.getSelectedItem();
+      for (const item of items) {
+        await this.appHelper.openFile(item.file, {
           leafType: "new-tab",
-          line: x.lineNumber - 1,
+          line: item.lineNumber - 1,
           preventDuplicateTabs: this.settings.preventDuplicateTabs,
         });
         await sleep(0);
       }
+    });
+
+    this.registerKeys("check/uncheck", async () => {
+      await this.toggleCheckedItem();
+    });
+    this.registerKeys("check/uncheck and next", async () => {
+      await this.toggleCheckedItem({ moveNext: true });
+    });
+    this.registerKeys("check all", () => {
+      this.checkAll();
+    });
+    this.registerKeys("uncheck all", () => {
+      this.uncheckAll();
     });
 
     this.registerKeys("show all results", () => {
