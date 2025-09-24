@@ -771,13 +771,46 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       }
     });
     this.registerKeys("open in new tab", async () => {
-      await this.chooseCurrentSuggestion("new-tab");
+      const items = this.getCheckedItems();
+      if (items.length > 0) {
+        this.close();
+        for (const x of items) {
+          this.appHelper.openFile(x.file, {
+            leafType: "new-tab",
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          });
+        }
+      } else {
+        await this.chooseCurrentSuggestion("new-tab");
+      }
     });
     this.registerKeys("open in new pane (horizontal)", async () => {
-      await this.chooseCurrentSuggestion("new-pane-horizontal");
+      const items = this.getCheckedItems();
+      if (items.length > 0) {
+        this.close();
+        for (const x of items) {
+          this.appHelper.openFile(x.file, {
+            leafType: "new-pane-horizontal",
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          });
+        }
+      } else {
+        await this.chooseCurrentSuggestion("new-pane-horizontal");
+      }
     });
     this.registerKeys("open in new pane (vertical)", async () => {
-      await this.chooseCurrentSuggestion("new-pane-vertical");
+      const items = this.getCheckedItems();
+      if (items.length > 0) {
+        this.close();
+        for (const x of items) {
+          this.appHelper.openFile(x.file, {
+            leafType: "new-pane-vertical",
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          });
+        }
+      } else {
+        await this.chooseCurrentSuggestion("new-pane-vertical");
+      }
     });
     this.registerKeys("open in new window", async () => {
       await this.chooseCurrentSuggestion("new-window");

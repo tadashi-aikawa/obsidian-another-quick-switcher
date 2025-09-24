@@ -314,9 +314,9 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | Command                        | Default Keybinding | MC |
 | ------------------------------ | ------------------ | -- |
 | open                           | `Enter`            | ✅  |
-| open in new tab                | `Mod+Enter`        | ⛔  |
-| open in new pane (horizontal)  | `Mod+-`            | ⛔  |
-| open in new pane (vertical)    | `Mod+i`            | ⛔  |
+| open in new tab                | `Mod+Enter`        | ✅  |
+| open in new pane (horizontal)  | `Mod+-`            | ✅  |
+| open in new pane (vertical)    | `Mod+i`            | ✅  |
 | open in new window             | `Mod+o`            | ⛔  |
 | open in popup                  | _(none)_           | ⛔  |
 | open in new tab in background  | `Alt+o`            | ⛔  |
@@ -385,9 +385,9 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | Command                       | Default Keybinding | MC |
 | ----------------------------- | ------------------ | -- |
 | open                          | `Enter`            | ✅  |
-| open in new tab               | `Mod+Enter`        | ⛔  |
-| open in new pane (horizontal) | `Mod+-`            | ⛔  |
-| open in new pane (vertical)   | `Mod+i`            | ⛔  |
+| open in new tab               | `Mod+Enter`        | ✅  |
+| open in new pane (horizontal) | `Mod+-`            | ✅  |
+| open in new pane (vertical)   | `Mod+i`            | ✅  |
 | open in new window            | `Mod+o`            | ⛔  |
 | open in popup                 | _(none)_           | ⛔  |
 | open in new tab in background | `Alt+o`            | ⛔  |
@@ -442,9 +442,9 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | Command                       | Default Keybinding | MC |
 | ----------------------------- | ------------------ | -- |
 | open                          | `Enter`            | ✅  |
-| open in new tab               | `Mod+Enter`        | ⛔  |
-| open in new pane (horizontal) | `Mod+-`            | ⛔  |
-| open in new pane (vertical)   | `Mod+i`            | ⛔  |
+| open in new tab               | `Mod+Enter`        | ✅  |
+| open in new pane (horizontal) | `Mod+-`            | ✅  |
+| open in new pane (vertical)   | `Mod+i`            | ✅  |
 | open in new window            | `Mod+o`            | ⛔  |
 | open in popup                 | _(none)_           | ⛔  |
 | open in new tab in background | `Alt+o`            | ⛔  |

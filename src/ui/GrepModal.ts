@@ -947,13 +947,52 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
       }
     });
     this.registerKeys("open in new tab", async () => {
-      await this.chooseCurrentSuggestion("new-tab");
+      const items = this.getCheckedItems();
+      if (items.length > 0) {
+        this.close();
+        for (const x of items.slice()) {
+          await this.appHelper.openFile(x.file, {
+            leafType: "new-tab",
+            line: x.lineNumber - 1,
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          });
+          await sleep(0);
+        }
+      } else {
+        await this.chooseCurrentSuggestion("new-tab");
+      }
     });
     this.registerKeys("open in new pane (horizontal)", async () => {
-      await this.chooseCurrentSuggestion("new-pane-horizontal");
+      const items = this.getCheckedItems();
+      if (items.length > 0) {
+        this.close();
+        for (const x of items.slice()) {
+          await this.appHelper.openFile(x.file, {
+            leafType: "new-pane-horizontal",
+            line: x.lineNumber - 1,
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          });
+          await sleep(0);
+        }
+      } else {
+        await this.chooseCurrentSuggestion("new-pane-horizontal");
+      }
     });
     this.registerKeys("open in new pane (vertical)", async () => {
-      await this.chooseCurrentSuggestion("new-pane-vertical");
+      const items = this.getCheckedItems();
+      if (items.length > 0) {
+        this.close();
+        for (const x of items.slice()) {
+          await this.appHelper.openFile(x.file, {
+            leafType: "new-pane-vertical",
+            line: x.lineNumber - 1,
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          });
+          await sleep(0);
+        }
+      } else {
+        await this.chooseCurrentSuggestion("new-pane-vertical");
+      }
     });
     this.registerKeys("open in new window", async () => {
       await this.chooseCurrentSuggestion("new-window");
