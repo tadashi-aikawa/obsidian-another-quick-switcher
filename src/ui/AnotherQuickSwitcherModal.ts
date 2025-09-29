@@ -714,6 +714,14 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     }
   }
 
+  private async toFileToOpened(item: SuggestionItem) {
+    let fileToOpened = item.file;
+    if (item.phantom) {
+      fileToOpened = await this.app.vault.create(item.file.path, "");
+    }
+    return fileToOpened;
+  }
+
   private setHotkeys() {
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
@@ -761,10 +769,11 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       if (items.length > 0) {
         this.close();
         for (const x of items) {
-          this.appHelper.openFile(x.file, {
+          this.appHelper.openFile(await this.toFileToOpened(x), {
             leafType: "new-tab",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           });
+          await sleep(0);
         }
       } else {
         await this.chooseCurrentSuggestion("same-tab");
@@ -775,10 +784,11 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       if (items.length > 0) {
         this.close();
         for (const x of items) {
-          this.appHelper.openFile(x.file, {
+          this.appHelper.openFile(await this.toFileToOpened(x), {
             leafType: "new-tab",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           });
+          await sleep(0);
         }
       } else {
         await this.chooseCurrentSuggestion("new-tab");
@@ -789,10 +799,11 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       if (items.length > 0) {
         this.close();
         for (const x of items) {
-          this.appHelper.openFile(x.file, {
+          this.appHelper.openFile(await this.toFileToOpened(x), {
             leafType: "new-pane-horizontal",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           });
+          await sleep(0);
         }
       } else {
         await this.chooseCurrentSuggestion("new-pane-horizontal");
@@ -803,10 +814,11 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       if (items.length > 0) {
         this.close();
         for (const x of items) {
-          this.appHelper.openFile(x.file, {
+          this.appHelper.openFile(await this.toFileToOpened(x), {
             leafType: "new-pane-vertical",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           });
+          await sleep(0);
         }
       } else {
         await this.chooseCurrentSuggestion("new-pane-vertical");
