@@ -311,46 +311,48 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 ### Main dialog
 
 
-| Command                        | Default Keybinding | MC |
-| ------------------------------ | ------------------ | -- |
-| open                           | `Enter`            | ✅  |
-| open in new tab                | `Mod+Enter`        | ✅  |
-| open in new pane (horizontal)  | `Mod+-`            | ✅  |
-| open in new pane (vertical)    | `Mod+i`            | ✅  |
-| open in new window             | `Mod+o`            | ⛔  |
-| open in popup                  | _(none)_           | ⛔  |
-| open in new tab in background  | `Alt+o`            | ⛔  |
-| open all in new tabs           | `Mod+Shift+Alt+o`  | ⛔  |
-| preview                        | `Mod+,`            | ⛔  |
-| create                         | `Shift+Enter`      | ⛔  |
-| create in new tab              | `Mod+Shift+Enter`  | ⛔  |
-| create in new window           | `Mod+Shift+o`      | ⛔  |
-| create in new popup            | _(none)_           | ⛔  |
-| check/uncheck                  | _(none)_           | -  |
-| check/uncheck and next         | _(none)_           | -  |
-| check all                      | _(none)_           | -  |
-| uncheck all                    | _(none)_           | -  |
-| insert to editor               | `Alt+Enter`        | ✅  |
-| insert to editor in background | _(none)_           | ⛔  |
-| insert all to editor           | `Alt+Shift+Enter`  | ⛔  |
-| open in default app            | _(none)_           | ✅  |
-| show in system explorer        | _(none)_           | ✅  |
-| open in google                 | `Mod+g`            | ⛔  |
-| open first URL                 | `Mod+]`            | ✅  |
-| close if opened                | _(none)_           | ✅  |
-| show links                     | `Mod+l`            | ⛔  |
-| show backlinks                 | `Mod+h`            | ⛔  |
-| show all results               | `Shift+Alt+a`      | ⛔  |
-| navigate back                  | `Alt+ArrowLeft`    | ⛔  |
-| navigate forward               | `Alt+ArrowRight`   | ⛔  |
-| launch grep                    | _(none)_           | ⛔  |
-| copy file vault path           | _(none)_           | ⛔  |
-| copy absolute file path        | _(none)_           | ⛔  |
-| up                             | `Mod+p`            | ⛔  |
-| down                           | `Mod+n`            | ⛔  |
-| clear input                    | `Mod+d`            | ⛔  |
-| replace input                  | `Tab`              | ⛔  |
-| dismiss                        | `Escape`           | ⛔  |
+| Command                         | Default Keybinding | MC |
+| ------------------------------- | ------------------ | -- |
+| open                            | `Enter`            | ✅  |
+| open in new tab                 | `Mod+Enter`        | ✅  |
+| open in new pane (horizontal)   | `Mod+-`            | ✅  |
+| open in new pane (vertical)     | `Mod+i`            | ✅  |
+| open in new window              | `Mod+o`            | ⛔  |
+| open in popup                   | _(none)_           | ⛔  |
+| open in new tab in background   | `Alt+o`            | ⛔  |
+| open all in new tabs            | `Mod+Shift+Alt+o`  | ⛔  |
+| preview                         | `Mod+,`            | ⛔  |
+| create                          | `Shift+Enter`      | ⛔  |
+| create in new tab               | `Mod+Shift+Enter`  | ⛔  |
+| create in new pane (horizontal) | _(none)_           | ⛔  |
+| create in new pane (vertical)   | _(none)_           | ⛔  |
+| create in new window            | `Mod+Shift+o`      | ⛔  |
+| create in new popup             | _(none)_           | ⛔  |
+| check/uncheck                   | _(none)_           | -  |
+| check/uncheck and next          | _(none)_           | -  |
+| check all                       | _(none)_           | -  |
+| uncheck all                     | _(none)_           | -  |
+| insert to editor                | `Alt+Enter`        | ✅  |
+| insert to editor in background  | _(none)_           | ⛔  |
+| insert all to editor            | `Alt+Shift+Enter`  | ⛔  |
+| open in default app             | _(none)_           | ✅  |
+| show in system explorer         | _(none)_           | ✅  |
+| open in google                  | `Mod+g`            | ⛔  |
+| open first URL                  | `Mod+]`            | ✅  |
+| close if opened                 | _(none)_           | ✅  |
+| show links                      | `Mod+l`            | ⛔  |
+| show backlinks                  | `Mod+h`            | ⛔  |
+| show all results                | `Shift+Alt+a`      | ⛔  |
+| navigate back                   | `Alt+ArrowLeft`    | ⛔  |
+| navigate forward                | `Alt+ArrowRight`   | ⛔  |
+| launch grep                     | _(none)_           | ⛔  |
+| copy file vault path            | _(none)_           | ⛔  |
+| copy absolute file path         | _(none)_           | ⛔  |
+| up                              | `Mod+p`            | ⛔  |
+| down                            | `Mod+n`            | ⛔  |
+| clear input                     | `Mod+d`            | ⛔  |
+| replace input                   | `Tab`              | ⛔  |
+| dismiss                         | `Escape`           | ⛔  |
 
 
 ### Folder dialog

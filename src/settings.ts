@@ -69,6 +69,8 @@ export interface Hotkeys {
     preview: Hotkey[];
     create: Hotkey[];
     "create in new tab": Hotkey[];
+    "create in new pane (horizontal)": Hotkey[];
+    "create in new pane (vertical)": Hotkey[];
     "create in new window": Hotkey[];
     "create in new popup": Hotkey[];
     "open in default app": Hotkey[];
@@ -259,6 +261,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     preview: [{ modifiers: ["Mod"], key: "," }],
     create: [{ modifiers: ["Shift"], key: "Enter" }],
     "create in new tab": [{ modifiers: ["Mod", "Shift"], key: "Enter" }],
+    "create in new pane (horizontal)": [],
+    "create in new pane (vertical)": [],
     "create in new window": [{ modifiers: ["Mod", "Shift"], key: "o" }],
     "create in new popup": [],
     "open in default app": [],

@@ -865,6 +865,15 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.registerKeys("create in new tab", async () => {
       await this.handleCreateNewMarkdown(this.searchQuery, "new-tab");
     });
+    this.registerKeys("create in new pane (horizontal)", async () => {
+      await this.handleCreateNewMarkdown(
+        this.searchQuery,
+        "new-pane-horizontal",
+      );
+    });
+    this.registerKeys("create in new pane (vertical)", async () => {
+      await this.handleCreateNewMarkdown(this.searchQuery, "new-pane-vertical");
+    });
     this.registerKeys("create in new window", async () => {
       await this.handleCreateNewMarkdown(this.searchQuery, "new-window");
     });
