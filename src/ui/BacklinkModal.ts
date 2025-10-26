@@ -25,6 +25,7 @@ import { toLeafType } from "../utils/mouse";
 import { isExcalidraw, normalizePath } from "../utils/path";
 import {
   capitalizeFirstLetter,
+  escapeRegExp,
   smartIncludes,
   trimLineByEllipsis,
 } from "../utils/strings";
@@ -88,7 +89,10 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
     this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
     this.originFileBaseName = this.appHelper.getActiveFile()!.basename;
-    this.originFileBaseNameRegExp = new RegExp(this.originFileBaseName, "g");
+    this.originFileBaseNameRegExp = new RegExp(
+      escapeRegExp(this.originFileBaseName),
+      "g",
+    );
     this.limit = 255;
     this.app.workspace.getLastOpenFiles().forEach((v, i) => {
       this.lastOpenFileIndexByPath[v] = i;
