@@ -260,10 +260,11 @@ function createMetaDiv(args: {
   frontMatter: {
     [key: string]: string | number | string[] | number[] | boolean | null;
   };
+  frontMatterRanges?: { [key: string]: { start: number; end: number }[] };
   score: number;
   options: Options;
 }): Elements["metaDiv"] {
-  const { frontMatter, options } = args;
+  const { frontMatter, options, frontMatterRanges } = args;
 
   const metaDiv = createDiv({
     cls: "another-quick-switcher__item__metas",
@@ -275,8 +276,13 @@ function createMetaDiv(args: {
     });
     const descriptionSpan = createSpan({
       cls: "another-quick-switcher__item__meta__description",
-      text: String(frontMatter.description),
     });
+    const descriptionText = String(frontMatter.description);
+    const highlightedDescription = createHighlightedText(
+      descriptionText,
+      frontMatterRanges?.description,
+    );
+    descriptionSpan.appendChild(highlightedDescription);
     descriptionDiv.appendChild(descriptionSpan);
     metaDiv.appendChild(descriptionDiv);
   }
@@ -319,11 +325,11 @@ function createMetaDiv(args: {
         cls: "another-quick-switcher__item__meta__front_matter__values",
       });
       for (const v of [value].flat().filter(isPresent)) {
-        frontMatterValueDiv.createSpan({
-          cls: "another-quick-switcher__item__meta__front_matter__value",
-          title: v.toString(),
-          text: v.toString(),
-        });
+        const highlighted = createHighlightedText(
+          v.toString(),
+          frontMatterRanges?.[key],
+        );
+        frontMatterValueDiv.appendChild(highlighted);
       }
       frontMatterDiv.appendChild(frontMatterValueDiv);
 
@@ -507,6 +513,7 @@ export function createElements(
   const itemDiv = createItemDiv(item, essenceAliases, isTitleMatched, options);
 
   // meta
+  // FIXME: frontMatterのrangesがいる
   const frontMatter = omitBy(
     item.frontMatter ?? {},
     (key, value) =>
@@ -517,10 +524,29 @@ export function createElements(
     6,
   );
 
+  // FIXME: keyに対して複数ある
+  const frontMatterRanges = item.matchResults
+    .filter((res) => res.type === "property")
+    .map((res) => res.frontMatterRanges)
+    .filter(isPresent)
+    .reduce(
+      (acc, cur) => {
+        for (const [k, rng] of Object.entries(cur)) {
+          if (!acc[k]) {
+            acc[k] = [];
+          }
+          acc[k].push(rng);
+        }
+        return acc;
+      },
+      {} as { [key: string]: { start: number; end: number }[] },
+    );
+
   const metaDiv =
     Object.keys(frontMatter).length > 0 || maxScore > 0
       ? createMetaDiv({
           frontMatter,
+          frontMatterRanges,
           score: maxScore,
           options,
         })

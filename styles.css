@@ -316,7 +316,7 @@
 }
 
 .another-quick-switcher__item__meta__description {
-  display: inline-flex;
+  display: inline-block;
   font-size: 1.05em;
   padding-bottom: 0.5rem;
 }

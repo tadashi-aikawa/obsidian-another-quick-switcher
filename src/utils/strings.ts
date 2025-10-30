@@ -42,6 +42,70 @@ export function includes(
   );
 }
 
+function normalizeChar(
+  char: string,
+  isNormalizeAccentsDiacritics: boolean,
+): string {
+  const lowerChar = char.toLowerCase();
+  if (!isNormalizeAccentsDiacritics) {
+    return lowerChar;
+  }
+
+  const code = lowerChar.charCodeAt(0);
+  if (code <= 0x007e) {
+    return lowerChar;
+  }
+
+  return diacriticsMap[lowerChar] ?? lowerChar;
+}
+
+function buildNormalizationMap(
+  text: string,
+  isNormalizeAccentsDiacritics: boolean,
+  normalizedLength: number,
+): number[] {
+  const map = new Array<number>(normalizedLength);
+  let cursor = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    const normalizedChar = normalizeChar(text[i], isNormalizeAccentsDiacritics);
+    for (let j = 0; j < normalizedChar.length; j++) {
+      map[cursor++] = i;
+    }
+  }
+
+  return map;
+}
+
+export function includesWithRange(
+  text: string,
+  query: string,
+  isNormalizeAccentsDiacritics: boolean,
+): { start: number; end: number } | null {
+  const normalizedText = normalize(text, isNormalizeAccentsDiacritics);
+  const normalizedQuery = normalize(query, isNormalizeAccentsDiacritics);
+
+  if (normalizedQuery.length === 0) {
+    return { start: 0, end: -1 };
+  }
+
+  const startIndex = normalizedText.indexOf(normalizedQuery);
+  if (startIndex === -1) {
+    return null;
+  }
+
+  const map = buildNormalizationMap(
+    text,
+    isNormalizeAccentsDiacritics,
+    normalizedText.length,
+  );
+  const endIndex = startIndex + normalizedQuery.length - 1;
+  return {
+    start: map[startIndex],
+    end: map[endIndex],
+  };
+}
+
 export function capitalIncludes(
   text: string,
   query: string,

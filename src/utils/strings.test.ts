@@ -8,6 +8,7 @@ import {
   excludeSpace,
   hasCapitalLetter,
   includes,
+  includesWithRange,
   isValidRegex,
   microFuzzy,
   normalizeAccentsDiacritics,
@@ -74,6 +75,47 @@ describe.each<{ text: string; query: string; expected: boolean }>`
 `("includes", ({ text, query, expected }) => {
   test(`includes(${text}, ${query}) = ${expected}`, () => {
     expect(includes(text, query, false)).toBe(expected);
+  });
+});
+
+describe("includesWithRange", () => {
+  test("returns start and end for simple match", () => {
+    expect(includesWithRange("abcdef", "cd", false)).toEqual({
+      start: 2,
+      end: 3,
+    });
+  });
+
+  test("is case-insensitive", () => {
+    expect(includesWithRange("AbCdEf", "cd", false)).toEqual({
+      start: 2,
+      end: 3,
+    });
+  });
+
+  test("normalizes diacritics when enabled", () => {
+    expect(includesWithRange("Café", "Cafe", true)).toEqual({
+      start: 0,
+      end: 3,
+    });
+  });
+
+  test("returns null when not found", () => {
+    expect(includesWithRange("abcdef", "gh", false)).toBeNull();
+  });
+
+  test("handles repeated occurrences by returning first match", () => {
+    expect(includesWithRange("abcabc", "bc", false)).toEqual({
+      start: 1,
+      end: 2,
+    });
+  });
+
+  test("returns placeholder range for empty query", () => {
+    expect(includesWithRange("abc", "", false)).toEqual({
+      start: 0,
+      end: -1,
+    });
   });
 });
 

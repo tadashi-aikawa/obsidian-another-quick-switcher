@@ -1,7 +1,11 @@
 import type { TFile } from "obsidian";
 import { minBy, uniqFlatMap } from "./utils/collection-helper";
-import { smartEquals, smartIncludes, smartMicroFuzzy } from "./utils/strings";
-import { isPresent } from "./utils/types";
+import {
+  includesWithRange,
+  smartEquals,
+  smartIncludes,
+  smartMicroFuzzy,
+} from "./utils/strings";
 
 type MatchType =
   | "not found"
@@ -44,6 +48,8 @@ export interface MatchQueryResult {
     alias: string;
     ranges: { start: number; end: number }[];
   }[];
+  // TODO:
+  frontMatterRanges?: { [key: string]: { start: number; end: number } };
 }
 
 function matchQuery(
@@ -270,14 +276,29 @@ function matchQuery(
   }
 
   if (keysOfPropertyToSearch.length > 0) {
-    const values = keysOfPropertyToSearch
-      .map((x) => item.frontMatter?.[x]?.toString())
-      .filter((x) => x && smartIncludes(x, query, isNormalizeAccentsDiacritics))
-      .filter(isPresent);
-    if (values.length > 0) {
+    const r: MatchQueryResult["frontMatterRanges"] = {};
+    for (const key of keysOfPropertyToSearch) {
+      const prop = item.frontMatter?.[key]?.toString();
+      if (!prop) {
+        continue;
+      }
+
+      const ranges = includesWithRange(
+        prop,
+        query,
+        isNormalizeAccentsDiacritics,
+      );
+      if (ranges) {
+        r[key] = ranges;
+      }
+    }
+
+    const keys = Object.keys(r);
+    if (keys.length > 0) {
       results.push({
         type: "property",
-        meta: values,
+        meta: keys,
+        frontMatterRanges: r,
         query,
       });
     }
