@@ -227,7 +227,6 @@
 .another-quick-switcher__hit_word {
   /*noinspection CssUnresolvedCustomProperty*/
   color: var(--text-accent);
-  font-weight: bold;
 }
 
 .another-quick-switcher__grep__item__title_entry {
