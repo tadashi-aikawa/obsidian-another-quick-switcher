@@ -1,5 +1,5 @@
 import { isExcalidraw } from "src/utils/path";
-import { isPresent } from "src/utils/types";
+import { type FrontmatterProperty, isPresent } from "src/utils/types";
 import { type SuggestionItem, getMatchedTitleAndAliases } from "../matcher";
 import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
 import { round } from "../utils/math";
@@ -258,9 +258,11 @@ function createItemDiv(
 
 function createMetaDiv(args: {
   frontMatter: {
-    [key: string]: string | number | string[] | number[] | boolean | null;
+    [key: string]: FrontmatterProperty;
   };
-  frontMatterRanges?: { [key: string]: { start: number; end: number }[] };
+  frontMatterRanges?: {
+    [key: string]: Array<{ start: number; end: number }>[];
+  };
   score: number;
   options: Options;
 }): Elements["metaDiv"] {
@@ -280,7 +282,7 @@ function createMetaDiv(args: {
     const descriptionText = String(frontMatter.description);
     const highlightedDescription = createHighlightedText(
       descriptionText,
-      frontMatterRanges?.description,
+      frontMatterRanges?.description?.at(0) ?? [],
     );
     descriptionSpan.appendChild(highlightedDescription);
     descriptionDiv.appendChild(descriptionSpan);
@@ -321,17 +323,27 @@ function createMetaDiv(args: {
         text: key,
       });
 
-      const frontMatterValueDiv = createDiv({
+      const frontMatterValuesDiv = createDiv({
         cls: "another-quick-switcher__item__meta__front_matter__values",
       });
-      for (const v of [value].flat().filter(isPresent)) {
+      const values = Array.isArray(value) ? value : [value];
+      for (let i = 0; i < values.length; i++) {
+        const v = values[i];
+        if (v == null) {
+          continue;
+        }
+
         const highlighted = createHighlightedText(
           v.toString(),
-          frontMatterRanges?.[key],
+          frontMatterRanges?.[key]?.at(i),
         );
+        const frontMatterValueDiv = frontMatterValuesDiv.createSpan({
+          cls: "another-quick-switcher__item__meta__front_matter__value",
+        });
         frontMatterValueDiv.appendChild(highlighted);
+        frontMatterValuesDiv.appendChild(frontMatterValueDiv);
       }
-      frontMatterDiv.appendChild(frontMatterValueDiv);
+      frontMatterDiv.appendChild(frontMatterValuesDiv);
 
       frontMattersDiv.appendChild(frontMatterDiv);
     }
@@ -513,7 +525,6 @@ export function createElements(
   const itemDiv = createItemDiv(item, essenceAliases, isTitleMatched, options);
 
   // meta
-  // FIXME: frontMatterのrangesがいる
   const frontMatter = omitBy(
     item.frontMatter ?? {},
     (key, value) =>
@@ -524,22 +535,37 @@ export function createElements(
     6,
   );
 
-  // FIXME: keyに対して複数ある
+  /**
+   * {
+   *  key: [
+   *    [ {start: number, end: number}, ... ], // match result of fromtmatter[key][0]
+   *    [ {start: number, end: number}, ... ], // match result of fromtmatter[key][1]
+   *    ...
+   *  ],
+   * }
+   */
   const frontMatterRanges = item.matchResults
     .filter((res) => res.type === "property")
     .map((res) => res.frontMatterRanges)
     .filter(isPresent)
     .reduce(
-      (acc, cur) => {
-        for (const [k, rng] of Object.entries(cur)) {
-          if (!acc[k]) {
-            acc[k] = [];
+      (rngsListByKey, rngsByKey) => {
+        for (const [key, rngOrNulls] of Object.entries(rngsByKey)) {
+          rngsListByKey[key] ??= [];
+
+          for (let i = 0; i < rngOrNulls.length; i++) {
+            const rng = rngOrNulls[i];
+            if (rng == null) {
+              continue;
+            }
+
+            rngsListByKey[key][i] ??= [];
+            rngsListByKey[key][i].push(rng);
           }
-          acc[k].push(rng);
         }
-        return acc;
+        return rngsListByKey;
       },
-      {} as { [key: string]: { start: number; end: number }[] },
+      {} as { [key: string]: Array<{ start: number; end: number }>[] },
     );
 
   const metaDiv =

@@ -6,6 +6,7 @@ import {
   smartIncludes,
   smartMicroFuzzy,
 } from "./utils/strings";
+import type { FrontmatterProperty } from "./utils/types";
 
 type MatchType =
   | "not found"
@@ -26,7 +27,7 @@ export interface SuggestionItem {
   headers: string[];
   links: string[];
   frontMatter?: {
-    [key: string]: string | number | string[] | number[] | boolean | null;
+    [key: string]: FrontmatterProperty;
   };
   matchResults: MatchQueryResult[];
   phantom: boolean;
@@ -48,8 +49,11 @@ export interface MatchQueryResult {
     alias: string;
     ranges: { start: number; end: number }[];
   }[];
-  // TODO:
-  frontMatterRanges?: { [key: string]: { start: number; end: number } };
+  // Front matter property match ranges for highlighting purposes (only used for property matches)
+  // { key: [range for value1, range for value2, ...] }
+  frontMatterRanges?: {
+    [key: string]: Array<{ start: number; end: number } | null>;
+  };
 }
 
 function matchQuery(
@@ -276,29 +280,38 @@ function matchQuery(
   }
 
   if (keysOfPropertyToSearch.length > 0) {
-    const r: MatchQueryResult["frontMatterRanges"] = {};
+    const frontMatterRanges: MatchQueryResult["frontMatterRanges"] = {};
     for (const key of keysOfPropertyToSearch) {
-      const prop = item.frontMatter?.[key]?.toString();
+      const prop = item.frontMatter?.[key];
       if (!prop) {
         continue;
       }
 
-      const ranges = includesWithRange(
-        prop,
-        query,
-        isNormalizeAccentsDiacritics,
-      );
-      if (ranges) {
-        r[key] = ranges;
+      if (Array.isArray(prop)) {
+        const ranges = prop.map((v) =>
+          includesWithRange(v.toString(), query, isNormalizeAccentsDiacritics),
+        );
+        if (ranges.length > 0 && ranges.some((x) => x !== null)) {
+          frontMatterRanges[key] = ranges;
+        }
+      } else {
+        const range = includesWithRange(
+          prop.toString(),
+          query,
+          isNormalizeAccentsDiacritics,
+        );
+        if (range) {
+          frontMatterRanges[key] = [range];
+        }
       }
     }
 
-    const keys = Object.keys(r);
+    const keys = Object.keys(frontMatterRanges);
     if (keys.length > 0) {
       results.push({
         type: "property",
         meta: keys,
-        frontMatterRanges: r,
+        frontMatterRanges,
         query,
       });
     }
