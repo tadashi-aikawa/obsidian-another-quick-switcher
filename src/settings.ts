@@ -103,6 +103,12 @@ export interface Hotkeys {
     "open in default app": Hotkey[];
     dismiss: Hotkey[];
   };
+  command: {
+    up: Hotkey[];
+    down: Hotkey[];
+    "copy command id": Hotkey[];
+    dismiss: Hotkey[];
+  };
   header: {
     up: Hotkey[];
     down: Hotkey[];
@@ -235,6 +241,11 @@ export interface Settings {
   moveFolderSortPriority: MoveFolderSortPriority;
   moveFileRecentlyUsedFilePath: string;
   moveFileMaxRecentlyUsedFolders: number;
+
+  // Command palette
+  commandPaletteHistoryPath: string;
+  commandPaletteMaxHistoryRetentionDays: number;
+
   // debug
   showLogAboutPerformanceInConsole: boolean;
   showFuzzyMatchScore: boolean;
@@ -293,6 +304,12 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     up: [{ modifiers: ["Mod"], key: "p" }],
     down: [{ modifiers: ["Mod"], key: "n" }],
     "open in default app": [],
+    dismiss: [{ modifiers: [], key: "Escape" }],
+  },
+  command: {
+    up: [{ modifiers: ["Mod"], key: "p" }],
+    down: [{ modifiers: ["Mod"], key: "n" }],
+    "copy command id": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   header: {
@@ -696,6 +713,9 @@ export const DEFAULT_SETTINGS: Settings = {
   moveFolderSortPriority: "Recently used",
   moveFileRecentlyUsedFilePath: "",
   moveFileMaxRecentlyUsedFolders: 10,
+  // Command palette
+  commandPaletteHistoryPath: "",
+  commandPaletteMaxHistoryRetentionDays: 10,
   // debug
   showLogAboutPerformanceInConsole: false,
   showFuzzyMatchScore: false,
@@ -712,6 +732,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     link: false,
     "in-file": false,
     grep: false,
+    command: false,
   };
 
   constructor(app: App, plugin: AnotherQuickSwitcher) {
@@ -735,6 +756,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addInFileSettings(containerEl);
     this.addGrepSettings(containerEl);
     this.addMoveSettings(containerEl);
+    this.addCommandPalleteSettings(containerEl);
 
     this.addDebugSettings(containerEl);
   }
@@ -1050,6 +1072,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     addHotkeysForDialog("link", "Link dialog");
     addHotkeysForDialog("in-file", "In File dialog");
     addHotkeysForDialog("grep", "Grep dialog");
+    addHotkeysForDialog("command", "Command palette");
   }
 
   private addSearchSettings(containerEl: HTMLElement) {
@@ -1874,6 +1897,39 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setDynamicTooltip()
           .onChange(async (value) => {
             this.plugin.settings.moveFileMaxRecentlyUsedFolders = value;
+            await this.plugin.saveSettings();
+          });
+      });
+  }
+
+  private addCommandPalleteSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "⌘ Command pallete" });
+
+    new Setting(containerEl)
+      .setName("History mapping file path")
+      .setDesc("Path within vault to store command history data")
+      .addText((tc) => {
+        tc.setPlaceholder(
+          ".obsidian/plugins/obsidian-another-quick-switcher/command-history.json",
+        )
+          .setValue(this.plugin.settings.commandPaletteHistoryPath)
+          .onChange(async (value) => {
+            this.plugin.settings.commandPaletteHistoryPath = value;
+            await this.plugin.saveSettings();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Max history retention days")
+      .setDesc(
+        "Commands not used within this number of days will be removed. Set to 0 to retain all history.",
+      )
+      .addSlider((sc) => {
+        sc.setLimits(0, 30, 1)
+          .setValue(this.plugin.settings.commandPaletteMaxHistoryRetentionDays)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.commandPaletteMaxHistoryRetentionDays = value;
             await this.plugin.saveSettings();
           });
       });

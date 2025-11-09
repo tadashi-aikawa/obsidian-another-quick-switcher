@@ -6,16 +6,25 @@ import {
   Notice,
   Platform,
 } from "obsidian";
+import { getAvailableCommands } from "./apputils/commands";
+import { loadJson } from "./apputils/io";
 import type { SearchCommand, Settings } from "./settings";
 import { AnotherQuickSwitcherModal } from "./ui/AnotherQuickSwitcherModal";
 import { BacklinkModal } from "./ui/BacklinkModal";
+import {
+  type CommandHistoryMap,
+  CommandQuickSwitcher,
+  type HistoricalCommand,
+} from "./ui/CommandPaletteModal";
 import { FolderModal } from "./ui/FolderModal";
 import { GrepModal } from "./ui/GrepModal";
 import { HeaderModal } from "./ui/HeaderModal";
 import { InFileModal } from "./ui/InFileModal";
 import { LinkModal } from "./ui/LinkModal";
 import { MoveModal } from "./ui/MoveModal";
+import { omitBy } from "./utils/collection-helper";
 import { existsRg } from "./utils/ripgrep";
+import { now } from "./utils/times";
 
 const SEARCH_COMMAND_PREFIX = "search-command";
 
@@ -134,6 +143,49 @@ export function showHeaderDialog(
   modal.open();
 }
 
+export async function showCommandPalette(args: {
+  app: App;
+  settings: Settings;
+}): Promise<void> {
+  const unixNow = now();
+
+  const commandHistoryPath =
+    args.settings.commandPaletteHistoryPath ||
+    ".obsidian/plugins/obsidian-another-quick-switcher/command-history.json";
+
+  const { lastUsedMap: _lastUsedMap = {}, queryUsedMap: _queryUsedMap = {} } =
+    (await loadJson<CommandHistoryMap>(commandHistoryPath)) ?? {};
+
+  const lastUsedMap =
+    args.settings.commandPaletteMaxHistoryRetentionDays > 0
+      ? omitBy(
+          _lastUsedMap,
+          (_, lastUpdated: number) =>
+            unixNow - lastUpdated >
+            args.settings.commandPaletteMaxHistoryRetentionDays * 24 * 60 * 60,
+        )
+      : _lastUsedMap;
+  const queryUsedMap =
+    args.settings.commandPaletteMaxHistoryRetentionDays > 0
+      ? omitBy(_queryUsedMap, (_, commandId) => lastUsedMap[commandId] == null)
+      : _queryUsedMap;
+
+  const commands: HistoricalCommand[] = getAvailableCommands().map((x) => ({
+    ...x,
+    lastUsed: lastUsedMap[x.id],
+  }));
+
+  const modal = new CommandQuickSwitcher(
+    args.app,
+    commands,
+    lastUsedMap,
+    queryUsedMap,
+    commandHistoryPath,
+    args.settings,
+  );
+  modal.open();
+}
+
 export function createCommands(app: App, settings: Settings): Command[] {
   return [
     {
@@ -221,6 +273,14 @@ export function createCommands(app: App, settings: Settings): Command[] {
         }
 
         showInFileDialog(app, settings);
+      },
+    },
+    {
+      id: "command-palette",
+      name: "Command palette",
+      hotkeys: [],
+      callback: () => {
+        showCommandPalette({ app, settings });
       },
     },
     ...settings.searchCommands.map((command) => {

@@ -16,6 +16,7 @@ This is an Obsidian plugin which is another choice of Quick switcher. It offers 
 - Searching **considering prefix emoji**
 - Showing file names and directory names separately
 - Revealing a folder in the file tree (`Reveal a folder in the file tree`)
+- Running Obsidian commands with a built-in command palette that remembers your history
 
 ## ⏬ Install
 
@@ -302,6 +303,25 @@ Tip: Assign convenient keys in Settings to quickly mark a range (e.g., bind "che
 
 ![Setting](./demo/check-uncheck-items-settings.webp)
 
+### 13. Command palette
+
+Another Quick Switcher bundles its own command palette dialog so you can search and execute Obsidian commands with the same fast scoring model and dialog hotkeys.
+
+- The palette remembers every command you run and surfaces recently used commands with a history badge
+- It also records which command you picked for the current query and marks that command as "top priority" the next time you type the same query
+- Use the `copy command id` hotkey to quickly grab an internal command ID for automation or scripting
+
+https://github.com/user-attachments/assets/eb2bf1bc-08b8-4084-b4b7-450d737b8e95
+
+#### History storage
+
+
+| Setting                    | Description                                                                                         | Default                                                                  |
+| -------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| History mapping file path  | Vault-relative path for the JSON file that stores last used commands and per-query favorites        | `.obsidian/plugins/obsidian-another-quick-switcher/command-history.json` |
+| Max history retention days | Remove entries from the history when a command hasn't been run within this many days (0 = keep all) | 10                                                                       |
+
+
 ## ⌘ Dialog Commands
 
 Below are dialog-specific command tables with default keybindings.
@@ -464,6 +484,17 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | down                          | `Mod+n`            | ⛔  |
 | search                        | `Tab`              | ⛔  |
 | dismiss                       | `Escape`           | ⛔  |
+
+
+### Command palette
+
+
+| Command         | Default Keybinding | MC |
+| --------------- | ------------------ | -- |
+| up              | `Mod+p`            | ⛔  |
+| down            | `Mod+n`            | ⛔  |
+| copy command id | _(none)_           | ⛔  |
+| dismiss         | `Escape`           | ⛔  |
 
 
 ## 💥 Major Breaking Changes

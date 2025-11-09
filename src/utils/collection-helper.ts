@@ -19,7 +19,7 @@ export const mapKeys = <T>(
 /**
  * Use as compareFn in sort
  */
-export const sorter = <T, U extends number | string>(
+export const sorter = <T, U extends number | string | boolean>(
   toOrdered: (t: T) => U,
   order: "asc" | "desc" = "asc",
 ) => {
@@ -173,3 +173,7 @@ export function omitBy<T extends { [key: string]: any }>(
 
   return cloned;
 }
+
+export const maxReducer = <T>(toNum: (t: T) => number) => {
+  return (a: T, b: T) => (toNum(a) >= toNum(b) ? a : b);
+};

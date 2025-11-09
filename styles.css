@@ -1,3 +1,8 @@
+* {
+  --first-rank-color: var(--interactive-accent);
+  --second-rank-color: var(--text-normal);
+}
+
 .another-quick-switcher__floating-prompt {
   width: min(700px, 33vw);
   min-width: 500px;
@@ -652,3 +657,44 @@
   display: none;
 }
 
+.another-quick-switcher__command-palette__item {
+  display: flex;
+}
+
+.another-quick-switcher__command-palette__item__key {
+  margin-left: auto;
+  font-size: 80%;
+  color: darkgrey;
+}
+
+.another-quick-switcher__command-palette__item-lastused {
+  color: var(--second-rank-color);
+  font-weight: bold;
+}
+
+.another-quick-switcher__command-palette__item-lastused::before {
+  background-size: 18px 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 2px;
+  display: inline-block;
+  content: "";
+  background-color: var(--second-rank-color);
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' stroke='currentColor' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-history-icon lucide-history'><path d='M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8'/><path d='M3 3v5h5'/><path d='M12 7v5l4 2'/></svg>");
+}
+
+.another-quick-switcher__command-palette__item-top-priority {
+  color: var(--first-rank-color);
+  font-weight: bold;
+}
+
+.another-quick-switcher__command-palette__item-top-priority::before {
+  background-size: 18px 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 2px;
+  display: inline-block;
+  content: "";
+  background-color: var(--first-rank-color);
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 32 32' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-crown-icon lucide-crown'><path d='M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z'/><path d='M5 21h14'/></svg>");
+}

@@ -58,6 +58,7 @@ interface UnsafeAppInterface {
   commands: {
     removeCommand(id: string): void;
     commands: { [commandId: string]: any };
+    executeCommandById(id: string): boolean;
   };
   plugins: {
     plugins: {
@@ -91,7 +92,12 @@ interface UnsafeAppInterface {
     getBacklinksForFile(file: TFile): { data: Map<string, LinkCache[]> };
     initialized: boolean;
   };
+  hotkeyManager: {
+    printHotkeyForCommand(id: string): string;
+  };
 }
+
+export type UnsafeApp = App & UnsafeAppInterface;
 
 interface UnSafeLayoutChild {
   id: string;
@@ -168,7 +174,7 @@ type OpenFileOption = {
 };
 
 export class AppHelper {
-  private unsafeApp: App & UnsafeAppInterface;
+  private unsafeApp: UnsafeApp;
 
   constructor(app: App) {
     this.unsafeApp = app as any;
