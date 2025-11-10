@@ -33,10 +33,10 @@ function validateType() {
 # $1: scope
 function validateScope() {
   case $1 in
-  main | folder | header | backlink | link | 'in file' | grep | move | "") ;;
+  main | folder | header | backlink | link | 'in file' | grep | move | command | "") ;;
   *)
     echo "Invalid scope: $1"
-    echo ">> main | folder | header | backlink | link | in file | grep | move"
+    echo ">> main | folder | header | backlink | link | in file | grep | move | command"
     exit 1
     ;;
   esac
