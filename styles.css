@@ -661,8 +661,14 @@
   display: flex;
 }
 
-.another-quick-switcher__command-palette__item__key {
+.another-quick-switcher__command-palette__item__keys {
   margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+.another-quick-switcher__command-palette__item__key {
+  display: flex;
+  align-items: center;
   font-size: 80%;
   color: darkgrey;
 }

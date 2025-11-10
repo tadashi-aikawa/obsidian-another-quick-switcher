@@ -1,7 +1,7 @@
 import { type App, type Command, Notice } from "obsidian";
 import type { UnsafeApp } from "src/app-helper";
 import { saveJson } from "src/apputils/io";
-import { createInstructions } from "src/keys";
+import { createInstructions, hotkey2String } from "src/keys";
 import type { Hotkeys, Settings } from "src/settings";
 import { maxReducer, sorter } from "src/utils/collection-helper";
 import { microFuzzy } from "src/utils/strings";
@@ -83,9 +83,13 @@ export class CommandQuickSwitcher extends AbstractSuggestionModal<HistoricalComm
   renderSuggestion(item: HistoricalCommand, el: HTMLElement): void {
     const recordEl = createDiv({
       cls: [
-        "carnelian-command-palette-item",
-        item.lastUsed ? "carnelian-command-palette-item-lastused" : "",
-        item.topPriority ? "carnelian-command-palette-item-top-priority" : "",
+        "another-quick-switcher__command-palette__item",
+        item.lastUsed
+          ? "another-quick-switcher__command-palette__item-lastused"
+          : "",
+        item.topPriority
+          ? "another-quick-switcher__command-palette__item-top-priority"
+          : "",
       ],
     });
 
@@ -94,12 +98,23 @@ export class CommandQuickSwitcher extends AbstractSuggestionModal<HistoricalComm
         text: item.name,
       }),
     );
-    recordEl.appendChild(
-      createDiv({
-        text: this.app.hotkeyManager.printHotkeyForCommand(item.id),
-        cls: ["carnelian-command-palette-item__key"],
-      }),
-    );
+
+    const hotkeys = this.app.hotkeyManager.getHotkeys(item.id);
+    if (hotkeys) {
+      const keysDiv = createDiv({
+        cls: ["another-quick-switcher__command-palette__item__keys"],
+      });
+      for (const hk of hotkeys) {
+        keysDiv.appendChild(
+          createEl("kbd", {
+            text: hotkey2String(hk),
+            cls: ["another-quick-switcher__command-palette__item__key"],
+          }),
+        );
+      }
+
+      recordEl.appendChild(keysDiv);
+    }
 
     el.appendChild(recordEl);
   }

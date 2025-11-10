@@ -6,6 +6,7 @@ import {
   type EditorPosition,
   FileView,
   type HeadingCache,
+  type Hotkey,
   type LinkCache,
   MarkdownView,
   type Pos,
@@ -93,7 +94,7 @@ interface UnsafeAppInterface {
     initialized: boolean;
   };
   hotkeyManager: {
-    printHotkeyForCommand(id: string): string;
+    getHotkeys(id: string): Hotkey[] | undefined;
   };
 }
 
