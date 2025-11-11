@@ -43,12 +43,13 @@ export class CommandQuickSwitcher extends AbstractSuggestionModal<HistoricalComm
     return item.id;
   }
 
-  getSuggestions(query: string): HistoricalCommand[] {
+  getSuggestions(_query: string): HistoricalCommand[] {
+    const query = _query.trim();
     this.query = query;
     return this.commands
       .map((command) => ({
         command:
-          this.queryUsedMap[query] === command.id
+          query && this.queryUsedMap[query] === command.id
             ? { ...command, topPriority: true }
             : command,
         results: query
