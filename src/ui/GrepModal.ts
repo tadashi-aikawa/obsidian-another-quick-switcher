@@ -44,10 +44,12 @@ const globalInternalStorage: {
   items: SuggestionItem[];
   basePath?: string;
   selected?: number;
+  queryHistories: string[];
 } = {
   items: [],
   basePath: undefined,
   selected: undefined,
+  queryHistories: [],
 };
 
 interface SuggestionItem {
@@ -107,6 +109,8 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
   debouncePreview?: Debouncer<[], void>;
   debouncePreviewCancelListener: () => void;
   debouncePreviewSearchCancelListener: () => void;
+  queryHistoryIndex: number;
+  queryHistoryBaseQuery: string | null;
 
   toKey(item: SuggestionItem): string {
     return `${item.file.path}:${item.lineNumber}`;
@@ -131,6 +135,8 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
     this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
     this.limit = 255;
+    this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
+    this.queryHistoryBaseQuery = null;
 
     const searchCmd = this.settings.hotkeys.grep.search.at(0);
     if (searchCmd) {
@@ -165,6 +171,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
       // Trigger input event to initialize suggestions
       this.inputEl.dispatchEvent(new Event("input"));
     }
+    this.resetQueryHistoryNavigationBase();
 
     window.setTimeout(() => {
       this.basePathInputEl = createEl("input", {
@@ -206,10 +213,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
           evt.preventDefault();
 
           this.basePath = (evt.target as any).value;
-          this.currentQuery = this.clonedInputEl!.value;
-          this.inputEl.value = this.currentQuery;
-          // Necessary to rerender suggestions
-          this.inputEl.dispatchEvent(new Event("input"));
+          this.triggerSearch();
         }
       };
       this.basePathInputEl.addEventListener(
@@ -287,8 +291,16 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
   }
 
   onClose() {
+    const latestQuery = this.clonedInputEl?.value;
     super.onClose();
     this.debouncePreview?.cancel();
+
+    const hasSuggestions = (this.suggestions?.length ?? 0) > 0;
+    if (hasSuggestions) {
+      this.recordCurrentQueryToHistory(latestQuery);
+    } else {
+      this.resetQueryHistoryNavigationBase();
+    }
 
     globalInternalStorage.items = this.suggestions;
     globalInternalStorage.basePath = this.basePath;
@@ -733,6 +745,79 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
     await this.chooseCurrentSuggestion(toLeafType(evt));
   }
 
+  private resetQueryHistoryNavigationBase() {
+    this.queryHistoryBaseQuery = this.clonedInputEl?.value ?? "";
+    this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
+  }
+
+  private recordCurrentQueryToHistory(query?: string) {
+    const q = (query ?? this.clonedInputEl?.value ?? "").trim();
+    if (!q) {
+      this.resetQueryHistoryNavigationBase();
+      return;
+    }
+
+    const histories = globalInternalStorage.queryHistories;
+    if (histories[histories.length - 1] !== q) {
+      histories.push(q);
+      const HISTORY_LIMIT = 50;
+      if (histories.length > HISTORY_LIMIT) {
+        histories.shift();
+      }
+    }
+
+    this.resetQueryHistoryNavigationBase();
+  }
+
+  private navigateQueryHistory(direction: "back" | "forward") {
+    const histories = globalInternalStorage.queryHistories;
+    if (histories.length === 0) {
+      return;
+    }
+
+    if (this.queryHistoryIndex === histories.length) {
+      this.queryHistoryBaseQuery = this.clonedInputEl.value;
+    } else if (this.queryHistoryBaseQuery === null) {
+      this.resetQueryHistoryNavigationBase();
+    }
+
+    const offset = direction === "back" ? -1 : 1;
+    let nextIndex = this.queryHistoryIndex + offset;
+
+    while (nextIndex >= 0 && nextIndex <= histories.length) {
+      const currentValue = this.clonedInputEl.value;
+      const nextValue =
+        nextIndex === histories.length
+          ? this.queryHistoryBaseQuery ?? ""
+          : histories[nextIndex];
+
+      if (nextValue !== currentValue) {
+        this.queryHistoryIndex = nextIndex;
+        this.clonedInputEl.value = nextValue;
+        this.inputEl.value = nextValue;
+        this.currentQuery = nextValue;
+        this.triggerSearch({ useDebounce: true });
+        return;
+      }
+      nextIndex += offset;
+    }
+  }
+
+  private triggerSearch(option?: { useDebounce?: boolean }) {
+    this.currentQuery = this.clonedInputEl!.value;
+    this.inputEl.value = this.currentQuery;
+
+    if (option?.useDebounce && this.settings.grepSearchDelayMilliSeconds > 0) {
+      this.debounceInputEvent();
+      return;
+    }
+
+    this.validateRegexInput();
+    if (this.currentQuery.length) {
+      this.inputEl.dispatchEvent(new Event("input"));
+    }
+  }
+
   private toggleInput(): void {
     if (document.activeElement === this.clonedInputEl) {
       this.basePathInputEl.focus();
@@ -856,10 +941,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
 
       if (equalsAsHotkey(hotkey, keyEvent)) {
         evt.preventDefault();
-        this.currentQuery = this.clonedInputEl!.value;
-        this.inputEl.value = this.currentQuery;
-        // Necessary to rerender suggestions
-        this.inputEl.dispatchEvent(new Event("input"));
+        this.triggerSearch();
       }
     };
     this.clonedInputEl.addEventListener(
@@ -928,6 +1010,14 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
 
     this.registerKeys("toggle input", () => {
       this.toggleInput();
+    });
+
+    this.registerKeys("previous search history", () => {
+      this.navigateQueryHistory("back");
+    });
+
+    this.registerKeys("next search history", () => {
+      this.navigateQueryHistory("forward");
     });
 
     this.registerKeys("open", async () => {

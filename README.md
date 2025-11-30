@@ -158,14 +158,16 @@ It sorts results by modified time descending.
 #### Additional hotkeys
 
 
-| Command | Description | Default Hotkey |
-|---------|-------------|----------------|
-| Search | Execute search | `TAB` |
-| Preview | Preview selected file | `Ctrl+,` |
-| Toggle input focus | Switch focus between search query and path input | _(customizable)_ |
-| Clear input | Clear the search query input | _(customizable)_ |
-| Clear path | Clear the path input | _(customizable)_ |
-| Set ./ to path | Set current directory to path input | _(customizable)_ |
+| Command                 | Description                                      | Default Hotkey   |
+| ----------------------- | ------------------------------------------------ | ---------------- |
+| Search                  | Execute search                                   | `TAB`            |
+| Preview                 | Preview selected file                            | `Ctrl+,`         |
+| Toggle input focus      | Switch focus between search query and path input | _(customizable)_ |
+| Previous search history | Move to the previous query in history            | _(customizable)_ |
+| Next search history     | Move to the next query in history                | _(customizable)_ |
+| Clear input             | Clear the search query input                     | _(customizable)_ |
+| Clear path              | Clear the path input                             | _(customizable)_ |
+| Set ./ to path          | Set current directory to path input              | _(customizable)_ |
 
 
 **Note**: If you want to search in real-time, please set the "Grep search delay milli-seconds" option to 1 or more.
@@ -365,6 +367,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | show all results                | `Shift+Alt+a`      | ⛔  |
 | navigate back                   | `Alt+ArrowLeft`    | ⛔  |
 | navigate forward                | `Alt+ArrowRight`   | ⛔  |
+| previous search history         | _(none)_           | ⛔  |
+| next search history             | _(none)_           | ⛔  |
 | launch grep                     | _(none)_           | ⛔  |
 | copy file vault path            | _(none)_           | ⛔  |
 | copy absolute file path         | _(none)_           | ⛔  |
@@ -480,6 +484,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | clear path                    | `Alt+d`            | ⛔  |
 | set ./ to path                | `Alt+c`            | ⛔  |
 | toggle input                  | _(none)_           | ⛔  |
+| previous search history       | _(none)_           | ⛔  |
+| next search history           | _(none)_           | ⛔  |
 | up                            | `Mod+p`            | ⛔  |
 | down                          | `Mod+n`            | ⛔  |
 | search                        | `Tab`              | ⛔  |

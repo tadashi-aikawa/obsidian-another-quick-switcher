@@ -85,6 +85,8 @@ export interface Hotkeys {
     "show all results": Hotkey[];
     "navigate forward": Hotkey[];
     "navigate back": Hotkey[];
+    "previous search history": Hotkey[];
+    "next search history": Hotkey[];
     "close if opened": Hotkey[];
     "copy file vault path": Hotkey[];
     "copy absolute file path": Hotkey[];
@@ -169,6 +171,8 @@ export interface Hotkeys {
     "clear path": Hotkey[];
     "set ./ to path": Hotkey[];
     "toggle input": Hotkey[];
+    "previous search history": Hotkey[];
+    "next search history": Hotkey[];
     open: Hotkey[];
     "open in new tab": Hotkey[];
     "open in new pane (horizontal)": Hotkey[];
@@ -288,6 +292,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     "navigate forward": [{ modifiers: ["Alt"], key: "ArrowRight" }],
     "navigate back": [{ modifiers: ["Alt"], key: "ArrowLeft" }],
+    "previous search history": [],
+    "next search history": [],
     "close if opened": [],
     "copy file vault path": [],
     "copy absolute file path": [],
@@ -372,6 +378,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "clear path": [{ modifiers: ["Alt"], key: "d" }],
     "set ./ to path": [{ modifiers: ["Alt"], key: "c" }],
     "toggle input": [],
+    "previous search history": [],
+    "next search history": [],
     open: [{ modifiers: [], key: "Enter" }],
     "open in new tab": [{ modifiers: ["Mod"], key: "Enter" }],
     "open in new pane (horizontal)": [{ modifiers: ["Mod"], key: "-" }],

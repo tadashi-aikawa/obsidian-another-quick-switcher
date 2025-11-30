@@ -58,8 +58,10 @@ import { createElements } from "./suggestion-factory";
 
 const globalInternalStorage: {
   query: string;
+  queryHistories: string[];
 } = {
   query: "",
+  queryHistories: [],
 };
 
 interface CustomSearchHistory {
@@ -81,6 +83,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   navigationHistories: CustomSearchHistory[];
   currentNavigationHistoryIndex: number;
   stackHistory: boolean;
+  queryHistoryIndex: number;
+  queryHistoryBaseQuery: string | null;
 
   debounceGetSuggestions: Debouncer<
     [string, (items: SuggestionItem[]) => void],
@@ -142,6 +146,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.initialLeaf = args.initialLeaf;
     this.stateToRestore = args.initialState;
     this.navQueue = args.navQueue ?? Promise.resolve();
+    this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
+    this.queryHistoryBaseQuery = null;
 
     this.limit = this.settings.maxNumberOfSuggestions;
     this.setHotkeys();
@@ -197,6 +203,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       : this.initialInputQuery ?? "";
     this.inputEl.select();
     this.updateSuggestions();
+    this.resetQueryHistoryNavigationBase();
 
     if (this.command.floating) {
       this.enableFloating();
@@ -214,9 +221,17 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   }
 
   onClose() {
+    const latestInput = this.inputEl.value;
     super.onClose();
     if (this.willSilentClose) {
       return;
+    }
+
+    const hasSuggestions = (this.chooser.values?.length ?? 0) > 0;
+    if (hasSuggestions) {
+      this.recordCurrentQueryToHistory(latestInput);
+    } else {
+      this.resetQueryHistoryNavigationBase();
     }
 
     if (this.command.restoreLastInput) {
@@ -722,6 +737,63 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     return fileToOpened;
   }
 
+  private resetQueryHistoryNavigationBase() {
+    this.queryHistoryBaseQuery = this.inputEl.value;
+    this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
+  }
+
+  private recordCurrentQueryToHistory(query?: string) {
+    const queryToSave = (query ?? this.inputEl.value).trim();
+    if (!queryToSave) {
+      this.resetQueryHistoryNavigationBase();
+      return;
+    }
+
+    const histories = globalInternalStorage.queryHistories;
+    const lastHistory = histories[histories.length - 1];
+    if (lastHistory !== queryToSave) {
+      histories.push(queryToSave);
+      const HISTORY_LIMIT = 50;
+      if (histories.length > HISTORY_LIMIT) {
+        histories.shift();
+      }
+    }
+
+    this.resetQueryHistoryNavigationBase();
+  }
+
+  private navigateQueryHistory(direction: "back" | "forward") {
+    const histories = globalInternalStorage.queryHistories;
+    if (histories.length === 0) {
+      return;
+    }
+
+    if (this.queryHistoryIndex === histories.length) {
+      this.queryHistoryBaseQuery = this.inputEl.value;
+    } else if (this.queryHistoryBaseQuery === null) {
+      this.resetQueryHistoryNavigationBase();
+    }
+
+    const offset = direction === "back" ? -1 : 1;
+    let nextIndex = this.queryHistoryIndex + offset;
+
+    while (nextIndex >= 0 && nextIndex <= histories.length) {
+      const currentValue = this.inputEl.value;
+      const nextValue =
+        nextIndex === histories.length
+          ? this.queryHistoryBaseQuery ?? ""
+          : histories[nextIndex];
+
+      if (nextValue !== currentValue) {
+        this.queryHistoryIndex = nextIndex;
+        this.inputEl.value = nextValue;
+        this.inputEl.dispatchEvent(new Event("input"));
+        return;
+      }
+      nextIndex += offset;
+    }
+  }
+
   private setHotkeys() {
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
@@ -836,12 +908,12 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       });
     });
     this.registerKeys("open all in new tabs", () => {
-      this.close();
       const items = this.getItems();
       if (!items) {
         return;
       }
 
+      this.close();
       for (const item of items) {
         this.appHelper.openFile(item.file, {
           leafType: "new-tab-background",
@@ -1118,6 +1190,14 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
 
     this.registerKeys("navigate forward", () => {
       navigate(this.currentNavigationHistoryIndex + 1);
+    });
+
+    this.registerKeys("previous search history", () => {
+      this.navigateQueryHistory("back");
+    });
+
+    this.registerKeys("next search history", () => {
+      this.navigateQueryHistory("forward");
     });
 
     this.registerKeys("close if opened", () => {
