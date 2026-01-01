@@ -147,6 +147,42 @@ If the path of the active file is "/usr/local/vault/notes", the query "`<cd>` ob
     - `ho ge` matches both `ho ge` and `hoge`
     - Use `\"` to search for literal quote characters
 
+If you want to show heading level labels (H1/H2, etc.) instead of bullets in header search, you can do so with CSS.
+
+<details>
+  <summary>CSS: Show heading level labels (H1-H6)</summary>
+
+```css
+.another-quick-switcher__item__title__header {
+  list-style: none;
+}
+.another-quick-switcher__item__title__header::before {
+  padding-right: 5px;
+  font-weight: bold;
+  color: darkcyan;
+  opacity: 0.4;
+}
+.another-quick-switcher__item__title__header1::before {
+  content: "H1";
+}
+.another-quick-switcher__item__title__header2::before {
+  content: "H2";
+}
+.another-quick-switcher__item__title__header3::before {
+  content: "H3";
+}
+.another-quick-switcher__item__title__header4::before {
+  content: "H4";
+}
+.another-quick-switcher__item__title__header5::before {
+  content: "H5";
+}
+.another-quick-switcher__item__title__header6::before {
+  content: "H6";
+}
+```
+</details>
+
 ### 3. Grep
 
 This feature requires [ripgrep](https://github.com/BurntSushi/ripgrep) and set the executable command to "Ripgrep command" option.
