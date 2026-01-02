@@ -159,6 +159,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
   onOpen() {
     super.onOpen();
     setFloatingModal(this.appHelper);
+    this.enableFloatingModalWheelScroll();
 
     this.basePath =
       globalInternalStorage.basePath ?? this.settings.defaultGrepFolder;
@@ -293,6 +294,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
   onClose() {
     const latestQuery = this.clonedInputEl?.value;
     super.onClose();
+    this.disableFloatingModalWheelScroll();
     this.debouncePreview?.cancel();
 
     const hasSuggestions = (this.suggestions?.length ?? 0) > 0;

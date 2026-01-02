@@ -223,6 +223,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   onClose() {
     const latestInput = this.inputEl.value;
     super.onClose();
+    this.disableFloatingModalWheelScroll();
     if (this.willSilentClose) {
       return;
     }
@@ -248,6 +249,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.floating = true;
     if (!Platform.isPhone) {
       setFloatingModal(this.appHelper);
+      this.enableFloatingModalWheelScroll();
     }
   }
 

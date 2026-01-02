@@ -117,6 +117,7 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
     super.onOpen();
     if (!Platform.isPhone) {
       setFloatingModal(this.appHelper);
+      this.enableFloatingModalWheelScroll();
     }
     this.opened = true;
 
@@ -155,6 +156,7 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
       this.onClose();
     }
     super.close();
+    this.disableFloatingModalWheelScroll();
   }
 
   onClose() {

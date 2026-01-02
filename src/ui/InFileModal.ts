@@ -1,9 +1,4 @@
-import {
-  type App,
-  type EditorPosition,
-  Platform,
-  SuggestModal,
-} from "obsidian";
+import { type App, type EditorPosition, Platform } from "obsidian";
 import { AppHelper } from "../app-helper";
 import type { CaptureState } from "../app-helper";
 import {
@@ -22,7 +17,7 @@ import {
   trimLineByEllipsis,
 } from "../utils/strings";
 import { isPresent } from "../utils/types";
-import type { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
 import { PREVIEW } from "./icons";
 import { setFloatingModal } from "./modal";
 
@@ -43,10 +38,11 @@ interface SuggestionItem {
   lineNumber: number;
 }
 
-export class InFileModal
-  extends SuggestModal<SuggestionItem>
-  implements UnsafeModalInterface<SuggestionItem>
-{
+export class InFileModal extends AbstractSuggestionModal<SuggestionItem> {
+  toKey(item: SuggestionItem): string {
+    return String(item.lineNumber);
+  }
+
   logger: Logger;
   appHelper: AppHelper;
   settings: Settings;
@@ -55,12 +51,6 @@ export class InFileModal
   ignoredItems: SuggestionItem[];
   /** !Not work correctly in all cases */
   unsafeSelectedIndex = 0;
-
-  // unofficial
-  isOpen: boolean;
-  updateSuggestions: () => unknown;
-  chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
-  scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   previewIcon: Element | null;
 
@@ -156,6 +146,7 @@ export class InFileModal
 
   onClose() {
     super.onClose();
+    this.disableFloatingModalWheelScroll();
     globalInternalStorage.query = this.inputEl.value;
     globalInternalStorage.selected =
       this.chooser.values != null ? this.chooser.selectedItem : null;
@@ -208,6 +199,7 @@ export class InFileModal
     this.floating = true;
     if (!Platform.isPhone) {
       setFloatingModal(this.appHelper);
+      this.enableFloatingModalWheelScroll();
     }
   }
 

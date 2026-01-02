@@ -3,11 +3,11 @@ import {
   type Debouncer,
   type LinkCache,
   Platform,
-  SuggestModal,
   type TFile,
   type WorkspaceLeaf,
   debounce,
 } from "obsidian";
+import { AbstractSuggestionModal } from "src/ui/AbstractSuggestionModal";
 import { uniqBy } from "src/utils/collection-helper";
 import {
   AppHelper,
@@ -25,7 +25,6 @@ import { Logger } from "../utils/logger";
 import { toLeafType } from "../utils/mouse";
 import { isExcalidraw, normalizePath } from "../utils/path";
 import { capitalizeFirstLetter, smartIncludes } from "../utils/strings";
-import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
 import { setFloatingModal } from "./modal";
 
@@ -38,23 +37,17 @@ interface SuggestionItem {
   offset: number;
 }
 
-export class LinkModal
-  extends SuggestModal<SuggestionItem>
-  implements UnsafeModalInterface<SuggestionItem>
-{
+export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
+  toKey(item: SuggestionItem): string {
+    return String(item.offset);
+  }
+
   logger: Logger;
-  appHelper: AppHelper;
   settings: Settings;
   ignoredItems: SuggestionItem[];
   initialLeaf: WorkspaceLeaf | null;
   stateToRestore: CaptureState;
   lastOpenFileIndexByPath: { [path: string]: number } = {};
-
-  // unofficial
-  isOpen: boolean;
-  updateSuggestions: () => unknown;
-  chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
-  scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   debounceGetSuggestions: Debouncer<
     [string, (items: SuggestionItem[]) => void],
@@ -102,19 +95,21 @@ export class LinkModal
   }
 
   async init() {
-    await this.indexingItems();
+    this.indexingItems();
   }
 
   onOpen() {
     super.onOpen();
     if (!Platform.isPhone) {
       setFloatingModal(this.appHelper);
+      this.enableFloatingModalWheelScroll();
     }
     this.opened = true;
   }
 
   onClose() {
     super.onClose();
+    this.disableFloatingModalWheelScroll();
     if (this.stateToRestore) {
       // restore initial leaf state, undoing any previewing
       this.navigate(() => this.stateToRestore.restore());

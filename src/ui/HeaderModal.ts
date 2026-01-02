@@ -1,10 +1,4 @@
-import {
-  type App,
-  type EditorPosition,
-  Platform,
-  type Pos,
-  SuggestModal,
-} from "obsidian";
+import { type App, type EditorPosition, Platform, type Pos } from "obsidian";
 import { minBy } from "src/utils/collection-helper";
 import { AppHelper, type CaptureState } from "../app-helper";
 import { createInstructions, normalizeKey } from "../keys";
@@ -15,7 +9,7 @@ import {
   smartIncludes,
   smartWhitespaceSplit,
 } from "../utils/strings";
-import type { UnsafeModalInterface } from "./UnsafeModalInterface";
+import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
 import { PREVIEW } from "./icons";
 import { setFloatingModal } from "./modal";
 
@@ -27,10 +21,11 @@ interface SuggestionItem {
   index: number;
 }
 
-export class HeaderModal
-  extends SuggestModal<SuggestionItem>
-  implements UnsafeModalInterface<SuggestionItem>
-{
+export class HeaderModal extends AbstractSuggestionModal<SuggestionItem> {
+  toKey(item: SuggestionItem): string {
+    return String(item.index);
+  }
+
   items: SuggestionItem[];
   hitItems: SuggestionItem[] = [];
   appHelper: AppHelper;
@@ -39,12 +34,6 @@ export class HeaderModal
   autoPreview: boolean;
   /** !Not work correctly in all cases */
   unsafeSelectedIndex = 0;
-
-  // unofficial
-  isOpen: boolean;
-  updateSuggestions: () => unknown;
-  chooser: UnsafeModalInterface<SuggestionItem>["chooser"];
-  scope: UnsafeModalInterface<SuggestionItem>["scope"];
 
   previewIcon: Element | null;
 
@@ -101,6 +90,7 @@ export class HeaderModal
 
   onClose() {
     super.onClose();
+    this.disableFloatingModalWheelScroll();
     this.navigate(() => this.stateToRestore.restore());
   }
 
@@ -183,6 +173,7 @@ export class HeaderModal
     this.floating = true;
     if (!Platform.isPhone) {
       setFloatingModal(this.appHelper);
+      this.enableFloatingModalWheelScroll();
     }
   }
 
