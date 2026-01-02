@@ -256,12 +256,9 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
 
     this.setHotkeys();
 
-    this.originItems = this.appHelper
-      .getFolders()
-      .filter((x) => !x.isRoot())
-      .map((x) => ({
-        folder: x,
-      }));
+    this.originItems = this.appHelper.getFolders().map((x) => ({
+      folder: x.isRoot() ? Object.assign({}, x, { name: "<VAULT_ROOT>" }) : x,
+    }));
 
     this.filteredItems = excludeItems(
       this.originItems,

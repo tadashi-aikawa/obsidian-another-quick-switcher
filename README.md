@@ -294,6 +294,7 @@ The "Move file to another folder" command allows you to quickly move the current
 - **Fuzzy Search**: Find folders even with partial or out-of-order characters (e.g., "proj" matches "Projects")
 - **Highlighted Matches**: Search terms are highlighted in both folder names and directory paths
 - **Multiple Match Types**: Supports prefix matching, substring matching, and fuzzy matching
+- **Vault root entry**: The vault root appears as `<VAULT_ROOT>` so you can move files directly to the root
 
 #### Folder Sort Options
 
