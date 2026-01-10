@@ -2,6 +2,7 @@ import { ExhaustiveError } from "./errors";
 import type { SuggestionItem } from "./matcher";
 import { intersection } from "./utils/collection-helper";
 import { excludeEmoji } from "./utils/strings";
+import type { FrontmatterProperty } from "./utils/types";
 
 export const sortPriorityList = [
   "Header match",
@@ -24,12 +25,35 @@ export const sortPriorityList = [
 export type SortPriority =
   | (typeof sortPriorityList)[number]
   | `#${string}`
-  | `.${string}`;
+  | `.${string}`
+  | `@${string}`;
+
+type SortOrder = "asc" | "desc";
+type PropertySortValue = number | string;
+
+const propertySortPriorityRegex = /^@([^:]+)(?::(asc|desc))?$/;
+
+function parsePropertySortPriority(
+  priority: string,
+): { key: string; order: SortOrder } | null {
+  const matched = priority.match(propertySortPriorityRegex);
+  if (!matched) {
+    return null;
+  }
+  const [, key, order] = matched;
+  return { key, order: (order ?? "asc") as SortOrder };
+}
+
+export function isPropertySortPriority(priority: string): boolean {
+  return parsePropertySortPriority(priority) !== null;
+}
+
 export function regardAsSortPriority(x: string) {
   return (
     sortPriorityList.includes(x as any) ||
     x.split(",").every((y) => y.startsWith("#")) ||
-    x.split(",").every((y) => y.startsWith("."))
+    x.split(",").every((y) => y.startsWith(".")) ||
+    isPropertySortPriority(x)
   );
 }
 
@@ -48,7 +72,8 @@ export function filterNoQueryPriorities(
         "Alphabetical reverse",
       ].includes(x) ||
       x.startsWith("#") ||
-      x.startsWith("."),
+      x.startsWith(".") ||
+      isPropertySortPriority(x),
   );
 }
 
@@ -92,7 +117,12 @@ function getComparator(
       return priorityToAlphabetical;
     case "Alphabetical reverse":
       return priorityToAlphabeticalReverse;
-    default:
+    default: {
+      const propertySort = parsePropertySortPriority(priority);
+      if (propertySort) {
+        return (a: SuggestionItem, b: SuggestionItem) =>
+          priorityToPropertyValue(a, b, propertySort.key, propertySort.order);
+      }
       if (priority.startsWith("#")) {
         const tags = priority.split(",");
         return (a: SuggestionItem, b: SuggestionItem) =>
@@ -105,6 +135,7 @@ function getComparator(
       }
       // XXX: xox
       throw new ExhaustiveError(priority as never);
+    }
   }
 }
 
@@ -368,4 +399,66 @@ function priorityToExtensions(
     (x) => Number(extensions.contains(x.file.extension)),
     "desc",
   );
+}
+
+function toPropertySortValue(
+  value: FrontmatterProperty | undefined,
+): PropertySortValue | null {
+  if (value == null) {
+    return null;
+  }
+  const normalized = Array.isArray(value) ? value[0] : value;
+  if (normalized == null) {
+    return null;
+  }
+  if (typeof normalized === "number") {
+    return normalized;
+  }
+  if (typeof normalized === "boolean") {
+    return normalized ? 1 : 0;
+  }
+  return normalized;
+}
+
+function comparePropertyValues(
+  a: PropertySortValue,
+  b: PropertySortValue,
+  order: SortOrder,
+): -1 | 0 | 1 {
+  if (typeof a === "number" && typeof b === "number") {
+    if (a === b) {
+      return 0;
+    }
+    if (order === "asc") {
+      return a > b ? 1 : -1;
+    }
+    return a < b ? 1 : -1;
+  }
+
+  const result = String(a).localeCompare(String(b));
+  if (result === 0) {
+    return 0;
+  }
+  return order === "asc" ? (result > 0 ? 1 : -1) : result > 0 ? -1 : 1;
+}
+
+function priorityToPropertyValue(
+  a: SuggestionItem,
+  b: SuggestionItem,
+  key: string,
+  order: SortOrder,
+): 0 | -1 | 1 {
+  const valueA = toPropertySortValue(a.frontMatter?.[key]);
+  const valueB = toPropertySortValue(b.frontMatter?.[key]);
+
+  if (valueA === null && valueB === null) {
+    return 0;
+  }
+  if (valueA === null) {
+    return 1;
+  }
+  if (valueB === null) {
+    return -1;
+  }
+  return comparePropertyValues(valueA, valueB, order);
 }

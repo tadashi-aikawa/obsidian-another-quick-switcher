@@ -49,36 +49,40 @@ Custom searches enables you to create your original search commands.
 
 You can use the following names as a `Sort priorities`.
 
-| Name                        | Description                                            | Since  |
-| --------------------------- | ------------------------------------------------------ | ------ |
-| Perfect word match          | A query matches perfectly with a word in the file name | 6.0.0  |
-| Prefix name match           | The file name or alias starts with a query             | 6.0.0  |
-| Name match                  | The file name or alias includes a query                | 6.0.0  |
-| Fuzzy name match            | The file name or alias matches fuzzy with a query      | 8.10.0 |
-| Tag match                   | The query includes the file's tag name                 | 6.0.0  |
-| Header match                | The query includes the file's header name              | 6.0.0  |
-| Link match                  | The query includes the file's internal link name       | 6.0.0  |
-| Property match              | The query includes the file's property name            | 11.0.0 |
-| Length                      | Length of the file name or alias                       | 6.0.0  |
-| Last opened                 | The time the file opened last                          | 6.0.0  |
-| Last modified               | The time the file modified last                        | 6.0.0  |
-| Star                        | The file has a star                                    | 6.0.0  |
-| Alphabetical                | File name or alias order by alphabetically ascend      | 6.2.0  |
-| Alphabetical reverse        | File name or alias order by alphabetically descend     | 7.0.0  |
-| Created latest              | File creation date from the latest to the earliest     | 7.0.0  |
-| Created earliest            | File creation date from the earliest to the latest     | 7.0.0  |
-| (Tags split by comma)       | The file has specific tags                             | 7.0.0  |
-| (Extensions split by comma) | The file has specific extensions                       | 8.3.0  |
+| Name                        | Description                                               | Since   |
+| --------------------------- | --------------------------------------------------------- | ------- |
+| Perfect word match          | Matches an exact word in the file name                    | 6.0.0   |
+| Prefix name match           | Matches when the file name or alias starts with the query | 6.0.0   |
+| Name match                  | Matches when the file name or alias contains the query    | 6.0.0   |
+| Fuzzy name match            | Fuzzy matches the file name or alias                      | 8.10.0  |
+| Tag match                   | Matches when the query includes a tag name                | 6.0.0   |
+| Header match                | Matches when the query includes a header name             | 6.0.0   |
+| Link match                  | Matches when the query includes an internal link name     | 6.0.0   |
+| Property match              | Matches when the query includes a property name           | 11.0.0  |
+| Length                      | Orders by file name or alias length                       | 6.0.0   |
+| Last opened                 | Orders by most recently opened                            | 6.0.0   |
+| Last modified               | Orders by most recently modified                          | 6.0.0   |
+| Star                        | Orders starred files first                                | 6.0.0   |
+| Alphabetical                | Orders by file name or alias (A-Z)                        | 6.2.0   |
+| Alphabetical reverse        | Orders by file name or alias (Z-A)                        | 7.0.0   |
+| Created latest              | Orders by newest creation date                            | 7.0.0   |
+| Created earliest            | Orders by oldest creation date                            | 7.0.0   |
+| (Tags split by comma)       | Prioritizes files with the specified tags                 | 7.0.0   |
+| (Extensions split by comma) | Prioritizes files with the specified extensions           | 8.3.0   |
+| (Property and sort order)   | Orders by front matter property value                     | 13.27.0 |
 
 > **Warning**
 > Please don't forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
 > ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/save-button.png)
 
 > **Note**
-> Examples of `(Tags spit by comma)` are `#hoge`, `#hoge,#huga`, and so on.
+> Use `(Tags split by comma)` like `#hoge` or `#hoge,#huga`.
 
 > **Note**
-> Examples of `(Extensions spit by comma)` are `.md`, `.md,.canvas`, and so on.
+> Use `(Extensions split by comma)` like `.md` or `.md,.canvas`.
+
+> **Note**
+> Use `(Property)` like `@<property>` (`@<property>:asc`) or `@<property>:desc` for descending order. For arrays, the first element is used; missing values sort last.
 
 #### Preset search commands
 

@@ -35,7 +35,11 @@ import {
   createDefaultBacklinkSearchCommand,
   createDefaultLinkSearchCommand,
 } from "../settings";
-import { filterNoQueryPriorities, sort } from "../sorters";
+import {
+  filterNoQueryPriorities,
+  isPropertySortPriority,
+  sort,
+} from "../sorters";
 import {
   excludeItems,
   includeItems,
@@ -259,6 +263,10 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       (x) => x,
     );
     const originFilePath = this.originFile?.path;
+    const shouldLoadFrontMatter =
+      this.command.showFrontMatter ||
+      this.command.searchBy.property ||
+      this.command.sortPriorities.some(isPropertySortPriority);
 
     let start = performance.now();
     const fileItems: SuggestionItem[] = this.app.vault
@@ -292,8 +300,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
               )
             : [],
           frontMatter:
-            (this.command.showFrontMatter || this.command.searchBy.property) &&
-            cache.frontmatter
+            shouldLoadFrontMatter && cache.frontmatter
               ? omitBy(cache.frontmatter, (key, _) => key === "position")
               : undefined,
           phantom: false,
