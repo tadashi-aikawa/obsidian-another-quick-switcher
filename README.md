@@ -285,6 +285,8 @@ You can navigate outgoing/backlinks without leaving the dialog by using the "sho
 
 You can preview the file without closing the dialog. (Default hotkey is `Mod ,`)
 
+While previewing, you can scroll the note with `scroll preview up` / `scroll preview down` (hotkeys are configurable). It also responds to scrolling from pointing devices.
+
 It shows a floating view that doesn't distract the contents. Additionally, it makes the editor state before opening the dialog after previewing files and closing the dialog.
 
 https://user-images.githubusercontent.com/9500018/216806330-daf57b52-d8a4-42e3-9803-ba7d76a93319.mp4
@@ -385,6 +387,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open in new tab in background   | `Alt+o`            | ⛔  |
 | open all in new tabs            | `Mod+Shift+Alt+o`  | ⛔  |
 | preview                         | `Mod+,`            | ⛔  |
+| scroll preview up               | _(none)_           | ⛔  |
+| scroll preview down             | _(none)_           | ⛔  |
 | create                          | `Shift+Enter`      | ⛔  |
 | create in new tab               | `Mod+Shift+Enter`  | ⛔  |
 | create in new pane (horizontal) | _(none)_           | ⛔  |
@@ -442,6 +446,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | move to next hit     | `Tab`              | ⛔  |
 | move to previous hit | `Shift+Tab`        | ⛔  |
 | toggle auto preview  | `Mod+,`            | ⛔  |
+| scroll preview up    | _(none)_           | ⛔  |
+| scroll preview down  | _(none)_           | ⛔  |
 | insert all to editor | `Alt+Shift+Enter`  | ⛔  |
 | dismiss              | `Escape`           | ⛔  |
 
@@ -465,6 +471,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | uncheck all                   | _(none)_           | -  |
 | show all results              | `Shift+Alt+a`      | ⛔  |
 | preview                       | `Mod+,`            | ⛔  |
+| scroll preview up             | _(none)_           | ⛔  |
+| scroll preview down           | _(none)_           | ⛔  |
 | up                            | `Mod+p`            | ⛔  |
 | down                          | `Mod+n`            | ⛔  |
 | dismiss                       | `Escape`           | ⛔  |
@@ -485,6 +493,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open all in new tabs          | `Mod+Shift+Alt+o`  | ⛔  |
 | show all results              | `Shift+Alt+a`      | ⛔  |
 | preview                       | `Mod+,`            | ⛔  |
+| scroll preview up             | _(none)_           | ⛔  |
+| scroll preview down           | _(none)_           | ⛔  |
 | up                            | `Mod+p`            | ⛔  |
 | down                          | `Mod+n`            | ⛔  |
 | dismiss                       | `Escape`           | ⛔  |
@@ -500,6 +510,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | insert to editor   | _(none)_           | ⛔  |
 | show all results   | `Shift+Alt+a`      | ⛔  |
 | toggle auto preview| `Mod+,`            | ⛔  |
+| scroll preview up  | _(none)_           | ⛔  |
+| scroll preview down| _(none)_           | ⛔  |
 | dismiss            | `Escape`           | ⛔  |
 
 
@@ -521,6 +533,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | check all                     | _(none)_           | -  |
 | uncheck all                   | _(none)_           | -  |
 | preview                       | `Mod+,`            | ⛔  |
+| scroll preview up             | _(none)_           | ⛔  |
+| scroll preview down           | _(none)_           | ⛔  |
 | clear input                   | `Mod+d`            | ⛔  |
 | clear path                    | `Alt+d`            | ⛔  |
 | set ./ to path                | `Alt+c`            | ⛔  |

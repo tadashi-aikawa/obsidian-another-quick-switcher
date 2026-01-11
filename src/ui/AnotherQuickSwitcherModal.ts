@@ -830,6 +830,12 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         new KeyboardEvent("keydown", { key: "ArrowDown" }),
       );
     });
+    this.registerKeys("scroll preview up", () => {
+      this.scrollActiveLeafByPage("up");
+    });
+    this.registerKeys("scroll preview down", () => {
+      this.scrollActiveLeafByPage("down");
+    });
 
     this.registerKeys("clear input", () => {
       this.inputEl.value = "";

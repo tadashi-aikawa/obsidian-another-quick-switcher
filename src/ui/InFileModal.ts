@@ -445,6 +445,12 @@ export class InFileModal extends AbstractSuggestionModal<SuggestionItem> {
     this.registerKeys("down", (evt) => {
       navigateNext(evt);
     });
+    this.registerKeys("scroll preview up", () => {
+      this.scrollActiveLeafByPage("up");
+    });
+    this.registerKeys("scroll preview down", () => {
+      this.scrollActiveLeafByPage("down");
+    });
 
     this.registerKeys("insert to editor", async () => {
       const item = this.chooser.values?.[this.chooser.selectedItem];

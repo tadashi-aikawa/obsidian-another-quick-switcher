@@ -67,6 +67,8 @@ export interface Hotkeys {
     "check all": Hotkey[];
     "uncheck all": Hotkey[];
     preview: Hotkey[];
+    "scroll preview up": Hotkey[];
+    "scroll preview down": Hotkey[];
     create: Hotkey[];
     "create in new tab": Hotkey[];
     "create in new pane (horizontal)": Hotkey[];
@@ -118,6 +120,8 @@ export interface Hotkeys {
     "move to next hit": Hotkey[];
     "move to previous hit": Hotkey[];
     "toggle auto preview": Hotkey[];
+    "scroll preview up": Hotkey[];
+    "scroll preview down": Hotkey[];
     "insert all to editor": Hotkey[];
     dismiss: Hotkey[];
   };
@@ -138,6 +142,8 @@ export interface Hotkeys {
     "uncheck all": Hotkey[];
     "show all results": Hotkey[];
     preview: Hotkey[];
+    "scroll preview up": Hotkey[];
+    "scroll preview down": Hotkey[];
     dismiss: Hotkey[];
   };
   link: {
@@ -153,6 +159,8 @@ export interface Hotkeys {
     "open all in new tabs": Hotkey[];
     "show all results": Hotkey[];
     preview: Hotkey[];
+    "scroll preview up": Hotkey[];
+    "scroll preview down": Hotkey[];
     dismiss: Hotkey[];
   };
   "in-file": {
@@ -161,6 +169,8 @@ export interface Hotkeys {
     "insert to editor": Hotkey[];
     "show all results": Hotkey[];
     "toggle auto preview": Hotkey[];
+    "scroll preview up": Hotkey[];
+    "scroll preview down": Hotkey[];
     dismiss: Hotkey[];
   };
   grep: {
@@ -186,6 +196,8 @@ export interface Hotkeys {
     "check all": Hotkey[];
     "uncheck all": Hotkey[];
     preview: Hotkey[];
+    "scroll preview up": Hotkey[];
+    "scroll preview down": Hotkey[];
     dismiss: Hotkey[];
   };
 }
@@ -274,6 +286,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "check all": [],
     "uncheck all": [],
     preview: [{ modifiers: ["Mod"], key: "," }],
+    "scroll preview up": [],
+    "scroll preview down": [],
     create: [{ modifiers: ["Shift"], key: "Enter" }],
     "create in new tab": [{ modifiers: ["Mod", "Shift"], key: "Enter" }],
     "create in new pane (horizontal)": [],
@@ -325,6 +339,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "move to next hit": [{ modifiers: [], key: "Tab" }],
     "move to previous hit": [{ modifiers: ["Shift"], key: "Tab" }],
     "toggle auto preview": [{ modifiers: ["Mod"], key: "," }],
+    "scroll preview up": [],
+    "scroll preview down": [],
     "insert all to editor": [{ modifiers: ["Alt", "Shift"], key: "Enter" }],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
@@ -345,6 +361,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "uncheck all": [],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     preview: [{ modifiers: ["Mod"], key: "," }],
+    "scroll preview up": [],
+    "scroll preview down": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   link: {
@@ -360,6 +378,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     preview: [{ modifiers: ["Mod"], key: "," }],
+    "scroll preview up": [],
+    "scroll preview down": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   "in-file": {
@@ -368,6 +388,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "insert to editor": [],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     "toggle auto preview": [{ modifiers: ["Mod"], key: "," }],
+    "scroll preview up": [],
+    "scroll preview down": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
   grep: {
@@ -393,6 +415,8 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "check all": [],
     "uncheck all": [],
     preview: [{ modifiers: ["Mod"], key: "," }],
+    "scroll preview up": [],
+    "scroll preview down": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
   },
 });

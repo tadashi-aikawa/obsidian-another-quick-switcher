@@ -332,6 +332,12 @@ export class HeaderModal extends AbstractSuggestionModal<SuggestionItem> {
     this.registerKeys("down", (evt) => {
       navigateNext(evt);
     });
+    this.registerKeys("scroll preview up", () => {
+      this.scrollActiveLeafByPage("up");
+    });
+    this.registerKeys("scroll preview down", () => {
+      this.scrollActiveLeafByPage("down");
+    });
     this.registerKeys("clear input", () => {
       this.inputEl.value = "";
       // Necessary to rerender suggestions

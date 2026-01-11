@@ -116,7 +116,42 @@ export abstract class AbstractSuggestionModal<T>
 
   private floatingModalBg?: HTMLElement;
   private floatingWheelHandler?: (evt: WheelEvent) => void;
+  private lastPreviewScrollAt = 0;
 
+  private getScrollElementFromActiveLeaf(): HTMLElement | null {
+    const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
+    if (!markdownView) {
+      return null;
+    }
+
+    return markdownView.getMode() === "preview"
+      ? markdownView.contentEl.querySelector<HTMLElement>(
+          ".markdown-preview-view",
+        )
+      : markdownView.contentEl.querySelector<HTMLElement>(".cm-scroller");
+  }
+
+  protected scrollActiveLeafByPage(direction: "up" | "down") {
+    const scrollEl = this.getScrollElementFromActiveLeaf();
+    if (!scrollEl) {
+      return;
+    }
+
+    const step = Math.max(80, Math.floor(scrollEl.clientHeight * 0.25));
+    const now = Date.now();
+    const isRapidRepeat = now - this.lastPreviewScrollAt <= 120;
+    this.lastPreviewScrollAt = now;
+    const prefersReduceMotion = activeWindow.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    scrollEl.scrollBy({
+      top: direction === "down" ? step : -step,
+      left: 0,
+      behavior: prefersReduceMotion || isRapidRepeat ? "auto" : "smooth",
+    });
+  }
+
+  //hoge
   enableFloatingModalWheelScroll() {
     const modalBg =
       activeWindow.activeDocument.querySelector<HTMLElement>(".modal-bg");
@@ -153,26 +188,13 @@ export abstract class AbstractSuggestionModal<T>
       return null;
     };
 
-    const findScrollElFromActiveLeaf = (): HTMLElement | null => {
-      const markdownView = this.appHelper.getMarkdownViewInActiveLeaf();
-      if (!markdownView) {
-        return null;
-      }
-
-      return markdownView.getMode() === "preview"
-        ? markdownView.contentEl.querySelector<HTMLElement>(
-            ".markdown-preview-view",
-          )
-        : markdownView.contentEl.querySelector<HTMLElement>(".cm-scroller");
-    };
-
     const handler = (evt: WheelEvent) => {
       if (this.modalEl?.contains(evt.target as Node)) {
         return;
       }
 
       const scrollEl =
-        findScrollElFromPoint(evt) ?? findScrollElFromActiveLeaf();
+        findScrollElFromPoint(evt) ?? this.getScrollElementFromActiveLeaf();
       if (!scrollEl) {
         return;
       }
