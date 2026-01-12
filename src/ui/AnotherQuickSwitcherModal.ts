@@ -323,6 +323,11 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   }
 
   private async preview() {
+    const item = this.getSelectedItem();
+    if (!item || item.phantom) {
+      return;
+    }
+
     if (!this.floating) {
       this.enableFloating();
     }
