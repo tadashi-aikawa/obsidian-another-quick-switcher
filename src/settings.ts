@@ -37,6 +37,8 @@ export interface SearchCommand {
   includeCurrentFile: boolean;
   targetExtensions: string[];
   floating: boolean;
+  autoPreview: boolean;
+  autoPreviewDelayMilliSeconds: number;
   showFrontMatter: boolean;
   excludeFrontMatterKeys: string[];
   defaultInput: string;
@@ -445,6 +447,8 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   targetExtensions: [],
   includeCurrentFile: false,
   floating: false,
+  autoPreview: false,
+  autoPreviewDelayMilliSeconds: 300,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
@@ -472,6 +476,8 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
   targetExtensions: [],
   includeCurrentFile: false,
   floating: false,
+  autoPreview: false,
+  autoPreviewDelayMilliSeconds: 300,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
@@ -499,6 +505,8 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
   targetExtensions: ["md"],
   includeCurrentFile: false,
   floating: false,
+  autoPreview: false,
+  autoPreviewDelayMilliSeconds: 300,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
@@ -525,6 +533,8 @@ export const createDefault2HopLinkSearchCommand = (): SearchCommand => ({
   targetExtensions: [],
   includeCurrentFile: false,
   floating: false,
+  autoPreview: false,
+  autoPreviewDelayMilliSeconds: 300,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
   defaultInput: "",
@@ -558,6 +568,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     targetExtensions: [],
     includeCurrentFile: false,
     floating: false,
+    autoPreview: false,
+    autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -583,6 +595,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     targetExtensions: [],
     includeCurrentFile: false,
     floating: false,
+    autoPreview: false,
+    autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -614,6 +628,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     targetExtensions: [],
     includeCurrentFile: false,
     floating: false,
+    autoPreview: false,
+    autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -645,6 +661,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     targetExtensions: [],
     includeCurrentFile: false,
     floating: false,
+    autoPreview: false,
+    autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -679,6 +697,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     targetExtensions: [],
     includeCurrentFile: false,
     floating: false,
+    autoPreview: false,
+    autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
     defaultInput: "",
@@ -1478,6 +1498,36 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         this.display();
       });
     });
+
+    new Setting(div)
+      .setName("Auto preview")
+      .setDesc(
+        "If enabled, automatically shows preview when selecting candidates.",
+      )
+      .addToggle((tc) => {
+        tc.setValue(command.autoPreview).onChange(async (value) => {
+          command.autoPreview = value;
+          this.display();
+        });
+      });
+
+    if (command.autoPreview) {
+      new Setting(div)
+        .setName("Auto preview delay milli-seconds")
+        .setClass("another-quick-switcher__settings__nested")
+        .setDesc(
+          "Delay before auto preview is triggered when selection changes.",
+        )
+        .addSlider((sc) =>
+          sc
+            .setLimits(0, 1000, 50)
+            .setValue(command.autoPreviewDelayMilliSeconds)
+            .setDynamicTooltip()
+            .onChange(async (value) => {
+              command.autoPreviewDelayMilliSeconds = value;
+            }),
+        );
+    }
 
     new Setting(div).setName("Show front matter").addToggle((cb) => {
       cb.setValue(command.showFrontMatter).onChange(async (value) => {

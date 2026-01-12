@@ -115,6 +115,10 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.markClosed = resolve;
   });
   navQueue: Promise<void>;
+  debouncePreview?: Debouncer<[], void>;
+  debouncePreviewCancelListener?: () => void;
+  autoPreviewConfigKey?: string;
+  originalSetSelectedItem?: (selectedIndex: number, evt?: any) => void;
 
   toKey(item: SuggestionItem): string {
     return item.file.path;
@@ -209,7 +213,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.updateSuggestions();
     this.resetQueryHistoryNavigationBase();
 
-    if (this.command.floating) {
+    if (this.command.floating || this.command.autoPreview) {
       this.enableFloating();
     }
 
@@ -222,12 +226,21 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     }
 
     this.opened = true;
+    this.setupAutoPreviewListeners();
+    this.requestAutoPreview();
   }
 
   onClose() {
     const latestInput = this.inputEl.value;
     super.onClose();
     this.disableFloatingModalWheelScroll();
+    this.debouncePreview?.cancel();
+    if (this.debouncePreviewCancelListener) {
+      this.inputEl.removeEventListener(
+        "keydown",
+        this.debouncePreviewCancelListener,
+      );
+    }
     if (this.willSilentClose) {
       return;
     }
@@ -255,6 +268,67 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       setFloatingModal(this.appHelper);
       this.enableFloatingModalWheelScroll();
     }
+  }
+
+  private setupAutoPreviewListeners() {
+    if (!this.originalSetSelectedItem) {
+      this.originalSetSelectedItem = this.chooser.setSelectedItem.bind(
+        this.chooser,
+      );
+      this.chooser.setSelectedItem = (selectedIndex: number, evt?: any) => {
+        this.originalSetSelectedItem?.(selectedIndex, evt);
+        this.requestAutoPreview();
+      };
+    }
+
+    if (!this.debouncePreviewCancelListener) {
+      this.debouncePreviewCancelListener = () => {
+        this.debouncePreview?.cancel();
+      };
+      this.inputEl.addEventListener(
+        "keydown",
+        this.debouncePreviewCancelListener,
+      );
+    }
+  }
+
+  private refreshAutoPreviewDebouncer() {
+    const configKey = `${this.command.autoPreview}-${
+      this.command.autoPreviewDelayMilliSeconds
+    }`;
+    if (!this.command.autoPreview) {
+      this.debouncePreview?.cancel();
+      this.debouncePreview = undefined;
+      this.autoPreviewConfigKey = configKey;
+      return;
+    }
+
+    if (this.autoPreviewConfigKey !== configKey || !this.debouncePreview) {
+      this.debouncePreview?.cancel();
+      this.debouncePreview = debounce(
+        () => this.preview(),
+        this.command.autoPreviewDelayMilliSeconds,
+        true,
+      );
+      this.autoPreviewConfigKey = configKey;
+    }
+  }
+
+  private requestAutoPreview() {
+    this.refreshAutoPreviewDebouncer();
+    if (!this.command.autoPreview) {
+      return;
+    }
+    this.debouncePreview?.();
+  }
+
+  private async preview() {
+    if (!this.floating) {
+      this.enableFloating();
+    }
+    await this.chooseCurrentSuggestion("same-tab", {
+      keepOpen: true,
+    });
   }
 
   indexingItems() {
@@ -435,6 +509,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     ) {
       this.command = commandByPrefix ?? this.initialCommand;
       this.indexingItems(); // slow?
+      this.refreshAutoPreviewDebouncer();
     }
     this.searchQuery = query.startsWith(this.command.commandPrefix)
       ? query.replace(this.command.commandPrefix, "")
@@ -937,14 +1012,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       }
     });
 
-    this.registerKeys("preview", () => {
-      if (!this.floating) {
-        this.enableFloating();
-      }
-      this.chooseCurrentSuggestion("same-tab", {
-        keepOpen: true,
-      });
-    });
+    this.registerKeys("preview", () => this.preview());
 
     this.registerKeys("create", async () => {
       await this.handleCreateNewMarkdown(this.searchQuery, "same-tab");
@@ -1136,6 +1204,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         command: {
           ...command,
           floating: this.floating,
+          autoPreview: this.command.autoPreview,
+          autoPreviewDelayMilliSeconds:
+            this.command.autoPreviewDelayMilliSeconds,
         },
         originFile: file,
         inputQuery: null,
