@@ -22,15 +22,11 @@ export function setFloatingModal(appHelper: AppHelper) {
       return;
     }
 
+    const viewState = fileView.getState?.();
     const selector =
-      fileView.getState().mode === "preview"
-        ? ".markdown-preview-sizer"
-        : ".cm-sizer";
-    const editorContentEl = fileView.contentEl.querySelector(selector);
-    if (!editorContentEl) {
-      console.error("Unexpected error.");
-      return;
-    }
+      viewState?.mode === "preview" ? ".markdown-preview-sizer" : ".cm-sizer";
+    const editorContentEl =
+      fileView.contentEl.querySelector(selector) ?? fileView.contentEl;
 
     const { width: modalWidth, height: modalHeight } =
       modalEl.getBoundingClientRect();
