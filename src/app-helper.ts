@@ -157,6 +157,19 @@ export type CaptureState = {
   restore(): Promise<void> | void;
 };
 
+type UnsafeHistoryEntry = {
+  title?: string;
+  icon?: string;
+  state?: ViewState;
+  eState?: Record<string, unknown>;
+};
+
+export type LeafHistorySnapshot = {
+  backHistory: UnsafeHistoryEntry[];
+  forwardHistory: UnsafeHistoryEntry[];
+  currentEntry: UnsafeHistoryEntry | null;
+};
+
 export type LeafType =
   | "same-tab"
   | "new-tab"
@@ -505,6 +518,125 @@ export class AppHelper {
         this.leaf = undefined;
       },
     };
+  }
+
+  createLeafHistorySnapshot(
+    leaf: WorkspaceLeaf | null,
+  ): LeafHistorySnapshot | null {
+    const history = this.getLeafHistory(leaf);
+    if (!history || !leaf) {
+      return null;
+    }
+
+    return {
+      backHistory: history.backHistory.map((entry) => ({
+        ...entry,
+        state: entry.state
+          ? {
+              ...(entry.state as any),
+              state: (entry.state as any).state
+                ? { ...(entry.state as any).state }
+                : undefined,
+            }
+          : undefined,
+        eState: entry.eState ? { ...entry.eState } : undefined,
+      })),
+      forwardHistory: history.forwardHistory.map((entry) => ({
+        ...entry,
+        state: entry.state
+          ? {
+              ...(entry.state as any),
+              state: (entry.state as any).state
+                ? { ...(entry.state as any).state }
+                : undefined,
+            }
+          : undefined,
+        eState: entry.eState ? { ...entry.eState } : undefined,
+      })),
+      currentEntry: this.createHistoryEntryFromLeaf(leaf),
+    };
+  }
+
+  restoreLeafHistorySnapshot(
+    leaf: WorkspaceLeaf | null,
+    snapshot: LeafHistorySnapshot | null,
+  ) {
+    const history = this.getLeafHistory(leaf);
+    if (!history || !snapshot) {
+      return;
+    }
+
+    // Best-effort history patch: keep the pre-preview entry as the last back item.
+    const backHistory = snapshot.backHistory.slice();
+    if (snapshot.currentEntry) {
+      const lastEntry = backHistory.at(-1);
+      const lastKey = this.getHistoryEntryKey(lastEntry);
+      const currentKey = this.getHistoryEntryKey(snapshot.currentEntry);
+      if (!lastKey || lastKey !== currentKey) {
+        backHistory.push(snapshot.currentEntry);
+      }
+    }
+
+    history.backHistory = backHistory;
+    history.forwardHistory = snapshot.forwardHistory.slice();
+  }
+
+  private createHistoryEntryFromLeaf(
+    leaf: WorkspaceLeaf,
+  ): UnsafeHistoryEntry | null {
+    const viewState = leaf.getViewState() as any;
+    if (!viewState) {
+      return null;
+    }
+
+    const view = leaf.view;
+    const title =
+      viewState.title ??
+      (typeof view?.getDisplayText === "function"
+        ? view.getDisplayText()
+        : undefined);
+    const icon =
+      viewState.icon ??
+      (typeof view?.getIcon === "function" ? view.getIcon() : undefined);
+
+    return {
+      title,
+      icon,
+      state: viewState,
+      eState: leaf.getEphemeralState(),
+    };
+  }
+
+  private getLeafHistory(leaf: WorkspaceLeaf | null): {
+    backHistory: UnsafeHistoryEntry[];
+    forwardHistory: UnsafeHistoryEntry[];
+  } | null {
+    const history = (leaf as any)?.history;
+    if (!history || !Array.isArray(history.backHistory)) {
+      return null;
+    }
+    if (!Array.isArray(history.forwardHistory)) {
+      history.forwardHistory = [];
+    }
+    return history as {
+      backHistory: UnsafeHistoryEntry[];
+      forwardHistory: UnsafeHistoryEntry[];
+    };
+  }
+
+  private getHistoryEntryKey(entry?: UnsafeHistoryEntry | null): string | null {
+    if (!entry?.state) {
+      return null;
+    }
+    const state = entry.state as any;
+    const file = state?.state?.file as string | undefined;
+    if (file) {
+      return `file:${file}`;
+    }
+
+    const type = state?.type ?? "unknown";
+    const title = entry.title ?? "";
+    return `type:${type}|title:${title}`;
   }
 
   getOpenState(leaf: WorkspaceLeaf, file: TFile) {

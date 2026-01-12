@@ -10,6 +10,7 @@ import {
   AppHelper,
   type CaptureState,
   type LeafType,
+  type LeafHistorySnapshot,
   isFrontMatterLinkCache,
 } from "../app-helper";
 import {
@@ -50,6 +51,9 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
   originFileBaseName: string;
   originFileBaseNameRegExp: RegExp;
   stateToRestore: CaptureState;
+  historySnapshot: LeafHistorySnapshot | null;
+  usedPreview = false;
+  skipRestoreOnClose = false;
   lastOpenFileIndexByPath: { [path: string]: number } = {};
 
   debounceGetSuggestions: Debouncer<
@@ -88,6 +92,9 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
     this.settings = settings;
     this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
+    this.historySnapshot = this.appHelper.createLeafHistorySnapshot(
+      this.initialLeaf ?? this.appHelper.getActiveFileLeaf(),
+    );
     this.originFileBaseName = this.appHelper.getActiveFile()!.basename;
     this.originFileBaseNameRegExp = new RegExp(
       escapeRegExp(this.originFileBaseName),
@@ -168,10 +175,11 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
       this.debouncePreviewCancelListener,
     );
 
-    if (this.stateToRestore) {
+    if (this.stateToRestore && !this.skipRestoreOnClose) {
       // restore initial leaf state, undoing any previewing
       this.navigate(() => this.stateToRestore.restore());
     }
+    this.skipRestoreOnClose = false;
     this.navigate(this.markClosed);
   }
 
@@ -404,11 +412,19 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
       return null;
     }
 
-    if (!option.keepOpen) {
+    const isSameTab = leaf === "same-tab";
+    const isFinalOpen = !option.keepOpen;
+
+    if (isFinalOpen && isSameTab && this.usedPreview) {
+      this.skipRestoreOnClose = true;
+    }
+
+    if (isFinalOpen) {
       this.close();
       this.navigate(() => this.isClosed); // wait for close to finish before navigating
-    } else if (leaf === "same-tab") {
+    } else if (isSameTab) {
       this.stateToRestore ??= this.appHelper.captureState(this.initialLeaf);
+      this.usedPreview = true;
     }
     this.navigate(() =>
       this.appHelper.openFile(
@@ -422,6 +438,15 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
         this.stateToRestore,
       ),
     );
+    if (isFinalOpen && isSameTab && this.usedPreview) {
+      this.navigate(() => {
+        const leafToPatch = this.stateToRestore?.leaf ?? this.initialLeaf;
+        this.appHelper.restoreLeafHistorySnapshot(
+          leafToPatch ?? null,
+          this.historySnapshot,
+        );
+      });
+    }
     return item.file;
   }
 

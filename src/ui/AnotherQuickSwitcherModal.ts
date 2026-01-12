@@ -23,6 +23,7 @@ import {
   AppHelper,
   type CaptureState,
   type FrontMatterLinkCache,
+  type LeafHistorySnapshot,
   type LeafType,
   isFrontMatterLinkCache,
 } from "../app-helper";
@@ -100,6 +101,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
 
   initialLeaf: WorkspaceLeaf | null;
   stateToRestore?: CaptureState;
+  historySnapshot: LeafHistorySnapshot | null;
+  usedPreview = false;
+  skipRestoreOnClose = false;
 
   navigationHistoryEl?: HTMLDivElement;
   searchCommandEl?: HTMLDivElement;
@@ -135,6 +139,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     stackHistory: boolean;
     initialLeaf: WorkspaceLeaf | null;
     initialState?: CaptureState;
+    historySnapshot?: LeafHistorySnapshot | null;
     navQueue?: Promise<void>;
   }) {
     super(args.app);
@@ -153,6 +158,15 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.stackHistory = args.stackHistory;
     this.initialLeaf = args.initialLeaf;
     this.stateToRestore = args.initialState;
+    const hasHistorySnapshot = Object.prototype.hasOwnProperty.call(
+      args,
+      "historySnapshot",
+    );
+    this.historySnapshot = hasHistorySnapshot
+      ? args.historySnapshot ?? null
+      : this.appHelper.createLeafHistorySnapshot(
+          this.initialLeaf ?? this.appHelper.getActiveFileLeaf(),
+        );
     this.navQueue = args.navQueue ?? Promise.resolve();
     this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
     this.queryHistoryBaseQuery = null;
@@ -256,9 +270,10 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       globalInternalStorage.query = this.inputEl.value;
     }
 
-    if (this.stateToRestore) {
+    if (this.stateToRestore && !this.skipRestoreOnClose) {
       this.navigate(() => this.stateToRestore!.restore());
     }
+    this.skipRestoreOnClose = false;
     this.navigate(this.markClosed);
   }
 
@@ -751,11 +766,19 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         throw new ExhaustiveError(this.command.searchTarget as never);
     }
 
-    if (!option.keepOpen) {
+    const isSameTab = leafType === "same-tab";
+    const isFinalOpen = !option.keepOpen;
+
+    if (isFinalOpen && isSameTab && this.usedPreview) {
+      this.skipRestoreOnClose = true;
+    }
+
+    if (isFinalOpen) {
       this.close();
       this.navigate(() => this.isClosed); // wait for close to finish before navigating
-    } else if (leafType === "same-tab") {
+    } else if (isSameTab) {
       this.stateToRestore ??= this.appHelper.captureState(this.initialLeaf);
+      this.usedPreview = true;
     }
 
     this.navigate(() =>
@@ -771,6 +794,15 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         this.stateToRestore,
       ),
     );
+    if (isFinalOpen && isSameTab && this.usedPreview) {
+      this.navigate(() => {
+        const leafToPatch = this.stateToRestore?.leaf ?? this.initialLeaf;
+        this.appHelper.restoreLeafHistorySnapshot(
+          leafToPatch ?? null,
+          this.historySnapshot,
+        );
+      });
+    }
     return fileToOpened;
   }
 
@@ -793,9 +825,22 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       return true;
     }
 
+    const isSameTab = leafType === "same-tab";
+    if (isSameTab && this.usedPreview) {
+      this.skipRestoreOnClose = true;
+    }
     this.close();
     this.navigate(() => this.isClosed);
     this.navigate(() => this.appHelper.openFile(file, { leafType: leafType }));
+    if (isSameTab && this.usedPreview) {
+      this.navigate(() => {
+        const leafToPatch = this.stateToRestore?.leaf ?? this.initialLeaf;
+        this.appHelper.restoreLeafHistorySnapshot(
+          leafToPatch ?? null,
+          this.historySnapshot,
+        );
+      });
+    }
     return false;
   }
 
@@ -1230,6 +1275,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         stackHistory: true,
         initialLeaf: this.initialLeaf,
         initialState: this.stateToRestore,
+        // Preserve the pre-dialog history snapshot to avoid capturing preview-mutated history.
+        historySnapshot: this.historySnapshot,
         navQueue: this.navQueue,
       });
       modal.open();
@@ -1270,6 +1317,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         stackHistory: false,
         initialState: this.stateToRestore,
         initialLeaf: this.initialLeaf,
+        historySnapshot: this.historySnapshot,
         navQueue: this.navQueue,
       });
       modal.open();
