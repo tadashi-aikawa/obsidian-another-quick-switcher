@@ -9,8 +9,8 @@ import {
 import {
   AppHelper,
   type CaptureState,
-  type LeafType,
   type LeafHistorySnapshot,
+  type LeafType,
   isFrontMatterLinkCache,
 } from "../app-helper";
 import {
@@ -52,8 +52,11 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
   originFileBaseNameRegExp: RegExp;
   stateToRestore: CaptureState;
   historySnapshot: LeafHistorySnapshot | null;
+  recentHistorySnapshot: string[] | null;
+  recentHistoryBaseFilePath: string | null;
   usedPreview = false;
   skipRestoreOnClose = false;
+  skipRecentHistoryRestoreOnClose = false;
   lastOpenFileIndexByPath: { [path: string]: number } = {};
 
   debounceGetSuggestions: Debouncer<
@@ -95,6 +98,9 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
     this.historySnapshot = this.appHelper.createLeafHistorySnapshot(
       this.initialLeaf ?? this.appHelper.getActiveFileLeaf(),
     );
+    this.recentHistorySnapshot = this.appHelper.captureLastOpenFilesSnapshot();
+    this.recentHistoryBaseFilePath =
+      this.appHelper.getActiveFile()?.path ?? null;
     this.originFileBaseName = this.appHelper.getActiveFile()!.basename;
     this.originFileBaseNameRegExp = new RegExp(
       escapeRegExp(this.originFileBaseName),
@@ -180,6 +186,12 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
       this.navigate(() => this.stateToRestore.restore());
     }
     this.skipRestoreOnClose = false;
+    if (this.usedPreview && !this.skipRecentHistoryRestoreOnClose) {
+      this.navigate(() => {
+        this.scheduleRecentHistoryRestore(this.recentHistorySnapshot);
+      });
+    }
+    this.skipRecentHistoryRestoreOnClose = false;
     this.navigate(this.markClosed);
   }
 
@@ -415,8 +427,11 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
     const isSameTab = leaf === "same-tab";
     const isFinalOpen = !option.keepOpen;
 
-    if (isFinalOpen && isSameTab && this.usedPreview) {
-      this.skipRestoreOnClose = true;
+    if (isFinalOpen && this.usedPreview) {
+      this.skipRecentHistoryRestoreOnClose = true;
+      if (isSameTab) {
+        this.skipRestoreOnClose = true;
+      }
     }
 
     if (isFinalOpen) {
@@ -426,18 +441,32 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
       this.stateToRestore ??= this.appHelper.captureState(this.initialLeaf);
       this.usedPreview = true;
     }
-    this.navigate(() =>
-      this.appHelper.openFile(
-        item.file,
-        {
-          leafType: leaf,
-          line: item.lineNumber - 1,
-          inplace: option.keepOpen,
-          preventDuplicateTabs: this.settings.preventDuplicateTabs,
-        },
-        this.stateToRestore,
-      ),
-    );
+    const shouldRestoreRecentHistory = option.keepOpen === true;
+    this.navigate(async () => {
+      try {
+        await this.appHelper.openFile(
+          item.file,
+          {
+            leafType: leaf,
+            line: item.lineNumber - 1,
+            inplace: option.keepOpen,
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          },
+          this.stateToRestore,
+        );
+      } finally {
+        if (shouldRestoreRecentHistory) {
+          this.scheduleRecentHistoryRestore(this.recentHistorySnapshot);
+        } else if (isFinalOpen && this.usedPreview) {
+          const nextRecentHistory = this.buildRecentHistoryForFinalOpen(
+            this.recentHistorySnapshot,
+            this.recentHistoryBaseFilePath,
+            item.file.path,
+          );
+          this.scheduleRecentHistoryRestore(nextRecentHistory);
+        }
+      }
+    });
     if (isFinalOpen && isSameTab && this.usedPreview) {
       this.navigate(() => {
         const leafToPatch = this.stateToRestore?.leaf ?? this.initialLeaf;

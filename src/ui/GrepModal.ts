@@ -81,8 +81,11 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
   initialQuery?: string;
   stateToRestore: CaptureState;
   historySnapshot: LeafHistorySnapshot | null;
+  recentHistorySnapshot: string[] | null;
+  recentHistoryBaseFilePath: string | null;
   usedPreview = false;
   skipRestoreOnClose = false;
+  skipRecentHistoryRestoreOnClose = false;
 
   vaultRootPath: string;
   currentQuery: string;
@@ -145,6 +148,9 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
     this.historySnapshot = this.appHelper.createLeafHistorySnapshot(
       this.initialLeaf ?? this.appHelper.getActiveFileLeaf(),
     );
+    this.recentHistorySnapshot = this.appHelper.captureLastOpenFilesSnapshot();
+    this.recentHistoryBaseFilePath =
+      this.appHelper.getActiveFile()?.path ?? null;
     this.limit = 255;
     this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
     this.queryHistoryBaseQuery = null;
@@ -358,6 +364,12 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
       this.navigate(() => this.stateToRestore.restore());
     }
     this.skipRestoreOnClose = false;
+    if (this.usedPreview && !this.skipRecentHistoryRestoreOnClose) {
+      this.navigate(() => {
+        this.scheduleRecentHistoryRestore(this.recentHistorySnapshot);
+      });
+    }
+    this.skipRecentHistoryRestoreOnClose = false;
     this.navigate(this.markClosed);
   }
 
@@ -737,8 +749,11 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
     const isSameTab = leaf === "same-tab";
     const isFinalOpen = !option.keepOpen;
 
-    if (isFinalOpen && isSameTab && this.usedPreview) {
-      this.skipRestoreOnClose = true;
+    if (isFinalOpen && this.usedPreview) {
+      this.skipRecentHistoryRestoreOnClose = true;
+      if (isSameTab) {
+        this.skipRestoreOnClose = true;
+      }
     }
 
     if (isFinalOpen) {
@@ -748,18 +763,32 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
       this.stateToRestore ??= this.appHelper.captureState(this.initialLeaf);
       this.usedPreview = true;
     }
-    this.navigate(() =>
-      this.appHelper.openFile(
-        item.file,
-        {
-          leafType: leaf,
-          line: item.lineNumber - 1,
-          inplace: option.keepOpen,
-          preventDuplicateTabs: this.settings.preventDuplicateTabs,
-        },
-        this.stateToRestore,
-      ),
-    );
+    const shouldRestoreRecentHistory = option.keepOpen === true;
+    this.navigate(async () => {
+      try {
+        await this.appHelper.openFile(
+          item.file,
+          {
+            leafType: leaf,
+            line: item.lineNumber - 1,
+            inplace: option.keepOpen,
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          },
+          this.stateToRestore,
+        );
+      } finally {
+        if (shouldRestoreRecentHistory) {
+          this.scheduleRecentHistoryRestore(this.recentHistorySnapshot);
+        } else if (isFinalOpen && this.usedPreview) {
+          const nextRecentHistory = this.buildRecentHistoryForFinalOpen(
+            this.recentHistorySnapshot,
+            this.recentHistoryBaseFilePath,
+            item.file.path,
+          );
+          this.scheduleRecentHistoryRestore(nextRecentHistory);
+        }
+      }
+    });
     if (isFinalOpen && isSameTab && this.usedPreview) {
       this.navigate(() => {
         const leafToPatch = this.stateToRestore?.leaf ?? this.initialLeaf;

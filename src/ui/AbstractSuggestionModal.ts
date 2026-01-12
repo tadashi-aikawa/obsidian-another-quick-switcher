@@ -43,6 +43,39 @@ export abstract class AbstractSuggestionModal<T>
     };
   }
 
+  protected scheduleRecentHistoryRestore(snapshot: string[] | null) {
+    if (!snapshot) {
+      return;
+    }
+    const restore = () => this.appHelper.restoreLastOpenFilesSnapshot(snapshot);
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(() => {
+        setTimeout(restore, 0);
+      });
+      return;
+    }
+    setTimeout(restore, 0);
+  }
+
+  protected buildRecentHistoryForFinalOpen(
+    snapshot: string[] | null,
+    basePath: string | null,
+    finalPath: string,
+  ): string[] | null {
+    if (!snapshot) {
+      return null;
+    }
+    // Keep the pre-dialog file right after the chosen file, skipping preview-only entries.
+    const next = snapshot.filter(
+      (path) => path !== finalPath && path !== basePath,
+    );
+    if (basePath && basePath !== finalPath) {
+      next.unshift(basePath);
+    }
+    next.unshift(finalPath);
+    return next;
+  }
+
   selectNextItem(): void {
     this.chooser.setSelectedItem(this.chooser.selectedItem + 1);
   }

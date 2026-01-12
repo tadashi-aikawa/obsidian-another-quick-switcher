@@ -102,8 +102,11 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   initialLeaf: WorkspaceLeaf | null;
   stateToRestore?: CaptureState;
   historySnapshot: LeafHistorySnapshot | null;
+  recentHistorySnapshot: string[] | null;
+  recentHistoryBaseFilePath: string | null;
   usedPreview = false;
   skipRestoreOnClose = false;
+  skipRecentHistoryRestoreOnClose = false;
 
   navigationHistoryEl?: HTMLDivElement;
   searchCommandEl?: HTMLDivElement;
@@ -140,6 +143,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     initialLeaf: WorkspaceLeaf | null;
     initialState?: CaptureState;
     historySnapshot?: LeafHistorySnapshot | null;
+    recentHistorySnapshot?: string[] | null;
+    recentHistoryBaseFilePath?: string | null;
     navQueue?: Promise<void>;
   }) {
     super(args.app);
@@ -167,6 +172,20 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       : this.appHelper.createLeafHistorySnapshot(
           this.initialLeaf ?? this.appHelper.getActiveFileLeaf(),
         );
+    const hasRecentHistorySnapshot = Object.prototype.hasOwnProperty.call(
+      args,
+      "recentHistorySnapshot",
+    );
+    this.recentHistorySnapshot = hasRecentHistorySnapshot
+      ? args.recentHistorySnapshot ?? null
+      : this.appHelper.captureLastOpenFilesSnapshot();
+    const hasRecentHistoryBaseFilePath = Object.prototype.hasOwnProperty.call(
+      args,
+      "recentHistoryBaseFilePath",
+    );
+    this.recentHistoryBaseFilePath = hasRecentHistoryBaseFilePath
+      ? args.recentHistoryBaseFilePath ?? null
+      : this.appHelper.getActiveFile()?.path ?? null;
     this.navQueue = args.navQueue ?? Promise.resolve();
     this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
     this.queryHistoryBaseQuery = null;
@@ -274,6 +293,13 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       this.navigate(() => this.stateToRestore!.restore());
     }
     this.skipRestoreOnClose = false;
+    if (this.usedPreview && !this.skipRecentHistoryRestoreOnClose) {
+      this.navigate(() => {
+        // Restore recent history after preview to avoid polluting recents.
+        this.scheduleRecentHistoryRestore(this.recentHistorySnapshot);
+      });
+    }
+    this.skipRecentHistoryRestoreOnClose = false;
     this.navigate(this.markClosed);
   }
 
@@ -769,8 +795,11 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     const isSameTab = leafType === "same-tab";
     const isFinalOpen = !option.keepOpen;
 
-    if (isFinalOpen && isSameTab && this.usedPreview) {
-      this.skipRestoreOnClose = true;
+    if (isFinalOpen && this.usedPreview) {
+      this.skipRecentHistoryRestoreOnClose = true;
+      if (isSameTab) {
+        this.skipRestoreOnClose = true;
+      }
     }
 
     if (isFinalOpen) {
@@ -781,19 +810,33 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       this.usedPreview = true;
     }
 
-    this.navigate(() =>
-      this.appHelper.openFile(
-        fileToOpened,
-        {
-          leafType: leafType,
-          offset,
-          inplace: option.keepOpen,
-          preventDuplicateTabs: this.settings.preventDuplicateTabs,
-          leafPriorToSameTab,
-        },
-        this.stateToRestore,
-      ),
-    );
+    const shouldRestoreRecentHistory = option.keepOpen === true;
+    this.navigate(async () => {
+      try {
+        await this.appHelper.openFile(
+          fileToOpened,
+          {
+            leafType: leafType,
+            offset,
+            inplace: option.keepOpen,
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+            leafPriorToSameTab,
+          },
+          this.stateToRestore,
+        );
+      } finally {
+        if (shouldRestoreRecentHistory) {
+          this.scheduleRecentHistoryRestore(this.recentHistorySnapshot);
+        } else if (isFinalOpen && this.usedPreview) {
+          const nextRecentHistory = this.buildRecentHistoryForFinalOpen(
+            this.recentHistorySnapshot,
+            this.recentHistoryBaseFilePath,
+            fileToOpened.path,
+          );
+          this.scheduleRecentHistoryRestore(nextRecentHistory);
+        }
+      }
+    });
     if (isFinalOpen && isSameTab && this.usedPreview) {
       this.navigate(() => {
         const leafToPatch = this.stateToRestore?.leaf ?? this.initialLeaf;
@@ -826,12 +869,25 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     }
 
     const isSameTab = leafType === "same-tab";
+    if (this.usedPreview) {
+      this.skipRecentHistoryRestoreOnClose = true;
+    }
     if (isSameTab && this.usedPreview) {
       this.skipRestoreOnClose = true;
     }
     this.close();
     this.navigate(() => this.isClosed);
     this.navigate(() => this.appHelper.openFile(file, { leafType: leafType }));
+    if (this.usedPreview) {
+      this.navigate(() => {
+        const nextRecentHistory = this.buildRecentHistoryForFinalOpen(
+          this.recentHistorySnapshot,
+          this.recentHistoryBaseFilePath,
+          file.path,
+        );
+        this.scheduleRecentHistoryRestore(nextRecentHistory);
+      });
+    }
     if (isSameTab && this.usedPreview) {
       this.navigate(() => {
         const leafToPatch = this.stateToRestore?.leaf ?? this.initialLeaf;
@@ -1277,6 +1333,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         initialState: this.stateToRestore,
         // Preserve the pre-dialog history snapshot to avoid capturing preview-mutated history.
         historySnapshot: this.historySnapshot,
+        recentHistorySnapshot: this.recentHistorySnapshot,
+        recentHistoryBaseFilePath: this.recentHistoryBaseFilePath,
         navQueue: this.navQueue,
       });
       modal.open();
@@ -1318,6 +1376,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         initialState: this.stateToRestore,
         initialLeaf: this.initialLeaf,
         historySnapshot: this.historySnapshot,
+        recentHistorySnapshot: this.recentHistorySnapshot,
+        recentHistoryBaseFilePath: this.recentHistoryBaseFilePath,
         navQueue: this.navQueue,
       });
       modal.open();

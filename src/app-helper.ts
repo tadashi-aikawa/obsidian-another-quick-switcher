@@ -83,6 +83,9 @@ interface UnsafeAppInterface {
   };
   workspace: Workspace & {
     openPopoutLeaf(): WorkspaceLeaf;
+    recentFileTracker?: {
+      lastOpenFiles: string[];
+    };
   };
   openWithDefaultApp(path: string): unknown;
   showInFolder(path: string): void;
@@ -731,6 +734,29 @@ export class AppHelper {
         this.moveTo({ start: p, end: p }, markdownView.editor);
       }
     }
+  }
+
+  captureLastOpenFilesSnapshot(): string[] | null {
+    const tracker = this.unsafeApp.workspace.recentFileTracker;
+    if (!tracker?.lastOpenFiles) {
+      return null;
+    }
+    // Non-public API: snapshot recent history to roll back preview-only opens.
+    return tracker.lastOpenFiles.slice();
+  }
+
+  restoreLastOpenFilesSnapshot(snapshot: string[] | null) {
+    if (!snapshot) {
+      return;
+    }
+    const tracker = this.unsafeApp.workspace.recentFileTracker;
+    if (!tracker?.lastOpenFiles) {
+      return;
+    }
+
+    const lastOpenFiles = tracker.lastOpenFiles;
+    lastOpenFiles.length = 0;
+    lastOpenFiles.push(...snapshot);
   }
 
   openFileInDefaultApp(file: TFile): void {
