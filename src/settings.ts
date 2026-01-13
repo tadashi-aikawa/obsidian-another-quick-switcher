@@ -162,6 +162,7 @@ export interface Hotkeys {
     "open all in new tabs": Hotkey[];
     "show all results": Hotkey[];
     preview: Hotkey[];
+    "toggle auto preview": Hotkey[];
     "scroll preview up": Hotkey[];
     "scroll preview down": Hotkey[];
     dismiss: Hotkey[];
@@ -234,6 +235,8 @@ export interface Settings {
   };
   // Header search
   autoPreviewInFloatingHeaderSearch: boolean;
+  // Link search
+  autoPreviewInFloatingLinkSearch: boolean;
   // Backlink search
   backlinkExcludePrefixPathPatterns: string[];
   // In file search
@@ -382,6 +385,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     preview: [{ modifiers: ["Mod"], key: "," }],
+    "toggle auto preview": [],
     "scroll preview up": [],
     "scroll preview down": [],
     dismiss: [{ modifiers: [], key: "Escape" }],
@@ -743,6 +747,8 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   // Header search
   autoPreviewInFloatingHeaderSearch: true,
+  // Link search
+  autoPreviewInFloatingLinkSearch: false,
   // Backlink search
   backlinkExcludePrefixPathPatterns: [],
   // In file search
@@ -807,6 +813,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addSearchSettings(containerEl);
     this.addHeaderSearchSettings(containerEl);
     this.addBacklinkSettings(containerEl);
+    this.addLinkSettings(containerEl);
     this.addInFileSettings(containerEl);
     this.addGrepSettings(containerEl);
     this.addMoveSettings(containerEl);
@@ -1727,6 +1734,21 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             }),
         );
     }
+  }
+
+  private addLinkSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", { text: "🔗 Link search" });
+
+    new Setting(containerEl)
+      .setName("Auto preview in the floating mode")
+      .addToggle((tc) => {
+        tc.setValue(
+          this.plugin.settings.autoPreviewInFloatingLinkSearch,
+        ).onChange(async (value) => {
+          this.plugin.settings.autoPreviewInFloatingLinkSearch = value;
+          await this.plugin.saveSettings();
+        });
+      });
   }
 
   private addInFileSettings(containerEl: HTMLElement) {

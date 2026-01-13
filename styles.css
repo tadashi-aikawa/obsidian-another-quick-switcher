@@ -127,6 +127,12 @@
   margin-right: 12px;
 }
 
+.another-quick-switcher__link__auto-preview-icon {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+}
+
 .another-quick-switcher__status__auto-preview-icon {
   display: flex;
   align-items: center;

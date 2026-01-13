@@ -25,7 +25,7 @@ import { Logger } from "../utils/logger";
 import { toLeafType } from "../utils/mouse";
 import { isExcalidraw, normalizePath } from "../utils/path";
 import { capitalizeFirstLetter, smartIncludes } from "../utils/strings";
-import { FOLDER } from "./icons";
+import { FOLDER, PREVIEW } from "./icons";
 import { setFloatingModal } from "./modal";
 
 interface SuggestionItem {
@@ -47,6 +47,10 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
   ignoredItems: SuggestionItem[];
   initialLeaf: WorkspaceLeaf | null;
   stateToRestore: CaptureState;
+  floating: boolean;
+  autoPreview: boolean;
+  previewIcon: Element | null;
+  originalSetSelectedItem?: (selectedIndex: number, evt?: any) => void;
 
   debounceGetSuggestions: Debouncer<
     [string, (items: SuggestionItem[]) => void],
@@ -77,6 +81,8 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
     this.settings = settings;
     this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
+    this.floating = false;
+    this.autoPreview = settings.autoPreviewInFloatingLinkSearch;
     this.limit = 255;
 
     this.setHotkeys();
@@ -96,11 +102,11 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
 
   onOpen() {
     super.onOpen();
-    if (!Platform.isPhone) {
-      setFloatingModal(this.appHelper);
-      this.enableFloatingModalWheelScroll();
-    }
+    this.enableFloating();
     this.opened = true;
+    this.setupAutoPreviewListeners();
+    this.refreshPreviewIcon();
+    this.requestAutoPreview();
   }
 
   onClose() {
@@ -111,6 +117,53 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
       this.navigate(() => this.stateToRestore.restore());
     }
     this.navigate(this.markClosed);
+  }
+
+  enableFloating() {
+    this.floating = true;
+    if (!Platform.isPhone) {
+      setFloatingModal(this.appHelper);
+      this.enableFloatingModalWheelScroll();
+    }
+  }
+
+  private setupAutoPreviewListeners() {
+    if (!this.originalSetSelectedItem) {
+      this.originalSetSelectedItem = this.chooser.setSelectedItem.bind(
+        this.chooser,
+      );
+      this.chooser.setSelectedItem = (selectedIndex: number, evt?: any) => {
+        this.originalSetSelectedItem?.(selectedIndex, evt);
+        this.requestAutoPreview();
+      };
+    }
+  }
+
+  private refreshPreviewIcon() {
+    this.previewIcon?.remove();
+    this.previewIcon = null;
+    if (this.autoPreview) {
+      this.previewIcon = this.inputEl.insertAdjacentElement(
+        "afterend",
+        createDiv({
+          cls: "another-quick-switcher__link__auto-preview-icon",
+        }),
+      );
+      this.previewIcon?.insertAdjacentHTML("beforeend", PREVIEW);
+    }
+  }
+
+  private requestAutoPreview() {
+    if (!this.autoPreview || !this.opened) {
+      return;
+    }
+    void this.preview();
+  }
+
+  private async preview() {
+    await this.chooseCurrentSuggestion("same-tab", {
+      keepOpen: true,
+    });
   }
 
   indexingItems() {
@@ -426,6 +479,16 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
       await this.chooseCurrentSuggestion("same-tab", {
         keepOpen: true,
       });
+    });
+    this.registerKeys("toggle auto preview", () => {
+      this.autoPreview = !this.autoPreview;
+      this.refreshPreviewIcon();
+      if (this.autoPreview && !this.floating) {
+        this.enableFloating();
+      }
+      if (this.autoPreview) {
+        this.requestAutoPreview();
+      }
     });
 
     const modifierKey = this.settings.userAltInsteadOfModForQuickResultSelection
