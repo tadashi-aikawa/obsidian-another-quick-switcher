@@ -69,6 +69,7 @@ export interface Hotkeys {
     "check all": Hotkey[];
     "uncheck all": Hotkey[];
     preview: Hotkey[];
+    "toggle auto preview": Hotkey[];
     "scroll preview up": Hotkey[];
     "scroll preview down": Hotkey[];
     create: Hotkey[];
@@ -288,6 +289,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "check all": [],
     "uncheck all": [],
     preview: [{ modifiers: ["Mod"], key: "," }],
+    "toggle auto preview": [],
     "scroll preview up": [],
     "scroll preview down": [],
     create: [{ modifiers: ["Shift"], key: "Enter" }],

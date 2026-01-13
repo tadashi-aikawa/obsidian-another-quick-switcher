@@ -57,7 +57,7 @@ import {
   smartWhitespaceSplit,
 } from "../utils/strings";
 import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
-import { FILTER, HEADER, LINK, SEARCH, TAG } from "./icons";
+import { FILTER, HEADER, LINK, PREVIEW, SEARCH, TAG } from "./icons";
 import { setFloatingModal } from "./modal";
 import { createElements } from "./suggestion-factory";
 
@@ -125,6 +125,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   debouncePreview?: Debouncer<[], void>;
   debouncePreviewCancelListener?: () => void;
   autoPreviewConfigKey?: string;
+  autoPreviewEnabled: boolean;
+  previewIcon: Element | null;
   originalSetSelectedItem?: (selectedIndex: number, evt?: any) => void;
 
   toKey(item: SuggestionItem): string {
@@ -155,6 +157,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.logger = Logger.of(this.settings);
     this.initialCommand = args.command;
     this.command = args.command;
+    this.autoPreviewEnabled = args.command.autoPreview;
     this.originFile = args.originFile;
     this.floating = args.command.floating;
     this.initialInputQuery = args.inputQuery;
@@ -246,7 +249,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.updateSuggestions();
     this.resetQueryHistoryNavigationBase();
 
-    if (this.command.floating || this.command.autoPreview) {
+    if (this.command.floating || this.autoPreviewEnabled) {
       this.enableFloating();
     }
 
@@ -260,6 +263,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
 
     this.opened = true;
     this.setupAutoPreviewListeners();
+    this.refreshAutoPreviewIcon();
     this.requestAutoPreview();
   }
 
@@ -334,10 +338,10 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   }
 
   private refreshAutoPreviewDebouncer() {
-    const configKey = `${this.command.autoPreview}-${
+    const configKey = `${this.autoPreviewEnabled}-${
       this.command.autoPreviewDelayMilliSeconds
     }`;
-    if (!this.command.autoPreview) {
+    if (!this.autoPreviewEnabled) {
       this.debouncePreview?.cancel();
       this.debouncePreview = undefined;
       this.autoPreviewConfigKey = configKey;
@@ -355,9 +359,21 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     }
   }
 
+  private refreshAutoPreviewIcon() {
+    this.previewIcon?.remove();
+    this.previewIcon = null;
+    if (this.autoPreviewEnabled && this.searchCommandEl) {
+      this.previewIcon = createDiv({
+        cls: "another-quick-switcher__status__auto-preview-icon",
+      });
+      this.previewIcon.insertAdjacentHTML("beforeend", PREVIEW);
+      this.searchCommandEl.appendChild(this.previewIcon);
+    }
+  }
+
   private requestAutoPreview() {
     this.refreshAutoPreviewDebouncer();
-    if (!this.command.autoPreview) {
+    if (!this.autoPreviewEnabled) {
       return;
     }
     this.debouncePreview?.();
@@ -554,8 +570,10 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       commandByPrefix !== this.command
     ) {
       this.command = commandByPrefix ?? this.initialCommand;
+      this.autoPreviewEnabled = this.command.autoPreview;
       this.indexingItems(); // slow?
       this.refreshAutoPreviewDebouncer();
+      this.refreshAutoPreviewIcon();
     }
     this.searchQuery = query.startsWith(this.command.commandPrefix)
       ? query.replace(this.command.commandPrefix, "")
@@ -665,6 +683,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     if (this.command.searchBy.link) {
       this.searchCommandEl.insertAdjacentHTML("beforeend", LINK);
     }
+    this.refreshAutoPreviewIcon();
 
     // For the bugfix (can't scroll on the mobile)
     const promptInputContainer = this.modalEl.find(".prompt-input-container");
@@ -1119,6 +1138,17 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     });
 
     this.registerKeys("preview", () => this.preview());
+    this.registerKeys("toggle auto preview", () => {
+      this.autoPreviewEnabled = !this.autoPreviewEnabled;
+      this.refreshAutoPreviewDebouncer();
+      this.refreshAutoPreviewIcon();
+      if (this.autoPreviewEnabled) {
+        if (!this.floating) {
+          this.enableFloating();
+        }
+        this.preview();
+      }
+    });
 
     this.registerKeys("create", async () => {
       await this.handleCreateNewMarkdown(this.searchQuery, "same-tab");

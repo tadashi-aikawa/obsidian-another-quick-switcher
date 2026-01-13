@@ -127,6 +127,12 @@
   margin-right: 12px;
 }
 
+.another-quick-switcher__status__auto-preview-icon {
+  display: flex;
+  align-items: center;
+  margin-left: 6px;
+}
+
 .another-quick-switcher__header__floating-modal-bg {
   background-color: rgba(0, 0, 0, 0.3);
 }
