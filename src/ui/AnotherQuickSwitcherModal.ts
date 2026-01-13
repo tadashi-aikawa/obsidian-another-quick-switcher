@@ -129,6 +129,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   previewIcon: Element | null;
   originalSetSelectedItem?: (selectedIndex: number, evt?: any) => void;
 
+  lastOpenFileIndexByPath: { [path: string]: number } = {};
+
   toKey(item: SuggestionItem): string {
     return item.file.path;
   }
@@ -194,6 +196,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.queryHistoryBaseQuery = null;
 
     this.limit = this.settings.maxNumberOfSuggestions;
+    this.lastOpenFileIndexByPath = this.appHelper.createRecentFilePathMap();
     this.setHotkeys();
 
     this.phantomItems = this.settings.showExistingFilesOnly
@@ -556,8 +559,6 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   _getSuggestions(query: string): SuggestionItem[] {
     const start = performance.now();
 
-    const lastOpenFileIndexByPath = this.appHelper.createRecentFilePathMap();
-
     const commandByPrefix = this.settings.searchCommands
       .filter((x) => x.commandPrefix)
       .find((x) => query.startsWith(x.commandPrefix));
@@ -618,7 +619,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       isQueryEmpty
         ? filterNoQueryPriorities(this.command.sortPriorities)
         : this.command.sortPriorities,
-      lastOpenFileIndexByPath,
+      this.lastOpenFileIndexByPath,
     );
 
     this.logger.showDebugLog(

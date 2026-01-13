@@ -47,7 +47,6 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
   ignoredItems: SuggestionItem[];
   initialLeaf: WorkspaceLeaf | null;
   stateToRestore: CaptureState;
-  lastOpenFileIndexByPath: { [path: string]: number } = {};
 
   debounceGetSuggestions: Debouncer<
     [string, (items: SuggestionItem[]) => void],
@@ -79,7 +78,6 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
     this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
     this.limit = 255;
-    this.lastOpenFileIndexByPath = this.appHelper.createRecentFilePathMap();
 
     this.setHotkeys();
 
