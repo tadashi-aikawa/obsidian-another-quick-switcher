@@ -79,9 +79,7 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
     this.logger = Logger.of(this.settings);
     this.initialLeaf = initialLeaf;
     this.limit = 255;
-    this.app.workspace.getLastOpenFiles().forEach((v, i) => {
-      this.lastOpenFileIndexByPath[v] = i;
-    });
+    this.lastOpenFileIndexByPath = this.appHelper.createRecentFilePathMap();
 
     this.setHotkeys();
 

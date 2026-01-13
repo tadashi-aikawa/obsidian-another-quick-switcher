@@ -333,6 +333,18 @@ export class AppHelper {
     );
   }
 
+  /**
+   * @return {"<relative path from root>: lastOpenFiles index"}
+   */
+  createRecentFilePathMap(): Record<string, number> {
+    const files = this.unsafeApp.workspace.recentFileTracker.lastOpenFiles;
+    const map: Record<string, number> = {};
+    for (let index = 0; index < files.length; index++) {
+      map[files[index]] = index;
+    }
+    return map;
+  }
+
   // noinspection FunctionWithMultipleLoopsJS
   /**
    * Includes phantom files

@@ -107,9 +107,8 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
       "g",
     );
     this.limit = 255;
-    this.app.workspace.getLastOpenFiles().forEach((v, i) => {
-      this.lastOpenFileIndexByPath[v] = i;
-    });
+
+    this.lastOpenFileIndexByPath = this.appHelper.createRecentFilePathMap();
 
     this.setHotkeys();
 

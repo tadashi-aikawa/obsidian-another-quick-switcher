@@ -556,10 +556,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   _getSuggestions(query: string): SuggestionItem[] {
     const start = performance.now();
 
-    const lastOpenFileIndexByPath: { [path: string]: number } = {};
-    this.app.workspace.getLastOpenFiles().forEach((v, i) => {
-      lastOpenFileIndexByPath[v] = i;
-    });
+    const lastOpenFileIndexByPath = this.appHelper.createRecentFilePathMap();
 
     const commandByPrefix = this.settings.searchCommands
       .filter((x) => x.commandPrefix)
