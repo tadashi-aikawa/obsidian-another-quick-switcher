@@ -83,7 +83,7 @@ interface UnsafeAppInterface {
   };
   workspace: Workspace & {
     openPopoutLeaf(): WorkspaceLeaf;
-    recentFileTracker?: {
+    recentFileTracker: {
       lastOpenFiles: string[];
     };
   };
@@ -737,24 +737,17 @@ export class AppHelper {
   }
 
   captureLastOpenFilesSnapshot(): string[] | null {
-    const tracker = this.unsafeApp.workspace.recentFileTracker;
-    if (!tracker?.lastOpenFiles) {
-      return null;
-    }
     // Non-public API: snapshot recent history to roll back preview-only opens.
-    return tracker.lastOpenFiles.slice();
+    return this.unsafeApp.workspace.recentFileTracker.lastOpenFiles.slice();
   }
 
   restoreLastOpenFilesSnapshot(snapshot: string[] | null) {
     if (!snapshot) {
       return;
     }
-    const tracker = this.unsafeApp.workspace.recentFileTracker;
-    if (!tracker?.lastOpenFiles) {
-      return;
-    }
 
-    const lastOpenFiles = tracker.lastOpenFiles;
+    const lastOpenFiles =
+      this.unsafeApp.workspace.recentFileTracker.lastOpenFiles;
     lastOpenFiles.length = 0;
     lastOpenFiles.push(...snapshot);
   }
