@@ -64,7 +64,7 @@ export interface Hotkeys {
     "open in popup": Hotkey[];
     "check/uncheck": Hotkey[];
     "check/uncheck and next": Hotkey[];
-    "check all": Hotkey[];
+    "check/uncheck all": Hotkey[];
     "uncheck all": Hotkey[];
     preview: Hotkey[];
     "toggle auto preview": Hotkey[];
@@ -135,7 +135,7 @@ export interface Hotkeys {
     "open in popup": Hotkey[];
     "check/uncheck": Hotkey[];
     "check/uncheck and next": Hotkey[];
-    "check all": Hotkey[];
+    "check/uncheck all": Hotkey[];
     "uncheck all": Hotkey[];
     "show all results": Hotkey[];
     preview: Hotkey[];
@@ -187,7 +187,7 @@ export interface Hotkeys {
     "open in popup": Hotkey[];
     "check/uncheck": Hotkey[];
     "check/uncheck and next": Hotkey[];
-    "check all": Hotkey[];
+    "check/uncheck all": Hotkey[];
     "uncheck all": Hotkey[];
     preview: Hotkey[];
     "scroll preview up": Hotkey[];
@@ -277,7 +277,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in popup": [],
     "check/uncheck": [],
     "check/uncheck and next": [],
-    "check all": [],
+    "check/uncheck all": [],
     "uncheck all": [],
     preview: [{ modifiers: ["Mod"], key: "," }],
     "toggle auto preview": [],
@@ -348,7 +348,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in popup": [],
     "check/uncheck": [],
     "check/uncheck and next": [],
-    "check all": [],
+    "check/uncheck all": [],
     "uncheck all": [],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     preview: [{ modifiers: ["Mod"], key: "," }],
@@ -400,7 +400,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in popup": [],
     "check/uncheck": [],
     "check/uncheck and next": [],
-    "check all": [],
+    "check/uncheck all": [],
     "uncheck all": [],
     preview: [{ modifiers: ["Mod"], key: "," }],
     "scroll preview up": [],

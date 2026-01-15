@@ -1168,8 +1168,8 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
     this.registerKeys("check/uncheck and next", async () => {
       await this.toggleCheckedItem({ moveNext: true });
     });
-    this.registerKeys("check all", () => {
-      this.checkAll();
+    this.registerKeys("check/uncheck all", () => {
+      this.toggleCheckAll();
     });
     this.registerKeys("uncheck all", () => {
       this.uncheckAll();

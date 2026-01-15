@@ -175,6 +175,21 @@ export abstract class AbstractSuggestionModal<T>
     this.updateCheckedCountBadge();
   }
 
+  toggleCheckAll(): void {
+    const items = this.chooser.values ?? [];
+    const isAllChecked = items.every((item) => {
+      const path = this.toKey(item);
+      return Boolean(this.selectedItemMap[path]);
+    });
+
+    if (isAllChecked) {
+      this.uncheckAll();
+      return;
+    }
+
+    this.checkAll();
+  }
+
   uncheckAll(): void {
     this.selectedItemMap = {};
     this.updateSuggestions();

@@ -335,7 +335,7 @@ The "Move file to another folder" command allows you to quickly move the current
 You can multi-select suggestions in the main Quick Switcher, Backlink search, and Grep.
 
 - Toggle selection: use the configurable hotkeys "check/uncheck" or "check/uncheck and next" (moves the cursor to the next item).
-- Select all / Clear all: "check all" and "uncheck all" hotkeys (configurable).
+- Select all / Clear all: use "check/uncheck all" (toggles all) or "uncheck all" hotkeys (configurable).
 - Visual cue: checked items show a left accent bar in the list.
 - Batch actions: when items are checked, actions like Open will apply to all checked items. For example, Open opens all checked targets in new tabs; other supported actions (e.g., close if opened, open in default app, show in system explorer) also work for checked items.
 
@@ -397,7 +397,7 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | create in new popup             | _(none)_           | ⛔  |
 | check/uncheck                   | _(none)_           | -  |
 | check/uncheck and next          | _(none)_           | -  |
-| check all                       | _(none)_           | -  |
+| check/uncheck all               | _(none)_           | -  |
 | uncheck all                     | _(none)_           | -  |
 | insert to editor                | `Alt+Enter`        | ✅  |
 | insert to editor in background  | _(none)_           | ⛔  |
@@ -467,7 +467,7 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open all in new tabs          | `Mod+Shift+Alt+o`  | ⛔  |
 | check/uncheck                 | _(none)_           | -  |
 | check/uncheck and next        | _(none)_           | -  |
-| check all                     | _(none)_           | -  |
+| check/uncheck all             | _(none)_           | -  |
 | uncheck all                   | _(none)_           | -  |
 | show all results              | `Shift+Alt+a`      | ⛔  |
 | preview                       | `Mod+,`            | ⛔  |
@@ -530,7 +530,7 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open all in new tabs          | `Mod+Shift+Alt+o`  | ⛔  |
 | check/uncheck                 | _(none)_           | -  |
 | check/uncheck and next        | _(none)_           | -  |
-| check all                     | _(none)_           | -  |
+| check/uncheck all             | _(none)_           | -  |
 | uncheck all                   | _(none)_           | -  |
 | preview                       | `Mod+,`            | ⛔  |
 | scroll preview up             | _(none)_           | ⛔  |
