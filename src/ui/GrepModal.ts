@@ -101,6 +101,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
   debounceInputEvent: Debouncer<[], void>;
   clonedInputElInputEventListener: () => void;
   countInputEl?: HTMLDivElement;
+  countWrapperEl?: HTMLDivElement;
   basePathInputEl: HTMLInputElement;
   basePathInputElChangeEventListener: (
     this: HTMLInputElement,
@@ -388,23 +389,15 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
     // Check if any query has invalid regex
     for (const singleQuery of queries) {
       if (!isValidRegex(singleQuery)) {
-        this.countInputEl?.remove();
-        this.countInputEl = createDiv({
-          text: `Invalid regex pattern: ${singleQuery}`,
-          cls: "another-quick-switcher__grep__count-input another-quick-switcher__grep__count-input--error",
+        this.renderCountStatus(`Invalid regex pattern: ${singleQuery}`, {
+          error: true,
         });
-        this.clonedInputEl.before(this.countInputEl);
         return [];
       }
     }
 
     // Show searching message only after validation passes
-    this.countInputEl?.remove();
-    this.countInputEl = createDiv({
-      text: "searching...",
-      cls: "another-quick-switcher__grep__count-input",
-    });
-    this.clonedInputEl.before(this.countInputEl);
+    this.renderCountStatus("searching...");
 
     if (queries.length > 1) {
       // AND search: run ripgrep for each query separately and merge results
@@ -430,12 +423,9 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
           results.type === "error" &&
           results.errorType === "regex_parse_error"
         ) {
-          this.countInputEl?.remove();
-          this.countInputEl = createDiv({
-            text: `Invalid regex pattern: ${singleQuery}`,
-            cls: "another-quick-switcher__grep__count-input another-quick-switcher__grep__count-input--error",
+          this.renderCountStatus(`Invalid regex pattern: ${singleQuery}`, {
+            error: true,
           });
-          this.clonedInputEl.before(this.countInputEl);
           return [];
         }
       }
@@ -463,12 +453,9 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
         results.type === "error" &&
         results.errorType === "regex_parse_error"
       ) {
-        this.countInputEl?.remove();
-        this.countInputEl = createDiv({
-          text: `Invalid regex pattern: ${singleQuery}`,
-          cls: "another-quick-switcher__grep__count-input another-quick-switcher__grep__count-input--error",
+        this.renderCountStatus(`Invalid regex pattern: ${singleQuery}`, {
+          error: true,
         });
-        this.clonedInputEl.before(this.countInputEl);
         return [];
       } else {
         rgResults = [];
@@ -585,14 +572,11 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
           "another-quick-switcher__grep__count-input--error",
         )
       ) {
-        this.countInputEl?.remove();
-        this.countInputEl = createDiv({
-          text: `${Math.min(this.suggestions.length, this.limit)} / ${
+        this.renderCountStatus(
+          `${Math.min(this.suggestions.length, this.limit)} / ${
             this.suggestions.length
           }`,
-          cls: "another-quick-switcher__grep__count-input",
-        });
-        this.clonedInputEl.before(this.countInputEl);
+        );
       }
     }
 
@@ -731,6 +715,28 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
     itemDiv.appendChild(descriptionsDiv);
 
     el.appendChild(itemDiv);
+  }
+
+  private renderCountStatus(
+    text: string,
+    option: { error?: boolean } = {},
+  ): void {
+    this.countWrapperEl?.remove();
+    this.countWrapperEl = createDiv({
+      cls: "another-quick-switcher__grep__count-wrapper",
+    });
+    this.countInputEl = createDiv({
+      text,
+      cls: option.error
+        ? "another-quick-switcher__grep__count-input another-quick-switcher__grep__count-input--error"
+        : "another-quick-switcher__grep__count-input",
+    });
+    this.countWrapperEl.appendChild(this.countInputEl);
+    this.clonedInputEl.before(this.countWrapperEl);
+    this.renderCheckedCountBadge(
+      "another-quick-switcher__grep__checked-count-badge",
+      this.countWrapperEl,
+    );
   }
 
   navigate(cb: () => any) {
@@ -898,7 +904,8 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
           "another-quick-switcher__grep__count-input--error",
         )
       ) {
-        this.countInputEl?.remove();
+        this.countWrapperEl?.remove();
+        this.countWrapperEl = undefined;
         this.countInputEl = undefined;
       }
       return;
@@ -921,12 +928,9 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
         "another-quick-switcher__grep__input--invalid",
       );
       // Show error message immediately
-      this.countInputEl?.remove();
-      this.countInputEl = createDiv({
-        text: `Invalid regex pattern: ${invalidQuery}`,
-        cls: "another-quick-switcher__grep__count-input another-quick-switcher__grep__count-input--error",
+      this.renderCountStatus(`Invalid regex pattern: ${invalidQuery}`, {
+        error: true,
       });
-      this.clonedInputEl.before(this.countInputEl);
     } else {
       this.clonedInputEl?.classList.remove(
         "another-quick-switcher__grep__input--invalid",
@@ -937,7 +941,8 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
           "another-quick-switcher__grep__count-input--error",
         )
       ) {
-        this.countInputEl?.remove();
+        this.countWrapperEl?.remove();
+        this.countWrapperEl = undefined;
         this.countInputEl = undefined;
       }
     }

@@ -112,6 +112,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   searchCommandEl?: HTMLDivElement;
   defaultInputEl?: HTMLDivElement;
   countInputEl?: HTMLDivElement;
+  countWrapperEl?: HTMLDivElement;
   floating: boolean;
   opened: boolean;
   willSilentClose = false;
@@ -627,11 +628,20 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       start,
     );
 
+    this.countWrapperEl?.remove();
+    this.countWrapperEl = createDiv({
+      cls: "another-quick-switcher__status__count-wrapper",
+    });
     this.countInputEl = createDiv({
       text: `${Math.min(items.length, this.limit)} / ${items.length}`,
       cls: "another-quick-switcher__status__count-input",
     });
-    this.inputEl.before(this.countInputEl);
+    this.countWrapperEl.appendChild(this.countInputEl);
+    this.inputEl.before(this.countWrapperEl);
+    this.renderCheckedCountBadge(
+      "another-quick-switcher__status__checked-count-badge",
+      this.countWrapperEl,
+    );
 
     return items.slice(0, this.limit).map((x, order) => ({ ...x, order }));
   }
@@ -640,6 +650,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.navigationHistoryEl?.remove();
     this.searchCommandEl?.remove();
     this.defaultInputEl?.remove();
+    this.countWrapperEl?.remove();
     this.countInputEl?.remove();
 
     this.navigationHistoryEl = createDiv({

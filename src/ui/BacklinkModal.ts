@@ -69,6 +69,7 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
   opened: boolean;
 
   countInputEl?: HTMLDivElement;
+  countWrapperEl?: HTMLDivElement;
 
   private markClosed: () => void;
   isClosed: Promise<void> = new Promise((resolve) => {
@@ -280,14 +281,22 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
 
     this.logger.showDebugLog(`Get suggestions: ${query}`, start);
 
-    this.countInputEl?.remove();
+    this.countWrapperEl?.remove();
+    this.countWrapperEl = createDiv({
+      cls: "another-quick-switcher__backlink__status__count-wrapper",
+    });
     this.countInputEl = createDiv({
       text: `${Math.min(matchedSuggestions.length, this.limit)} / ${
         matchedSuggestions.length
       }`,
       cls: "another-quick-switcher__backlink__status__count-input",
     });
-    this.inputEl.before(this.countInputEl);
+    this.countWrapperEl.appendChild(this.countInputEl);
+    this.inputEl.before(this.countWrapperEl);
+    this.renderCheckedCountBadge(
+      "another-quick-switcher__backlink__status__checked-count-badge",
+      this.countWrapperEl,
+    );
 
     this.suggestions = matchedSuggestions
       .sort((a, b) =>

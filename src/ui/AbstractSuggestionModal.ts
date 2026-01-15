@@ -23,6 +23,7 @@ export abstract class AbstractSuggestionModal<T>
   // ╰─────────────────────────────────────────────────────────╯
 
   selectedItemMap: { [key: string]: T } = {};
+  protected checkedCountEl?: HTMLDivElement;
   abstract toKey(item: T): string;
 
   getSelectedItem(): T | null {
@@ -84,6 +85,40 @@ export abstract class AbstractSuggestionModal<T>
     return Object.values(this.selectedItemMap);
   }
 
+  protected renderCheckedCountBadge(
+    cls: string,
+    containerEl: HTMLElement,
+  ): void {
+    this.checkedCountEl?.remove();
+    this.checkedCountEl = createDiv({
+      cls: [
+        "another-quick-switcher__checked-count-badge",
+        "another-quick-switcher__checked-count-badge--hidden",
+        cls,
+      ],
+    });
+    containerEl.appendChild(this.checkedCountEl);
+    this.updateCheckedCountBadge();
+  }
+
+  protected updateCheckedCountBadge(): void {
+    if (!this.checkedCountEl) {
+      return;
+    }
+    const count = Object.keys(this.selectedItemMap).length;
+    if (count === 0) {
+      this.checkedCountEl.classList.add(
+        "another-quick-switcher__checked-count-badge--hidden",
+      );
+      this.checkedCountEl.textContent = "";
+      return;
+    }
+    this.checkedCountEl.classList.remove(
+      "another-quick-switcher__checked-count-badge--hidden",
+    );
+    this.checkedCountEl.textContent = String(count);
+  }
+
   async actionMultiItems(
     action: (item: T, mode: "select" | "check") => Promise<unknown> | unknown,
     actionIfItemNotSelected?: () => Promise<void> | unknown,
@@ -123,6 +158,7 @@ export abstract class AbstractSuggestionModal<T>
     // Clear element
     element.empty();
     this.renderSuggestion(item, element as HTMLElement);
+    this.updateCheckedCountBadge();
 
     if (option?.moveNext) {
       this.selectNextItem();
@@ -136,11 +172,13 @@ export abstract class AbstractSuggestionModal<T>
       this.selectedItemMap[path] = item;
     }
     this.updateSuggestions();
+    this.updateCheckedCountBadge();
   }
 
   uncheckAll(): void {
     this.selectedItemMap = {};
     this.updateSuggestions();
+    this.updateCheckedCountBadge();
   }
 
   // ╭─────────────────────────────────────────────────────────╮
