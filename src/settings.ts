@@ -62,8 +62,6 @@ export interface Hotkeys {
     "open in new pane (vertical)": Hotkey[];
     "open in new window": Hotkey[];
     "open in popup": Hotkey[];
-    "open in new tab in background": Hotkey[];
-    "open all in new tabs": Hotkey[];
     "check/uncheck": Hotkey[];
     "check/uncheck and next": Hotkey[];
     "check all": Hotkey[];
@@ -83,8 +81,6 @@ export interface Hotkeys {
     "open in google": Hotkey[];
     "open first URL": Hotkey[];
     "insert to editor": Hotkey[];
-    "insert to editor in background": Hotkey[];
-    "insert all to editor": Hotkey[];
     "show backlinks": Hotkey[];
     "show links": Hotkey[];
     "show all results": Hotkey[];
@@ -137,8 +133,6 @@ export interface Hotkeys {
     "open in new pane (vertical)": Hotkey[];
     "open in new window": Hotkey[];
     "open in popup": Hotkey[];
-    "open in new tab in background": Hotkey[];
-    "open all in new tabs": Hotkey[];
     "check/uncheck": Hotkey[];
     "check/uncheck and next": Hotkey[];
     "check all": Hotkey[];
@@ -158,8 +152,6 @@ export interface Hotkeys {
     "open in new pane (vertical)": Hotkey[];
     "open in new window": Hotkey[];
     "open in popup": Hotkey[];
-    "open in new tab in background": Hotkey[];
-    "open all in new tabs": Hotkey[];
     "show all results": Hotkey[];
     preview: Hotkey[];
     "toggle auto preview": Hotkey[];
@@ -193,8 +185,6 @@ export interface Hotkeys {
     "open in new pane (vertical)": Hotkey[];
     "open in new window": Hotkey[];
     "open in popup": Hotkey[];
-    "open in new tab in background": Hotkey[];
-    "open all in new tabs": Hotkey[];
     "check/uncheck": Hotkey[];
     "check/uncheck and next": Hotkey[];
     "check all": Hotkey[];
@@ -285,8 +275,6 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
     "open in new window": [{ modifiers: ["Mod"], key: "o" }],
     "open in popup": [],
-    "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
-    "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     "check/uncheck": [],
     "check/uncheck and next": [],
     "check all": [],
@@ -306,8 +294,6 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in google": [{ modifiers: ["Mod"], key: "g" }],
     "open first URL": [{ modifiers: ["Mod"], key: "]" }],
     "insert to editor": [{ modifiers: ["Alt"], key: "Enter" }],
-    "insert to editor in background": [],
-    "insert all to editor": [{ modifiers: ["Alt", "Shift"], key: "Enter" }],
     "show backlinks": [{ modifiers: ["Mod"], key: "h" }],
     "show links": [{ modifiers: ["Mod"], key: "l" }],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
@@ -360,8 +346,6 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
     "open in new window": [{ modifiers: ["Mod"], key: "o" }],
     "open in popup": [],
-    "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
-    "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     "check/uncheck": [],
     "check/uncheck and next": [],
     "check all": [],
@@ -381,8 +365,6 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
     "open in new window": [{ modifiers: ["Mod"], key: "o" }],
     "open in popup": [],
-    "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
-    "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     "show all results": [{ modifiers: ["Shift", "Alt"], key: "a" }],
     preview: [{ modifiers: ["Mod"], key: "," }],
     "toggle auto preview": [],
@@ -416,8 +398,6 @@ export const createDefaultHotkeys = (): Hotkeys => ({
     "open in new pane (vertical)": [{ modifiers: ["Mod"], key: "i" }],
     "open in new window": [{ modifiers: ["Mod"], key: "o" }],
     "open in popup": [],
-    "open in new tab in background": [{ modifiers: ["Alt"], key: "o" }],
-    "open all in new tabs": [{ modifiers: ["Mod", "Shift", "Alt"], key: "o" }],
     "check/uncheck": [],
     "check/uncheck and next": [],
     "check all": [],

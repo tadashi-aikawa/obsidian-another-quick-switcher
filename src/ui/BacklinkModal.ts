@@ -613,28 +613,6 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
     this.registerKeys("open in popup", async () => {
       await this.chooseCurrentSuggestion("popup");
     });
-    this.registerKeys("open in new tab in background", async () => {
-      await this.chooseCurrentSuggestion("new-tab-background", {
-        keepOpen: true,
-      });
-    });
-    this.registerKeys("open all in new tabs", async () => {
-      this.close();
-      const items = this.getItems();
-      if (!items) {
-        return;
-      }
-
-      this.getSelectedItem();
-      for (const item of items) {
-        await this.appHelper.openFile(item.file, {
-          leafType: "new-tab",
-          line: item.lineNumber - 1,
-          preventDuplicateTabs: this.settings.preventDuplicateTabs,
-        });
-        await sleep(0);
-      }
-    });
 
     this.registerKeys("check/uncheck", async () => {
       await this.toggleCheckedItem();

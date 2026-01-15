@@ -1156,27 +1156,6 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
     this.registerKeys("open in popup", async () => {
       await this.chooseCurrentSuggestion("popup");
     });
-    this.registerKeys("open in new tab in background", async () => {
-      await this.chooseCurrentSuggestion("new-tab-background", {
-        keepOpen: true,
-      });
-    });
-    this.registerKeys("open all in new tabs", async () => {
-      this.close();
-      if (this.chooser.values == null) {
-        return;
-      }
-
-      const items = this.chooser.values.slice().reverse();
-      for (const x of items) {
-        await this.appHelper.openFile(x.file, {
-          leafType: "new-tab",
-          line: x.lineNumber - 1,
-          preventDuplicateTabs: this.settings.preventDuplicateTabs,
-        });
-        await sleep(0);
-      }
-    });
 
     this.registerKeys("check/uncheck", async () => {
       await this.toggleCheckedItem();

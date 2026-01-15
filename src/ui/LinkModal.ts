@@ -446,27 +446,6 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
     this.registerKeys("open in popup", async () => {
       await this.chooseCurrentSuggestion("popup");
     });
-    this.registerKeys("open in new tab in background", async () => {
-      await this.chooseCurrentSuggestion("new-tab-background", {
-        keepOpen: true,
-      });
-    });
-    this.registerKeys("open all in new tabs", async () => {
-      this.close();
-      if (this.chooser.values == null) {
-        return;
-      }
-
-      const items = this.chooser.values.slice().reverse();
-      for (const item of items) {
-        await this.appHelper.openFile(this.appHelper.getActiveFile()!, {
-          leafType: "new-tab",
-          line: item.lineNumber - 1,
-          preventDuplicateTabs: this.settings.preventDuplicateTabs,
-        });
-        await sleep(0);
-      }
-    });
 
     this.registerKeys("show all results", () => {
       this.limit = Number.MAX_SAFE_INTEGER;

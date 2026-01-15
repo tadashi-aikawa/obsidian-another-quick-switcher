@@ -1115,25 +1115,6 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.registerKeys("open in popup", async () => {
       await this.chooseCurrentSuggestion("popup");
     });
-    this.registerKeys("open in new tab in background", async () => {
-      await this.chooseCurrentSuggestion("new-tab-background", {
-        keepOpen: true,
-      });
-    });
-    this.registerKeys("open all in new tabs", () => {
-      const items = this.getItems();
-      if (!items) {
-        return;
-      }
-
-      this.close();
-      for (const item of items) {
-        this.appHelper.openFile(item.file, {
-          leafType: "new-tab-background",
-          preventDuplicateTabs: this.settings.preventDuplicateTabs,
-        });
-      }
-    });
 
     this.registerKeys("preview", () => this.preview());
     this.registerKeys("toggle auto preview", () => {
@@ -1280,49 +1261,6 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
           await this.safeClose();
         },
       );
-    });
-
-    this.registerKeys("insert to editor in background", async () => {
-      const item = this.chooser.values?.[this.chooser.selectedItem];
-      if (!item) {
-        return;
-      }
-
-      const file = item.file;
-      if (!file) {
-        return;
-      }
-
-      this.historyRestoreStatus = "doing";
-      if (this.stateToRestore) {
-        await this.stateToRestore.restore();
-        this.stateToRestore = undefined;
-      }
-
-      if (this.appHelper.isActiveLeafCanvas()) {
-        this.appHelper.addFileToCanvas(file);
-      } else {
-        insertLinkToActiveMarkdownFile(file, item);
-        this.appHelper.insertStringToActiveFile("\n");
-      }
-    });
-
-    this.registerKeys("insert all to editor", async () => {
-      await this.safeClose();
-
-      let offsetX = 0;
-      for (const x of this.chooser.values ?? []) {
-        if (this.appHelper.isActiveLeafCanvas()) {
-          const cv = this.appHelper.addFileToCanvas(x.file, {
-            x: offsetX,
-            y: 0,
-          });
-          offsetX += cv.width + 30;
-        } else {
-          insertLinkToActiveMarkdownFile(x.file, x);
-          this.appHelper.insertStringToActiveFile("\n");
-        }
-      }
     });
 
     const navigateLinks = (command: SearchCommand) => {

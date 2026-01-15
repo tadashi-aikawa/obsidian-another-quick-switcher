@@ -176,7 +176,6 @@ export type LeafHistorySnapshot = {
 export type LeafType =
   | "same-tab"
   | "new-tab"
-  | "new-tab-background"
   | "new-pane-vertical"
   | "new-pane-horizontal"
   | "new-window"
@@ -686,7 +685,6 @@ export class AppHelper {
       : undefined;
 
     let leaf: WorkspaceLeaf | undefined;
-    let background = false;
     switch (opt.leafType) {
       case "same-tab":
         leaf =
@@ -696,10 +694,6 @@ export class AppHelper {
         break;
       case "new-tab":
         leaf = priorLeaf ?? this.unsafeApp.workspace.getLeaf(true);
-        break;
-      case "new-tab-background":
-        leaf = priorLeaf ?? this.unsafeApp.workspace.getLeaf(true);
-        background = true;
         break;
       case "new-pane-horizontal":
         leaf = this.unsafeApp.workspace.getLeaf("split", "horizontal");
@@ -733,7 +727,7 @@ export class AppHelper {
     } else {
       await leaf.openFile(file, {
         ...leaf.getViewState(),
-        active: !background,
+        active: true,
       });
     }
 
