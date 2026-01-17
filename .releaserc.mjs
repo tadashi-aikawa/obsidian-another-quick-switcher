@@ -1,3 +1,4 @@
+// biome-ignore-all lint/suspicious/noTemplateCurlyInString: semantic-release
 export default {
   branches: ["master"],
   tagFormat: "${version}",

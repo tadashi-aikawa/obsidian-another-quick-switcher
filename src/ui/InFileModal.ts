@@ -1,6 +1,6 @@
 import { type App, type EditorPosition, Platform } from "obsidian";
-import { AppHelper } from "../app-helper";
 import type { CaptureState } from "../app-helper";
+import { AppHelper } from "../app-helper";
 import {
   createInstructions,
   normalizeKey,
@@ -74,9 +74,7 @@ export class InFileModal extends AbstractSuggestionModal<SuggestionItem> {
     this.logger = Logger.of(this.settings);
     this.floating = this.settings.autoPreviewInFloatingInFileSearch;
     this.autoPreview = settings.autoPreviewInFloatingInFileSearch;
-    this.stateToRestore = this.appHelper.captureStateInFile(
-      this.appHelper.getActiveFileLeaf(),
-    );
+    this.stateToRestore = this.appHelper.captureStateInFile();
     this.initialCursor = this.appHelper.getCurrentEditor()!.getCursor();
     this.navQueue = Promise.resolve();
     this.limit = 255;

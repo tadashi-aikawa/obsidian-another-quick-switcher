@@ -1,11 +1,11 @@
 import { describe, expect, test } from "@jest/globals";
 import {
-  type FuzzyResult,
   capitalIncludes,
   capitalizeFirstLetter,
   excludeEmoji,
   excludeFormat,
   excludeSpace,
+  type FuzzyResult,
   hasCapitalLetter,
   includes,
   includesWithRange,

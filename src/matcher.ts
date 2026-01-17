@@ -95,7 +95,9 @@ function matchQuery(
   const file = qs.pop()!;
   const dirs = qs;
   const includeDir = dirs.every((dir) =>
-    smartIncludes(item.file.parent?.path!, dir, isNormalizeAccentsDiacritics),
+    !item.file.parent
+      ? false
+      : smartIncludes(item.file.parent.path, dir, isNormalizeAccentsDiacritics),
   );
   if (!includeDir) {
     return [{ type: "not found", query }];
@@ -118,7 +120,7 @@ function matchQuery(
     isNormalizeAccentsDiacritics,
   );
   switch (fuzzyResult.type) {
-    // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
+    // biome-ignore lint/suspicious/noFallthroughSwitchClause: intentionally fall through
     case "starts-with":
       results.push({
         type: "prefix-name",
@@ -126,7 +128,7 @@ function matchQuery(
         query,
         ranges: fuzzyResult.ranges,
       });
-    // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
+    // biome-ignore lint/suspicious/noFallthroughSwitchClause: intentionally fall through
     case "includes":
       results.push({
         type: "name",
@@ -165,13 +167,13 @@ function matchQuery(
     const r = smartMicroFuzzy(al, file, isNormalizeAccentsDiacritics);
     // noinspection FallThroughInSwitchStatementJS
     switch (r.type) {
-      // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
+      // biome-ignore lint/suspicious/noFallthroughSwitchClause: intentionally fall through
       case "starts-with":
         prefixNameMatchedAliases.push({
           value: al,
           ranges: r.ranges,
         });
-      // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
+      // biome-ignore lint/suspicious/noFallthroughSwitchClause: intentionally fall through
       case "includes":
         nameMatchedAliases.push({
           value: al,
@@ -235,7 +237,8 @@ function matchQuery(
   }
 
   if (
-    smartIncludes(item.file.parent?.path!, query, isNormalizeAccentsDiacritics)
+    item.file.parent &&
+    smartIncludes(item.file.parent.path, query, isNormalizeAccentsDiacritics)
   ) {
     results.push({ type: "directory", meta: [item.file.path], query });
   }

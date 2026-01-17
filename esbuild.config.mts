@@ -1,8 +1,8 @@
-import fs from "fs";
-import path from "path";
 import builtins from "builtin-modules";
 import chokidar from "chokidar";
 import esbuild from "esbuild";
+import fs from "fs";
+import path from "path";
 import process from "process";
 
 const VAULT_DIR = "/Users/tadashi-aikawa/work/minerva";

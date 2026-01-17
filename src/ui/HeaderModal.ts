@@ -52,9 +52,7 @@ export class HeaderModal extends AbstractSuggestionModal<SuggestionItem> {
     this.floating = floating;
     this.autoPreview = settings.autoPreviewInFloatingHeaderSearch && floating;
 
-    this.stateToRestore = this.appHelper.captureStateInFile(
-      this.appHelper.getActiveFileLeaf(),
-    );
+    this.stateToRestore = this.appHelper.captureStateInFile();
     this.initialCursor = this.appHelper.getCurrentEditor()!.getCursor();
     this.navQueue = Promise.resolve();
 

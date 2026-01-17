@@ -1,13 +1,13 @@
 import {
   type App,
   type Debouncer,
+  debounce,
   Notice,
   Platform,
-  type TFile,
-  type WorkspaceLeaf,
-  debounce,
   parseFrontMatterAliases,
   parseFrontMatterTags,
+  type TFile,
+  type WorkspaceLeaf,
 } from "obsidian";
 import {
   createInstructions,
@@ -15,26 +15,26 @@ import {
   quickResultSelectionModifier,
 } from "src/keys";
 import {
-  type SuggestionItem,
   getMatchedTitleAndAliases,
+  type SuggestionItem,
   stampMatchResults,
 } from "src/matcher";
 import {
   AppHelper,
   type CaptureState,
   type FrontMatterLinkCache,
+  isFrontMatterLinkCache,
   type LeafHistorySnapshot,
   type LeafType,
-  isFrontMatterLinkCache,
 } from "../app-helper";
 import { showGrepDialog } from "../commands";
 import { ExhaustiveError } from "../errors";
 import {
+  createDefaultBacklinkSearchCommand,
+  createDefaultLinkSearchCommand,
   type Hotkeys,
   type SearchCommand,
   type Settings,
-  createDefaultBacklinkSearchCommand,
-  createDefaultLinkSearchCommand,
 } from "../settings";
 import {
   filterNoQueryPriorities,
@@ -169,29 +169,17 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.stackHistory = args.stackHistory;
     this.initialLeaf = args.initialLeaf;
     this.stateToRestore = args.initialState;
-    const hasHistorySnapshot = Object.prototype.hasOwnProperty.call(
-      args,
-      "historySnapshot",
-    );
-    this.historySnapshot = hasHistorySnapshot
-      ? args.historySnapshot ?? null
+    this.historySnapshot = args.historySnapshot
+      ? (args.historySnapshot ?? null)
       : this.appHelper.createLeafHistorySnapshot(
           this.initialLeaf ?? this.appHelper.getActiveFileLeaf(),
         );
-    const hasRecentHistorySnapshot = Object.prototype.hasOwnProperty.call(
-      args,
-      "recentHistorySnapshot",
-    );
-    this.recentHistorySnapshot = hasRecentHistorySnapshot
-      ? args.recentHistorySnapshot ?? null
+    this.recentHistorySnapshot = args.recentHistorySnapshot
+      ? (args.recentHistorySnapshot ?? null)
       : this.appHelper.captureLastOpenFilesSnapshot();
-    const hasRecentHistoryBaseFilePath = Object.prototype.hasOwnProperty.call(
-      args,
-      "recentHistoryBaseFilePath",
-    );
-    this.recentHistoryBaseFilePath = hasRecentHistoryBaseFilePath
-      ? args.recentHistoryBaseFilePath ?? null
-      : this.appHelper.getActiveFile()?.path ?? null;
+    this.recentHistoryBaseFilePath = args.recentHistoryBaseFilePath
+      ? (args.recentHistoryBaseFilePath ?? null)
+      : (this.appHelper.getActiveFile()?.path ?? null);
     this.navQueue = args.navQueue ?? Promise.resolve();
     this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
     this.queryHistoryBaseQuery = null;
@@ -247,8 +235,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     // WARN: Instead of super.onOpen()
     this.isOpen = true;
     this.inputEl.value = this.command.restoreLastInput
-      ? this.initialInputQuery ?? globalInternalStorage.query
-      : this.initialInputQuery ?? "";
+      ? (this.initialInputQuery ?? globalInternalStorage.query)
+      : (this.initialInputQuery ?? "");
     this.inputEl.select();
     this.updateSuggestions();
     this.resetQueryHistoryNavigationBase();
@@ -877,7 +865,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     return fileToOpened;
   }
 
-  async onChooseSuggestion(item: any, evt: MouseEvent): Promise<any> {
+  async onChooseSuggestion(_item: any, evt: MouseEvent): Promise<any> {
     await this.chooseCurrentSuggestion(toLeafType(evt));
   }
 
@@ -999,7 +987,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       const currentValue = this.inputEl.value;
       const nextValue =
         nextIndex === histories.length
-          ? this.queryHistoryBaseQuery ?? ""
+          ? (this.queryHistoryBaseQuery ?? "")
           : histories[nextIndex];
 
       if (nextValue !== currentValue) {
@@ -1216,7 +1204,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       this.appHelper.insertLinkToActiveFileBy(file, {
         phantom: item.phantom,
         displayedString: this.settings.showAliasesOnTop
-          ? title ?? aliases.at(0)
+          ? (title ?? aliases.at(0))
           : undefined,
         aliasTranformer: saat.enabled
           ? { pattern: saat.aliasPattern, format: saat.aliasFormat }
@@ -1412,7 +1400,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       try {
         await navigator.clipboard.writeText(item.file.path);
         new Notice("Vault path copied to clipboard");
-      } catch (error) {
+      } catch (_error) {
         new Notice("Failed to copy vault path to clipboard");
       }
     });
@@ -1427,7 +1415,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         const basePath = this.appHelper.getNormalizeVaultRootPath();
         await navigator.clipboard.writeText(`${basePath}/${item.file.path}`);
         new Notice("Absolute file path copied to clipboard");
-      } catch (error) {
+      } catch (_error) {
         new Notice("Failed to copy absolute file path to clipboard");
       }
     });

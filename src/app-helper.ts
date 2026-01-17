@@ -1,10 +1,11 @@
 import {
   type App,
-  type CacheItem,
   type CachedMetadata,
+  type CacheItem,
   type Editor,
   type EditorPosition,
   FileView,
+  getLinkpath,
   type HeadingCache,
   type Hotkey,
   type LinkCache,
@@ -19,7 +20,6 @@ import {
   type ViewState,
   type Workspace,
   type WorkspaceLeaf,
-  getLinkpath,
 } from "obsidian";
 import merge from "ts-deepmerge";
 import { ExhaustiveError } from "./errors";
@@ -512,7 +512,7 @@ export class AppHelper {
   }
 
   // https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues/284#event-17898469302
-  captureStateInFile(initialLeaf: WorkspaceLeaf | null): CaptureState {
+  captureStateInFile(): CaptureState {
     const leaf = this.unsafeApp.workspace.getMostRecentLeaf()!;
     const state = leaf.getViewState();
     const eState = leaf.getEphemeralState();
@@ -852,6 +852,7 @@ export class AppHelper {
 
       linkText = `[${dispTxt}](${link})`;
     } else {
+      // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: safe
       const text = Array.from(linkText.matchAll(/\[\[(?<text>[^\]]+)]]/g))[0]
         .groups?.text!;
 
@@ -1002,7 +1003,6 @@ export class AppHelper {
   createPhantomFile(linkText: string): TFile {
     const linkPath = this.getPathToBeCreated(linkText);
 
-    // @ts-ignore
     return {
       path: linkPath,
       name: basename(linkPath),
@@ -1015,7 +1015,6 @@ export class AppHelper {
         vault: this.unsafeApp.vault,
         // XXX: From here, Untrusted properties
         children: [],
-        // @ts-ignore
         parent: null,
         isRoot: () => true,
       },

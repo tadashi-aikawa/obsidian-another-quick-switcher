@@ -1,19 +1,19 @@
 import {
   type App,
   type Debouncer,
+  debounce,
   type LinkCache,
   Platform,
   type TFile,
   type WorkspaceLeaf,
-  debounce,
 } from "obsidian";
 import { AbstractSuggestionModal } from "src/ui/AbstractSuggestionModal";
 import { uniqBy } from "src/utils/collection-helper";
 import {
   AppHelper,
   type CaptureState,
-  type LeafType,
   isFrontMatterLinkCache,
+  type LeafType,
 } from "../app-helper";
 import {
   createInstructions,
@@ -370,7 +370,7 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
     return this.appHelper.getActiveFile()!;
   }
 
-  async onChooseSuggestion(item: any, evt: MouseEvent): Promise<void> {
+  async onChooseSuggestion(_item: any, evt: MouseEvent): Promise<void> {
     await this.chooseCurrentSuggestion(toLeafType(evt));
   }
 

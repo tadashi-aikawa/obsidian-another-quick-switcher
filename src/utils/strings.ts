@@ -3,7 +3,6 @@ import diacriticsMap from "./diacritics-map";
 type Range = { start: number; end: number };
 
 const regEmoji = new RegExp(
-  // biome-ignore lint/suspicious/noMisleadingCharacterClass: <explanation>
   /[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|[\uFE0E-\uFE0F]/,
   "g",
 );
@@ -18,7 +17,7 @@ export function excludeEmoji(text: string): string {
 
 export function normalizeAccentsDiacritics(text: string): string {
   // https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript
-  // biome-ignore lint/suspicious/noControlCharactersInRegex: <explanation>
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: ???
   return text.replace(/[^\u0000-\u007E]/g, (x) => diacriticsMap[x] ?? x);
 }
 
@@ -29,7 +28,7 @@ function normalize(str: string, isNormalizeAccentsDiacritics: boolean): string {
 
 // Refer https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
 export function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^=!:${}()|[\]\/\\]/g, "\\$&");
+  return str.replace(/[.*+?^=!:${}()|[\]/\\]/g, "\\$&");
 }
 
 export function includes(
@@ -527,7 +526,7 @@ export function isValidRegex(pattern: string): boolean {
   try {
     new RegExp(pattern);
     return true;
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }

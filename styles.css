@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/noImportantStyles: allow */
 * {
   --first-rank-color: var(--interactive-accent);
   --second-rank-color: var(--text-normal);
@@ -19,7 +20,8 @@
   padding-left: 1rem;
 }
 
-.another-quick-switcher__modal-prompt .suggestion-item:has(.another-quick-switcher__item__selected) {
+.another-quick-switcher__modal-prompt
+  .suggestion-item:has(.another-quick-switcher__item__selected) {
   border-left: solid var(--interactive-accent) var(--size-2-3);
   padding-left: var(--size-2-3);
   border-top-left-radius: 0;
@@ -237,14 +239,6 @@
   color: var(--text-accent);
 }
 
-.another-quick-switcher__item__title__header_no_hit {
-  /** do nothing */
-}
-
-.another-quick-switcher__item__title__header1 {
-  /* nothing */
-}
-
 .another-quick-switcher__item__title__header2 {
   margin-left: 1em;
 }
@@ -356,8 +350,8 @@
   margin-right: 3px;
 }
 .another-quick-switcher__item__meta__front_matter__value
-	+ .another-quick-switcher__item__meta__front_matter__value::before {
-	content: ", ";
+  + .another-quick-switcher__item__meta__front_matter__value::before {
+  content: ", ";
 }
 
 .another-quick-switcher__item__meta__description {
@@ -493,9 +487,6 @@
 .another-quick-switcher__settings__search-command__header__fold-button > svg {
   width: 28px;
   height: 28px;
-}
-.another-quick-switcher__settings__search-command__search-by-button_enabled {
-  /*noinspection CssUnresolvedCustomProperty*/
 }
 .another-quick-switcher__settings__search-command__search-by-button_disabled {
   /*noinspection CssUnresolvedCustomProperty*/

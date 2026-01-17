@@ -4,8 +4,8 @@ import { createInstructions } from "../keys";
 import type { Hotkeys, Settings } from "../settings";
 import { sorter } from "../utils/collection-helper";
 import { smartIncludes, smartStartsWith } from "../utils/strings";
-import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
+import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 interface SuggestionItem {
   folder: TFolder;
@@ -21,12 +21,14 @@ function matchQuery(
   const qs = query.split("/");
   const folder = qs.pop()!;
   return (
-    qs.every((dir) =>
-      smartIncludes(
-        item.folder.parent?.path!,
-        dir,
-        isNormalizeAccentsDiacritics,
-      ),
+    qs.every(
+      (dir) =>
+        item.folder.parent &&
+        smartIncludes(
+          item.folder.parent.path,
+          dir,
+          isNormalizeAccentsDiacritics,
+        ),
     ) && matcher(item, folder)
   );
 }

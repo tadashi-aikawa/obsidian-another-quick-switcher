@@ -119,7 +119,7 @@ export function mergeAndFilterResults(
 
   // Filter: only keep locations that have results from ALL queries
   const mergedResults: MatchResult[] = [];
-  for (const [key, locationResults] of resultsByLocation) {
+  for (const [_key, locationResults] of resultsByLocation) {
     if (locationResults.length === allResults.length) {
       // This location has results from all queries
       // Merge submatches from all results

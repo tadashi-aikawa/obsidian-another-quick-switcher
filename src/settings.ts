@@ -1,7 +1,7 @@
 import { type App, Notice, PluginSettingTab, Setting } from "obsidian";
 import { type Hotkey, hotkey2String, string2Hotkey } from "./keys";
 import type AnotherQuickSwitcher from "./main";
-import { type SortPriority, regardAsSortPriority } from "./sorters";
+import { regardAsSortPriority, type SortPriority } from "./sorters";
 import { mirror } from "./utils/collection-helper";
 import { smartCommaSplit, smartLineBreakSplit } from "./utils/strings";
 

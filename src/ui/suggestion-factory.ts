@@ -1,6 +1,6 @@
 import { isExcalidraw } from "src/utils/path";
 import { type FrontmatterProperty, isPresent } from "src/utils/types";
-import { type SuggestionItem, getMatchedTitleAndAliases } from "../matcher";
+import { getMatchedTitleAndAliases, type SuggestionItem } from "../matcher";
 import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
 import { round } from "../utils/math";
 import {

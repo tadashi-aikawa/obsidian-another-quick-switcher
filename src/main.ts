@@ -5,11 +5,11 @@ import { createCommands } from "./commands";
 import type { Hotkey } from "./keys";
 import {
   AnotherQuickSwitcherSettingTab,
+  createDefaultHotkeys,
+  createDefaultSearchCommand,
   DEFAULT_SETTINGS,
   type Hotkeys,
   type Settings,
-  createDefaultHotkeys,
-  createDefaultSearchCommand,
 } from "./settings";
 
 export default class AnotherQuickSwitcher extends Plugin {
@@ -65,7 +65,7 @@ export default class AnotherQuickSwitcher extends Plugin {
         },
       );
 
-      // @ts-ignore (v7 -> v8 backward compatibility)
+      // @ts-expect-error (v7 -> v8 backward compatibility)
       if (this.settings.searchCommands[i].searchTarget === "markdown") {
         this.settings.searchCommands[i].searchTarget = "file";
       }

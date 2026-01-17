@@ -1,17 +1,17 @@
 import {
   type App,
   type Debouncer,
+  debounce,
   Platform,
   type TFile,
   type WorkspaceLeaf,
-  debounce,
 } from "obsidian";
 import {
   AppHelper,
   type CaptureState,
+  isFrontMatterLinkCache,
   type LeafHistorySnapshot,
   type LeafType,
-  isFrontMatterLinkCache,
 } from "../app-helper";
 import {
   createInstructions,
@@ -487,7 +487,7 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
     return item.file;
   }
 
-  async onChooseSuggestion(item: any, evt: MouseEvent): Promise<void> {
+  async onChooseSuggestion(_item: any, evt: MouseEvent): Promise<void> {
     await this.chooseCurrentSuggestion(toLeafType(evt));
   }
 

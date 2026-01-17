@@ -62,7 +62,7 @@ export async function rg(cmd: string, ...args: string[]): Promise<RgResult> {
       cmd,
       ["--json", ...args],
       { maxBuffer: 1024 * 1024 * 1024 },
-      (error, stdout, stderr) => {
+      (error, stdout, _stderr) => {
         if (error) {
           // Check if it's a regex parse error
           if (error.message.includes("regex parse error")) {
@@ -93,7 +93,7 @@ export async function rg(cmd: string, ...args: string[]): Promise<RgResult> {
           .map((x: string) => {
             try {
               return JSON.parse(x) as Result;
-            } catch (e) {
+            } catch (_e) {
               console.warn("JSON parse error for line:", x);
               return null;
             }
@@ -129,7 +129,7 @@ export async function rgFiles(
       cmd,
       filesArgs,
       { maxBuffer: 1024 * 1024 * 1024 },
-      (error, stdout, stderr) => {
+      (error, stdout, _stderr) => {
         if (error) {
           if (error.message.includes("No such file or directory")) {
             resolve([]);

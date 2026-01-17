@@ -26,7 +26,7 @@ function updateVersion(version: string) {
 
 const [_1, _2, version] = Bun.argv;
 if (!version) {
-  console.error("Required: ${version} (ex: bun version 1.2.3)");
+  console.error("Required: $version (ex: bun version 1.2.3)");
   exit(1);
 }
 if (!version.match(/\d+\.\d+\.\d+/)) {

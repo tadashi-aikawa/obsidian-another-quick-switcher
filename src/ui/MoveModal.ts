@@ -4,8 +4,8 @@ import { createInstructions } from "../keys";
 import type { Hotkeys, MoveFolderSortPriority, Settings } from "../settings";
 import { excludeItems } from "../utils/collection-helper";
 import { smartIncludes, smartMicroFuzzy } from "../utils/strings";
-import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 import { FOLDER } from "./icons";
+import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 
 /**
  * Merges overlapping or adjacent ranges into consolidated ranges.
@@ -115,12 +115,14 @@ function matchQuery(
   const qs = query.split("/");
   const folder = qs.pop()!;
   return (
-    qs.every((dir) =>
-      smartIncludes(
-        item.folder.parent?.path!,
-        dir,
-        isNormalizeAccentsDiacritics,
-      ),
+    qs.every(
+      (dir) =>
+        item.folder.parent &&
+        smartIncludes(
+          item.folder.parent.path,
+          dir,
+          isNormalizeAccentsDiacritics,
+        ),
     ) && matcher(item, folder)
   );
 }

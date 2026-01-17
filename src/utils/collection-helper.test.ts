@@ -79,8 +79,8 @@ describe.each<{
   obj                     | shouldOmit                                 | expected
   ${{ id: 1, name: "a" }} | ${(k: string, _: unknown) => k === "id"}   | ${{ name: "a" }}
   ${{ id: 2, name: "a" }} | ${(k: string, _: unknown) => k === "name"} | ${{ id: 2 }}
-  ${{ id: 3, name: "a" }} | ${(k: string, _: unknown) => false}        | ${{ id: 3, name: "a" }}
-  ${{ id: 4, name: "a" }} | ${(k: string, _: unknown) => true}         | ${{}}
+  ${{ id: 3, name: "a" }} | ${(_k: string, _: unknown) => false}       | ${{ id: 3, name: "a" }}
+  ${{ id: 4, name: "a" }} | ${(_k: string, _: unknown) => true}        | ${{}}
 `("omitBy", ({ obj, shouldOmit, expected }) => {
   test(`omitBy(${JSON.stringify(obj)}, shouldOmit) = ${JSON.stringify(
     expected,

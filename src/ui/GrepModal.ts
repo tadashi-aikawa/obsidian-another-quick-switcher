@@ -1,9 +1,9 @@
 import {
   type App,
   type Debouncer,
+  debounce,
   type TFile,
   type WorkspaceLeaf,
-  debounce,
 } from "obsidian";
 import {
   AppHelper,
@@ -807,7 +807,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
     return item.file;
   }
 
-  async onChooseSuggestion(item: any, evt: MouseEvent): Promise<void> {
+  async onChooseSuggestion(_item: any, evt: MouseEvent): Promise<void> {
     await this.chooseCurrentSuggestion(toLeafType(evt));
   }
 
@@ -854,7 +854,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
       const currentValue = this.clonedInputEl.value;
       const nextValue =
         nextIndex === histories.length
-          ? this.queryHistoryBaseQuery ?? ""
+          ? (this.queryHistoryBaseQuery ?? "")
           : histories[nextIndex];
 
       if (nextValue !== currentValue) {
