@@ -24,7 +24,7 @@
     "esbuild": "^0.23.0",
     "esbuild-jest": "^0.5.0",
     "jest": "^29.7.0",
-    "obsidian": "^1.7.2",
+    "obsidian": "1.11.4",
     "tslib": "^2.6.3",
     "typescript": "^5.5.3"
   },
