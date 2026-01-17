@@ -67,17 +67,18 @@ export class CommandQuickSwitcher extends AbstractSuggestionModal<HistoricalComm
         ({ result }) =>
           !query || result.type !== "fuzzy" || result.score > 0.25,
       )
-      .toSorted(sorter(({ result }) => result.score, "desc"))
-      .toSorted(sorter(({ command }) => command.lastUsed ?? 0, "desc"))
-      .toSorted(
+      .slice()
+      .sort(sorter(({ result }) => result.score, "desc"))
+      .sort(sorter(({ command }) => command.lastUsed ?? 0, "desc"))
+      .sort(
         sorter(
           ({ result }) =>
             result.type === "includes" || result.type === "starts-with",
           "desc",
         ),
       )
-      .toSorted(sorter(({ command }) => command.lastUsed != null, "desc"))
-      .toSorted(sorter(({ command }) => command.topPriority ?? false, "desc"))
+      .sort(sorter(({ command }) => command.lastUsed != null, "desc"))
+      .sort(sorter(({ command }) => command.topPriority ?? false, "desc"))
       .map(({ command }) => command);
   }
 
