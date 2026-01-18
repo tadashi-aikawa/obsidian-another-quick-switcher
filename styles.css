@@ -444,6 +444,9 @@
 .another-quick-switcher__settings__nested {
   padding-left: 30px;
 }
+.setting-group .setting-items .another-quick-switcher__settings__nested {
+  padding-left: 30px;
+}
 
 .another-quick-switcher__settings__dialog-hotkey {
   padding: 0.5rem 0;
