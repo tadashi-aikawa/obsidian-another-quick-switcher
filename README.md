@@ -281,6 +281,8 @@ While previewing, you can scroll the note with `scroll preview up` / `scroll pre
 
 It shows a floating view that doesn't distract the contents. Additionally, it makes the editor state before opening the dialog after previewing files and closing the dialog.
 
+https://user-images.githubusercontent.com/9500018/216806330-daf57b52-d8a4-42e3-9803-ba7d76a93319.mp4
+
 #### Auto Preview
 
 Auto Preview shows a preview automatically as you move the selection, without manually triggering Preview.
@@ -303,7 +305,10 @@ Settings reference (UI labels):
 - Link dialog: `Auto preview in the floating mode`
 - In File dialog: `Auto preview in the floating mode`
 
-https://user-images.githubusercontent.com/9500018/216806330-daf57b52-d8a4-42e3-9803-ba7d76a93319.mp4
+<div style="text-align: center">🎥 <b>Demo movie (YouTube)</b>👇</div>
+
+[![YouTube Video i8b6pHrhIb4](https://img.youtube.com/vi/i8b6pHrhIb4/maxresdefault.jpg)](https://www.youtube.com/watch?v=i8b6pHrhIb4)
+
 
 ### 11. Move file to another folder
 
@@ -584,6 +589,11 @@ Alternatives with multi-select:
 - `open all in new tabs` -> use `check/uncheck all` to select all and run `open`
 - `insert to editor in background` -> use `check/uncheck` for multiple selection and run `insert to editor`
 - `insert all to editor` -> use `check/uncheck all` to select all and run `insert to editor`
+
+<div style="text-align: center">🎥 <b>Demo movie (YouTube)</b>👇</div>
+
+[![YouTube Video sxDEMQq8txc](https://img.youtube.com/vi/sxDEMQq8txc/maxresdefault.jpg)](https://www.youtube.com/watch?v=sxDEMQq8txc)
+
 
 ### For users who use earlier than v13.0.0
 
