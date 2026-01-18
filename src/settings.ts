@@ -1,4 +1,10 @@
-import { type App, Notice, PluginSettingTab, Setting } from "obsidian";
+import {
+  type App,
+  Notice,
+  PluginSettingTab,
+  Setting,
+  SettingGroup,
+} from "obsidian";
 import { type Hotkey, hotkey2String, string2Hotkey } from "./keys";
 import type AnotherQuickSwitcher from "./main";
 import { regardAsSortPriority, type SortPriority } from "./sorters";
@@ -1003,44 +1009,49 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         return;
       }
 
+      const group = new SettingGroup(div);
+      const { addFilterableSetting } = useFilterSetting(group);
+
       const addHotKeyItem = (name: string, command: string) => {
-        new Setting(div)
-          .setName(name)
-          .setClass("another-quick-switcher__settings__dialog-hotkey-item")
-          .addText((cb) => {
-            const dialog = this.plugin.settings.hotkeys[dialogKey] as {
-              [key: string]: Hotkey[];
-            };
-            return cb
-              .setValue(hotkey2String(dialog[command][0]))
-              .onChange(async (value: string) => {
-                const hk = string2Hotkey(
-                  value,
-                  dialog[command][0]?.hideHotkeyGuide ?? false,
-                );
-                dialog[command] = hk ? [hk] : [];
-                await this.plugin.saveSettings();
-              });
-          })
-          .addToggle((cb) => {
-            const dialog = this.plugin.settings.hotkeys[dialogKey] as {
-              [key: string]: Hotkey[];
-            };
-            return cb
-              .setTooltip("Show hotkey guide if enabled")
-              .setValue(!dialog[command][0]?.hideHotkeyGuide)
-              .onChange(async (showHotkeyGuide: boolean) => {
-                dialog[command] = dialog[command][0]
-                  ? [
-                      {
-                        ...dialog[command][0],
-                        hideHotkeyGuide: !showHotkeyGuide,
-                      },
-                    ]
-                  : [];
-                await this.plugin.saveSettings();
-              });
-          });
+        addFilterableSetting(name, null, (setting) => {
+          setting
+            .setName(name)
+            .setClass("another-quick-switcher__settings__dialog-hotkey-item")
+            .addText((cb) => {
+              const dialog = this.plugin.settings.hotkeys[dialogKey] as {
+                [key: string]: Hotkey[];
+              };
+              return cb
+                .setValue(hotkey2String(dialog[command][0]))
+                .onChange(async (value: string) => {
+                  const hk = string2Hotkey(
+                    value,
+                    dialog[command][0]?.hideHotkeyGuide ?? false,
+                  );
+                  dialog[command] = hk ? [hk] : [];
+                  await this.plugin.saveSettings();
+                });
+            })
+            .addToggle((cb) => {
+              const dialog = this.plugin.settings.hotkeys[dialogKey] as {
+                [key: string]: Hotkey[];
+              };
+              return cb
+                .setTooltip("Show hotkey guide if enabled")
+                .setValue(!dialog[command][0]?.hideHotkeyGuide)
+                .onChange(async (showHotkeyGuide: boolean) => {
+                  dialog[command] = dialog[command][0]
+                    ? [
+                        {
+                          ...dialog[command][0],
+                          hideHotkeyGuide: !showHotkeyGuide,
+                        },
+                      ]
+                    : [];
+                  await this.plugin.saveSettings();
+                });
+            });
+        });
       };
 
       const keys = Object.keys(this.plugin.settings.hotkeys[dialogKey]);
@@ -1329,255 +1340,291 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       return;
     }
 
+    const group = new SettingGroup(div);
+    const { addFilterableSetting } = useFilterSetting(group);
+
     const buttonClass =
       "another-quick-switcher__settings__search-command__search-by-button";
     const buttonEnabledClass =
       "another-quick-switcher__settings__search-command__search-by-button_enabled";
     const buttonDisabledClass =
       "another-quick-switcher__settings__search-command__search-by-button_disabled";
-    new Setting(div)
-      .setName("Search by")
-      .setDesc("Click the button to enable/disable the search target")
-      .addButton((bc) => {
-        const coloring = () => {
-          bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
-          bc.buttonEl.addClass(
-            command.searchBy.tag ? buttonEnabledClass : buttonDisabledClass,
-          );
-        };
 
-        bc.setButtonText("Tag")
-          .setClass(buttonClass)
-          .onClick(async () => {
-            command.searchBy.tag = !command.searchBy!.tag;
-            coloring();
-          });
-        coloring();
-        return bc;
-      })
-      .addButton((bc) => {
-        const coloring = () => {
-          bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
-          bc.buttonEl.addClass(
-            command.searchBy.header ? buttonEnabledClass : buttonDisabledClass,
-          );
-        };
+    addFilterableSetting("Search by", null, (setting) => {
+      setting
+        .setName("Search by")
+        .setDesc("Click the button to enable/disable the search target")
+        .addButton((bc) => {
+          const coloring = () => {
+            bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
+            bc.buttonEl.addClass(
+              command.searchBy.tag ? buttonEnabledClass : buttonDisabledClass,
+            );
+          };
 
-        bc.setButtonText("Header")
-          .setClass(buttonClass)
-          .onClick(async () => {
-            command.searchBy.header = !command.searchBy!.header;
-            coloring();
-          });
-        coloring();
-        return bc;
-      })
-      .addButton((bc) => {
-        const coloring = () => {
-          bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
-          bc.buttonEl.addClass(
-            command.searchBy.link ? buttonEnabledClass : buttonDisabledClass,
-          );
-        };
+          bc.setButtonText("Tag")
+            .setClass(buttonClass)
+            .onClick(async () => {
+              command.searchBy.tag = !command.searchBy!.tag;
+              coloring();
+            });
+          coloring();
+          return bc;
+        })
+        .addButton((bc) => {
+          const coloring = () => {
+            bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
+            bc.buttonEl.addClass(
+              command.searchBy.header
+                ? buttonEnabledClass
+                : buttonDisabledClass,
+            );
+          };
 
-        bc.setButtonText("Link")
-          .setClass(buttonClass)
-          .onClick(async () => {
-            command.searchBy.link = !command.searchBy!.link;
-            coloring();
-          });
-        coloring();
-        return bc;
-      })
-      .addButton((bc) => {
-        const coloring = () => {
-          bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
-          bc.buttonEl.addClass(
-            command.searchBy.property
-              ? buttonEnabledClass
-              : buttonDisabledClass,
-          );
-        };
+          bc.setButtonText("Header")
+            .setClass(buttonClass)
+            .onClick(async () => {
+              command.searchBy.header = !command.searchBy!.header;
+              coloring();
+            });
+          coloring();
+          return bc;
+        })
+        .addButton((bc) => {
+          const coloring = () => {
+            bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
+            bc.buttonEl.addClass(
+              command.searchBy.link ? buttonEnabledClass : buttonDisabledClass,
+            );
+          };
 
-        bc.setButtonText("Property")
-          .setClass(buttonClass)
-          .onClick(async () => {
-            command.searchBy.property = !command.searchBy!.property;
-            coloring();
-            this.display();
-          });
-        coloring();
+          bc.setButtonText("Link")
+            .setClass(buttonClass)
+            .onClick(async () => {
+              command.searchBy.link = !command.searchBy!.link;
+              coloring();
+            });
+          coloring();
+          return bc;
+        })
+        .addButton((bc) => {
+          const coloring = () => {
+            bc.buttonEl.removeClass(buttonEnabledClass, buttonDisabledClass);
+            bc.buttonEl.addClass(
+              command.searchBy.property
+                ? buttonEnabledClass
+                : buttonDisabledClass,
+            );
+          };
 
-        return bc;
-      });
+          bc.setButtonText("Property")
+            .setClass(buttonClass)
+            .onClick(async () => {
+              command.searchBy.property = !command.searchBy!.property;
+              coloring();
+              this.display();
+            });
+          coloring();
+
+          return bc;
+        });
+    });
 
     if (command.searchBy.property) {
-      new Setting(div)
-        .setName("Keys of the property to search")
-        .setDesc("Multiple entries can be specified, separated by line breaks.")
-        .addTextArea((tc) => {
-          const el = tc
-            .setValue(command.keysOfPropertyToSearch!.join("\n"))
-            .onChange(async (value) => {
-              command.keysOfPropertyToSearch = smartLineBreakSplit(value);
-            });
-          el.inputEl.className =
-            "another-quick-switcher__settings__keys_of_property_to_search";
+      addFilterableSetting(
+        "Keys of the property to search",
+        "Multiple entries can be specified, separated by line breaks.",
+        (setting) => {
+          setting.addTextArea((tc) => {
+            const el = tc
+              .setValue(command.keysOfPropertyToSearch!.join("\n"))
+              .onChange(async (value) => {
+                command.keysOfPropertyToSearch = smartLineBreakSplit(value);
+              });
+            el.inputEl.className =
+              "another-quick-switcher__settings__keys_of_property_to_search";
 
-          return el;
-        });
+            return el;
+          });
+        },
+      );
     }
 
-    new Setting(div).setName("Search target").addDropdown((dc) => {
-      dc.addOptions(mirror([...searchTargetList]))
-        .setValue(command.searchTarget)
-        .onChange(async (value) => {
-          command.searchTarget = value as SearchTarget;
+    addFilterableSetting("Search target", null, (setting) => {
+      setting.setName("Search target").addDropdown((dc) => {
+        dc.addOptions(mirror([...searchTargetList]))
+          .setValue(command.searchTarget)
+          .onChange(async (value) => {
+            command.searchTarget = value as SearchTarget;
+          });
+      });
+    });
+
+    addFilterableSetting(
+      'Allow fuzzy search for "Search target"',
+      null,
+      (setting) => {
+        setting.addToggle((cb) => {
+          cb.setValue(command.allowFuzzySearchForSearchTarget).onChange(
+            async (value) => {
+              command.allowFuzzySearchForSearchTarget = value as boolean;
+            },
+          );
         });
-    });
+      },
+    );
 
-    new Setting(div)
-      .setName('Allow fuzzy search for "Search target"')
-      .addToggle((cb) => {
-        cb.setValue(command.allowFuzzySearchForSearchTarget).onChange(
-          async (value) => {
-            command.allowFuzzySearchForSearchTarget = value as boolean;
-          },
+    addFilterableSetting(
+      "Min fuzzy match score",
+      "Only show suggestion those score is more than the specific score",
+      (setting) => {
+        setting.addSlider((sc) =>
+          sc
+            .setLimits(0, 10.0, 0.1)
+            .setValue(command.minFuzzyMatchScore)
+            .setDynamicTooltip()
+            .onChange(async (value) => {
+              command.minFuzzyMatchScore = value;
+            }),
         );
-      });
+      },
+    );
 
-    new Setting(div)
-      .setName("Min fuzzy match score")
-      .setDesc(
-        "Only show suggestion those score is more than the specific score",
-      )
-      .addSlider((sc) =>
-        sc
-          .setLimits(0, 10.0, 0.1)
-          .setValue(command.minFuzzyMatchScore)
-          .setDynamicTooltip()
-          .onChange(async (value) => {
-            command.minFuzzyMatchScore = value;
-          }),
-      );
+    addFilterableSetting(
+      "Target extensions",
+      "If set, only files whose extension equals will be suggested. If empty, all files will be suggested. It can set multi extensions using comma.",
+      (setting) => {
+        setting.addTextArea((tc) =>
+          tc
+            .setPlaceholder("(ex: md,png,canvas)")
+            .setValue(command.targetExtensions.join(","))
+            .onChange(async (value) => {
+              command.targetExtensions = smartCommaSplit(value);
+            }),
+        );
+      },
+    );
 
-    new Setting(div)
-      .setName("Target extensions")
-      .setDesc(
-        "If set, only files whose extension equals will be suggested. If empty, all files will be suggested. It can set multi extensions using comma.",
-      )
-      .addTextArea((tc) =>
-        tc
-          .setPlaceholder("(ex: md,png,canvas)")
-          .setValue(command.targetExtensions.join(","))
-          .onChange(async (value) => {
-            command.targetExtensions = smartCommaSplit(value);
-          }),
-      );
-
-    new Setting(div).setName("Include current file").addToggle((cb) => {
-      cb.setValue(command.includeCurrentFile).onChange(async (value) => {
-        command.includeCurrentFile = value as boolean;
+    addFilterableSetting("Include current file", null, (setting) => {
+      setting.addToggle((cb) => {
+        cb.setValue(command.includeCurrentFile).onChange(async (value) => {
+          command.includeCurrentFile = value as boolean;
+        });
       });
     });
 
-    new Setting(div).setName("Floating").addToggle((cb) => {
-      cb.setValue(command.floating).onChange(async (value) => {
-        command.floating = value as boolean;
-        this.display();
-      });
-    });
-
-    new Setting(div)
-      .setName("Auto preview")
-      .setDesc(
-        "If enabled, automatically shows preview when selecting candidates.",
-      )
-      .addToggle((tc) => {
-        tc.setValue(command.autoPreview).onChange(async (value) => {
-          command.autoPreview = value;
+    addFilterableSetting("Floating", null, (setting) => {
+      setting.addToggle((cb) => {
+        cb.setValue(command.floating).onChange(async (value) => {
+          command.floating = value as boolean;
           this.display();
         });
       });
+    });
+
+    addFilterableSetting(
+      "Auto preview",
+      "If enabled, automatically shows preview when selecting candidates.",
+      (setting) => {
+        setting.addToggle((tc) => {
+          tc.setValue(command.autoPreview).onChange(async (value) => {
+            command.autoPreview = value;
+            this.display();
+          });
+        });
+      },
+    );
 
     if (command.autoPreview) {
-      new Setting(div)
-        .setName("Auto preview delay milli-seconds")
-        .setClass("another-quick-switcher__settings__nested")
-        .setDesc(
-          "Delay before auto preview is triggered when selection changes.",
-        )
-        .addSlider((sc) =>
-          sc
-            .setLimits(0, 1000, 50)
-            .setValue(command.autoPreviewDelayMilliSeconds)
-            .setDynamicTooltip()
-            .onChange(async (value) => {
-              command.autoPreviewDelayMilliSeconds = value;
-            }),
-        );
+      addFilterableSetting(
+        "Auto preview delay milli-seconds",
+        "Delay before auto preview is triggered when selection changes.",
+        (setting) => {
+          setting
+            .setClass("another-quick-switcher__settings__nested")
+            .addSlider((sc) =>
+              sc
+                .setLimits(0, 1000, 50)
+                .setValue(command.autoPreviewDelayMilliSeconds)
+                .setDynamicTooltip()
+                .onChange(async (value) => {
+                  command.autoPreviewDelayMilliSeconds = value;
+                }),
+            );
+        },
+      );
     }
 
-    new Setting(div).setName("Show front matter").addToggle((cb) => {
-      cb.setValue(command.showFrontMatter).onChange(async (value) => {
-        command.showFrontMatter = value as boolean;
-        this.display();
+    addFilterableSetting("Front matter", null, (setting) => {
+      setting.addToggle((cb) => {
+        cb.setValue(command.showFrontMatter).onChange(async (value) => {
+          command.showFrontMatter = value as boolean;
+          this.display();
+        });
       });
     });
 
     if (command.showFrontMatter) {
-      new Setting(div)
-        .setName("Exclude front matter keys")
-        .setDesc("It can set multi patterns by line breaks.")
-        .addTextArea((tc) => {
-          const el = tc
-            .setValue(command.excludeFrontMatterKeys!.join("\n"))
-            .onChange(async (value) => {
-              command.excludeFrontMatterKeys = smartLineBreakSplit(value);
-            });
-          el.inputEl.className =
-            "another-quick-switcher__settings__exclude_front_matter_keys";
+      addFilterableSetting(
+        "Exclude front matter keys",
+        "It can set multi patterns by line breaks.",
+        (setting) => {
+          setting.addTextArea((tc) => {
+            const el = tc
+              .setValue(command.excludeFrontMatterKeys!.join("\n"))
+              .onChange(async (value) => {
+                command.excludeFrontMatterKeys = smartLineBreakSplit(value);
+              });
+            el.inputEl.className =
+              "another-quick-switcher__settings__exclude_front_matter_keys";
 
-          return el;
-        });
+            return el;
+          });
+        },
+      );
     }
 
-    new Setting(div)
-      .setName("Default input")
-      .setDesc("Default input strings when it opens the dialog")
-      .addText((tc) =>
-        tc
-          .setValue(command.defaultInput)
-          .setPlaceholder("(ex: #todo )")
-          .onChange(async (value) => {
-            command.defaultInput = value;
-          }),
-      );
+    addFilterableSetting(
+      "Default input",
+      "Default input strings when it opens the dialog",
+      (setting) => {
+        setting.addText((tc) =>
+          tc
+            .setValue(command.defaultInput)
+            .setPlaceholder("(ex: #todo )")
+            .onChange(async (value) => {
+              command.defaultInput = value;
+            }),
+        );
+      },
+    );
 
-    new Setting(div)
-      .setName("Restore last input")
-      .setDesc(
-        "If enabled, this option will restore the last input, shared across all searches where it is enabled.",
-      )
-      .addToggle((tc) => {
-        tc.setValue(command.restoreLastInput).onChange(async (value) => {
-          command.restoreLastInput = value;
+    addFilterableSetting(
+      "Restore last input",
+      "If enabled, this option will restore the last input, shared across all searches where it is enabled.",
+      (setting) => {
+        setting.addToggle((tc) => {
+          tc.setValue(command.restoreLastInput).onChange(async (value) => {
+            command.restoreLastInput = value;
+          });
         });
-      });
+      },
+    );
 
-    new Setting(div)
-      .setName("Command prefix")
-      .setDesc(
-        "For example, if it sets ':r ', a query starts with ':r ' means that search as this command",
-      )
-      .addText((tc) =>
-        tc
-          .setValue(command.commandPrefix)
-          .setPlaceholder("(ex: :r )")
-          .onChange(async (value) => {
-            command.commandPrefix = value;
-          }),
-      );
+    addFilterableSetting(
+      "Command prefix",
+      "For example, if it sets ':r ', a query starts with ':r ' means that search as this command",
+      (setting) => {
+        setting.addText((tc) =>
+          tc
+            .setValue(command.commandPrefix)
+            .setPlaceholder("(ex: :r )")
+            .onChange(async (value) => {
+              command.commandPrefix = value;
+            }),
+        );
+      },
+    );
 
     const df = document.createDocumentFragment();
     df.append(
@@ -1588,10 +1635,8 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       }),
     );
 
-    new Setting(div)
-      .setName("Sort priorities")
-      .setDesc(df)
-      .addTextArea((tc) => {
+    addFilterableSetting("Sort priorities", df, (setting) => {
+      setting.addTextArea((tc) => {
         const el = tc
           .setPlaceholder("")
           .setValue(command.sortPriorities.join("\n"))
@@ -1604,43 +1649,45 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         );
         return el;
       });
+    });
 
-    new Setting(div)
-      .setName("Include prefix path patterns")
-      .setDesc(
-        "If set, only files whose paths start with one of the patterns will be suggested. It can set multi patterns by line breaks. <current_dir> means current directory.",
-      )
-      .addTextArea((tc) => {
-        const el = tc
-          .setPlaceholder("(ex: Notes/Private)")
-          .setValue(command.includePrefixPathPatterns!.join("\n"))
-          .onChange(async (value) => {
-            command.includePrefixPathPatterns = smartLineBreakSplit(value);
-          });
-        el.inputEl.className =
-          "another-quick-switcher__settings__include_path_patterns";
+    addFilterableSetting(
+      "Include path patterns",
+      "If set, only files whose paths start with one of the patterns will be suggested. It can set multi patterns by line breaks. <current_dir> means current directory.",
+      (setting) => {
+        setting.addTextArea((tc) => {
+          const el = tc
+            .setPlaceholder("(ex: Notes/Private)")
+            .setValue(command.includePrefixPathPatterns.join("\n"))
+            .onChange(async (value) => {
+              command.includePrefixPathPatterns = smartLineBreakSplit(value);
+            });
+          el.inputEl.className =
+            "another-quick-switcher__settings__include_path_patterns";
 
-        return el;
-      });
+          return el;
+        });
+      },
+    );
 
-    new Setting(div)
-      .setName("Exclude prefix path patterns")
-      .setDesc(
-        "If set, files whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks. <current_dir> means current directory.",
-      )
+    addFilterableSetting(
+      "Exclude prefix path patterns",
+      "If set, files whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks. <current_dir> means current directory.",
+      (setting) => {
+        setting.addTextArea((tc) => {
+          const el = tc
+            .setPlaceholder("(ex: Notes/Private)")
+            .setValue(command.excludePrefixPathPatterns!.join("\n"))
+            .onChange(async (value) => {
+              command.excludePrefixPathPatterns = smartLineBreakSplit(value);
+            });
+          el.inputEl.className =
+            "another-quick-switcher__settings__exclude_path_patterns";
 
-      .addTextArea((tc) => {
-        const el = tc
-          .setPlaceholder("(ex: Notes/Private)")
-          .setValue(command.excludePrefixPathPatterns!.join("\n"))
-          .onChange(async (value) => {
-            command.excludePrefixPathPatterns = smartLineBreakSplit(value);
-          });
-        el.inputEl.className =
-          "another-quick-switcher__settings__exclude_path_patterns";
-
-        return el;
-      });
+          return el;
+        });
+      },
+    );
   }
 
   private addHeaderSearchSettings(containerEl: HTMLElement) {
@@ -2047,3 +2094,54 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       });
   }
 }
+
+const useFilterSetting = (group: SettingGroup) => {
+  const filterTargets: {
+    settingEl: HTMLElement;
+    getSearchText: () => string;
+  }[] = [];
+  let latestQuery = "";
+
+  const applyFilter = (query: string) => {
+    latestQuery = query;
+    const normalizedQuery = query.trim().toLowerCase();
+    const shouldShowAll = normalizedQuery.length === 0;
+    for (const target of filterTargets) {
+      const searchText = target.getSearchText().toLowerCase();
+      const isMatch = shouldShowAll || searchText.includes(normalizedQuery);
+      target.settingEl.toggle(isMatch);
+    }
+  };
+
+  const addFilterTarget = (
+    element: HTMLElement,
+    getSearchText: () => string,
+  ) => {
+    filterTargets.push({ settingEl: element, getSearchText });
+    applyFilter(latestQuery);
+  };
+
+  const addFilterableSetting = (
+    name: string,
+    desc: string | DocumentFragment | null,
+    build: (setting: Setting) => void,
+  ) => {
+    const searchText = name.trim();
+    group.addSetting((setting) => {
+      setting.setName(name);
+      if (desc) {
+        setting.setDesc(desc);
+      }
+      build(setting);
+      addFilterTarget(setting.settingEl, () => searchText);
+    });
+  };
+
+  group.addSearch((sc) => {
+    sc.setPlaceholder("Filter settings").onChange((value) => {
+      applyFilter(value);
+    });
+  });
+
+  return { addFilterableSetting };
+};
