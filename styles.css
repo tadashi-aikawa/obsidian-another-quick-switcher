@@ -446,27 +446,95 @@
 }
 
 .another-quick-switcher__settings__dialog-hotkey {
-  padding: 1rem 0;
+  padding: 0.5rem 0;
   /*noinspection CssUnresolvedCustomProperty*/
   border-top: 1px solid var(--background-modifier-border);
 }
 
-.another-quick-switcher__settings__dialog-hotkey-item {
-  padding-left: 2rem;
+.another-quick-switcher__settings__dialog-hotkey__title {
+  margin-right: 0.5rem;
+}
+
+.another-quick-switcher__settings__dialog-hotkey
+  .setting-item.setting-item-heading {
+  margin-bottom: 0.5rem;
+}
+
+.another-quick-switcher__settings__popup {
+  position: relative;
+  display: inline-block;
+}
+
+.another-quick-switcher__settings__popup__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.another-quick-switcher__settings__popup__content {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% + 6px);
+  left: 0;
+  padding: 8px 10px;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  color: var(--text-normal);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  width: min(40rem, 80vw);
+}
+
+.another-quick-switcher__settings__popup__content ul {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.another-quick-switcher__settings__popup__content li + li {
+  margin-top: 4px;
+}
+
+.another-quick-switcher__settings__dialog-hotkeys-container {
+  border: solid 1px var(--text-faint);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.setting-group
+  .setting-items
+  .another-quick-switcher__settings__dialog-hotkey-item {
+  padding: 0.2rem;
 }
 
 .another-quick-switcher__settings__search-command {
-  /*noinspection CssUnresolvedCustomProperty*/
-  border: solid 1px var(--text-muted);
+  border: solid 1px var(--text-faint);
   border-radius: 10px;
-  padding: 20px 25px 0 20px;
-  margin: 15px;
+  /* padding: 10px 25px 0 20px; */
+  padding-top: 10px;
+  margin: 5px;
+}
+
+.another-quick-switcher__settings__search-command .setting-group {
+  margin: 10px 25px 0 20px;
+  margin-bottom: 16px;
 }
 
 .another-quick-switcher__settings__search-command__header
   .setting-item-control {
   justify-content: left;
-  padding-bottom: 20px;
 }
 
 .another-quick-switcher__settings__search-command__header

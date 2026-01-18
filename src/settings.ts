@@ -5,6 +5,8 @@ import {
   Setting,
   SettingGroup,
 } from "obsidian";
+import { useFilterSetting } from "./composables/settings/useFilterSetting";
+import { usePopover } from "./composables/settings/usePopover";
 import { type Hotkey, hotkey2String, string2Hotkey } from "./keys";
 import type AnotherQuickSwitcher from "./main";
 import { regardAsSortPriority, type SortPriority } from "./sorters";
@@ -769,6 +771,7 @@ export const DEFAULT_SETTINGS: Settings = {
 export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   plugin: AnotherQuickSwitcher;
   resetLock = true;
+  hotkeyHelpCleanups: (() => void)[] = [];
   hotkeyExpandedStatus: Record<keyof Hotkeys, boolean> = {
     main: false,
     folder: false,
@@ -788,6 +791,11 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
   display(): void {
     const { containerEl } = this;
+
+    for (const cleanup of this.hotkeyHelpCleanups) {
+      cleanup();
+    }
+    this.hotkeyHelpCleanups = [];
 
     containerEl.empty();
 
@@ -988,21 +996,10 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   }
 
   private addHotKeysInDialogSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "⌨Hot keys in dialog" });
-
-    new Setting(containerEl)
-      .setName(
-        "Use `alt 1～9` instead of `ctrl/cmd 1～9` for quick result selection",
-      )
-      .addToggle((tc) => {
-        tc.setValue(
-          this.plugin.settings.userAltInsteadOfModForQuickResultSelection,
-        ).onChange(async (value) => {
-          this.plugin.settings.userAltInsteadOfModForQuickResultSelection =
-            value;
-          await this.plugin.saveSettings();
-        });
-      });
+    containerEl.createEl("h3", { text: "⌨Hotkeys in dialog" });
+    const dialogHotkeysContainer = containerEl.createDiv({
+      cls: "another-quick-switcher__settings__dialog-hotkeys-container",
+    });
 
     const addHotkeyItems = (dialogKey: keyof Hotkeys, div: HTMLDivElement) => {
       if (!this.hotkeyExpandedStatus[dialogKey]) {
@@ -1067,10 +1064,23 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       const div = createDiv({
         cls: "another-quick-switcher__settings__dialog-hotkey",
       });
-      containerEl.append(div);
+      dialogHotkeysContainer.append(div);
 
-      const li = createEl("li");
-      li.append(
+      const { createPopover } = usePopover((cleanup) => {
+        this.hotkeyHelpCleanups.push(cleanup);
+      });
+
+      const hotkeyHelpTrigger = createEl("button", {
+        cls: "another-quick-switcher__settings__popup__icon",
+        text: "i",
+        attr: { "aria-label": "Hotkey input help" },
+      });
+      hotkeyHelpTrigger.setAttribute("type", "button");
+
+      const hotkeyHelpContent = createDiv();
+      const hotkeyHelpList = hotkeyHelpContent.createEl("ul");
+      const keycodeLi = hotkeyHelpList.createEl("li");
+      keycodeLi.append(
         "You can know the keycode at ",
         createEl("a", {
           text: "keycode.info",
@@ -1078,26 +1088,28 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         }),
         ". (Press any key and show 'event.key')",
       );
-      li.createEl("ul").createEl("li", {
+      keycodeLi.createEl("ul").createEl("li", {
         text: "For the space key, please set the value to 'Space'.",
       });
-
-      const ul = createEl("ul");
-      ul.createEl("li", {
+      hotkeyHelpList.createEl("li", {
         text: "'Ctrl a' means pressing the Ctrl key and the A key.",
       });
-      ul.createEl("li", {
+      hotkeyHelpList.createEl("li", {
         text: "Use 'Mod' instead of 'Ctrl' on Windows or 'Cmd' on macOS.",
       });
-      ul.append(li);
 
-      const df = document.createDocumentFragment();
-      df.append(ul);
+      const df = createPopover(hotkeyHelpTrigger, hotkeyHelpContent);
+
+      const dialogNameDf = document.createDocumentFragment();
+      dialogNameDf.createSpan({
+        text: dialogName,
+        cls: "another-quick-switcher__settings__dialog-hotkey__title",
+      });
+      dialogNameDf.appendChild(df);
 
       new Setting(div)
         .setHeading()
-        .setName(dialogName)
-        .setDesc(df)
+        .setName(dialogNameDf)
         .addExtraButton((btn) =>
           btn
             .setIcon(
@@ -1125,6 +1137,20 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     addHotkeysForDialog("in-file", "In File dialog");
     addHotkeysForDialog("grep", "Grep dialog");
     addHotkeysForDialog("command", "Command palette");
+
+    new Setting(containerEl)
+      .setName(
+        "Use `alt 1～9` instead of `ctrl/cmd 1～9` for quick result selection",
+      )
+      .addToggle((tc) => {
+        tc.setValue(
+          this.plugin.settings.userAltInsteadOfModForQuickResultSelection,
+        ).onChange(async (value) => {
+          this.plugin.settings.userAltInsteadOfModForQuickResultSelection =
+            value;
+          await this.plugin.saveSettings();
+        });
+      });
   }
 
   private addSearchSettings(containerEl: HTMLElement) {
@@ -2094,54 +2120,3 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       });
   }
 }
-
-const useFilterSetting = (group: SettingGroup) => {
-  const filterTargets: {
-    settingEl: HTMLElement;
-    getSearchText: () => string;
-  }[] = [];
-  let latestQuery = "";
-
-  const applyFilter = (query: string) => {
-    latestQuery = query;
-    const normalizedQuery = query.trim().toLowerCase();
-    const shouldShowAll = normalizedQuery.length === 0;
-    for (const target of filterTargets) {
-      const searchText = target.getSearchText().toLowerCase();
-      const isMatch = shouldShowAll || searchText.includes(normalizedQuery);
-      target.settingEl.toggle(isMatch);
-    }
-  };
-
-  const addFilterTarget = (
-    element: HTMLElement,
-    getSearchText: () => string,
-  ) => {
-    filterTargets.push({ settingEl: element, getSearchText });
-    applyFilter(latestQuery);
-  };
-
-  const addFilterableSetting = (
-    name: string,
-    desc: string | DocumentFragment | null,
-    build: (setting: Setting) => void,
-  ) => {
-    const searchText = name.trim();
-    group.addSetting((setting) => {
-      setting.setName(name);
-      if (desc) {
-        setting.setDesc(desc);
-      }
-      build(setting);
-      addFilterTarget(setting.settingEl, () => searchText);
-    });
-  };
-
-  group.addSearch((sc) => {
-    sc.setPlaceholder("Filter settings").onChange((value) => {
-      applyFilter(value);
-    });
-  });
-
-  return { addFilterableSetting };
-};
