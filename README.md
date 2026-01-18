@@ -620,6 +620,9 @@ Please read a "🔥 Breaking changes" section in the [Release note](https://gith
 
 It both supports desktop and mobile.
 
+> [!NOTE]
+> Please note that I am not currently using the mobile version of Obsidian, so I cannot verify this issue myself. As a result, addressing this bug will have a low priority.
+
 ## 💬 Feature requests / Bugs
 
 Please create a new [issue].
