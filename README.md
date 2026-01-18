@@ -212,14 +212,6 @@ It sorts results by modified time descending.
 
 **Note**: If you want to search in real-time, please set the "Grep search delay milli-seconds" option to 1 or more.
 
-#### Auto Preview
-
-You can enable automatic preview functionality in Grep search to see file contents without manually triggering preview:
-
-- **Auto preview**: Automatically shows preview when selecting candidates in search results
-- **Auto preview delay**: Configure the delay (0-1000ms) before auto preview is triggered when selection changes
-- This feature provides seamless file browsing while searching through content
-
 #### Launch Grep from Quick Switcher
 
 You can launch the Grep dialog directly from the main Quick Switcher with the current query carried over. This allows for seamless transition from file searching to content searching.
@@ -289,6 +281,28 @@ While previewing, you can scroll the note with `scroll preview up` / `scroll pre
 
 It shows a floating view that doesn't distract the contents. Additionally, it makes the editor state before opening the dialog after previewing files and closing the dialog.
 
+#### Auto Preview
+
+Auto Preview shows a preview automatically as you move the selection, without manually triggering Preview.
+
+| Dialog | Auto preview on selection | Delay setting | Toggle command | Notes |
+| ------ | ------------------------- | ------------- | -------------- | ----- |
+| Main dialog (search commands) | Yes (per command) | Yes | Yes (`toggle auto preview`) | Configured per search command |
+| Grep dialog | Yes | Yes | No | Enable in settings |
+| Backlink dialog | Yes | Yes | No | Enable in settings |
+| Header dialog | Yes | No | Yes (`toggle auto preview`) | Auto preview uses floating mode |
+| Link dialog | Yes | No | Yes (`toggle auto preview`) | Auto preview uses floating mode |
+| In File dialog | Yes | No | Yes (`toggle auto preview`) | Auto preview uses floating mode |
+
+Settings reference (UI labels):
+
+- Main dialog (search commands): `Auto preview`, `Auto preview delay milli-seconds`
+- Grep dialog: `Auto preview`, `Auto preview delay milli-seconds`
+- Backlink dialog: `Auto preview`, `Auto preview delay milli-seconds`
+- Header dialog: `Auto preview in the floating mode`
+- Link dialog: `Auto preview in the floating mode`
+- In File dialog: `Auto preview in the floating mode`
+
 https://user-images.githubusercontent.com/9500018/216806330-daf57b52-d8a4-42e3-9803-ba7d76a93319.mp4
 
 ### 11. Move file to another folder
@@ -336,6 +350,7 @@ You can multi-select suggestions in the main Quick Switcher, Backlink search, an
 
 - Toggle selection: use the configurable hotkeys "check/uncheck" or "check/uncheck and next" (moves the cursor to the next item).
 - Select all / Clear all: use "check/uncheck all" (toggles all) or "uncheck all" hotkeys (configurable).
+- Checked-count badge: shows how many items are checked next to the input while using multi-select.
 - Visual cue: checked items show a left accent bar in the list.
 - Batch actions: when items are checked, actions like Open will apply to all checked items. For example, Open opens all checked targets in new tabs; other supported actions (e.g., close if opened, open in default app, show in system explorer) also work for checked items.
 
@@ -384,9 +399,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open in new pane (vertical)     | `Mod+i`            | ✅  |
 | open in new window              | `Mod+o`            | ⛔  |
 | open in popup                   | _(none)_           | ⛔  |
-| open in new tab in background   | `Alt+o`            | ⛔  |
-| open all in new tabs            | `Mod+Shift+Alt+o`  | ⛔  |
 | preview                         | `Mod+,`            | ⛔  |
+| toggle auto preview             | _(none)_           | -  |
 | scroll preview up               | _(none)_           | ⛔  |
 | scroll preview down             | _(none)_           | ⛔  |
 | create                          | `Shift+Enter`      | ⛔  |
@@ -400,8 +414,6 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | check/uncheck all               | _(none)_           | -  |
 | uncheck all                     | _(none)_           | -  |
 | insert to editor                | `Alt+Enter`        | ✅  |
-| insert to editor in background  | _(none)_           | ⛔  |
-| insert all to editor            | `Alt+Shift+Enter`  | ⛔  |
 | open in default app             | _(none)_           | ✅  |
 | show in system explorer         | _(none)_           | ✅  |
 | open in google                  | `Mod+g`            | ⛔  |
@@ -463,8 +475,6 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open in new pane (vertical)   | `Mod+i`            | ✅  |
 | open in new window            | `Mod+o`            | ⛔  |
 | open in popup                 | _(none)_           | ⛔  |
-| open in new tab in background | `Alt+o`            | ⛔  |
-| open all in new tabs          | `Mod+Shift+Alt+o`  | ⛔  |
 | check/uncheck                 | _(none)_           | -  |
 | check/uncheck and next        | _(none)_           | -  |
 | check/uncheck all             | _(none)_           | -  |
@@ -489,10 +499,9 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open in new pane (vertical)   | `Mod+i`            | ⛔  |
 | open in new window            | `Mod+o`            | ⛔  |
 | open in popup                 | _(none)_           | ⛔  |
-| open in new tab in background | `Alt+o`            | ⛔  |
-| open all in new tabs          | `Mod+Shift+Alt+o`  | ⛔  |
 | show all results              | `Shift+Alt+a`      | ⛔  |
 | preview                       | `Mod+,`            | ⛔  |
+| toggle auto preview           | _(none)_           | -  |
 | scroll preview up             | _(none)_           | ⛔  |
 | scroll preview down           | _(none)_           | ⛔  |
 | up                            | `Mod+p`            | ⛔  |
@@ -526,8 +535,6 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open in new pane (vertical)   | `Mod+i`            | ✅  |
 | open in new window            | `Mod+o`            | ⛔  |
 | open in popup                 | _(none)_           | ⛔  |
-| open in new tab in background | `Alt+o`            | ⛔  |
-| open all in new tabs          | `Mod+Shift+Alt+o`  | ⛔  |
 | check/uncheck                 | _(none)_           | -  |
 | check/uncheck and next        | _(none)_           | -  |
 | check/uncheck all             | _(none)_           | -  |
@@ -559,6 +566,24 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 
 
 ## 💥 Major Breaking Changes
+
+### For users who use earlier than v14.0.0
+
+The following commands were removed to avoid conflicts with preview:
+
+- `open in new tab in background`
+- `open all in new tabs`
+- `insert to editor in background`
+- `insert all to editor`
+
+The first two were removed from the main/backlink/link/grep dialogs; the last two were removed from the main dialog.
+
+Alternatives with multi-select:
+
+- `open in new tab in background` -> use `check/uncheck` for multiple selection and run `open`
+- `open all in new tabs` -> use `check/uncheck all` to select all and run `open`
+- `insert to editor in background` -> use `check/uncheck` for multiple selection and run `insert to editor`
+- `insert all to editor` -> use `check/uncheck all` to select all and run `insert to editor`
 
 ### For users who use earlier than v13.0.0
 
@@ -614,7 +639,7 @@ git config core.hooksPath hooks
 [Bun] is required.
 
 ```console
-bun i
+bun install --frozen-lockfile --ignore-scripts
 bun dev
 ```
 
