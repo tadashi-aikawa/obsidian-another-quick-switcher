@@ -147,6 +147,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     stackHistory: boolean;
     initialLeaf: WorkspaceLeaf | null;
     initialState?: CaptureState;
+    selectedItemMap?: { [key: string]: SuggestionItem };
     historySnapshot?: LeafHistorySnapshot | null;
     recentHistorySnapshot?: string[] | null;
     recentHistoryBaseFilePath?: string | null;
@@ -181,6 +182,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       ? (args.recentHistoryBaseFilePath ?? null)
       : (this.appHelper.getActiveFile()?.path ?? null);
     this.navQueue = args.navQueue ?? Promise.resolve();
+    this.selectedItemMap = args.selectedItemMap ?? this.selectedItemMap;
     this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
     this.queryHistoryBaseQuery = null;
 
@@ -1317,6 +1319,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         stackHistory: true,
         initialLeaf: this.initialLeaf,
         initialState: this.stateToRestore,
+        selectedItemMap: this.selectedItemMap,
         // Preserve the pre-dialog history snapshot to avoid capturing preview-mutated history.
         historySnapshot: this.historySnapshot,
         recentHistorySnapshot: this.recentHistorySnapshot,
@@ -1361,6 +1364,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         stackHistory: false,
         initialState: this.stateToRestore,
         initialLeaf: this.initialLeaf,
+        selectedItemMap: this.selectedItemMap,
         historySnapshot: this.historySnapshot,
         recentHistorySnapshot: this.recentHistorySnapshot,
         recentHistoryBaseFilePath: this.recentHistoryBaseFilePath,

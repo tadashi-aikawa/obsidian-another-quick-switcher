@@ -166,7 +166,6 @@ export abstract class AbstractSuggestionModal<T>
   }
 
   checkAll(): void {
-    this.selectedItemMap = {};
     for (const item of this.chooser.values ?? []) {
       const path = this.toKey(item);
       this.selectedItemMap[path] = item;
@@ -191,7 +190,12 @@ export abstract class AbstractSuggestionModal<T>
   }
 
   uncheckAll(): void {
-    this.selectedItemMap = {};
+    for (const item of this.chooser.values ?? []) {
+      const path = this.toKey(item);
+      if (this.selectedItemMap[path]) {
+        delete this.selectedItemMap[path];
+      }
+    }
     this.updateSuggestions();
     this.updateCheckedCountBadge();
   }
