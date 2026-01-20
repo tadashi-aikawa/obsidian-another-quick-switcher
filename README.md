@@ -7,17 +7,35 @@
 
 This is an Obsidian plugin which is another choice of Quick switcher. It offers various features, such as:
 
-- Creating custom search commands (`Custom searches`)
-- Customizing the hotkeys in the quick switcher to your preference
-- Searching backlinks and moving them **without leaving the keyboard** (`Backlink search`)
-- Moving a file to another folder (`Move file to another folder`)
-- Searching **regardless of the order in which tokens appear**
-- Not performing very fuzzy searches by default, but an option is available to enable them
-- Searching **considering prefix emoji**
-- Showing file names and directory names separately
-- Show relative updated period (last modified/created/property) in suggestions (`Custom searches`)
-- Revealing a folder in the file tree (`Reveal a folder in the file tree`)
-- Running Obsidian commands with a built-in command palette that remembers your history (`Command palette`)
+- 🔎 **Search commands & ranking**
+  - [Create custom search commands (`Custom searches`)](#1-custom-searches)
+  - Token-order-independent matching
+  - Default to non-fuzzy matching; optional fuzzy search available
+  - Prefix emoji-aware search
+  - [Show relative updated period (last modified/created/property) in suggestions (`Custom searches`)](#relative-updated-period-display)
+- 🧭 **Dialogs & search modes**
+  - [Header floating search / Header search in file](#2-header-floating-search-in-file-header-search-in-file)
+  - [Backlink search with line context](#5-backlink-search)
+  - [Link search with line context](#6-link-search)
+  - [In-file search](#7-in-file-search)
+  - [Grep (ripgrep-powered content search)](#3-grep)
+- 🧠 **Preview & navigation**
+  - [Preview notes without closing the dialog](#10-preview)
+  - [Auto preview across dialogs](#auto-preview)
+  - [Show backlinks from the dialog](#8-show-backlinks-from-the-dialog)
+  - [Navigate outgoing/backlinks without leaving the dialog](#9-navigate-outgoingbacklinks-without-leaving-the-dialog)
+- ✅ **Batch actions**
+  - [Multi-select (check/uncheck) with batch open/insert/close](#12-checkuncheck-items-multi-select)
+- 📂 **File & folder tools**
+  - [Move file to another folder](#11-move-file-to-another-folder)
+  - Reveal a folder in the file tree (`Reveal a folder in the file tree`)
+- ⌨️ **Dialog commands & hotkeys**
+  - [100+ dialog commands across dialogs (open/preview/navigate/insert/etc.)](#dialog-commands)
+  - [Customize hotkeys for dialog commands](#4-customizable-hotkeys)
+- 🧩 **Command palette**
+  - [Command palette that prioritizes results using your query history and past selections (`Command palette`)](#13-command-palette)
+- 🪟 **UI/Display**
+  - Show file names and directory names separately
 
 ## ⏬ Install
 
