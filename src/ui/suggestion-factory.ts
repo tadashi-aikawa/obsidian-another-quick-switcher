@@ -1,4 +1,10 @@
+import { ExhaustiveError } from "src/errors";
+import type { RelativeUpdatedPeriodSource } from "src/settings";
 import { isExcalidraw } from "src/utils/path";
+import {
+  formatRelativeUpdatedPeriod,
+  type RelativeUpdatedPeriodInfo,
+} from "src/utils/times";
 import { type FrontmatterProperty, isPresent } from "src/utils/types";
 import { getMatchedTitleAndAliases, type SuggestionItem } from "../matcher";
 import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
@@ -32,6 +38,93 @@ interface Options {
   showFuzzyMatchScore: boolean;
   displayDescriptionBelowTitle: boolean;
   selected: boolean;
+  relativeUpdatedPeriodSource: RelativeUpdatedPeriodSource;
+  relativeUpdatedPeriodPropertyKey?: string;
+}
+
+function parseFrontMatterDate(
+  value: FrontmatterProperty | undefined,
+): number | null {
+  if (value == null) {
+    return null;
+  }
+
+  const normalized = Array.isArray(value) ? value[0] : value;
+  if (typeof normalized === "string") {
+    const trimmed = normalized.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const momentRef = (activeWindow as any).moment;
+    if (typeof momentRef === "function") {
+      const parsed = momentRef(trimmed);
+      if (parsed?.isValid?.()) {
+        const millis = parsed.valueOf();
+        if (Number.isFinite(millis)) {
+          return millis;
+        }
+      }
+    }
+
+    const parsedMillis = Date.parse(trimmed);
+    return Number.isNaN(parsedMillis) ? null : parsedMillis;
+  }
+
+  if (typeof normalized === "number") {
+    const momentRef = (activeWindow as any).moment;
+    if (typeof momentRef === "function") {
+      const parsed = momentRef(normalized);
+      if (parsed?.isValid?.()) {
+        const millis = parsed.valueOf();
+        if (Number.isFinite(millis)) {
+          return millis;
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+function getRelativeUpdatedPeriodInfo(args: {
+  source: RelativeUpdatedPeriodSource;
+  propertyKey?: string;
+  fileStat: { mtime: number; ctime: number };
+  frontMatter?: { [key: string]: FrontmatterProperty };
+  isPhantom?: boolean;
+  nowMs?: number;
+}): RelativeUpdatedPeriodInfo | null {
+  if (args.isPhantom) {
+    return null;
+  }
+
+  let baseMs: number | null = null;
+  switch (args.source) {
+    case "none":
+      return null;
+    case "modified":
+      baseMs = args.fileStat.mtime > 0 ? args.fileStat.mtime : null;
+      break;
+    case "created":
+      baseMs = args.fileStat.ctime > 0 ? args.fileStat.ctime : null;
+      break;
+    case "property": {
+      const key = args.propertyKey?.trim();
+      if (!key) {
+        return null;
+      }
+      baseMs = parseFrontMatterDate(args.frontMatter?.[key]);
+      break;
+    }
+    default:
+      throw new ExhaustiveError(args.source as never);
+  }
+
+  if (baseMs == null) {
+    return null;
+  }
+  return formatRelativeUpdatedPeriod(baseMs, args.nowMs);
 }
 
 /**
@@ -172,6 +265,25 @@ function createItemDiv(
     (options.displayAliaseAsTitle ||
       (!isTitleMatched && options.displayAliasAsTitleOnKeywordMatched));
 
+  const relativeUpdatedPeriodInfo = getRelativeUpdatedPeriodInfo({
+    source: options.relativeUpdatedPeriodSource,
+    propertyKey: options.relativeUpdatedPeriodPropertyKey,
+    fileStat: item.file.stat,
+    frontMatter: item.frontMatter,
+    isPhantom: item.phantom,
+  });
+
+  let relativeUpdatedPeriodSpan: HTMLSpanElement | null = null;
+  if (relativeUpdatedPeriodInfo) {
+    relativeUpdatedPeriodSpan = createSpan({
+      cls: [
+        "another-quick-switcher__item__relative-age",
+        `another-quick-switcher__item__relative-age--${relativeUpdatedPeriodInfo.unit}`,
+      ],
+      text: relativeUpdatedPeriodInfo.text,
+    });
+  }
+
   const titleText = shouldShowAliasAsTitle
     ? aliases.join(" | ")
     : item.file.basename;
@@ -223,6 +335,10 @@ function createItemDiv(
       text: isExcalidrawFile ? "excalidraw" : item.file.extension,
     });
     titleDiv.appendChild(extDiv);
+  }
+
+  if (relativeUpdatedPeriodSpan) {
+    titleDiv.appendChild(relativeUpdatedPeriodSpan);
   }
 
   if (item.order! < 9) {

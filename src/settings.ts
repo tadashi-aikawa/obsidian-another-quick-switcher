@@ -30,6 +30,15 @@ const moveFolderSortPriorityList = [
 export type MoveFolderSortPriority =
   (typeof moveFolderSortPriorityList)[number];
 
+const relativeUpdatedPeriodSourceList = [
+  "none",
+  "modified",
+  "created",
+  "property",
+] as const;
+export type RelativeUpdatedPeriodSource =
+  (typeof relativeUpdatedPeriodSourceList)[number];
+
 export interface SearchCommand {
   name: string;
   searchBy: {
@@ -39,6 +48,8 @@ export interface SearchCommand {
     property: boolean;
   };
   keysOfPropertyToSearch: string[];
+  relativeUpdatedPeriodSource: RelativeUpdatedPeriodSource;
+  relativeUpdatedPeriodPropertyKey: string;
   searchTarget: SearchTarget;
   allowFuzzySearchForSearchTarget: boolean;
   minFuzzyMatchScore: number;
@@ -435,6 +446,8 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
     property: false,
   },
   keysOfPropertyToSearch: [],
+  relativeUpdatedPeriodSource: "none",
+  relativeUpdatedPeriodPropertyKey: "Last modified",
   searchTarget: "file",
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
@@ -464,6 +477,8 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
     property: false,
   },
   keysOfPropertyToSearch: [],
+  relativeUpdatedPeriodSource: "none",
+  relativeUpdatedPeriodPropertyKey: "Last modified",
   searchTarget: "link",
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
@@ -493,6 +508,8 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
     property: false,
   },
   keysOfPropertyToSearch: [],
+  relativeUpdatedPeriodSource: "none",
+  relativeUpdatedPeriodPropertyKey: "Last modified",
   searchTarget: "backlink",
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
@@ -521,6 +538,8 @@ export const createDefault2HopLinkSearchCommand = (): SearchCommand => ({
     property: false,
   },
   keysOfPropertyToSearch: [],
+  relativeUpdatedPeriodSource: "none",
+  relativeUpdatedPeriodPropertyKey: "Last modified",
   searchTarget: "2-hop-link",
   allowFuzzySearchForSearchTarget: false,
   minFuzzyMatchScore: 0.5,
@@ -556,6 +575,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       property: false,
     },
     keysOfPropertyToSearch: [],
+    relativeUpdatedPeriodSource: "none",
+    relativeUpdatedPeriodPropertyKey: "Last modified",
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
@@ -583,6 +604,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       property: false,
     },
     keysOfPropertyToSearch: [],
+    relativeUpdatedPeriodSource: "none",
+    relativeUpdatedPeriodPropertyKey: "Last modified",
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
@@ -616,6 +639,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       property: false,
     },
     keysOfPropertyToSearch: [],
+    relativeUpdatedPeriodSource: "none",
+    relativeUpdatedPeriodPropertyKey: "Last modified",
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: true,
     minFuzzyMatchScore: 0.5,
@@ -649,6 +674,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       property: false,
     },
     keysOfPropertyToSearch: [],
+    relativeUpdatedPeriodSource: "none",
+    relativeUpdatedPeriodPropertyKey: "Last modified",
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
@@ -685,6 +712,8 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
       property: false,
     },
     keysOfPropertyToSearch: [],
+    relativeUpdatedPeriodSource: "none",
+    relativeUpdatedPeriodPropertyKey: "Last modified",
     searchTarget: "file",
     allowFuzzySearchForSearchTarget: false,
     minFuzzyMatchScore: 0.5,
@@ -1375,7 +1404,6 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       "another-quick-switcher__settings__search-command__search-by-button_enabled";
     const buttonDisabledClass =
       "another-quick-switcher__settings__search-command__search-by-button_disabled";
-
     addFilterableSetting("Search by", null, (setting) => {
       setting
         .setName("Search by")
@@ -1605,6 +1633,48 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
               "another-quick-switcher__settings__exclude_front_matter_keys";
 
             return el;
+          });
+        },
+      );
+    }
+
+    const relativeUpdatedPeriodSourceOptions: Record<
+      RelativeUpdatedPeriodSource,
+      string
+    > = {
+      none: "Do not show",
+      modified: "Last modified",
+      created: "Created time",
+      property: "Property",
+    };
+    addFilterableSetting(
+      "Relative updated period source",
+      "Shown in the left gutter of each suggestion.",
+      (setting) => {
+        setting.addDropdown((dc) => {
+          dc.addOptions(relativeUpdatedPeriodSourceOptions)
+            .setValue(command.relativeUpdatedPeriodSource)
+            .onChange(async (value) => {
+              command.relativeUpdatedPeriodSource =
+                value as RelativeUpdatedPeriodSource;
+              this.display();
+            });
+        });
+      },
+    );
+
+    if (command.relativeUpdatedPeriodSource === "property") {
+      addFilterableSetting(
+        "Property key for relative updated period",
+        "Use a front matter property value that can be parsed as a date.",
+        (setting) => {
+          setting.setClass("another-quick-switcher__settings__nested");
+          setting.addText((tc) => {
+            tc.setValue(command.relativeUpdatedPeriodPropertyKey).onChange(
+              async (value) => {
+                command.relativeUpdatedPeriodPropertyKey = value.trim();
+              },
+            );
           });
         },
       );
