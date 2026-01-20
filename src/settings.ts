@@ -1649,7 +1649,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     };
     addFilterableSetting(
       "Relative updated period source",
-      "Shown in the left gutter of each suggestion.",
+      "Shown in each suggestion.",
       (setting) => {
         setting.addDropdown((dc) => {
           dc.addOptions(relativeUpdatedPeriodSourceOptions)

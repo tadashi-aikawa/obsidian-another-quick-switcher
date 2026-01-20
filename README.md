@@ -15,8 +15,9 @@ This is an Obsidian plugin which is another choice of Quick switcher. It offers 
 - Not performing very fuzzy searches by default, but an option is available to enable them
 - Searching **considering prefix emoji**
 - Showing file names and directory names separately
+- Show relative updated period (last modified/created/property) in suggestions (`Custom searches`)
 - Revealing a folder in the file tree (`Reveal a folder in the file tree`)
-- Running Obsidian commands with a built-in command palette that remembers your history
+- Running Obsidian commands with a built-in command palette that remembers your history (`Command palette`)
 
 ## ⏬ Install
 
@@ -83,6 +84,13 @@ You can use the following names as a `Sort priorities`.
 
 > **Note**
 > Use `(Property)` like `@<property>` (`@<property>:asc`) or `@<property>:desc` for descending order. For arrays, the first element is used; missing values sort last.
+
+#### Relative updated period display
+
+You can show the relative updated period in suggestions. Configure it per search command.
+
+- Select the source in `Relative updated period source` (do not show / last modified / created time / property)
+- When using `Property`, set the front matter key in `Property key for relative updated period`
 
 #### Preset search commands
 
