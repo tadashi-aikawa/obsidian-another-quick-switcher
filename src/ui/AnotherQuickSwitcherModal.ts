@@ -1281,10 +1281,24 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         settings: this.settings,
         command: {
           ...command,
+          searchBy: this.command.searchBy,
+          keysOfPropertyToSearch: this.command.keysOfPropertyToSearch,
+          relativeUpdatedPeriodSource: this.command.relativeUpdatedPeriodSource,
+          relativeUpdatedPeriodPropertyKey:
+            this.command.relativeUpdatedPeriodPropertyKey,
+          allowFuzzySearchForSearchTarget:
+            this.command.allowFuzzySearchForSearchTarget,
+          minFuzzyMatchScore: this.command.minFuzzyMatchScore,
+          targetExtensions: this.command.targetExtensions,
           floating: this.floating,
           autoPreview: this.command.autoPreview,
           autoPreviewDelayMilliSeconds:
             this.command.autoPreviewDelayMilliSeconds,
+          showFrontMatter: this.command.showFrontMatter,
+          excludeFrontMatterKeys: this.command.excludeFrontMatterKeys,
+          sortPriorities: this.command.sortPriorities,
+          excludePrefixPathPatterns: this.command.excludePrefixPathPatterns,
+          includePrefixPathPatterns: this.command.includePrefixPathPatterns,
         },
         originFile: file,
         inputQuery: null,
