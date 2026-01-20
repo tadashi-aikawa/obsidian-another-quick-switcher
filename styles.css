@@ -2,6 +2,17 @@
 * {
   --first-rank-color: var(--interactive-accent);
   --second-rank-color: var(--text-normal);
+
+  --aqs-relative-age-minute-color: var(--text-on-accent);
+  --aqs-relative-age-minute-bgcolor: var(--interactive-accent);
+  --aqs-relative-age-hour-color: var(--text-accent);
+  --aqs-relative-age-day-color: var(--text-title);
+  --aqs-relative-age-month-color: var(--text-muted);
+  --aqs-relative-age-year-color: color-mix(
+    in srgb,
+    var(--text-faint),
+    transparent 25%
+  );
 }
 
 .another-quick-switcher__floating-prompt {
@@ -62,6 +73,55 @@
   display: flex;
   flex: 1;
   align-items: center;
+  position: relative;
+}
+
+.another-quick-switcher__item__relative-age {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.4rem;
+  padding: 0 0.35rem;
+  border-radius: 3px;
+  position: relative;
+  font-weight: 500;
+  font-size: 0.8em;
+  line-height: 1.4;
+  color: var(--text-muted);
+  background-color: transparent;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.another-quick-switcher__item__relative-age::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid currentColor;
+  border-radius: inherit;
+  box-sizing: border-box;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.another-quick-switcher__item__relative-age--minute {
+  color: var(--aqs-relative-age-minute-color);
+  background-color: var(--aqs-relative-age-minute-bgcolor);
+}
+
+.another-quick-switcher__item__relative-age--hour {
+  color: var(--aqs-relative-age-hour-color);
+}
+
+.another-quick-switcher__item__relative-age--day {
+  color: var(--aqs-relative-age-day-color);
+}
+
+.another-quick-switcher__item__relative-age--month {
+  color: var(--aqs-relative-age-month-color);
+}
+
+.another-quick-switcher__item__relative-age--year {
+  color: var(--aqs-relative-age-year-color);
 }
 
 .another-quick-switcher__item__title {

@@ -391,10 +391,14 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       (x) => x,
     );
     const originFilePath = this.originFile?.path;
+    const relativeUpdatedPeriodPropertyKey =
+      this.command.relativeUpdatedPeriodPropertyKey.trim();
     const shouldLoadFrontMatter =
       this.command.showFrontMatter ||
       this.command.searchBy.property ||
-      this.command.sortPriorities.some(isPropertySortPriority);
+      this.command.sortPriorities.some(isPropertySortPriority) ||
+      (this.command.relativeUpdatedPeriodSource === "property" &&
+        relativeUpdatedPeriodPropertyKey.length > 0);
 
     let start = performance.now();
     const fileItems: SuggestionItem[] = this.app.vault
@@ -712,6 +716,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       displayDescriptionBelowTitle: this.settings.displayDescriptionBelowTitle,
       hideGutterIcons: this.settings.hideGutterIcons,
       showFuzzyMatchScore: this.settings.showFuzzyMatchScore,
+      relativeUpdatedPeriodSource: this.command.relativeUpdatedPeriodSource,
+      relativeUpdatedPeriodPropertyKey:
+        this.command.relativeUpdatedPeriodPropertyKey,
       selected: Boolean(this.selectedItemMap[this.toKey(item)]),
     });
 
