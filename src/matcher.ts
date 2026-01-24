@@ -292,7 +292,13 @@ function matchQuery(
 
       if (Array.isArray(prop)) {
         const ranges = prop.map((v) =>
-          includesWithRange(v.toString(), query, isNormalizeAccentsDiacritics),
+          v == null
+            ? null
+            : includesWithRange(
+                v.toString(),
+                query,
+                isNormalizeAccentsDiacritics,
+              ),
         );
         if (ranges.length > 0 && ranges.some((x) => x !== null)) {
           frontMatterRanges[key] = ranges;
