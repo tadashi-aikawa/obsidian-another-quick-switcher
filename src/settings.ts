@@ -5,6 +5,10 @@ import {
   Setting,
   SettingGroup,
 } from "obsidian";
+import {
+  TextAreaComponentEvent,
+  TextComponentEvent,
+} from "src/apputils/setting/settings-helper";
 import { useFilterSetting } from "./composables/settings/useFilterSetting";
 import { usePopover } from "./composables/settings/usePopover";
 import { type Hotkey, hotkey2String, string2Hotkey } from "./keys";
@@ -1192,66 +1196,26 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       );
     });
 
-    new Setting(containerEl)
-      .setHeading()
-      .addButton((btn) => {
-        btn
-          .setButtonText("Add")
-          .setTooltip("Add a new command")
-          .setCta()
-          .setClass(
-            "another-quick-switcher__settings__search-command__add-button",
-          )
-          .onClick(async (_) => {
-            this.plugin.settings.searchCommands.push(
-              createDefaultSearchCommand(),
-            );
-            this.display();
-          });
-      })
-      .addButton((btn) => {
-        btn
-          .setButtonText("Save")
-          .setTooltip(
-            "You must click this button to save settings before closing Obsidian",
-          )
-          .setCta()
-          .setClass(
-            "another-quick-switcher__settings__search-command__save-button",
-          )
-          .onClick(async (_) => {
-            this.plugin.settings.searchCommands =
-              this.plugin.settings.searchCommands.filter((x) => x.name);
-
-            const invalidValues = this.plugin.settings.searchCommands
-              .flatMap((x) => x.sortPriorities)
-              .filter((x) => !regardAsSortPriority(x));
-            if (invalidValues.length > 0) {
-              // noinspection ObjectAllocationIgnored
-              new Notice(
-                `
-Invalid sort priorities:
-${invalidValues.map((x) => `- ${x}`).join("\n")}
-`.trim(),
-                0,
-              );
-              return;
-            }
-
-            await this.plugin.saveSettings();
-            this.display();
-            this.plugin.reloadCommands();
-            // noinspection ObjectAllocationIgnored
-            new Notice("Save and reload commands");
-          });
-      });
+    new Setting(containerEl).setHeading().addButton((btn) => {
+      btn
+        .setButtonText("Add a new command")
+        .setTooltip("Add a new command")
+        .setCta()
+        .setClass(
+          "another-quick-switcher__settings__search-command__add-button",
+        )
+        .onClick(async (_) => {
+          this.plugin.settings.searchCommands.push(
+            createDefaultSearchCommand(),
+          );
+          this.display();
+        });
+    });
 
     new Setting(containerEl)
       .setName("Reset all search commands")
       .setClass("another-quick-switcher__settings__danger")
-      .setDesc(
-        "It means your customized commands will be removed. If you reset unintentionally, you can restore the search commands by closing settings and Obsidian immediately, then restart Obsidian.",
-      )
+      .setDesc("It means your customized commands will be removed.")
       .addToggle((cb) => {
         cb.setValue(this.resetLock).onChange((lock) => {
           this.resetLock = lock;
@@ -1268,9 +1232,11 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setButtonText("Reset")
           .setTooltip("Reset all search commands!!")
           .setDisabled(this.resetLock)
-          .onClick(() => {
+          .onClick(async () => {
             this.plugin.settings.searchCommands =
               createPreSettingSearchCommands();
+            await this.plugin.saveSettings();
+            this.plugin.reloadCommands();
             this.display();
           });
         if (!this.resetLock) {
@@ -1351,25 +1317,58 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     });
     containerEl.append(div);
 
+    const saveCommandWithValidation = async (option?: {
+      reloadCommands: true;
+    }) => {
+      if (!command.name.trim()) {
+        new Notice("❌ Command name is required");
+        return;
+      }
+
+      const invalidSortPriorities = command.sortPriorities.filter(
+        (x) => !regardAsSortPriority(x),
+      );
+      if (invalidSortPriorities.length > 0) {
+        new Notice(
+          `
+❌ Invalid sort priorities:
+${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
+`.trim(),
+          0,
+        );
+        return;
+      }
+
+      await this.plugin.saveSettings();
+
+      if (option?.reloadCommands) {
+        this.plugin.reloadCommands();
+      }
+    };
+
     new Setting(div)
       .setClass("another-quick-switcher__settings__search-command__header")
       .setHeading()
-      .addText((tc) => {
-        const el = tc
-          .setPlaceholder("Command name")
-          .setValue(command.name)
-          .onChange(async (value) => {
+      .addText((tc) =>
+        TextComponentEvent.onChange(
+          tc,
+          async (value) => {
             command.name = value;
-          });
-        el.inputEl.setAttribute("style", "text-align: left");
-        return el;
-      })
+            await saveCommandWithValidation({ reloadCommands: true });
+          },
+          { style: "text-align: left" },
+        )
+          .setPlaceholder("Command name")
+          .setValue(command.name),
+      )
       .addExtraButton((btn) => {
         btn
           .setTooltip("Delete a command (!! it will never be restored !!)")
           .setIcon("trash-2")
-          .onClick(() => {
+          .onClick(async () => {
             this.plugin.settings.searchCommands.remove(command);
+            await this.plugin.saveSettings();
+            this.plugin.reloadCommands();
             this.display();
           });
         btn.extraSettingsEl.addClass(
@@ -1381,8 +1380,9 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         btn
           .setIcon(command.expand ? "chevron-up" : "chevron-down")
           .setTooltip(command.expand ? "fold" : "unfold")
-          .onClick(() => {
+          .onClick(async () => {
             command.expand = !command.expand;
+            await this.plugin.saveSettings();
             this.display();
           });
         btn.extraSettingsEl.addClass(
@@ -1421,6 +1421,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             .onClick(async () => {
               command.searchBy.tag = !command.searchBy!.tag;
               coloring();
+              await saveCommandWithValidation();
             });
           coloring();
           return bc;
@@ -1440,6 +1441,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             .onClick(async () => {
               command.searchBy.header = !command.searchBy!.header;
               coloring();
+              await saveCommandWithValidation();
             });
           coloring();
           return bc;
@@ -1457,6 +1459,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             .onClick(async () => {
               command.searchBy.link = !command.searchBy!.link;
               coloring();
+              await saveCommandWithValidation();
             });
           coloring();
           return bc;
@@ -1476,6 +1479,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             .onClick(async () => {
               command.searchBy.property = !command.searchBy!.property;
               coloring();
+              await saveCommandWithValidation();
               this.display();
             });
           coloring();
@@ -1489,17 +1493,19 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         "Keys of the property to search",
         "Multiple entries can be specified, separated by line breaks.",
         (setting) => {
-          setting.addTextArea((tc) => {
-            const el = tc
-              .setValue(command.keysOfPropertyToSearch!.join("\n"))
-              .onChange(async (value) => {
+          setting.addTextArea((tc) =>
+            TextAreaComponentEvent.onChange(
+              tc,
+              async (value) => {
                 command.keysOfPropertyToSearch = smartLineBreakSplit(value);
-              });
-            el.inputEl.className =
-              "another-quick-switcher__settings__keys_of_property_to_search";
-
-            return el;
-          });
+                await saveCommandWithValidation();
+              },
+              {
+                className:
+                  "another-quick-switcher__settings__keys_of_property_to_search",
+              },
+            ).setValue(command.keysOfPropertyToSearch!.join("\n")),
+          );
         },
       );
     }
@@ -1510,6 +1516,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           .setValue(command.searchTarget)
           .onChange(async (value) => {
             command.searchTarget = value as SearchTarget;
+            await saveCommandWithValidation();
           });
       });
     });
@@ -1522,6 +1529,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
           cb.setValue(command.allowFuzzySearchForSearchTarget).onChange(
             async (value) => {
               command.allowFuzzySearchForSearchTarget = value as boolean;
+              await saveCommandWithValidation();
             },
           );
         });
@@ -1539,6 +1547,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             .setDynamicTooltip()
             .onChange(async (value) => {
               command.minFuzzyMatchScore = value;
+              await saveCommandWithValidation();
             }),
         );
       },
@@ -1549,12 +1558,12 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       "If set, only files whose extension equals will be suggested. If empty, all files will be suggested. It can set multi extensions using comma.",
       (setting) => {
         setting.addTextArea((tc) =>
-          tc
+          TextAreaComponentEvent.onChange(tc, async (value) => {
+            command.targetExtensions = smartCommaSplit(value);
+            await saveCommandWithValidation();
+          })
             .setPlaceholder("(ex: md,png,canvas)")
-            .setValue(command.targetExtensions.join(","))
-            .onChange(async (value) => {
-              command.targetExtensions = smartCommaSplit(value);
-            }),
+            .setValue(command.targetExtensions.join(",")),
         );
       },
     );
@@ -1563,6 +1572,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       setting.addToggle((cb) => {
         cb.setValue(command.includeCurrentFile).onChange(async (value) => {
           command.includeCurrentFile = value as boolean;
+          await saveCommandWithValidation();
         });
       });
     });
@@ -1571,6 +1581,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       setting.addToggle((cb) => {
         cb.setValue(command.floating).onChange(async (value) => {
           command.floating = value as boolean;
+          await saveCommandWithValidation();
           this.display();
         });
       });
@@ -1583,6 +1594,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         setting.addToggle((tc) => {
           tc.setValue(command.autoPreview).onChange(async (value) => {
             command.autoPreview = value;
+            await saveCommandWithValidation();
             this.display();
           });
         });
@@ -1603,6 +1615,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
                 .setDynamicTooltip()
                 .onChange(async (value) => {
                   command.autoPreviewDelayMilliSeconds = value;
+                  await saveCommandWithValidation();
                 }),
             );
         },
@@ -1613,6 +1626,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       setting.addToggle((cb) => {
         cb.setValue(command.showFrontMatter).onChange(async (value) => {
           command.showFrontMatter = value as boolean;
+          await saveCommandWithValidation();
           this.display();
         });
       });
@@ -1623,17 +1637,19 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         "Exclude front matter keys",
         "It can set multi patterns by line breaks.",
         (setting) => {
-          setting.addTextArea((tc) => {
-            const el = tc
-              .setValue(command.excludeFrontMatterKeys!.join("\n"))
-              .onChange(async (value) => {
+          setting.addTextArea((tc) =>
+            TextAreaComponentEvent.onChange(
+              tc,
+              async (value) => {
                 command.excludeFrontMatterKeys = smartLineBreakSplit(value);
-              });
-            el.inputEl.className =
-              "another-quick-switcher__settings__exclude_front_matter_keys";
-
-            return el;
-          });
+                await saveCommandWithValidation();
+              },
+              {
+                className:
+                  "another-quick-switcher__settings__exclude_front_matter_keys",
+              },
+            ).setValue(command.excludeFrontMatterKeys!.join("\n")),
+          );
         },
       );
     }
@@ -1657,6 +1673,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
             .onChange(async (value) => {
               command.relativeUpdatedPeriodSource =
                 value as RelativeUpdatedPeriodSource;
+              await saveCommandWithValidation();
               this.display();
             });
         });
@@ -1669,13 +1686,12 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         "Use a front matter property value that can be parsed as a date.",
         (setting) => {
           setting.setClass("another-quick-switcher__settings__nested");
-          setting.addText((tc) => {
-            tc.setValue(command.relativeUpdatedPeriodPropertyKey).onChange(
-              async (value) => {
-                command.relativeUpdatedPeriodPropertyKey = value.trim();
-              },
-            );
-          });
+          setting.addText((tc) =>
+            TextComponentEvent.onChange(tc, async (value) => {
+              command.relativeUpdatedPeriodPropertyKey = value.trim();
+              await saveCommandWithValidation();
+            }),
+          );
         },
       );
     }
@@ -1685,12 +1701,12 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       "Default input strings when it opens the dialog",
       (setting) => {
         setting.addText((tc) =>
-          tc
+          TextComponentEvent.onChange(tc, async (value) => {
+            command.defaultInput = value;
+            await saveCommandWithValidation();
+          })
             .setValue(command.defaultInput)
-            .setPlaceholder("(ex: #todo )")
-            .onChange(async (value) => {
-              command.defaultInput = value;
-            }),
+            .setPlaceholder("(ex: #todo )"),
         );
       },
     );
@@ -1702,6 +1718,7 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
         setting.addToggle((tc) => {
           tc.setValue(command.restoreLastInput).onChange(async (value) => {
             command.restoreLastInput = value;
+            await saveCommandWithValidation();
           });
         });
       },
@@ -1712,12 +1729,12 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       "For example, if it sets ':r ', a query starts with ':r ' means that search as this command",
       (setting) => {
         setting.addText((tc) =>
-          tc
+          TextComponentEvent.onChange(tc, async (value) => {
+            command.commandPrefix = value;
+            await saveCommandWithValidation();
+          })
             .setValue(command.commandPrefix)
-            .setPlaceholder("(ex: :r )")
-            .onChange(async (value) => {
-              command.commandPrefix = value;
-            }),
+            .setPlaceholder("(ex: :r )"),
         );
       },
     );
@@ -1732,37 +1749,43 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
     );
 
     addFilterableSetting("Sort priorities", df, (setting) => {
-      setting.addTextArea((tc) => {
-        const el = tc
-          .setPlaceholder("")
-          .setValue(command.sortPriorities.join("\n"))
-          .onChange(async (value) => {
+      setting.addTextArea((tc) =>
+        TextAreaComponentEvent.onChange(
+          tc,
+          async (value) => {
             const priorities = smartLineBreakSplit(value);
             command.sortPriorities = priorities as SortPriority[];
-          });
-        el.inputEl.addClass(
-          "another-quick-switcher__settings__search-command__sort-priority",
-        );
-        return el;
-      });
+            await saveCommandWithValidation();
+          },
+          {
+            className:
+              "another-quick-switcher__settings__search-command__sort-priority",
+          },
+        )
+          .setPlaceholder("")
+          .setValue(command.sortPriorities.join("\n")),
+      );
     });
 
     addFilterableSetting(
       "Include path patterns",
       "If set, only files whose paths start with one of the patterns will be suggested. It can set multi patterns by line breaks. <current_dir> means current directory.",
       (setting) => {
-        setting.addTextArea((tc) => {
-          const el = tc
-            .setPlaceholder("(ex: Notes/Private)")
-            .setValue(command.includePrefixPathPatterns.join("\n"))
-            .onChange(async (value) => {
+        setting.addTextArea((tc) =>
+          TextAreaComponentEvent.onChange(
+            tc,
+            async (value) => {
               command.includePrefixPathPatterns = smartLineBreakSplit(value);
-            });
-          el.inputEl.className =
-            "another-quick-switcher__settings__include_path_patterns";
-
-          return el;
-        });
+              await saveCommandWithValidation();
+            },
+            {
+              className:
+                "another-quick-switcher__settings__include_path_patterns",
+            },
+          )
+            .setPlaceholder("(ex: Notes/Private)")
+            .setValue(command.includePrefixPathPatterns.join("\n")),
+        );
       },
     );
 
@@ -1770,18 +1793,21 @@ ${invalidValues.map((x) => `- ${x}`).join("\n")}
       "Exclude prefix path patterns",
       "If set, files whose paths start with one of the patterns will not be suggested. It can set multi patterns by line breaks. <current_dir> means current directory.",
       (setting) => {
-        setting.addTextArea((tc) => {
-          const el = tc
-            .setPlaceholder("(ex: Notes/Private)")
-            .setValue(command.excludePrefixPathPatterns!.join("\n"))
-            .onChange(async (value) => {
+        setting.addTextArea((tc) =>
+          TextAreaComponentEvent.onChange(
+            tc,
+            async (value) => {
               command.excludePrefixPathPatterns = smartLineBreakSplit(value);
-            });
-          el.inputEl.className =
-            "another-quick-switcher__settings__exclude_path_patterns";
-
-          return el;
-        });
+              await saveCommandWithValidation();
+            },
+            {
+              className:
+                "another-quick-switcher__settings__exclude_path_patterns",
+            },
+          )
+            .setPlaceholder("(ex: Notes/Private)")
+            .setValue(command.excludePrefixPathPatterns!.join("\n")),
+        );
       },
     );
   }

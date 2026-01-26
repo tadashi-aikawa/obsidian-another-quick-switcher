@@ -49,6 +49,7 @@ You can download from `Community plugins` in Obsidian settings.
 
 
 Custom searches enables you to create your original search commands.
+Search command settings are saved automatically when you finish editing (no Save button required).
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/search-commands-setting.png)
 
@@ -90,9 +91,6 @@ You can use the following names as a `Sort priorities`.
 | (Extensions split by comma) | Prioritizes files with the specified extensions           | 8.3.0   |
 | (Property and sort order)   | Orders by front matter property value                     | 13.27.0 |
 
-> **Warning**
-> Please don't forget to click the `Save` button before you close Obsidian. Otherwise, the settings **will never restore** when you open Obsidian next time.
-> ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/save-button.png)
 
 > **Note**
 > Use `(Tags split by comma)` like `#hoge` or `#hoge,#huga`.

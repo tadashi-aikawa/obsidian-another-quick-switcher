@@ -627,6 +627,10 @@
 .another-quick-switcher__settings__search-command__sort-priority {
   height: 240px;
 }
+.another-quick-switcher__settings__search-command__add-button {
+  width: 100%;
+  height: 36px;
+}
 
 .another-quick-switcher__command_buttons {
   display: flex;
@@ -683,9 +687,6 @@
   margin: 0 3px !important;
 }
 .is-mobile .another-quick-switcher__settings__search-command__add-button {
-  margin: 0 3px !important;
-}
-.is-mobile .another-quick-switcher__settings__search-command__save-button {
   margin: 0 3px !important;
 }
 

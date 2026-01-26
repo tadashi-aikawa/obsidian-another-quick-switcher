@@ -283,17 +283,19 @@ export function createCommands(app: App, settings: Settings): Command[] {
         showCommandPalette({ app, settings });
       },
     },
-    ...settings.searchCommands.map((command) => {
-      return {
-        id: `${SEARCH_COMMAND_PREFIX}_${command.name
-          .replace(/ /g, "-")
-          .toLowerCase()}`,
-        name: command.name,
-        hotkeys: [],
-        callback: () => {
-          showSearchDialog(app, settings, command);
-        },
-      };
-    }),
+    ...settings.searchCommands
+      .filter((command) => command.name.trim().length > 0)
+      .map((command) => {
+        return {
+          id: `${SEARCH_COMMAND_PREFIX}_${command.name
+            .replace(/ /g, "-")
+            .toLowerCase()}`,
+          name: command.name,
+          hotkeys: [],
+          callback: () => {
+            showSearchDialog(app, settings, command);
+          },
+        };
+      }),
   ];
 }
