@@ -147,11 +147,9 @@ export const applyGlobalSettingFilter = (
     if (!container) {
       continue;
     }
-    container
-      .querySelectorAll<HTMLElement>(".setting-item")
-      .forEach((item) => {
-        visibleItems.add(item);
-      });
+    container.querySelectorAll<HTMLElement>(".setting-item").forEach((item) => {
+      visibleItems.add(item);
+    });
   }
 
   for (const item of matchedItems) {
@@ -206,18 +204,18 @@ export const applyGlobalSettingFilter = (
   containerEl
     .querySelectorAll<HTMLElement>(`.${searchCommandContainerClass}`)
     .forEach((container) => {
-    const hasVisibleItem = Array.from(
-      container.querySelectorAll<HTMLElement>(".setting-item"),
-    ).some((item) => visibleItems.has(item));
-    container.toggle(hasVisibleItem);
-  });
+      const hasVisibleItem = Array.from(
+        container.querySelectorAll<HTMLElement>(".setting-item"),
+      ).some((item) => visibleItems.has(item));
+      container.toggle(hasVisibleItem);
+    });
 
   containerEl
     .querySelectorAll<HTMLElement>(`.${dialogHotkeyContainerClass}`)
     .forEach((container) => {
-    const hasVisibleItem = Array.from(
-      container.querySelectorAll<HTMLElement>(".setting-item"),
-    ).some((item) => visibleItems.has(item));
-    container.toggle(hasVisibleItem);
-  });
+      const hasVisibleItem = Array.from(
+        container.querySelectorAll<HTMLElement>(".setting-item"),
+      ).some((item) => visibleItems.has(item));
+      container.toggle(hasVisibleItem);
+    });
 };

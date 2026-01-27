@@ -829,6 +829,33 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     return this.globalSettingSearchQuery.trim().length > 0;
   }
 
+  private createWarningName(
+    name: string,
+    warningText: string,
+  ): DocumentFragment {
+    const { createPopover } = usePopover((cleanup) => {
+      this.hotkeyHelpCleanups.push(cleanup);
+    });
+
+    const trigger = createEl("div", {
+      cls: [
+        "another-quick-switcher__settings__popup__icon",
+        "another-quick-switcher__settings__warning-icon",
+      ],
+      text: "⚠️",
+    });
+    trigger.setAttribute("type", "button");
+
+    const content = createDiv({
+      text: warningText,
+      cls: "another-quick-switcher__settings__warning",
+    });
+    const df = document.createDocumentFragment();
+    df.append(createSpan({ text: name }));
+    df.appendChild(createPopover(trigger, content));
+    return df;
+  }
+
   private updateGlobalSettingSearchQuery(value: string) {
     const wasActive = this.isGlobalSettingSearchActive();
     this.globalSettingSearchQuery = value;
@@ -865,7 +892,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       attr: {
         type: "search",
         placeholder: "Search all settings",
-        "aria-label": "Search all settings",
       },
     });
     this.globalSettingSearchInputEl = globalSearchInput;
@@ -929,7 +955,12 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Normalize accents/diacritics")
+      .setName(
+        this.createWarningName(
+          "Normalize accents/diacritics",
+          "If enabled, it is about 2 to 5 times slower than disabled",
+        ),
+      )
       .addToggle((tc) => {
         tc.setValue(
           this.plugin.settings.normalizeAccentsAndDiacritics,
@@ -939,12 +970,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           this.display();
         });
       });
-    if (this.plugin.settings.normalizeAccentsAndDiacritics) {
-      containerEl.createEl("div", {
-        text: "! If enabled, it is about 2 to 5 times slower than disabled",
-        cls: "another-quick-switcher__settings__warning",
-      });
-    }
 
     new Setting(containerEl)
       .setName("Use selection words as a default input query")
@@ -1163,10 +1188,9 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         this.hotkeyHelpCleanups.push(cleanup);
       });
 
-      const hotkeyHelpTrigger = createEl("button", {
+      const hotkeyHelpTrigger = createEl("div", {
         cls: "another-quick-switcher__settings__popup__icon",
         text: "i",
-        attr: { "aria-label": "Hotkey input help" },
       });
       hotkeyHelpTrigger.setAttribute("type", "button");
 
@@ -2032,7 +2056,12 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
     });
 
     new Setting(containerEl)
-      .setName("Ripgrep command")
+      .setName(
+        this.createWarningName(
+          "Ripgrep command",
+          "Please note that on Windows, the initial file access speed may be significantly slower.",
+        ),
+      )
       .setDesc("A command that can execute ripgrep")
       .addText((tc) =>
         tc
@@ -2042,11 +2071,6 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
             await this.plugin.saveSettings();
           }),
       );
-
-    containerEl.createEl("div", {
-      text: "! Please note that on Windows, the initial file access speed may be significantly slower.",
-      cls: "another-quick-switcher__settings__warning",
-    });
 
     new Setting(containerEl)
       .setName("Grep search delay milli-seconds")

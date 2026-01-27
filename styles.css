@@ -497,8 +497,18 @@
 }
 
 .another-quick-switcher__settings__warning {
-  color: darkorange;
+  color: var(--text-warning);
   text-align: right;
+}
+
+.another-quick-switcher__settings__popup__content
+  .another-quick-switcher__settings__warning {
+  text-align: left;
+}
+
+.another-quick-switcher__settings__popup__icon.another-quick-switcher__settings__warning-icon {
+  margin-left: 6px;
+  border: none;
 }
 
 .another-quick-switcher__settings__global-search {
