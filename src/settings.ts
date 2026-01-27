@@ -10,6 +10,7 @@ import {
   TextComponentEvent,
 } from "src/apputils/setting/settings-helper";
 import { useFilterSetting } from "./composables/settings/useFilterSetting";
+import { applyGlobalSettingFilter } from "./composables/settings/useGlobalSettingFilter";
 import { usePopover } from "./composables/settings/usePopover";
 import { type Hotkey, hotkey2String, string2Hotkey } from "./keys";
 import type AnotherQuickSwitcher from "./main";
@@ -805,6 +806,8 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   plugin: AnotherQuickSwitcher;
   resetLock = true;
   hotkeyHelpCleanups: (() => void)[] = [];
+  globalSettingSearchQuery = "";
+  globalSettingSearchInputEl: HTMLInputElement | null = null;
   hotkeyExpandedStatus: Record<keyof Hotkeys, boolean> = {
     main: false,
     folder: false,
@@ -822,6 +825,28 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
+  private isGlobalSettingSearchActive(): boolean {
+    return this.globalSettingSearchQuery.trim().length > 0;
+  }
+
+  private updateGlobalSettingSearchQuery(value: string) {
+    const wasActive = this.isGlobalSettingSearchActive();
+    this.globalSettingSearchQuery = value;
+    const isActive = this.isGlobalSettingSearchActive();
+    if (wasActive !== isActive) {
+      this.display();
+      if (this.globalSettingSearchInputEl) {
+        this.globalSettingSearchInputEl.focus();
+        this.globalSettingSearchInputEl.setSelectionRange(
+          value.length,
+          value.length,
+        );
+      }
+      return;
+    }
+    applyGlobalSettingFilter(this.containerEl, this.globalSettingSearchQuery);
+  }
+
   display(): void {
     const { containerEl } = this;
 
@@ -832,7 +857,26 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "Another Quick Switcher - Settings" });
+    const globalSearchContainer = containerEl.createDiv({
+      cls: "another-quick-switcher__settings__global-search",
+    });
+    const globalSearchInput = createEl("input", {
+      cls: "another-quick-switcher__settings__global-search-input",
+      attr: {
+        type: "search",
+        placeholder: "Search all settings",
+        "aria-label": "Search all settings",
+      },
+    });
+    this.globalSettingSearchInputEl = globalSearchInput;
+    globalSearchInput.value = this.globalSettingSearchQuery;
+    globalSearchInput.addEventListener("input", (event) => {
+      if (!(event.target instanceof HTMLInputElement)) {
+        return;
+      }
+      this.updateGlobalSettingSearchQuery(event.target.value);
+    });
+    globalSearchContainer.append(globalSearchInput);
 
     this.addGeneralSettings(containerEl);
     this.addAppearanceSettings(containerEl);
@@ -847,9 +891,16 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     this.addCommandPalleteSettings(containerEl);
 
     this.addDebugSettings(containerEl);
+
+    applyGlobalSettingFilter(containerEl, this.globalSettingSearchQuery);
   }
 
   private addGeneralSettings(containerEl: HTMLElement) {
+    containerEl.createEl("h3", {
+      text: "🌐General",
+      cls: "another-quick-switcher__settings__header",
+    });
+
     new Setting(containerEl)
       .setName("Search delay milli-seconds")
       .setDesc("If keyboard operation is slow, try increasing the value")
@@ -922,7 +973,10 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   }
 
   private addAppearanceSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "👁Appearance" });
+    containerEl.createEl("h3", {
+      text: "👁Appearance",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     new Setting(containerEl).setName("Show directory").addToggle((tc) => {
       tc.setValue(this.plugin.settings.showDirectory).onChange(
@@ -1029,13 +1083,19 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   }
 
   private addHotKeysInDialogSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "⌨Hotkeys in dialog" });
+    containerEl.createEl("h3", {
+      text: "⌨Hotkeys in dialog",
+      cls: "another-quick-switcher__settings__header",
+    });
     const dialogHotkeysContainer = containerEl.createDiv({
       cls: "another-quick-switcher__settings__dialog-hotkeys-container",
     });
 
     const addHotkeyItems = (dialogKey: keyof Hotkeys, div: HTMLDivElement) => {
-      if (!this.hotkeyExpandedStatus[dialogKey]) {
+      if (
+        !this.isGlobalSettingSearchActive() &&
+        !this.hotkeyExpandedStatus[dialogKey]
+      ) {
         return;
       }
 
@@ -1187,7 +1247,10 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   }
 
   private addSearchSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "🔍 Search commands" });
+    containerEl.createEl("h3", {
+      text: "🔍 Search commands",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     this.plugin.settings.searchCommands.forEach((_, i) => {
       this.addSearchCommandSetting(
@@ -1391,7 +1454,7 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
         return btn;
       });
 
-    if (!command.expand) {
+    if (!this.isGlobalSettingSearchActive() && !command.expand) {
       return;
     }
 
@@ -1813,7 +1876,10 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
   }
 
   private addHeaderSearchSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "📒 Header search" });
+    containerEl.createEl("h3", {
+      text: "📒 Header search",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     new Setting(containerEl)
       .setName("Auto preview in the floating mode")
@@ -1828,7 +1894,10 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
   }
 
   private addBacklinkSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "🔍 Backlink search" });
+    containerEl.createEl("h3", {
+      text: "🔍 Backlink search",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     new Setting(containerEl)
       .setName('Exclude prefix path patterns for "Backlink search"')
@@ -1886,7 +1955,10 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
   }
 
   private addLinkSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "🔗 Link search" });
+    containerEl.createEl("h3", {
+      text: "🔗 Link search",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     new Setting(containerEl)
       .setName("Auto preview in the floating mode")
@@ -1901,7 +1973,10 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
   }
 
   private addInFileSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "🔍 In file search" });
+    containerEl.createEl("h3", {
+      text: "🔍 In file search",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     new Setting(containerEl)
       .setName("Context Lines")
@@ -1951,7 +2026,10 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
   }
 
   private addGrepSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "🔍 Grep" });
+    containerEl.createEl("h3", {
+      text: "🔍 Grep",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     new Setting(containerEl)
       .setName("Ripgrep command")
@@ -2092,7 +2170,10 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
   }
 
   private addMoveSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "📁 Move file to another folder" });
+    containerEl.createEl("h3", {
+      text: "📁 Move file to another folder",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     new Setting(containerEl)
       .setName('Exclude prefix path patterns for "Move file to another folder"')
@@ -2158,7 +2239,10 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
   }
 
   private addCommandPalleteSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "⌘ Command pallete" });
+    containerEl.createEl("h3", {
+      text: "⌘ Command pallete",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     new Setting(containerEl)
       .setName("History mapping file path")
@@ -2191,7 +2275,10 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
   }
 
   private addDebugSettings(containerEl: HTMLElement) {
-    containerEl.createEl("h3", { text: "Debug" });
+    containerEl.createEl("h3", {
+      text: "Debug",
+      cls: "another-quick-switcher__settings__header",
+    });
 
     new Setting(containerEl)
       .setName("Show log about performance in a console")
