@@ -1777,7 +1777,9 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
             TextComponentEvent.onChange(tc, async (value) => {
               command.relativeUpdatedPeriodPropertyKey = value.trim();
               await saveCommandWithValidation();
-            }),
+            })
+              .setValue(command.relativeUpdatedPeriodPropertyKey)
+              .setPlaceholder("(ex: updated)"),
           );
         },
       );
