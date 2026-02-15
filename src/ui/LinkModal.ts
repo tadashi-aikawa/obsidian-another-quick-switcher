@@ -356,16 +356,22 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
       this.stateToRestore ??= this.appHelper.captureState(this.initialLeaf);
     }
     this.navigate(() =>
-      this.appHelper.openFile(
-        this.appHelper.getActiveFile()!,
-        {
-          leafType: leaf,
-          line: item.lineNumber - 1,
-          inplace: option.keepOpen,
-          preventDuplicateTabs: this.settings.preventDuplicateTabs,
-        },
-        this.stateToRestore,
-      ),
+      this.appHelper
+        .openFile(
+          this.appHelper.getActiveFile()!,
+          {
+            leafType: leaf,
+            line: item.lineNumber - 1,
+            inplace: option.keepOpen,
+            preventDuplicateTabs: this.settings.preventDuplicateTabs,
+          },
+          this.stateToRestore,
+        )
+        .then(() => {
+          if (option.keepOpen) {
+            setFloatingModal(this.appHelper);
+          }
+        }),
     );
     return this.appHelper.getActiveFile()!;
   }

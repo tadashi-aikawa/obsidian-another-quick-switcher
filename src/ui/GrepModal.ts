@@ -782,6 +782,9 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
           },
           this.stateToRestore,
         );
+        if (option.keepOpen) {
+          setFloatingModal(this.appHelper);
+        }
       } finally {
         if (shouldRestoreRecentHistory) {
           this.scheduleRecentHistoryRestore(this.recentHistorySnapshot);

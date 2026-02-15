@@ -895,6 +895,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
           },
           this.stateToRestore,
         );
+        if (option.keepOpen) {
+          setFloatingModal(this.appHelper);
+        }
       } finally {
         if (shouldRestoreRecentHistory) {
           this.scheduleRecentHistoryRestore(this.recentHistorySnapshot);

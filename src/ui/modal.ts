@@ -33,7 +33,14 @@ export function setFloatingModal(appHelper: AppHelper) {
     const { x: contentX, width: contentWidth } =
       editorContentEl.getBoundingClientRect();
     const { y: leafY } = fileView.containerEl.getBoundingClientRect();
-    const { y: promptY } = promptEl!.getBoundingClientRect();
+    const promptDataset = (promptEl as HTMLElement).dataset as DOMStringMap & {
+      aqsFloatingAnchorY?: string;
+    };
+    const promptY =
+      promptDataset.aqsFloatingAnchorY != null
+        ? Number(promptDataset.aqsFloatingAnchorY)
+        : promptEl!.getBoundingClientRect().y;
+    promptDataset.aqsFloatingAnchorY = String(promptY);
 
     const contentXEnd = contentX + contentWidth;
     const left =
