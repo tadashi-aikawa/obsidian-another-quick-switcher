@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "bun esbuild.config.mts",
     "build": "tsc -noEmit -skipLibCheck && bun esbuild.config.mts production",
+    "typecheck": "tsc -noEmit -skipLibCheck",
+    "lint": "biome check src *.mts",
     "test": "jest",
-    "check": "biome check --fix src *.mts",
-    "format": "biome format --write src *.mts",
-    "ci": "bun install && biome check src *.mts && bun run build && bun run test",
-    "pre:push": "tsc -noEmit -skipLibCheck && bun run check && bun run test"
+    "pre:push": "bun typecheck && bun lint && bun run test",
+    "ci": "bun install && bun pre:push && bun run build"
   },
   "keywords": [],
   "author": "",
@@ -32,3 +32,4 @@
     "ts-deepmerge": "^3.0.0"
   }
 }
+
