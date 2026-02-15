@@ -624,7 +624,7 @@ Please create a new [issue].
 
 ---
 
-## � API (Experimental)
+## 🔌 API (Experimental)
 
 Another Quick Switcher provides a public API that allows external scripts (e.g., [Templater](https://github.com/SilentVoid13/Templater)) to programmatically open the file picker dialog and retrieve the selected file(s).
 
@@ -692,7 +692,7 @@ if (files && files.length > 0) {
 
 ---
 
-## �🖥️ For developers / contributors
+## 🖥️ For developers / contributors
 
 ### Pull requests
 
