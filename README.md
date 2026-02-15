@@ -47,7 +47,6 @@ You can download from `Community plugins` in Obsidian settings.
 
 ![Demo](https://raw.githubusercontent.com/tadashi-aikawa/obsidian-another-quick-switcher/master/demo/custom-searches.gif)
 
-
 Custom searches enables you to create your original search commands.
 Search command settings are saved automatically when you finish editing (no Save button required).
 
@@ -55,15 +54,13 @@ Search command settings are saved automatically when you finish editing (no Save
 
 #### Search target
 
-
-| Name                               | Description                                          |
-| ---------------------------------- | ---------------------------------------------------- |
-| file                               | All files in the Vault                               |
-| backlink                           | Markdown files that link to the current file         |
-| link                               | Files linked from the current file                   |
-| [2-hop-link]                       | 2-hop links from the current file                    |
-| opened file                        | Files currently open in the window                   |
-
+| Name         | Description                                  |
+| ------------ | -------------------------------------------- |
+| file         | All files in the Vault                       |
+| backlink     | Markdown files that link to the current file |
+| link         | Files linked from the current file           |
+| [2-hop-link] | 2-hop links from the current file            |
+| opened file  | Files currently open in the window           |
 
 #### Sort priorities
 
@@ -90,7 +87,6 @@ You can use the following names as a `Sort priorities`.
 | (Tags split by comma)       | Prioritizes files with the specified tags                 | 7.0.0   |
 | (Extensions split by comma) | Prioritizes files with the specified extensions           | 8.3.0   |
 | (Property and sort order)   | Orders by front matter property value                     | 13.27.0 |
-
 
 > **Note**
 > Use `(Tags split by comma)` like `#hoge` or `#hoge,#huga`.
@@ -148,17 +144,17 @@ You can show the relative updated period in suggestions. Configure it per search
 - `ho ge` matches both `ho ge` and `hoge`.
 - Use `\"` to search for literal quote characters.
 
-##### A minus sign at the beginning excludes matched candidates  
+##### A minus sign at the beginning excludes matched candidates
 
-Example: Suppose there are three files:  
+Example: Suppose there are three files:
 
-- `hoge.md`  
-- `hoge`  
-- `mdhoge`  
+- `hoge.md`
+- `hoge`
+- `mdhoge`
 
-The input `hoge -md` will suggest only `hoge`.  
+The input `hoge -md` will suggest only `hoge`.
 
-Additionally, you can specify a custom string as the exclude prefix using the `Exclude prefix` setting.  
+Additionally, you can specify a custom string as the exclude prefix using the `Exclude prefix` setting.
 
 ##### `<cd>` means the current directory
 
@@ -171,9 +167,9 @@ If the path of the active file is "/usr/local/vault/notes", the query "`<cd>` ob
 - Show all headers even after filtering to retain file structures in the brain
 - Jump to the first hit suggestion automatically and move next/previous by `Tab/Shift+Tab` as default
 - Queries enclosed in double quotes are searched as is
-    - `"ho ge"` only matches `ho ge` not `hoge`
-    - `ho ge` matches both `ho ge` and `hoge`
-    - Use `\"` to search for literal quote characters
+  - `"ho ge"` only matches `ho ge` not `hoge`
+  - `ho ge` matches both `ho ge` and `hoge`
+  - Use `\"` to search for literal quote characters
 
 If you want to show heading level labels (H1/H2, etc.) instead of bullets in header search, you can do so with CSS.
 
@@ -209,6 +205,7 @@ If you want to show heading level labels (H1/H2, etc.) instead of bullets in hea
   content: "H6";
 }
 ```
+
 </details>
 
 ### 3. Grep
@@ -221,7 +218,6 @@ It sorts results by modified time descending.
 
 #### Additional hotkeys
 
-
 | Command                 | Description                                      | Default Hotkey   |
 | ----------------------- | ------------------------------------------------ | ---------------- |
 | Search                  | Execute search                                   | `TAB`            |
@@ -232,7 +228,6 @@ It sorts results by modified time descending.
 | Clear input             | Clear the search query input                     | _(customizable)_ |
 | Clear path              | Clear the path input                             | _(customizable)_ |
 | Set ./ to path          | Set current directory to path input              | _(customizable)_ |
-
 
 **Note**: If you want to search in real-time, please set the "Grep search delay milli-seconds" option to 1 or more.
 
@@ -273,9 +268,9 @@ https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/assets/9500018
 "In File search" allows you to search for a specific line within a file using a search keyword and displays it along with the surrounding lines.
 
 - Queries enclosed in double quotes are searched as is
-    - `"hello world"` only matches `hello world` not lines containing both `hello` and `world` separately
-    - `hello world` matches lines containing both `hello` and `world` anywhere in the line
-    - Use `\"` to search for literal quote characters (e.g., `search \"quote` finds `search "quote`)
+  - `"hello world"` only matches `hello world` not lines containing both `hello` and `world` separately
+  - `hello world` matches lines containing both `hello` and `world` anywhere in the line
+  - Use `\"` to search for literal quote characters (e.g., `search \"quote` finds `search "quote`)
 
 #### Additional Features
 
@@ -311,14 +306,14 @@ https://user-images.githubusercontent.com/9500018/216806330-daf57b52-d8a4-42e3-9
 
 Auto Preview shows a preview automatically as you move the selection, without manually triggering Preview.
 
-| Dialog | Auto preview on selection | Delay setting | Toggle command | Notes |
-| ------ | ------------------------- | ------------- | -------------- | ----- |
-| Main dialog (search commands) | Yes (per command) | Yes | Yes (`toggle auto preview`) | Configured per search command |
-| Grep dialog | Yes | Yes | No | Enable in settings |
-| Backlink dialog | Yes | Yes | No | Enable in settings |
-| Header dialog | Yes | No | Yes (`toggle auto preview`) | Auto preview uses floating mode |
-| Link dialog | Yes | No | Yes (`toggle auto preview`) | Auto preview uses floating mode |
-| In File dialog | Yes | No | Yes (`toggle auto preview`) | Auto preview uses floating mode |
+| Dialog                        | Auto preview on selection | Delay setting | Toggle command              | Notes                           |
+| ----------------------------- | ------------------------- | ------------- | --------------------------- | ------------------------------- |
+| Main dialog (search commands) | Yes (per command)         | Yes           | Yes (`toggle auto preview`) | Configured per search command   |
+| Grep dialog                   | Yes                       | Yes           | No                          | Enable in settings              |
+| Backlink dialog               | Yes                       | Yes           | No                          | Enable in settings              |
+| Header dialog                 | Yes                       | No            | Yes (`toggle auto preview`) | Auto preview uses floating mode |
+| Link dialog                   | Yes                       | No            | Yes (`toggle auto preview`) | Auto preview uses floating mode |
+| In File dialog                | Yes                       | No            | Yes (`toggle auto preview`) | Auto preview uses floating mode |
 
 Settings reference (UI labels):
 
@@ -333,7 +328,6 @@ Settings reference (UI labels):
 
 [![YouTube Video i8b6pHrhIb4](https://img.youtube.com/vi/i8b6pHrhIb4/maxresdefault.jpg)](https://www.youtube.com/watch?v=i8b6pHrhIb4)
 
-
 ### 11. Move file to another folder
 
 The "Move file to another folder" command allows you to quickly move the current file to a different folder with enhanced sorting capabilities and smart search features.
@@ -347,25 +341,22 @@ The "Move file to another folder" command allows you to quickly move the current
 
 #### Folder Sort Options
 
-
 | Option               | Description                                              |
 | -------------------- | -------------------------------------------------------- |
 | Recently used        | Folders you've recently moved files to appear at the top |
 | Alphabetical         | Sort folders alphabetically (A-Z)                        |
 | Alphabetical reverse | Sort folders in reverse alphabetical order (Z-A)         |
 
-
 #### Settings
 
+| Setting                         | Description                                                     | Default          |
+| ------------------------------- | --------------------------------------------------------------- | ---------------- |
+| Folder sort priority            | Choose how folders are sorted in the move dialog                | Recently used    |
+| Recently used folders file path | Customize where the folder usage history is stored<sup>\*</sup> | _(auto)_         |
+| Max recently used folders       | Maximum number of recently used folders to remember             | 10 (range: 5-50) |
+| Exclude prefix path patterns    | Exclude certain folder paths from appearing in the move dialog  | _(none)_         |
 
-| Setting                         | Description                                                    | Default          |
-| ------------------------------- | -------------------------------------------------------------- | ---------------- |
-| Folder sort priority            | Choose how folders are sorted in the move dialog               | Recently used    |
-| Recently used folders file path | Customize where the folder usage history is stored<sup>*</sup> | _(auto)_         |
-| Max recently used folders       | Maximum number of recently used folders to remember            | 10 (range: 5-50) |
-| Exclude prefix path patterns    | Exclude certain folder paths from appearing in the move dialog | _(none)_         |
-
-<sup>*</sup> When left empty, defaults to `.obsidian/plugins/obsidian-another-quick-switcher/recently-used-folders.json`
+<sup>\*</sup> When left empty, defaults to `.obsidian/plugins/obsidian-another-quick-switcher/recently-used-folders.json`
 
 #### Features
 
@@ -389,7 +380,6 @@ You can multi-select suggestions in the main Quick Switcher, Backlink search, an
 
 Tip: Assign convenient keys in Settings to quickly mark a range (e.g., bind "check/uncheck and next").
 
-
 ![Setting](./demo/check-uncheck-items-settings.webp)
 
 ### 13. Command palette
@@ -404,12 +394,10 @@ https://github.com/user-attachments/assets/eb2bf1bc-08b8-4084-b4b7-450d737b8e95
 
 #### History storage
 
-
 | Setting                    | Description                                                                                         | Default                                                                  |
 | -------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | History mapping file path  | Vault-relative path for the JSON file that stores last used commands and per-query favorites        | `.obsidian/plugins/obsidian-another-quick-switcher/command-history.json` |
 | Max history retention days | Remove entries from the history when a command hasn't been run within this many days (0 = keep all) | 10                                                                       |
-
 
 ## ⌘ Dialog Commands
 
@@ -419,9 +407,8 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 
 ### Main dialog
 
-
-| Command                         | Default Keybinding | MC |
-| ------------------------------- | ------------------ | -- |
+| Command                         | Default Keybinding | MC  |
+| ------------------------------- | ------------------ | --- |
 | open                            | `Enter`            | ✅  |
 | open in new tab                 | `Mod+Enter`        | ✅  |
 | open in new pane (horizontal)   | `Mod+-`            | ✅  |
@@ -429,7 +416,7 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open in new window              | `Mod+o`            | ⛔  |
 | open in popup                   | _(none)_           | ⛔  |
 | preview                         | `Mod+,`            | ⛔  |
-| toggle auto preview             | _(none)_           | -  |
+| toggle auto preview             | _(none)_           | -   |
 | scroll preview up               | _(none)_           | ⛔  |
 | scroll preview down             | _(none)_           | ⛔  |
 | create                          | `Shift+Enter`      | ⛔  |
@@ -438,10 +425,10 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | create in new pane (vertical)   | _(none)_           | ⛔  |
 | create in new window            | `Mod+Shift+o`      | ⛔  |
 | create in new popup             | _(none)_           | ⛔  |
-| check/uncheck                   | _(none)_           | -  |
-| check/uncheck and next          | _(none)_           | -  |
-| check/uncheck all               | _(none)_           | -  |
-| uncheck all                     | _(none)_           | -  |
+| check/uncheck                   | _(none)_           | -   |
+| check/uncheck and next          | _(none)_           | -   |
+| check/uncheck all               | _(none)_           | -   |
+| uncheck all                     | _(none)_           | -   |
 | insert to editor                | `Alt+Enter`        | ✅  |
 | open in default app             | _(none)_           | ✅  |
 | show in system explorer         | _(none)_           | ✅  |
@@ -464,23 +451,19 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | replace input                   | `Tab`              | ⛔  |
 | dismiss                         | `Escape`           | ⛔  |
 
-
 ### Folder dialog
 
-
-| Command             | Default Keybinding | MC |
-| ------------------- | ------------------ | -- |
+| Command             | Default Keybinding | MC  |
+| ------------------- | ------------------ | --- |
 | up                  | `Mod+p`            | ⛔  |
 | down                | `Mod+n`            | ⛔  |
 | open in default app | _(none)_           | ⛔  |
 | dismiss             | `Escape`           | ⛔  |
 
-
 ### Header dialog
 
-
-| Command              | Default Keybinding | MC |
-| -------------------- | ------------------ | -- |
+| Command              | Default Keybinding | MC  |
+| -------------------- | ------------------ | --- |
 | up                   | `Mod+p`            | ⛔  |
 | down                 | `Mod+n`            | ⛔  |
 | clear input          | `Mod+d`            | ⛔  |
@@ -492,22 +475,20 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | insert all to editor | `Alt+Shift+Enter`  | ⛔  |
 | dismiss              | `Escape`           | ⛔  |
 
-
 ### Backlink dialog
 
-
-| Command                       | Default Keybinding | MC |
-| ----------------------------- | ------------------ | -- |
+| Command                       | Default Keybinding | MC  |
+| ----------------------------- | ------------------ | --- |
 | open                          | `Enter`            | ✅  |
 | open in new tab               | `Mod+Enter`        | ✅  |
 | open in new pane (horizontal) | `Mod+-`            | ✅  |
 | open in new pane (vertical)   | `Mod+i`            | ✅  |
 | open in new window            | `Mod+o`            | ⛔  |
 | open in popup                 | _(none)_           | ⛔  |
-| check/uncheck                 | _(none)_           | -  |
-| check/uncheck and next        | _(none)_           | -  |
-| check/uncheck all             | _(none)_           | -  |
-| uncheck all                   | _(none)_           | -  |
+| check/uncheck                 | _(none)_           | -   |
+| check/uncheck and next        | _(none)_           | -   |
+| check/uncheck all             | _(none)_           | -   |
+| uncheck all                   | _(none)_           | -   |
 | show all results              | `Shift+Alt+a`      | ⛔  |
 | preview                       | `Mod+,`            | ⛔  |
 | scroll preview up             | _(none)_           | ⛔  |
@@ -516,12 +497,10 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | down                          | `Mod+n`            | ⛔  |
 | dismiss                       | `Escape`           | ⛔  |
 
-
 ### Link dialog
 
-
-| Command                       | Default Keybinding | MC |
-| ----------------------------- | ------------------ | -- |
+| Command                       | Default Keybinding | MC  |
+| ----------------------------- | ------------------ | --- |
 | open                          | `Enter`            | ⛔  |
 | open in new tab               | `Mod+Enter`        | ⛔  |
 | open in new pane (horizontal) | `Mod+-`            | ⛔  |
@@ -530,44 +509,40 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | open in popup                 | _(none)_           | ⛔  |
 | show all results              | `Shift+Alt+a`      | ⛔  |
 | preview                       | `Mod+,`            | ⛔  |
-| toggle auto preview           | _(none)_           | -  |
+| toggle auto preview           | _(none)_           | -   |
 | scroll preview up             | _(none)_           | ⛔  |
 | scroll preview down           | _(none)_           | ⛔  |
 | up                            | `Mod+p`            | ⛔  |
 | down                          | `Mod+n`            | ⛔  |
 | dismiss                       | `Escape`           | ⛔  |
 
-
 ### In File dialog
 
-
-| Command            | Default Keybinding | MC |
-| ------------------ | ------------------ | -- |
-| up                 | `Mod+p`            | ⛔  |
-| down               | `Mod+n`            | ⛔  |
-| insert to editor   | _(none)_           | ⛔  |
-| show all results   | `Shift+Alt+a`      | ⛔  |
-| toggle auto preview| `Mod+,`            | ⛔  |
-| scroll preview up  | _(none)_           | ⛔  |
-| scroll preview down| _(none)_           | ⛔  |
-| dismiss            | `Escape`           | ⛔  |
-
+| Command             | Default Keybinding | MC  |
+| ------------------- | ------------------ | --- |
+| up                  | `Mod+p`            | ⛔  |
+| down                | `Mod+n`            | ⛔  |
+| insert to editor    | _(none)_           | ⛔  |
+| show all results    | `Shift+Alt+a`      | ⛔  |
+| toggle auto preview | `Mod+,`            | ⛔  |
+| scroll preview up   | _(none)_           | ⛔  |
+| scroll preview down | _(none)_           | ⛔  |
+| dismiss             | `Escape`           | ⛔  |
 
 ### Grep dialog
 
-
-| Command                       | Default Keybinding | MC |
-| ----------------------------- | ------------------ | -- |
+| Command                       | Default Keybinding | MC  |
+| ----------------------------- | ------------------ | --- |
 | open                          | `Enter`            | ✅  |
 | open in new tab               | `Mod+Enter`        | ✅  |
 | open in new pane (horizontal) | `Mod+-`            | ✅  |
 | open in new pane (vertical)   | `Mod+i`            | ✅  |
 | open in new window            | `Mod+o`            | ⛔  |
 | open in popup                 | _(none)_           | ⛔  |
-| check/uncheck                 | _(none)_           | -  |
-| check/uncheck and next        | _(none)_           | -  |
-| check/uncheck all             | _(none)_           | -  |
-| uncheck all                   | _(none)_           | -  |
+| check/uncheck                 | _(none)_           | -   |
+| check/uncheck and next        | _(none)_           | -   |
+| check/uncheck all             | _(none)_           | -   |
+| uncheck all                   | _(none)_           | -   |
 | preview                       | `Mod+,`            | ⛔  |
 | scroll preview up             | _(none)_           | ⛔  |
 | scroll preview down           | _(none)_           | ⛔  |
@@ -582,17 +557,14 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | search                        | `Tab`              | ⛔  |
 | dismiss                       | `Escape`           | ⛔  |
 
-
 ### Command palette
 
-
-| Command         | Default Keybinding | MC |
-| --------------- | ------------------ | -- |
+| Command         | Default Keybinding | MC  |
+| --------------- | ------------------ | --- |
 | up              | `Mod+p`            | ⛔  |
 | down            | `Mod+n`            | ⛔  |
 | copy command id | _(none)_           | ⛔  |
 | dismiss         | `Escape`           | ⛔  |
-
 
 ## 💥 Major Breaking Changes
 
@@ -617,7 +589,6 @@ Alternatives with multi-select:
 <div style="text-align: center">🎥 <b>Demo movie (YouTube)</b>👇</div>
 
 [![YouTube Video sxDEMQq8txc](https://img.youtube.com/vi/sxDEMQq8txc/maxresdefault.jpg)](https://www.youtube.com/watch?v=sxDEMQq8txc)
-
 
 ### For users who use earlier than v13.0.0
 
@@ -653,7 +624,75 @@ Please create a new [issue].
 
 ---
 
-## 🖥️ For developers / contributors
+## � API (Experimental)
+
+Another Quick Switcher provides a public API that allows external scripts (e.g., [Templater](https://github.com/SilentVoid13/Templater)) to programmatically open the file picker dialog and retrieve the selected file(s).
+
+### Usage
+
+```javascript
+// Get the plugin instance
+const aqs = app.plugins.plugins["obsidian-another-quick-switcher"];
+
+// Open the file picker with a specific search command
+const files = await aqs.api.pickFile("Recent search");
+
+if (files) {
+  // files is TFile[] - array of selected files
+  // Single selection returns array with one element
+  // Multi-selection (check/uncheck) returns array with multiple elements
+  console.log(files.map((f) => f.path));
+} else {
+  // User cancelled the dialog
+}
+```
+
+### API Reference
+
+#### `api.pickFile(commandName: string): Promise<TFile[] | null>`
+
+Opens the file picker dialog with the specified search command and returns the selected file(s).
+
+**Parameters:**
+
+- `commandName` - The name of the search command to use (e.g., "Recent search", "File name search"). This must match a command name defined in Another Quick Switcher settings.
+- `option` - Optional parameters:
+    - `query`: An initial search query to pre-fill in the dialog's input box.
+
+
+**Returns:**
+
+- `Promise<TFile[]>` - Array of selected files when file(s) are selected
+- `Promise<null>` - When the dialog is cancelled
+
+**Throws:**
+
+- `Error` - If the specified command name is not found in settings
+
+#### `api.getAvailableCommandNames(): string[]`
+
+Returns the list of available search command names that can be used with `pickFile()`.
+
+### Example with Templater
+
+```javascript
+<%*
+const aqs = app.plugins.plugins['obsidian-another-quick-switcher'];
+const files = await aqs.api.pickFile("File name search");
+
+if (files && files.length > 0) {
+  const file = files[0];
+  tR += `[[${file.basename}]]`;
+}
+%>
+```
+
+> **Note**
+> This API is experimental and may change in future versions.
+
+---
+
+## �🖥️ For developers / contributors
 
 ### Pull requests
 
@@ -706,7 +745,7 @@ flowchart LR
     D[Dog]:::focus --> A[Animal]
     D[Dog]:::focus --> C[Cat]
     D[Dog]:::focus --> O[Owl]
-    
+
     classDef focus fill:#f96
 ```
 
@@ -748,9 +787,7 @@ flowchart LR
     classDef focus fill:#f96
 ```
 
-
 [Bun]: https://bun.sh/
 [issue]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues
 [discussion]: https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/discussions
-
 [2-hop-link]: #what-is-the-2-hop-link

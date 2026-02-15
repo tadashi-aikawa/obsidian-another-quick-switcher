@@ -132,6 +132,10 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
 
   lastOpenFileIndexByPath: { [path: string]: number } = {};
 
+  // API mode properties
+  private apiMode = false;
+  private resolveApiPromise: ((files: TFile[] | null) => void) | null = null;
+
   toKey(item: SuggestionItem): string {
     return item.file.path;
   }
@@ -152,6 +156,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     recentHistorySnapshot?: string[] | null;
     recentHistoryBaseFilePath?: string | null;
     navQueue?: Promise<void>;
+    // API mode (for external script integration)
+    apiMode?: boolean;
+    resolveApiPromise?: ((files: TFile[] | null) => void) | null;
   }) {
     super(args.app);
     this.modalEl.addClass("another-quick-switcher__modal-prompt");
@@ -185,6 +192,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.selectedItemMap = args.selectedItemMap ?? this.selectedItemMap;
     this.queryHistoryIndex = globalInternalStorage.queryHistories.length;
     this.queryHistoryBaseQuery = null;
+    // API mode
+    this.apiMode = args.apiMode ?? false;
+    this.resolveApiPromise = args.resolveApiPromise ?? null;
 
     this.limit = this.settings.maxNumberOfSuggestions;
     this.lastOpenFileIndexByPath = this.appHelper.createRecentFilePathMap();
@@ -233,6 +243,25 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.close();
   }
 
+  /**
+   * Opens the modal and returns a promise that resolves to the selected file(s).
+   * This method is used by the API for external script integration.
+   *
+   * @returns A promise that resolves to:
+   *          - `TFile[]` if file(s) are selected
+   *          - `null` if the dialog is cancelled
+   */
+  openAndGetValue(): Promise<TFile[] | null> {
+    this.apiMode = true;
+    return new Promise((resolve) => {
+      this.resolveApiPromise = async (files: TFile[] | null) => {
+        await sleep(100); // wait for modal close termination
+        resolve(files);
+      };
+      this.open();
+    });
+  }
+
   onOpen() {
     // WARN: Instead of super.onOpen()
     this.isOpen = true;
@@ -274,6 +303,11 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     }
     if (this.willSilentClose) {
       return;
+    }
+
+    if (this.apiMode && this.resolveApiPromise) {
+      this.resolveApiPromise(null);
+      this.resolveApiPromise = null;
     }
 
     const hasSuggestions = (this.chooser.values?.length ?? 0) > 0;
@@ -766,6 +800,18 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.navQueue = this.navQueue.then(cb);
   }
 
+  /**
+   * Resolves the API promise with the selected files and closes the modal.
+   * This is used when apiMode is true.
+   */
+  private resolveApiWithFiles(files: TFile[]): void {
+    if (this.resolveApiPromise) {
+      this.resolveApiPromise(files);
+      this.resolveApiPromise = null;
+    }
+    this.close();
+  }
+
   async chooseCurrentSuggestion(
     leafType: LeafType,
     option: { keepOpen?: boolean } = {},
@@ -1060,6 +1106,14 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.registerKeys("open", async () => {
       const items = this.getCheckedItems();
       if (items.length > 0) {
+        // API mode: return files without opening
+        if (this.apiMode) {
+          const files = await Promise.all(
+            items.map((x) => this.toFileToOpened(x)),
+          );
+          this.resolveApiWithFiles(files);
+          return;
+        }
         this.close();
         for (const x of items) {
           this.appHelper.openFile(await this.toFileToOpened(x), {
@@ -1069,6 +1123,15 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
           await sleep(0);
         }
       } else {
+        // API mode: return single file without opening
+        if (this.apiMode) {
+          const item = this.getSelectedItem();
+          if (item) {
+            const file = await this.toFileToOpened(item);
+            this.resolveApiWithFiles([file]);
+          }
+          return;
+        }
         await this.chooseCurrentSuggestion("same-tab");
       }
     });
@@ -1325,6 +1388,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         recentHistorySnapshot: this.recentHistorySnapshot,
         recentHistoryBaseFilePath: this.recentHistoryBaseFilePath,
         navQueue: this.navQueue,
+        apiMode: this.apiMode,
+        resolveApiPromise: this.resolveApiPromise,
       });
       modal.open();
     };
@@ -1369,6 +1434,8 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         recentHistorySnapshot: this.recentHistorySnapshot,
         recentHistoryBaseFilePath: this.recentHistoryBaseFilePath,
         navQueue: this.navQueue,
+        apiMode: this.apiMode,
+        resolveApiPromise: this.resolveApiPromise,
       });
       modal.open();
     };

@@ -1,5 +1,6 @@
 import { Plugin } from "obsidian";
 import merge from "ts-deepmerge";
+import { AnotherQuickSwitcherAPI } from "./api";
 import { AppHelper } from "./app-helper";
 import { createCommands } from "./commands";
 import type { Hotkey } from "./keys";
@@ -15,11 +16,24 @@ import {
 export default class AnotherQuickSwitcher extends Plugin {
   settings: Settings;
   appHelper: AppHelper;
+  /**
+   * Public API for external script integration (e.g., Templater).
+   *
+   * @example
+   * ```javascript
+   * const aqs = app.plugins.plugins['obsidian-another-quick-switcher'];
+   * const files = await aqs.api.pickFile("Recent search");
+   * ```
+   */
+  api: AnotherQuickSwitcherAPI;
 
   async onload() {
     this.appHelper = new AppHelper(this.app);
     await this.loadSettings();
     this.addSettingTab(new AnotherQuickSwitcherSettingTab(this.app, this));
+
+    // Initialize public API
+    this.api = new AnotherQuickSwitcherAPI(this.app, this.settings);
 
     if (this.appHelper.isCacheInitialized()) {
       this.reloadCommands();
