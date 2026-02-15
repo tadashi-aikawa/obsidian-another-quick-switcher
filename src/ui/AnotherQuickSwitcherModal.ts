@@ -1115,8 +1115,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
           return;
         }
         this.close();
+        await this.isClosed;
         for (const x of items) {
-          this.appHelper.openFile(await this.toFileToOpened(x), {
+          await this.appHelper.openFile(await this.toFileToOpened(x), {
             leafType: "new-tab",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           });
@@ -1139,8 +1140,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       const items = this.getCheckedItems();
       if (items.length > 0) {
         this.close();
+        await this.isClosed;
         for (const x of items) {
-          this.appHelper.openFile(await this.toFileToOpened(x), {
+          await this.appHelper.openFile(await this.toFileToOpened(x), {
             leafType: "new-tab",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           });
@@ -1154,8 +1156,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       const items = this.getCheckedItems();
       if (items.length > 0) {
         this.close();
+        await this.isClosed;
         for (const x of items) {
-          this.appHelper.openFile(await this.toFileToOpened(x), {
+          await this.appHelper.openFile(await this.toFileToOpened(x), {
             leafType: "new-pane-horizontal",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           });
@@ -1169,8 +1172,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       const items = this.getCheckedItems();
       if (items.length > 0) {
         this.close();
+        await this.isClosed;
         for (const x of items) {
-          this.appHelper.openFile(await this.toFileToOpened(x), {
+          await this.appHelper.openFile(await this.toFileToOpened(x), {
             leafType: "new-pane-vertical",
             preventDuplicateTabs: this.settings.preventDuplicateTabs,
           });
