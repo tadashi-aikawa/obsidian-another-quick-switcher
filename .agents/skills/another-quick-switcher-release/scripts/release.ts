@@ -2,7 +2,6 @@
 import { readFileSync } from "node:fs";
 
 const decoder = new TextDecoder();
-const encoder = new TextEncoder();
 const execEnv = { ...Bun.env };
 delete execEnv.GITHUB_TOKEN;
 
@@ -53,6 +52,18 @@ type WorkflowRun = {
   head_branch: string;
 };
 
+type ReleaseAutomationResult = {
+  mode: "normal" | "dry-run";
+  branch: string;
+  repo: RepoInfo;
+  releaseWorkflowRunId: number | null;
+  productName: string;
+  release: ReleaseInfo | null;
+  issueCandidates: IssueCandidate[];
+  issueNotifySkipped: boolean;
+  generatedAt: string;
+};
+
 function printHelp() {
   console.log(`Another Quick Switcher release helper
 
@@ -62,7 +73,7 @@ Usage:
 Options:
   --branch <name>        Target branch (default: master)
   --dry-run              Skip dispatch/pull and run post steps with latest release
-  --skip-issue-notify    Skip issue candidate listing and reply draft
+  --skip-issue-notify    Skip issue candidate listing
   --help                 Show this help
 `);
 }
@@ -507,64 +518,6 @@ async function printIssueCandidates(
   return candidates;
 }
 
-function extractBullets(body: string | null): string[] {
-  if (!body) {
-    return [];
-  }
-  const lines = body.split(/\r?\n/);
-  const bullets: string[] = [];
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.startsWith("*") || trimmed.startsWith("-")) {
-      let content = trimmed.replace(/^[-*]\s+/, "");
-      content = content.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
-      content = content.replace(/\s*\(#\d+\)/g, "");
-      content = content.replace(/\s*\([a-f0-9]{7,}\)$/i, "");
-      content = content.trim();
-      if (content.length > 0) {
-        bullets.push(`・${content}`);
-      }
-    }
-    if (bullets.length >= 5) {
-      break;
-    }
-  }
-  return bullets;
-}
-
-function generateBlueskyPost(productName: string, release: ReleaseInfo) {
-  const bullets = extractBullets(release.body);
-  const bulletText =
-    bullets.length > 0
-      ? bullets.join("\n")
-      : "・詳細はリリースノートをご覧ください";
-  return `📦 ${productName} ${release.tagName} 🚀\n\n${bulletText}\n\n${release.url}`;
-}
-
-function generateIssueReplyLine(
-  release: ReleaseInfo,
-  candidate: IssueCandidate,
-) {
-  const mention = candidate.authorLogin ? `@${candidate.authorLogin} ` : "";
-  return `${mention}Released in ${release.tagName} 🚀`;
-}
-
-function generateIssueReplyDraft(
-  release: ReleaseInfo,
-  candidates: IssueCandidate[],
-): string | null {
-  const targets = candidates.filter((candidate) => !candidate.isPullRequest);
-  if (targets.length === 0) {
-    return null;
-  }
-  return targets
-    .map((candidate) => {
-      const reply = generateIssueReplyLine(release, candidate);
-      return `#${candidate.number}\n${reply}`;
-    })
-    .join("\n\n");
-}
-
 async function gitPull(branch: string, dryRun: boolean) {
   if (dryRun) {
     console.log("ℹ️  dry-run のため git pull をスキップします。");
@@ -575,28 +528,10 @@ async function gitPull(branch: string, dryRun: boolean) {
   console.log("✅ git pull 完了");
 }
 
-async function copyToClipboard(text: string, label: string): Promise<boolean> {
-  try {
-    const result = Bun.spawnSync(["cb", "copy"], {
-      stdin: encoder.encode(text),
-      stdout: "ignore",
-      stderr: "pipe",
-      env: execEnv,
-    });
-    if (result.exitCode !== 0) {
-      const stderr = decoder.decode(result.stderr).trim();
-      const detail = stderr ? `: ${stderr}` : "";
-      console.log(`⚠️  cb copy が失敗しました (exitCode=${result.exitCode})${detail}`);
-      return false;
-    }
-    console.log(`✅ ${label}をクリップボードにコピーしました。`);
-    return true;
-  } catch (error) {
-    console.log(
-      `⚠️  クリップボードコピー中にエラーが発生しました: ${(error as Error).message}`,
-    );
-    return false;
-  }
+function printReleaseResult(result: ReleaseAutomationResult) {
+  console.log("\n=== RELEASE_RESULT_JSON_BEGIN ===");
+  console.log(JSON.stringify(result, null, 2));
+  console.log("=== RELEASE_RESULT_JSON_END ===");
 }
 
 async function main() {
@@ -610,7 +545,6 @@ async function main() {
   await ensureToolAvailable("git");
   await ensureToolAvailable("gh");
   await ensureToolAvailable("bun");
-  await ensureToolAvailable("cb");
   await ensureGhAuth();
 
   const repoUrl = (
@@ -625,6 +559,7 @@ async function main() {
   await ensureCiSuccess(repo, options.branch);
 
   let releaseInfo: ReleaseInfo | null = null;
+  let releaseWorkflowRunId: number | null = null;
   if (options.dryRun) {
     await ensureNoRunningRelease(repo);
     console.log(
@@ -633,8 +568,24 @@ async function main() {
     releaseInfo = await fetchLatestRelease(repo);
     if (!releaseInfo) {
       console.log(
-        "ℹ️  既存のGitHubリリースがないため、Issue候補表示と投稿文生成をスキップします。",
+        "ℹ️  既存のGitHubリリースがないため、Issue候補表示をスキップします。",
       );
+      const manifest = JSON.parse(readFileSync("manifest.json", "utf8")) as {
+        name?: string;
+      };
+      const productName = manifest.name ?? repo.name;
+      const result: ReleaseAutomationResult = {
+        mode: options.dryRun ? "dry-run" : "normal",
+        branch: options.branch,
+        repo,
+        releaseWorkflowRunId,
+        productName,
+        release: null,
+        issueCandidates: [],
+        issueNotifySkipped: options.skipIssueNotify,
+        generatedAt: new Date().toISOString(),
+      };
+      printReleaseResult(result);
       await gitPull(options.branch, options.dryRun);
       console.log("✅ dry-run 完了。");
       return;
@@ -645,15 +596,15 @@ async function main() {
   } else {
     const previousRelease = await fetchLatestRelease(repo);
     const releaseStart = new Date();
-    const runId = await triggerReleaseWorkflow(repo, options.branch);
-    await waitForRunCompletion(repo, runId);
+    releaseWorkflowRunId = await triggerReleaseWorkflow(repo, options.branch);
+    await waitForRunCompletion(repo, releaseWorkflowRunId);
     releaseInfo = await waitForNewRelease(repo, previousRelease, releaseStart);
   }
 
   let issueCandidates: IssueCandidate[] = [];
   if (options.skipIssueNotify) {
     console.log(
-      "ℹ️  --skip-issue-notify により Issue候補一覧表示と返信文生成をスキップします。",
+      "ℹ️  --skip-issue-notify により Issue候補一覧表示をスキップします。",
     );
   } else {
     issueCandidates = await printIssueCandidates(repo, releaseInfo);
@@ -663,23 +614,18 @@ async function main() {
     name?: string;
   };
   const productName = manifest.name ?? repo.name;
-  const blueskyPost = generateBlueskyPost(productName, releaseInfo);
-  console.log("\n=== Bluesky投稿案 ===");
-  console.log(blueskyPost);
-  console.log("=== 投稿案ここまで ===\n");
-  await copyToClipboard(blueskyPost, "Bluesky投稿案");
-
-  if (!options.skipIssueNotify) {
-    const issueReplyDraft = generateIssueReplyDraft(releaseInfo, issueCandidates);
-    if (!issueReplyDraft) {
-      console.log("ℹ️  返信対象Issueがないため、返信文の生成をスキップします。");
-    } else {
-      console.log("\n=== Issue返信文テンプレート ===");
-      console.log(issueReplyDraft);
-      console.log("=== 返信文ここまで ===\n");
-      await copyToClipboard(issueReplyDraft, "Issue返信文テンプレート");
-    }
-  }
+  const result: ReleaseAutomationResult = {
+    mode: options.dryRun ? "dry-run" : "normal",
+    branch: options.branch,
+    repo,
+    releaseWorkflowRunId,
+    productName,
+    release: releaseInfo,
+    issueCandidates,
+    issueNotifySkipped: options.skipIssueNotify,
+    generatedAt: new Date().toISOString(),
+  };
+  printReleaseResult(result);
 
   await gitPull(options.branch, options.dryRun);
   if (options.dryRun) {
