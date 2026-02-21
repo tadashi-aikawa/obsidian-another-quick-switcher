@@ -466,6 +466,7 @@ The MC column indicates multi-check support: "✅" applies to all checked items,
 | -------------------- | ------------------ | --- |
 | up                   | `Mod+p`            | ⛔  |
 | down                 | `Mod+n`            | ⛔  |
+| move to header       | `Enter`            | ⛔  |
 | clear input          | `Mod+d`            | ⛔  |
 | move to next hit     | `Tab`              | ⛔  |
 | move to previous hit | `Shift+Tab`        | ⛔  |

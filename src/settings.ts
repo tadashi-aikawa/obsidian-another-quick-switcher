@@ -139,6 +139,7 @@ export interface Hotkeys {
   header: {
     up: Hotkey[];
     down: Hotkey[];
+    "move to header": Hotkey[];
     "clear input": Hotkey[];
     "move to next hit": Hotkey[];
     "move to previous hit": Hotkey[];
@@ -352,6 +353,7 @@ export const createDefaultHotkeys = (): Hotkeys => ({
   header: {
     up: [{ modifiers: ["Mod"], key: "p" }],
     down: [{ modifiers: ["Mod"], key: "n" }],
+    "move to header": [{ modifiers: [], key: "Enter" }],
     "clear input": [{ modifiers: ["Mod"], key: "d" }],
     "move to next hit": [{ modifiers: [], key: "Tab" }],
     "move to previous hit": [{ modifiers: ["Shift"], key: "Tab" }],

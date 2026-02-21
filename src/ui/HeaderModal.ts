@@ -257,6 +257,7 @@ export class HeaderModal extends AbstractSuggestionModal<SuggestionItem> {
   }
 
   setHotkeys() {
+    this.scope.unregister(this.scope.keys.find((x) => x.key === "Enter")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Escape")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "Home")!);
     this.scope.unregister(this.scope.keys.find((x) => x.key === "End")!);
@@ -329,6 +330,9 @@ export class HeaderModal extends AbstractSuggestionModal<SuggestionItem> {
     });
     this.registerKeys("down", (evt) => {
       navigateNext(evt);
+    });
+    this.registerKeys("move to header", (evt) => {
+      this.chooser.useSelectedItem(evt);
     });
     this.registerKeys("scroll preview up", () => {
       this.scrollActiveLeafByPage("up");
