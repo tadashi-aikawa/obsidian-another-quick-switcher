@@ -1,0 +1,5 @@
+interface:
+  display_name: "Another Quick Switcher Release"
+  short_description: "Another Quick Switcherのリリース運用を自動化するSkill"
+  default_prompt: "Use $another-quick-switcher-release to run the release workflow safely."
+
