@@ -176,7 +176,9 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
 
   onOpen() {
     super.onOpen();
-    setFloatingModal(this.appHelper);
+    setFloatingModal(this.appHelper, {
+      allowNonMarkdownReposition: true,
+    });
     this.enableFloatingModalWheelScroll();
 
     this.basePath =

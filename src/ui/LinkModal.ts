@@ -122,7 +122,9 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
   enableFloating() {
     this.floating = true;
     if (!Platform.isPhone) {
-      setFloatingModal(this.appHelper);
+      setFloatingModal(this.appHelper, {
+        allowNonMarkdownReposition: true,
+      });
       this.enableFloatingModalWheelScroll();
     }
   }

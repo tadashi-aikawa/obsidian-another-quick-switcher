@@ -338,7 +338,9 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
   enableFloating() {
     this.floating = true;
     if (!Platform.isPhone) {
-      setFloatingModal(this.appHelper);
+      setFloatingModal(this.appHelper, {
+        allowNonMarkdownReposition: true,
+      });
       this.enableFloatingModalWheelScroll();
     }
   }
