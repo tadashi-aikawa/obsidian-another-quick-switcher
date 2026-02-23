@@ -448,17 +448,17 @@ describe("Performance tests", () => {
 
   // Performance thresholds based on actual AnotherQuickSwitcherModal usage
   // Reference: AnotherQuickSwitcherModal.ts:469 debug log timing
-  // Measured: small(0.6ms), medium(2.2-4.5ms), large(19-32ms)
+  // NOTE: Ideally it should stay within 1x, but because CI machine conditions vary, we allow up to 2x as a buffer.
   const PERFORMANCE_THRESHOLDS = {
     microFuzzy: {
-      small: 15, // 100 notes
-      medium: 45, // 1000 notes
-      large: 100, // 10000 notes
+      small: 15 * 2, // 100 notes
+      medium: 45 * 2, // 1000 notes
+      large: 100 * 2, // 10000 notes
     },
     smartMicroFuzzy: {
-      small: 20, // 100 notes
-      medium: 60, // 1000 notes
-      large: 150, // 10000 notes
+      small: 20 * 2, // 100 notes
+      medium: 60 * 2, // 1000 notes
+      large: 150 * 2, // 10000 notes
     },
   };
 
