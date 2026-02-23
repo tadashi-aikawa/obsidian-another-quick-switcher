@@ -21,9 +21,9 @@ description: Another Quick Switcher のリリース運用を実施するとき�
    - 理由: sandbox と host で `gh` の認証コンテキストが異なる場合があるため
 3. リポジトリルートで次を実行する。
    - `bun .agents/skills/another-quick-switcher-release/scripts/release.ts`
-4. スクリプトの `=== RELEASE_RESULT_JSON_BEGIN ===` から `=== RELEASE_RESULT_JSON_END ===` までの JSON を読み取り、次を標準出力する。
-   - Bluesky 投稿案 (日本語で自然な表現)
-   - Issue 返信テンプレート (下記フォーマット)
+4. スクリプトの `=== RELEASE_RESULT_JSON_BEGIN ===` から `=== RELEASE_RESULT_JSON_END ===` までの JSON を読み取り、`assets/templates` のテンプレートを使って次を標準出力する。
+   - Bluesky 投稿案
+   - Issue 返信テンプレート
 5. 投稿案・返信文はクリップボードにコピーせず、標準出力へ表示する。
 6. 動作確認のみ行うときは dry-run を使う。
    - `bun .agents/skills/another-quick-switcher-release/scripts/release.ts --dry-run`
@@ -41,27 +41,31 @@ description: Another Quick Switcher のリリース運用を実施するとき�
 - LLM はこの JSON の `release` / `issueCandidates` を入力として文章を作る。
 - `issueCandidates` には Pull Request も含まれるため、Issue 返信テンプレートでは `isPullRequest=false` のみを対象にする。
 
+## Assets
+
+- `assets/templates/bluesky-post.txt`
+- `assets/templates/issue-reply.txt`
+
 ## Issue Reply Template Format
 
-Issue 返信テンプレートは次の形式で生成する。
+Issue 返信は `assets/templates/issue-reply.txt` を使って生成する。
+形式変更はテンプレートファイル側で行う。
 
-```text
-- https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues/323
-- https://github.com/tadashi-aikawa/obsidian-another-quick-switcher/issues/324
+- `{issueUrls}` は対象 Issue URL を1行ずつ列挙する。
+- `{mentions}` は対象 Issue の `authorLogin` を重複除去したメンション行に置換する。
+- `authorLogin` が1人なら1人分、複数なら空白区切りで1行にまとめる。
+- `{releaseVersion}` は `release.tagName` を使う。
+- 対象 Issue が0件の場合はテンプレートを使わず「対象Issueはありません」を明示する。
 
-@FelipeRearden
-Released in 14.5.0 🚀
-```
+## Bluesky Post Format (Strict)
 
-- URL 行は対象 Issue 数だけ並べる。
-- メンション行は対象 Issue の `authorLogin` を重複除去して列挙する。
-- `authorLogin` が1人なら1行、複数なら空白区切りで1行にまとめる。
-
-## Bluesky Post Guidelines
-
-- 日本語で、読みやすく自然な表現にする。
-- 単なるコミット文の羅列は避け、変更点を要約して伝える。
-- リリースURL (`release.url`) を末尾に含める。
+Bluesky 投稿案は `assets/templates/bluesky-post.txt` を使って生成する。
+形式変更はテンプレートファイル側で行う。
+- `{productName}` は `result.productName` を使う。
+- `{release.tagName}` は公開されたタグ名を使う。
+- `{changesSummaryJa}` は日本語の自然な要約1〜2文にする。
+- 単なるコミット文の羅列は避け、利用者視点の要約にする。
+- `{release.url}` は GitHub Release URL をそのまま使う。
 
 ## Notes
 

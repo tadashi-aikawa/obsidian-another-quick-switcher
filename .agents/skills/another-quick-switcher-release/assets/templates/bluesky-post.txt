@@ -1,0 +1,5 @@
+📦 {productName} v{release.tagName} 🚀
+
+{changesSummaryJa}
+
+{release.url}

@@ -1,0 +1,4 @@
+{issueUrls}
+
+{mentions}
+Released in {releaseVersion} 🚀
