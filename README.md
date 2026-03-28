@@ -156,6 +156,16 @@ The input `hoge -md` will suggest only `hoge`.
 
 Additionally, you can specify a custom string as the exclude prefix using the `Exclude prefix` setting.
 
+##### `@key:value` or `@key:` searches by front matter property
+
+- `@status:done` matches files whose `status` property contains `done`.
+- `@status:` matches files whose `status` property has a non-null value set.
+- Combine with other queries: `keyword @status:done` matches files whose name contains `keyword` AND whose `status` is `done`.
+- Combine with exclusion: `@status: -@status:done` matches files that have a `status` value but it does NOT contain `done`.
+
+> **Note**
+> Front matter must be loaded for this to work (e.g., enable `Search by property` or `Show front matter` in the search command settings).
+
 ##### `<cd>` means the current directory
 
 If the path of the active file is "/usr/local/vault/notes", the query "`<cd>` obsidian" will be interpreted as "/usr/local/vault/notes obsidian".

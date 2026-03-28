@@ -91,6 +91,75 @@ function matchQuery(
     ];
   }
 
+  // property query (@key:value or @key:)
+  if (query.startsWith("@") && query.includes(":")) {
+    const colonIndex = query.indexOf(":");
+    const key = query.slice(1, colonIndex);
+    const value = query.slice(colonIndex + 1);
+
+    // empty key (@:value, @:): not found
+    if (key === "") {
+      return [{ type: "not found", query }];
+    }
+
+    // @key: (empty value): check if key has a non-null value
+    if (value === "") {
+      const hasKey =
+        item.frontMatter != null &&
+        // biome-ignore lint/suspicious/noPrototypeBuiltins: Object.hasOwn requires ES2022
+        Object.prototype.hasOwnProperty.call(item.frontMatter, key);
+      const hasValue = hasKey && item.frontMatter![key] != null;
+      return [
+        {
+          type: hasValue ? "property" : "not found",
+          meta: [key],
+          query,
+        },
+      ];
+    }
+
+    // @key:value: match value
+    const prop = item.frontMatter?.[key];
+    if (prop == null) {
+      return [{ type: "not found", query }];
+    }
+
+    const frontMatterRanges: MatchQueryResult["frontMatterRanges"] = {};
+    if (Array.isArray(prop)) {
+      const ranges = prop.map((v) =>
+        v == null
+          ? null
+          : includesWithRange(
+              v.toString(),
+              value,
+              isNormalizeAccentsDiacritics,
+            ),
+      );
+      if (ranges.some((x) => x !== null)) {
+        frontMatterRanges[key] = ranges;
+      }
+    } else {
+      const range = includesWithRange(
+        prop.toString(),
+        value,
+        isNormalizeAccentsDiacritics,
+      );
+      if (range) {
+        frontMatterRanges[key] = [range];
+      }
+    }
+
+    const matched = Object.keys(frontMatterRanges).length > 0;
+    return [
+      {
+        type: matched ? "property" : "not found",
+        meta: matched ? [key] : undefined,
+        frontMatterRanges: matched ? frontMatterRanges : undefined,
+        query,
+      },
+    ];
+  }
+
   const qs = query.split("/");
   const file = qs.pop()!;
   const dirs = qs;
