@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import merge from "ts-deepmerge";
+import { merge } from "ts-deepmerge";
 import { AnotherQuickSwitcherAPI } from "./api";
 import { AppHelper } from "./app-helper";
 import { createCommands } from "./commands";
@@ -62,7 +62,7 @@ export default class AnotherQuickSwitcher extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    const currentSettings = await this.loadData();
+    const currentSettings = (await this.loadData()) as Settings;
 
     this.settings = merge.withOptions(
       { mergeArrays: false },

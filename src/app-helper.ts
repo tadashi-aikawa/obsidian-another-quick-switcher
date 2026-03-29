@@ -21,7 +21,7 @@ import {
   type Workspace,
   type WorkspaceLeaf,
 } from "obsidian";
-import merge from "ts-deepmerge";
+import { merge } from "ts-deepmerge";
 import { ExhaustiveError } from "./errors";
 import { autoAliasTransform } from "./transformer";
 import {
