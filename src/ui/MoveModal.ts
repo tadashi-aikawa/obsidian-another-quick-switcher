@@ -270,6 +270,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
   }
 
   async onOpen(): Promise<void> {
+    new Notice("This is a test version.");
     await this.loadRecentlyUsedFolders();
     super.onOpen();
   }
