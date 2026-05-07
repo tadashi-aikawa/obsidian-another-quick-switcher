@@ -411,8 +411,17 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
       );
     }
 
-    await this.app.fileManager.renameFile(activeFile, newPath);
-    await this.updateRecentlyUsedFolder(item.folder.path);
+    try {
+      await this.app.fileManager.renameFile(activeFile, newPath);
+      await this.updateRecentlyUsedFolder(item.folder.path);
+    } catch (error) {
+      console.error("Failed to move file:", error);
+      new Notice(
+        `❌ Failed to move file: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
   }
 
   private registerKeys(
