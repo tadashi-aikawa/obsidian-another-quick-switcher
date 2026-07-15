@@ -10,7 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: npm i -D --no-save conventional-changelog-conventionalcommits @semantic-release/git @semantic-release/exec
+      # conventionalcommits v10はrelease notesが空になるバグがあるため9.3.1に固定
+      # https://github.com/semantic-release/release-notes-generator/issues/992
+      - run: npm i -D --no-save conventional-changelog-conventionalcommits@9.3.1 @semantic-release/git @semantic-release/exec
       - uses: cycjimmy/semantic-release-action@v4
         with:
           semantic_version: 24.1.2
