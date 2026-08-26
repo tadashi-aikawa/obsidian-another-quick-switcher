@@ -541,6 +541,14 @@
   box-shadow: 0 0 0 2px var(--background-modifier-border);
 }
 
+/* A setting turned off by the setting it depends on, and a setting hidden by
+   the filter of its group. They win over the global setting filter, which owns
+   the inline `display` style of every setting. */
+.another-quick-switcher__settings__dependency-hidden,
+.another-quick-switcher__settings__filter-hidden {
+  display: none !important;
+}
+
 .another-quick-switcher__settings__nested {
   padding-left: 30px;
 }

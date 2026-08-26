@@ -1,4 +1,6 @@
 import { smartWhitespaceSplit } from "../../utils/strings";
+import { DEPENDENCY_HIDDEN_CLASS } from "./useConditionalVisibility";
+import { FILTER_HIDDEN_CLASS } from "./useFilterSetting";
 
 const nestedClassName = "another-quick-switcher__settings__nested";
 const searchCommandContainerClass =
@@ -47,6 +49,18 @@ const getSettingSearchText = (settingEl: HTMLElement): string => {
   return [name, desc, ...inputValues].join(" ").trim();
 };
 
+// Settings already hidden by a class (by the setting they depend on, or by the
+// filter of their group) must stay out of this filter: they never match, and
+// they never make their container visible.
+const isHiddenByClass = (el: HTMLElement): boolean =>
+  el.classList.contains(DEPENDENCY_HIDDEN_CLASS) ||
+  el.classList.contains(FILTER_HIDDEN_CLASS);
+
+const querySettingItems = (el: HTMLElement): HTMLElement[] =>
+  Array.from(el.querySelectorAll<HTMLElement>(".setting-item")).filter(
+    (x) => !isHiddenByClass(x),
+  );
+
 const findPreviousElement = (
   orderedElements: HTMLElement[],
   startIndex: number,
@@ -70,6 +84,9 @@ export const applyGlobalSettingFilter = (
   );
   const isActive = queryTokens.length > 0;
 
+  // Class-hidden settings are still toggled like the others, so that they show
+  // up with the right filter state once the class is removed. They are only
+  // kept out of the match results.
   const settingItems = Array.from(
     containerEl.querySelectorAll<HTMLElement>(".setting-item"),
   );
@@ -78,7 +95,7 @@ export const applyGlobalSettingFilter = (
   );
   const orderedElements = Array.from(
     containerEl.querySelectorAll<HTMLElement>("h3, .setting-item"),
-  );
+  ).filter((el) => !isHiddenByClass(el));
 
   if (!isActive) {
     for (const item of settingItems) {
@@ -101,6 +118,9 @@ export const applyGlobalSettingFilter = (
 
   const matchedItems = new Set<HTMLElement>();
   for (const item of settingItems) {
+    if (isHiddenByClass(item)) {
+      continue;
+    }
     const searchText = getSettingSearchText(item).toLowerCase();
     if (queryTokens.every((token) => searchText.includes(token))) {
       matchedItems.add(item);
@@ -147,9 +167,9 @@ export const applyGlobalSettingFilter = (
     if (!container) {
       continue;
     }
-    container.querySelectorAll<HTMLElement>(".setting-item").forEach((item) => {
+    for (const item of querySettingItems(container)) {
       visibleItems.add(item);
-    });
+    }
   }
 
   for (const item of matchedItems) {
@@ -204,18 +224,18 @@ export const applyGlobalSettingFilter = (
   containerEl
     .querySelectorAll<HTMLElement>(`.${searchCommandContainerClass}`)
     .forEach((container) => {
-      const hasVisibleItem = Array.from(
-        container.querySelectorAll<HTMLElement>(".setting-item"),
-      ).some((item) => visibleItems.has(item));
+      const hasVisibleItem = querySettingItems(container).some((item) =>
+        visibleItems.has(item),
+      );
       container.toggle(hasVisibleItem);
     });
 
   containerEl
     .querySelectorAll<HTMLElement>(`.${dialogHotkeyContainerClass}`)
     .forEach((container) => {
-      const hasVisibleItem = Array.from(
-        container.querySelectorAll<HTMLElement>(".setting-item"),
-      ).some((item) => visibleItems.has(item));
+      const hasVisibleItem = querySettingItems(container).some((item) =>
+        visibleItems.has(item),
+      );
       container.toggle(hasVisibleItem);
     });
 };

@@ -1,6 +1,24 @@
 import type { Setting, SettingGroup } from "obsidian";
 
-export const useFilterSetting = (group: SettingGroup) => {
+/**
+ * A setting hidden by the filter of its group. It is a class instead of the
+ * inline `display` style, so that the global setting filter, which owns that
+ * style, cannot show a setting this filter has hidden.
+ */
+export const FILTER_HIDDEN_CLASS =
+  "another-quick-switcher__settings__filter-hidden";
+
+export const useFilterSetting = (
+  group: SettingGroup,
+  option?: {
+    /**
+     * Called after the query of this filter changes. The global setting filter
+     * has to run again, because a setting it had hidden while this filter was
+     * also hiding it stays hidden otherwise.
+     */
+    onQueryChange?: () => void;
+  },
+) => {
   const filterTargets: {
     settingEl: HTMLElement;
     getSearchText: () => string;
@@ -14,7 +32,7 @@ export const useFilterSetting = (group: SettingGroup) => {
     for (const target of filterTargets) {
       const searchText = target.getSearchText().toLowerCase();
       const isMatch = shouldShowAll || searchText.includes(normalizedQuery);
-      target.settingEl.toggle(isMatch);
+      target.settingEl.classList.toggle(FILTER_HIDDEN_CLASS, !isMatch);
     }
   };
 
@@ -45,6 +63,7 @@ export const useFilterSetting = (group: SettingGroup) => {
   group.addSearch((sc) => {
     sc.setPlaceholder("Filter settings").onChange((value) => {
       applyFilter(value);
+      option?.onQueryChange?.();
     });
   });
 

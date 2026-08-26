@@ -1,14 +1,17 @@
 import {
   type App,
+  type ButtonComponent,
   Notice,
   PluginSettingTab,
   Setting,
   SettingGroup,
+  type ToggleComponent,
 } from "obsidian";
 import {
   TextAreaComponentEvent,
   TextComponentEvent,
 } from "src/apputils/setting/settings-helper";
+import { useConditionalVisibility } from "./composables/settings/useConditionalVisibility";
 import { useFilterSetting } from "./composables/settings/useFilterSetting";
 import { applyGlobalSettingFilter } from "./composables/settings/useGlobalSettingFilter";
 import { usePopover } from "./composables/settings/usePopover";
@@ -820,6 +823,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
   hotkeyHelpCleanups: (() => void)[] = [];
   globalSettingSearchQuery = "";
   globalSettingSearchInputEl: HTMLInputElement | null = null;
+  conditionalVisibility = useConditionalVisibility();
   hotkeyExpandedStatus: Record<keyof Hotkeys, boolean> = {
     main: false,
     folder: false,
@@ -868,14 +872,77 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
     return df;
   }
 
+  /**
+   * Returns the element that actually scrolls the settings, which differs
+   * between the settings tab and the settings window.
+   */
+  private findScrollableAncestor(): HTMLElement | null {
+    // The settings window runs in its own window, so its `getComputedStyle` and
+    // `HTMLElement` differ from the ones of the main window.
+    const doc = this.containerEl.ownerDocument;
+    const win = doc.defaultView;
+    if (!win) {
+      return null;
+    }
+
+    let el: HTMLElement | null = this.containerEl;
+    while (el) {
+      const { overflowY } = win.getComputedStyle(el);
+      const scrollable =
+        overflowY !== "visible" &&
+        overflowY !== "hidden" &&
+        overflowY !== "clip";
+      if (scrollable && el.scrollHeight > el.clientHeight) {
+        return el;
+      }
+      el = el.parentElement;
+    }
+
+    // Fall back to the document itself, which scrolls instead of an ancestor
+    // when the settings fill the whole window.
+    return (doc.scrollingElement as HTMLElement | null) ?? null;
+  }
+
+  /**
+   * The global filter owns the inline `display` of every setting, so it has to
+   * run again whenever a setting is shown by another mechanism.
+   */
+  private applyGlobalFilter(): void {
+    applyGlobalSettingFilter(this.containerEl, this.globalSettingSearchQuery);
+  }
+
+  /**
+   * Re-evaluates the settings depending on another setting. The filter of each
+   * group hides with its own class, so it survives this.
+   */
+  private refreshDependentSettings(): void {
+    this.conditionalVisibility.refresh();
+    this.applyGlobalFilter();
+  }
+
+  /**
+   * Rebuilds the whole settings, keeping the current scroll position.
+   * Use it only if the structure changes (ex: adding/folding a search command).
+   * For a setting that only shows/hides other settings, use
+   * `refreshDependentSettings` instead.
+   */
+  private redisplay(): void {
+    const scrollEl = this.findScrollableAncestor();
+    const scrollTop = scrollEl?.scrollTop;
+    this.display();
+    if (scrollEl && scrollTop !== undefined) {
+      scrollEl.scrollTop = scrollTop;
+    }
+  }
+
   private updateGlobalSettingSearchQuery(value: string) {
     const wasActive = this.isGlobalSettingSearchActive();
     this.globalSettingSearchQuery = value;
     const isActive = this.isGlobalSettingSearchActive();
     if (wasActive !== isActive) {
-      this.display();
+      this.redisplay();
       if (this.globalSettingSearchInputEl) {
-        this.globalSettingSearchInputEl.focus();
+        this.globalSettingSearchInputEl.focus({ preventScroll: true });
         this.globalSettingSearchInputEl.setSelectionRange(
           value.length,
           value.length,
@@ -888,6 +955,8 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
 
   display(): void {
     const { containerEl } = this;
+
+    this.conditionalVisibility = useConditionalVisibility();
 
     for (const cleanup of this.hotkeyHelpCleanups) {
       cleanup();
@@ -979,7 +1048,6 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         ).onChange(async (value) => {
           this.plugin.settings.normalizeAccentsAndDiacritics = value;
           await this.plugin.saveSettings();
-          this.display();
         });
       });
 
@@ -1020,35 +1088,42 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         async (value) => {
           this.plugin.settings.showDirectory = value;
           await this.plugin.saveSettings();
-          this.display();
+          this.refreshDependentSettings();
         },
       );
     });
 
-    if (this.plugin.settings.showDirectory) {
-      new Setting(containerEl)
-        .setName("Show directory at the new line")
-        .setClass("another-quick-switcher__settings__nested")
-        .addToggle((tc) => {
-          tc.setValue(this.plugin.settings.showDirectoryAtNewLine).onChange(
-            async (value) => {
-              this.plugin.settings.showDirectoryAtNewLine = value;
-              await this.plugin.saveSettings();
-            },
-          );
-        });
-      new Setting(containerEl)
-        .setName("Show full path of directory")
-        .setClass("another-quick-switcher__settings__nested")
-        .addToggle((tc) => {
-          tc.setValue(this.plugin.settings.showFullPathOfDirectory).onChange(
-            async (value) => {
-              this.plugin.settings.showFullPathOfDirectory = value;
-              await this.plugin.saveSettings();
-            },
-          );
-        });
-    }
+    const showDirectoryAtNewLineSetting = new Setting(containerEl)
+      .setName("Show directory at the new line")
+      .setClass("another-quick-switcher__settings__nested")
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.showDirectoryAtNewLine).onChange(
+          async (value) => {
+            this.plugin.settings.showDirectoryAtNewLine = value;
+            await this.plugin.saveSettings();
+          },
+        );
+      });
+    this.conditionalVisibility.addConditionalTarget(
+      showDirectoryAtNewLineSetting.settingEl,
+      () => this.plugin.settings.showDirectory,
+    );
+
+    const showFullPathOfDirectorySetting = new Setting(containerEl)
+      .setName("Show full path of directory")
+      .setClass("another-quick-switcher__settings__nested")
+      .addToggle((tc) => {
+        tc.setValue(this.plugin.settings.showFullPathOfDirectory).onChange(
+          async (value) => {
+            this.plugin.settings.showFullPathOfDirectory = value;
+            await this.plugin.saveSettings();
+          },
+        );
+      });
+    this.conditionalVisibility.addConditionalTarget(
+      showFullPathOfDirectorySetting.settingEl,
+      () => this.plugin.settings.showDirectory,
+    );
 
     new Setting(containerEl)
       .setName("Display alias as title on keyword match")
@@ -1137,7 +1212,9 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
       }
 
       const group = new SettingGroup(div);
-      const { addFilterableSetting } = useFilterSetting(group);
+      const { addFilterableSetting } = useFilterSetting(group, {
+        onQueryChange: () => this.applyGlobalFilter(),
+      });
 
       const addHotKeyItem = (name: string, command: string) => {
         addFilterableSetting(name, null, (setting) => {
@@ -1252,7 +1329,7 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
             .onClick(() => {
               this.hotkeyExpandedStatus[dialogKey] =
                 !this.hotkeyExpandedStatus[dialogKey];
-              this.display();
+              this.redisplay();
             }),
         );
       addHotkeyItems(dialogKey, div);
@@ -1307,41 +1384,51 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
           this.plugin.settings.searchCommands.push(
             createDefaultSearchCommand(),
           );
-          this.display();
+          this.redisplay();
         });
     });
+
+    let resetLockToggle: ToggleComponent | null = null;
+    let resetButton: ButtonComponent | null = null;
+    const applyResetLock = () => {
+      resetLockToggle?.setTooltip(
+        this.resetLock
+          ? "Turn off the lock, if you want to reset all search commands"
+          : "",
+      );
+      resetButton?.setDisabled(this.resetLock);
+      if (this.resetLock) {
+        resetButton?.removeCta();
+      } else {
+        resetButton?.setCta();
+      }
+    };
 
     new Setting(containerEl)
       .setName("Reset all search commands")
       .setClass("another-quick-switcher__settings__danger")
       .setDesc("It means your customized commands will be removed.")
       .addToggle((cb) => {
+        resetLockToggle = cb;
         cb.setValue(this.resetLock).onChange((lock) => {
           this.resetLock = lock;
-          this.display();
+          applyResetLock();
         });
-        if (this.resetLock) {
-          cb.setTooltip(
-            "Turn off the lock, if you want to reset all search commands",
-          );
-        }
       })
       .addButton((btn) => {
+        resetButton = btn;
         btn
           .setButtonText("Reset")
           .setTooltip("Reset all search commands!!")
-          .setDisabled(this.resetLock)
           .onClick(async () => {
             this.plugin.settings.searchCommands =
               createPreSettingSearchCommands();
             await this.plugin.saveSettings();
             this.plugin.reloadCommands();
-            this.display();
+            this.redisplay();
           });
-        if (!this.resetLock) {
-          btn.setCta();
-        }
       });
+    applyResetLock();
 
     new Setting(containerEl)
       .setName("Exclude prefix")
@@ -1368,43 +1455,51 @@ export class AnotherQuickSwitcherSettingTab extends PluginSettingTab {
         ).onChange(async (value) => {
           this.plugin.settings.searchesAutoAliasTransform.enabled = value;
           await this.plugin.saveSettings();
-          this.display();
+          this.refreshDependentSettings();
         });
       });
 
-    if (this.plugin.settings.searchesAutoAliasTransform.enabled) {
-      const ex1 = String.raw`Ex: (?<name>.+) \(.+\)$`;
-      new Setting(containerEl)
-        .setName("Alias pattern")
-        .setDesc(
-          `Specifies the regex pattern to identify parts of the link candidate for transformation into an alias. ${ex1}`,
-        )
-        .setClass("another-quick-switcher__settings__nested")
-        .addText((cb) => {
-          cb.setValue(
-            this.plugin.settings.searchesAutoAliasTransform.aliasPattern,
-          ).onChange(async (value) => {
-            this.plugin.settings.searchesAutoAliasTransform.aliasPattern =
-              value;
-            await this.plugin.saveSettings();
-          });
-        });
+    const isAutoAliasTransformEnabled = () =>
+      this.plugin.settings.searchesAutoAliasTransform.enabled;
 
-      new Setting(containerEl)
-        .setName("Alias format")
-        .setDesc(
-          "Defines the format for the alias after transformation, using regex-captured groups from the candidate name. Ex: $<name>",
-        )
-        .setClass("another-quick-switcher__settings__nested")
-        .addText((cb) => {
-          cb.setValue(
-            this.plugin.settings.searchesAutoAliasTransform.aliasFormat,
-          ).onChange(async (value) => {
-            this.plugin.settings.searchesAutoAliasTransform.aliasFormat = value;
-            await this.plugin.saveSettings();
-          });
+    const ex1 = String.raw`Ex: (?<name>.+) \(.+\)$`;
+    const aliasPatternSetting = new Setting(containerEl)
+      .setName("Alias pattern")
+      .setDesc(
+        `Specifies the regex pattern to identify parts of the link candidate for transformation into an alias. ${ex1}`,
+      )
+      .setClass("another-quick-switcher__settings__nested")
+      .addText((cb) => {
+        cb.setValue(
+          this.plugin.settings.searchesAutoAliasTransform.aliasPattern,
+        ).onChange(async (value) => {
+          this.plugin.settings.searchesAutoAliasTransform.aliasPattern = value;
+          await this.plugin.saveSettings();
         });
-    }
+      });
+    this.conditionalVisibility.addConditionalTarget(
+      aliasPatternSetting.settingEl,
+      isAutoAliasTransformEnabled,
+    );
+
+    const aliasFormatSetting = new Setting(containerEl)
+      .setName("Alias format")
+      .setDesc(
+        "Defines the format for the alias after transformation, using regex-captured groups from the candidate name. Ex: $<name>",
+      )
+      .setClass("another-quick-switcher__settings__nested")
+      .addText((cb) => {
+        cb.setValue(
+          this.plugin.settings.searchesAutoAliasTransform.aliasFormat,
+        ).onChange(async (value) => {
+          this.plugin.settings.searchesAutoAliasTransform.aliasFormat = value;
+          await this.plugin.saveSettings();
+        });
+      });
+    this.conditionalVisibility.addConditionalTarget(
+      aliasFormatSetting.settingEl,
+      isAutoAliasTransformEnabled,
+    );
   }
 
   private addSearchCommandSetting(
@@ -1468,7 +1563,7 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
             this.plugin.settings.searchCommands.remove(command);
             await this.plugin.saveSettings();
             this.plugin.reloadCommands();
-            this.display();
+            this.redisplay();
           });
         btn.extraSettingsEl.addClass(
           "another-quick-switcher__settings__search-command__header__delete",
@@ -1482,7 +1577,7 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
           .onClick(async () => {
             command.expand = !command.expand;
             await this.plugin.saveSettings();
-            this.display();
+            this.redisplay();
           });
         btn.extraSettingsEl.addClass(
           "another-quick-switcher__settings__search-command__header__fold-button",
@@ -1495,7 +1590,9 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
     }
 
     const group = new SettingGroup(div);
-    const { addFilterableSetting } = useFilterSetting(group);
+    const { addFilterableSetting } = useFilterSetting(group, {
+      onQueryChange: () => this.applyGlobalFilter(),
+    });
 
     const buttonClass =
       "another-quick-switcher__settings__search-command__search-by-button";
@@ -1579,7 +1676,7 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
               command.searchBy.property = !command.searchBy!.property;
               coloring();
               await saveCommandWithValidation();
-              this.display();
+              this.refreshDependentSettings();
             });
           coloring();
 
@@ -1587,27 +1684,29 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
         });
     });
 
-    if (command.searchBy.property) {
-      addFilterableSetting(
-        "Keys of the property to search",
-        "Multiple entries can be specified, separated by line breaks.",
-        (setting) => {
-          setting.addTextArea((tc) =>
-            TextAreaComponentEvent.onChange(
-              tc,
-              async (value) => {
-                command.keysOfPropertyToSearch = smartLineBreakSplit(value);
-                await saveCommandWithValidation();
-              },
-              {
-                className:
-                  "another-quick-switcher__settings__keys_of_property_to_search",
-              },
-            ).setValue(command.keysOfPropertyToSearch!.join("\n")),
-          );
-        },
-      );
-    }
+    addFilterableSetting(
+      "Keys of the property to search",
+      "Multiple entries can be specified, separated by line breaks.",
+      (setting) => {
+        setting.addTextArea((tc) =>
+          TextAreaComponentEvent.onChange(
+            tc,
+            async (value) => {
+              command.keysOfPropertyToSearch = smartLineBreakSplit(value);
+              await saveCommandWithValidation();
+            },
+            {
+              className:
+                "another-quick-switcher__settings__keys_of_property_to_search",
+            },
+          ).setValue(command.keysOfPropertyToSearch!.join("\n")),
+        );
+        this.conditionalVisibility.addConditionalTarget(
+          setting.settingEl,
+          () => command.searchBy.property,
+        );
+      },
+    );
 
     addFilterableSetting("Search target", null, (setting) => {
       setting.setName("Search target").addDropdown((dc) => {
@@ -1681,7 +1780,6 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
         cb.setValue(command.floating).onChange(async (value) => {
           command.floating = value as boolean;
           await saveCommandWithValidation();
-          this.display();
         });
       });
     });
@@ -1694,84 +1792,92 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
           tc.setValue(command.autoPreview).onChange(async (value) => {
             command.autoPreview = value;
             await saveCommandWithValidation();
-            this.display();
+            this.refreshDependentSettings();
           });
         });
       },
     );
 
-    if (command.autoPreview) {
-      addFilterableSetting(
-        "Auto preview delay milli-seconds",
-        "Delay before auto preview is triggered when selection changes.",
-        (setting) => {
-          setting
-            .setClass("another-quick-switcher__settings__nested")
-            .addSlider((sc) =>
-              sc
-                .setLimits(0, 1000, 50)
-                .setValue(command.autoPreviewDelayMilliSeconds)
-                .setDynamicTooltip()
-                .onChange(async (value) => {
-                  command.autoPreviewDelayMilliSeconds = value;
-                  await saveCommandWithValidation();
-                }),
-            );
-        },
-      );
-    }
+    addFilterableSetting(
+      "Auto preview delay milli-seconds",
+      "Delay before auto preview is triggered when selection changes.",
+      (setting) => {
+        setting
+          .setClass("another-quick-switcher__settings__nested")
+          .addSlider((sc) =>
+            sc
+              .setLimits(0, 1000, 50)
+              .setValue(command.autoPreviewDelayMilliSeconds)
+              .setDynamicTooltip()
+              .onChange(async (value) => {
+                command.autoPreviewDelayMilliSeconds = value;
+                await saveCommandWithValidation();
+              }),
+          );
+        this.conditionalVisibility.addConditionalTarget(
+          setting.settingEl,
+          () => command.autoPreview,
+        );
+      },
+    );
 
     addFilterableSetting("Front matter", null, (setting) => {
       setting.addToggle((cb) => {
         cb.setValue(command.showFrontMatter).onChange(async (value) => {
           command.showFrontMatter = value as boolean;
           await saveCommandWithValidation();
-          this.display();
+          this.refreshDependentSettings();
         });
       });
     });
 
-    if (command.showFrontMatter) {
-      addFilterableSetting(
-        "Exclude front matter keys",
-        "It can set multi patterns by line breaks.",
-        (setting) => {
-          setting.addTextArea((tc) =>
-            TextAreaComponentEvent.onChange(
-              tc,
-              async (value) => {
-                command.excludeFrontMatterKeys = smartLineBreakSplit(value);
-                await saveCommandWithValidation();
-              },
-              {
-                className:
-                  "another-quick-switcher__settings__exclude_front_matter_keys",
-              },
-            ).setValue(command.excludeFrontMatterKeys!.join("\n")),
-          );
-        },
-      );
+    addFilterableSetting(
+      "Exclude front matter keys",
+      "It can set multi patterns by line breaks.",
+      (setting) => {
+        setting.addTextArea((tc) =>
+          TextAreaComponentEvent.onChange(
+            tc,
+            async (value) => {
+              command.excludeFrontMatterKeys = smartLineBreakSplit(value);
+              await saveCommandWithValidation();
+            },
+            {
+              className:
+                "another-quick-switcher__settings__exclude_front_matter_keys",
+            },
+          ).setValue(command.excludeFrontMatterKeys!.join("\n")),
+        );
+        this.conditionalVisibility.addConditionalTarget(
+          setting.settingEl,
+          () => command.showFrontMatter,
+        );
+      },
+    );
 
-      addFilterableSetting(
-        "Include front matter keys",
-        'It can set multi patterns by line breaks. If not empty, only these keys are shown, then "Exclude front matter keys" is applied to the result.',
-        (setting) => {
-          setting.addTextArea((tc) =>
-            TextAreaComponentEvent.onChange(
-              tc,
-              async (value) => {
-                command.includeFrontMatterKeys = smartLineBreakSplit(value);
-                await saveCommandWithValidation();
-              },
-              {
-                className:
-                  "another-quick-switcher__settings__include_front_matter_keys",
-              },
-            ).setValue(command.includeFrontMatterKeys!.join("\n")),
-          );
-        },
-      );
-    }
+    addFilterableSetting(
+      "Include front matter keys",
+      'It can set multi patterns by line breaks. If not empty, only these keys are shown, then "Exclude front matter keys" is applied to the result.',
+      (setting) => {
+        setting.addTextArea((tc) =>
+          TextAreaComponentEvent.onChange(
+            tc,
+            async (value) => {
+              command.includeFrontMatterKeys = smartLineBreakSplit(value);
+              await saveCommandWithValidation();
+            },
+            {
+              className:
+                "another-quick-switcher__settings__include_front_matter_keys",
+            },
+          ).setValue(command.includeFrontMatterKeys!.join("\n")),
+        );
+        this.conditionalVisibility.addConditionalTarget(
+          setting.settingEl,
+          () => command.showFrontMatter,
+        );
+      },
+    );
 
     const relativeUpdatedPeriodSourceOptions: Record<
       RelativeUpdatedPeriodSource,
@@ -1793,29 +1899,31 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
               command.relativeUpdatedPeriodSource =
                 value as RelativeUpdatedPeriodSource;
               await saveCommandWithValidation();
-              this.display();
+              this.refreshDependentSettings();
             });
         });
       },
     );
 
-    if (command.relativeUpdatedPeriodSource === "property") {
-      addFilterableSetting(
-        "Property key for relative updated period",
-        "Use a front matter property value that can be parsed as a date.",
-        (setting) => {
-          setting.setClass("another-quick-switcher__settings__nested");
-          setting.addText((tc) =>
-            TextComponentEvent.onChange(tc, async (value) => {
-              command.relativeUpdatedPeriodPropertyKey = value.trim();
-              await saveCommandWithValidation();
-            })
-              .setValue(command.relativeUpdatedPeriodPropertyKey)
-              .setPlaceholder("(ex: updated)"),
-          );
-        },
-      );
-    }
+    addFilterableSetting(
+      "Property key for relative updated period",
+      "Use a front matter property value that can be parsed as a date.",
+      (setting) => {
+        setting.setClass("another-quick-switcher__settings__nested");
+        setting.addText((tc) =>
+          TextComponentEvent.onChange(tc, async (value) => {
+            command.relativeUpdatedPeriodPropertyKey = value.trim();
+            await saveCommandWithValidation();
+          })
+            .setValue(command.relativeUpdatedPeriodPropertyKey)
+            .setPlaceholder("(ex: updated)"),
+        );
+        this.conditionalVisibility.addConditionalTarget(
+          setting.settingEl,
+          () => command.relativeUpdatedPeriodSource === "property",
+        );
+      },
+    );
 
     addFilterableSetting(
       "Default input",
@@ -1988,28 +2096,28 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
           async (value) => {
             this.plugin.settings.autoPreviewInBacklinkSearch = value;
             await this.plugin.saveSettings();
-            this.display();
+            this.refreshDependentSettings();
           },
         );
       });
 
-    if (this.plugin.settings.autoPreviewInBacklinkSearch) {
-      new Setting(containerEl)
-        .setName("Auto preview delay milli-seconds")
-        .setDesc(
-          "Delay before auto preview is triggered when selection changes.",
-        )
-        .addSlider((sc) =>
-          sc
-            .setLimits(0, 1000, 50)
-            .setValue(this.plugin.settings.backlinkAutoPreviewDelayMilliSeconds)
-            .setDynamicTooltip()
-            .onChange(async (value) => {
-              this.plugin.settings.backlinkAutoPreviewDelayMilliSeconds = value;
-              await this.plugin.saveSettings();
-            }),
-        );
-    }
+    const backlinkAutoPreviewDelaySetting = new Setting(containerEl)
+      .setName("Auto preview delay milli-seconds")
+      .setDesc("Delay before auto preview is triggered when selection changes.")
+      .addSlider((sc) =>
+        sc
+          .setLimits(0, 1000, 50)
+          .setValue(this.plugin.settings.backlinkAutoPreviewDelayMilliSeconds)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.backlinkAutoPreviewDelayMilliSeconds = value;
+            await this.plugin.saveSettings();
+          }),
+      );
+    this.conditionalVisibility.addConditionalTarget(
+      backlinkAutoPreviewDelaySetting.settingEl,
+      () => this.plugin.settings.autoPreviewInBacklinkSearch,
+    );
   }
 
   private addLinkSettings(containerEl: HTMLElement) {
@@ -2187,7 +2295,6 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
           async (value) => {
             this.plugin.settings.includeFilenameInGrepSearch = value;
             await this.plugin.saveSettings();
-            this.display();
           },
         );
       });
@@ -2202,29 +2309,29 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
           async (value) => {
             this.plugin.settings.autoPreviewInGrepSearch = value;
             await this.plugin.saveSettings();
-            this.display();
+            this.refreshDependentSettings();
           },
         );
       });
 
-    if (this.plugin.settings.autoPreviewInGrepSearch) {
-      new Setting(containerEl)
-        .setName("Auto preview delay milli-seconds")
-        .setClass("another-quick-switcher__settings__nested")
-        .setDesc(
-          "Delay before auto preview is triggered when selection changes.",
-        )
-        .addSlider((sc) =>
-          sc
-            .setLimits(0, 1000, 50)
-            .setValue(this.plugin.settings.grepAutoPreviewDelayMilliSeconds)
-            .setDynamicTooltip()
-            .onChange(async (value) => {
-              this.plugin.settings.grepAutoPreviewDelayMilliSeconds = value;
-              await this.plugin.saveSettings();
-            }),
-        );
-    }
+    const grepAutoPreviewDelaySetting = new Setting(containerEl)
+      .setName("Auto preview delay milli-seconds")
+      .setClass("another-quick-switcher__settings__nested")
+      .setDesc("Delay before auto preview is triggered when selection changes.")
+      .addSlider((sc) =>
+        sc
+          .setLimits(0, 1000, 50)
+          .setValue(this.plugin.settings.grepAutoPreviewDelayMilliSeconds)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.grepAutoPreviewDelayMilliSeconds = value;
+            await this.plugin.saveSettings();
+          }),
+      );
+    this.conditionalVisibility.addConditionalTarget(
+      grepAutoPreviewDelaySetting.settingEl,
+      () => this.plugin.settings.autoPreviewInGrepSearch,
+    );
   }
 
   private addMoveSettings(containerEl: HTMLElement) {
