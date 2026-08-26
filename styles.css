@@ -474,7 +474,8 @@
   height: 120px;
   width: 300px;
 }
-.another-quick-switcher__settings__exclude_front_matter_keys {
+.another-quick-switcher__settings__exclude_front_matter_keys,
+.another-quick-switcher__settings__include_front_matter_keys {
   height: 120px;
   width: 300px;
 }

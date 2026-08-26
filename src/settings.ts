@@ -65,6 +65,7 @@ export interface SearchCommand {
   autoPreviewDelayMilliSeconds: number;
   showFrontMatter: boolean;
   excludeFrontMatterKeys: string[];
+  includeFrontMatterKeys: string[];
   defaultInput: string;
   restoreLastInput: boolean;
   commandPrefix: string;
@@ -465,6 +466,7 @@ export const createDefaultSearchCommand = (): SearchCommand => ({
   autoPreviewDelayMilliSeconds: 300,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+  includeFrontMatterKeys: [],
   defaultInput: "",
   restoreLastInput: false,
   commandPrefix: "",
@@ -496,6 +498,7 @@ export const createDefaultLinkSearchCommand = (): SearchCommand => ({
   autoPreviewDelayMilliSeconds: 300,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+  includeFrontMatterKeys: [],
   defaultInput: "",
   restoreLastInput: false,
   commandPrefix: "",
@@ -527,6 +530,7 @@ export const createDefaultBacklinkSearchCommand = (): SearchCommand => ({
   autoPreviewDelayMilliSeconds: 300,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+  includeFrontMatterKeys: [],
   defaultInput: "",
   restoreLastInput: false,
   commandPrefix: "",
@@ -557,6 +561,7 @@ export const createDefault2HopLinkSearchCommand = (): SearchCommand => ({
   autoPreviewDelayMilliSeconds: 300,
   showFrontMatter: false,
   excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+  includeFrontMatterKeys: [],
   defaultInput: "",
   restoreLastInput: false,
   commandPrefix: "",
@@ -594,6 +599,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+    includeFrontMatterKeys: [],
     defaultInput: "",
     restoreLastInput: false,
     commandPrefix: ":e ",
@@ -623,6 +629,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+    includeFrontMatterKeys: [],
     defaultInput: "",
     restoreLastInput: false,
     commandPrefix: ":f ",
@@ -658,6 +665,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+    includeFrontMatterKeys: [],
     defaultInput: "",
     restoreLastInput: false,
     commandPrefix: "",
@@ -693,6 +701,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+    includeFrontMatterKeys: [],
     defaultInput: "",
     restoreLastInput: false,
     commandPrefix: ":l ",
@@ -731,6 +740,7 @@ export const createPreSettingSearchCommands = (): SearchCommand[] => [
     autoPreviewDelayMilliSeconds: 300,
     showFrontMatter: false,
     excludeFrontMatterKeys: createDefaultExcludeFrontMatterKeys(),
+    includeFrontMatterKeys: [],
     defaultInput: "",
     restoreLastInput: false,
     commandPrefix: ":s ",
@@ -1738,6 +1748,26 @@ ${invalidSortPriorities.map((x) => `- ${x}`).join("\n")}
                   "another-quick-switcher__settings__exclude_front_matter_keys",
               },
             ).setValue(command.excludeFrontMatterKeys!.join("\n")),
+          );
+        },
+      );
+
+      addFilterableSetting(
+        "Include front matter keys",
+        'It can set multi patterns by line breaks. If not empty, only these keys are shown, then "Exclude front matter keys" is applied to the result.',
+        (setting) => {
+          setting.addTextArea((tc) =>
+            TextAreaComponentEvent.onChange(
+              tc,
+              async (value) => {
+                command.includeFrontMatterKeys = smartLineBreakSplit(value);
+                await saveCommandWithValidation();
+              },
+              {
+                className:
+                  "another-quick-switcher__settings__include_front_matter_keys",
+              },
+            ).setValue(command.includeFrontMatterKeys!.join("\n")),
           );
         },
       );

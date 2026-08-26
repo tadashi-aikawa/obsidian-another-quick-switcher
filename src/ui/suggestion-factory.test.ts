@@ -2,7 +2,7 @@ import { describe, expect, test } from "@jest/globals";
 import type { MatchQueryResult, SuggestionItem } from "../matcher";
 import { createSuggestionItem as createItem } from "../test-helpers/suggestion-item";
 import { ALIAS, FILE } from "./icons";
-import { createElements } from "./suggestion-factory";
+import { createElements, filterFrontMatter } from "./suggestion-factory";
 import {
   findAllByClass,
   findByClass,
@@ -18,6 +18,7 @@ installObsidianDomStubs();
 const defaultOptions = {
   showFrontMatter: false,
   excludeFrontMatterKeys: [],
+  includeFrontMatterKeys: [],
   showDirectory: false,
   showDirectoryAtNewLine: false,
   showFullPathOfDirectory: false,
@@ -54,6 +55,57 @@ const hitWordsOf = (el: StubElement) =>
   );
 
 // ---- tests ----
+
+describe("filterFrontMatter", () => {
+  const frontMatter = {
+    status: "done",
+    category: "note",
+    secret: "hidden",
+  };
+
+  test("includeとexcludeが空なら全キーを残す", () => {
+    expect(filterFrontMatter(frontMatter, [], [])).toEqual(frontMatter);
+  });
+
+  test("includeが空ならexcludeのキーだけを除外する", () => {
+    expect(filterFrontMatter(frontMatter, [], ["secret"])).toEqual({
+      status: "done",
+      category: "note",
+    });
+  });
+
+  test("excludeが空ならincludeのキーだけを残す", () => {
+    expect(filterFrontMatter(frontMatter, ["status"], [])).toEqual({
+      status: "done",
+    });
+  });
+
+  test("includeと重ならないexcludeを指定するとincludeのキーだけを残す", () => {
+    expect(
+      filterFrontMatter(frontMatter, ["status", "category"], ["secret"]),
+    ).toEqual({ status: "done", category: "note" });
+  });
+
+  test("includeとexcludeに同じキーがある場合はexcludeを優先する", () => {
+    expect(
+      filterFrontMatter(frontMatter, ["status", "category"], ["status"]),
+    ).toEqual({ category: "note" });
+  });
+
+  test("includeに存在しないキーを指定してもエラーにならない", () => {
+    expect(filterFrontMatter(frontMatter, ["missing"], [])).toEqual({});
+  });
+
+  test("nullとundefinedはincludeに指定されていても除外する", () => {
+    expect(
+      filterFrontMatter(
+        { status: "done", nullable: null, undefinable: undefined },
+        ["status", "nullable", "undefinable"],
+        [],
+      ),
+    ).toEqual({ status: "done" });
+  });
+});
 
 describe("createElements: itemDiv", () => {
   test("マッチなしのmdファイルはタイトルにbasenameが表示され、meta/descriptionは作られない", () => {
@@ -317,6 +369,31 @@ describe("createElements: metaDiv", () => {
       "another-quick-switcher__item__meta__front_matter__value",
     ).map((x) => x.textContent);
     expect(values).toEqual(["done", "a", "b"]);
+  });
+
+  test("showFrontMatterでincludeFrontMatterKeysのプロパティだけが表示される", () => {
+    const { metaDiv } = elementsOf(
+      createItem({
+        frontMatter: {
+          status: "done",
+          tags: ["a", "b"],
+          secret: "hidden",
+        },
+      }),
+      options({ showFrontMatter: true, includeFrontMatterKeys: ["status"] }),
+    );
+
+    const keys = findAllByClass(
+      metaDiv!,
+      "another-quick-switcher__item__meta__front_matter__key",
+    ).map((x) => x.textContent);
+    expect(keys).toEqual(["status"]);
+
+    const values = findAllByClass(
+      metaDiv!,
+      "another-quick-switcher__item__meta__front_matter__value",
+    ).map((x) => x.textContent);
+    expect(values).toEqual(["done"]);
   });
 
   test("displayDescriptionBelowTitleでdescriptionプロパティがハイライト付きで表示され、プロパティ一覧からは除外される", () => {

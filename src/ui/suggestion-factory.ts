@@ -29,6 +29,7 @@ interface Elements {
 interface Options {
   showFrontMatter: boolean;
   excludeFrontMatterKeys: string[];
+  includeFrontMatterKeys: string[];
   showDirectory: boolean;
   showDirectoryAtNewLine: boolean;
   showFullPathOfDirectory: boolean;
@@ -621,6 +622,20 @@ function createDescriptionDiv(args: {
   return descriptionDiv;
 }
 
+export function filterFrontMatter<T extends { [key: string]: any }>(
+  frontMatter: T,
+  includeKeys: string[],
+  excludeKeys: string[],
+): T {
+  return omitBy(
+    frontMatter,
+    (key, value) =>
+      value == null ||
+      excludeKeys.includes(key) ||
+      (includeKeys.length > 0 && !includeKeys.includes(key)),
+  );
+}
+
 export function createElements(
   item: SuggestionItem,
   options: Options,
@@ -641,10 +656,10 @@ export function createElements(
   const itemDiv = createItemDiv(item, essenceAliases, isTitleMatched, options);
 
   // meta
-  const frontMatter = omitBy(
+  const frontMatter = filterFrontMatter(
     item.frontMatter ?? {},
-    (key, value) =>
-      options.excludeFrontMatterKeys.includes(key) || value == null,
+    options.includeFrontMatterKeys ?? [],
+    options.excludeFrontMatterKeys,
   );
   const maxScore = round(
     Math.max(...item.matchResults.map((a) => a.score ?? 0)),

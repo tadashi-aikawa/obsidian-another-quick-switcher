@@ -97,6 +97,21 @@ You can use the following names as a `Sort priorities`.
 > **Note**
 > Use `(Property)` like `@<property>` (`@<property>:asc`) or `@<property>:desc` for descending order. For arrays, the first element is used; missing values sort last.
 
+#### Front matter display
+
+Enable `Show front matter` to display front matter in suggestions. You can narrow down the displayed keys with the following settings.
+
+| Setting                     | Description                                                                | Since  |
+| --------------------------- | -------------------------------------------------------------------------- | ------ |
+| `Exclude front matter keys` | Hides the specified keys. It can set multi patterns by line breaks.         | 7.4.0  |
+| `Include front matter keys` | Shows only the specified keys. If empty, all keys are shown.                | 14.8.0 |
+
+> **Note**
+> If `Include front matter keys` is not empty, only those keys are shown, then `Exclude front matter keys` is applied to the result. Therefore a key listed in both is not shown.
+
+> **Note**
+> These settings only affect the display. Searching by `@key:value` still works for every key.
+
 #### Relative updated period display
 
 You can show the relative updated period in suggestions. Configure it per search command.

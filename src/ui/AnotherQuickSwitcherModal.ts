@@ -747,6 +747,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     const { itemDiv, metaDiv, descriptionDiv } = createElements(item, {
       showFrontMatter: this.command.showFrontMatter,
       excludeFrontMatterKeys: this.command.excludeFrontMatterKeys,
+      includeFrontMatterKeys: this.command.includeFrontMatterKeys,
       showDirectory: this.settings.showDirectory,
       showDirectoryAtNewLine: this.settings.showDirectoryAtNewLine,
       showFullPathOfDirectory: this.settings.showFullPathOfDirectory,
@@ -1371,6 +1372,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
             this.command.autoPreviewDelayMilliSeconds,
           showFrontMatter: this.command.showFrontMatter,
           excludeFrontMatterKeys: this.command.excludeFrontMatterKeys,
+          includeFrontMatterKeys: this.command.includeFrontMatterKeys,
           sortPriorities: this.command.sortPriorities,
           excludePrefixPathPatterns: this.command.excludePrefixPathPatterns,
           includePrefixPathPatterns: this.command.includePrefixPathPatterns,
