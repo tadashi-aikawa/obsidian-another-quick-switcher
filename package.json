@@ -29,6 +29,6 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "ts-deepmerge": "7.0.3"
+    "ts-deepmerge": "8.0.0"
   }
 }
