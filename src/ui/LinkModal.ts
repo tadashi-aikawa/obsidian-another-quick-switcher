@@ -25,7 +25,7 @@ import { Logger } from "../utils/logger";
 import { toLeafType } from "../utils/mouse";
 import { isExcalidraw, normalizePath } from "../utils/path";
 import { capitalizeFirstLetter, smartIncludes } from "../utils/strings";
-import { FOLDER, PREVIEW } from "./icons";
+import { createFolderIcon, createPreviewIcon } from "./icons";
 import { addMobileDismissButton, setFloatingModal } from "./modal";
 
 interface SuggestionItem {
@@ -152,7 +152,7 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
           cls: "another-quick-switcher__link__auto-preview-icon",
         }),
       );
-      this.previewIcon?.insertAdjacentHTML("beforeend", PREVIEW);
+      this.previewIcon?.appendChild(createPreviewIcon());
     }
   }
 
@@ -300,7 +300,7 @@ export class LinkModal extends AbstractSuggestionModal<SuggestionItem> {
         const directoryDiv = createDiv({
           cls: "another-quick-switcher__item__directory",
         });
-        directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
+        directoryDiv.appendChild(createFolderIcon());
         const text = this.settings.showFullPathOfDirectory
           ? item.file?.parent?.path
           : item.file?.parent?.name;

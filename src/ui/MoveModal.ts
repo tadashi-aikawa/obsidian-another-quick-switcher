@@ -4,7 +4,7 @@ import { createInstructions } from "../keys";
 import type { Hotkeys, MoveFolderSortPriority, Settings } from "../settings";
 import { excludeItems } from "../utils/collection-helper";
 import { smartIncludes, smartMicroFuzzy } from "../utils/strings";
-import { FOLDER } from "./icons";
+import { createFolderIcon } from "./icons";
 import { addMobileDismissButton } from "./modal";
 import type { UnsafeModalInterface } from "./UnsafeModalInterface";
 
@@ -376,7 +376,7 @@ export class MoveModal extends SuggestModal<SuggestionItem> {
     const directoryDiv = createDiv({
       cls: "another-quick-switcher__item__directory",
     });
-    directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
+    directoryDiv.appendChild(createFolderIcon());
 
     // Apply highlighting to directory name if it's a directory match
     const parentName = item.folder.parent?.name || "";

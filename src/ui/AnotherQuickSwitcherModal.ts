@@ -57,7 +57,14 @@ import {
   smartWhitespaceSplit,
 } from "../utils/strings";
 import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
-import { FILTER, HEADER, LINK, PREVIEW, SEARCH, TAG } from "./icons";
+import {
+  createFilterIcon,
+  createHeaderIcon,
+  createLinkIcon,
+  createPreviewIcon,
+  createSearchIcon,
+  createTagIcon,
+} from "./icons";
 import { addMobileDismissButton, setFloatingModal } from "./modal";
 import { createElements } from "./suggestion-factory";
 
@@ -397,7 +404,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
       this.previewIcon = createDiv({
         cls: "another-quick-switcher__status__auto-preview-icon",
       });
-      this.previewIcon.insertAdjacentHTML("beforeend", PREVIEW);
+      this.previewIcon.appendChild(createPreviewIcon());
       this.searchCommandEl.appendChild(this.previewIcon);
     }
   }
@@ -704,7 +711,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     this.searchCommandEl = createDiv({
       cls: "another-quick-switcher__status__search-command",
     });
-    this.searchCommandEl.insertAdjacentHTML("beforeend", SEARCH);
+    this.searchCommandEl.appendChild(createSearchIcon());
 
     this.searchCommandEl.createSpan({
       text: this.command.name,
@@ -715,13 +722,13 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
     });
 
     if (this.command.searchBy.tag) {
-      this.searchCommandEl.insertAdjacentHTML("beforeend", TAG);
+      this.searchCommandEl.appendChild(createTagIcon());
     }
     if (this.command.searchBy.header) {
-      this.searchCommandEl.insertAdjacentHTML("beforeend", HEADER);
+      this.searchCommandEl.appendChild(createHeaderIcon());
     }
     if (this.command.searchBy.link) {
-      this.searchCommandEl.insertAdjacentHTML("beforeend", LINK);
+      this.searchCommandEl.appendChild(createLinkIcon());
     }
     this.refreshAutoPreviewIcon();
 
@@ -738,7 +745,7 @@ export class AnotherQuickSwitcherModal extends AbstractSuggestionModal<Suggestio
         text: this.searchQuery,
         cls: "another-quick-switcher__status__default-input",
       });
-      this.defaultInputEl.insertAdjacentHTML("afterbegin", FILTER);
+      this.defaultInputEl.prepend(createFilterIcon());
       this.resultContainerEl.before(this.defaultInputEl);
     }
   }

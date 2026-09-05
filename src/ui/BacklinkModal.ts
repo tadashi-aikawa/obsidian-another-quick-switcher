@@ -31,7 +31,7 @@ import {
   trimLineByEllipsis,
 } from "../utils/strings";
 import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
-import { FOLDER } from "./icons";
+import { createFolderIcon } from "./icons";
 import { addMobileDismissButton, setFloatingModal } from "./modal";
 
 interface SuggestionItem {
@@ -359,7 +359,7 @@ export class BacklinkModal extends AbstractSuggestionModal<SuggestionItem> {
         const directoryDiv = createDiv({
           cls: "another-quick-switcher__item__directory",
         });
-        directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
+        directoryDiv.appendChild(createFolderIcon());
         const text = this.settings.showFullPathOfDirectory
           ? item.file.parent?.path
           : item.file.parent?.name;

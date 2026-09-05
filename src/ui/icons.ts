@@ -1,19 +1,334 @@
-export const FILE = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="15" height="15"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path></g></svg>`;
-export const FOLDER = `<svg viewBox="0 0 100 100" class="folder" width="17" height="17"><path fill="currentColor" stroke="currentColor" d="M6.1,8c-3.3,0-6,2.7-6,6v73.8c-0.1,0.5-0.1,0.9,0.1,1.4c0.6,2.7,3,4.8,5.9,4.8h78c3,0,5.4-2.2,5.9-5.1 c0-0.1,0.1-0.2,0.1-0.4c0,0,0-0.1,0-0.1l0.1-0.3c0,0,0,0,0-0.1l9.9-53.6l0.1-0.2V34c0-3.3-2.7-6-6-6v-6c0-3.3-2.7-6-6-6H36.1 c0,0,0,0-0.1,0c-0.1,0-0.2-0.2-0.6-0.6c-0.5-0.6-1.1-1.5-1.7-2.5c-0.6-1-1.3-2.1-2.1-3C30.9,9,29.7,8,28.1,8L6.1,8z M6.1,12h22 c-0.1,0,0.1,0,0.6,0.6c0.5,0.6,1.1,1.5,1.7,2.5c0.6,1,1.3,2.1,2.1,3c0.8,0.9,1.9,1.9,3.6,1.9h52c1.1,0,2,0.9,2,2v6h-74 c-3.1,0-5.7,2.5-5.9,5.6h-0.1L10.1,34l-6,32.4V14C4.1,12.9,4.9,12,6.1,12z M16.1,32h78c1.1,0,2,0.9,2,2l-9.8,53.1l-0.1,0.1 c0,0.1,0,0.2-0.1,0.2c0,0.1,0,0.2-0.1,0.2c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0.1,0,0.2-0.1,0.3c0,0.1,0,0.1,0,0.2 c0,0.1,0,0.2,0,0.2c-0.3,0.8-1,1.4-1.9,1.4h-78c-1.1,0-2-0.9-2-2L14,34.4l0.1-0.2V34C14.1,32.9,14.9,32,16.1,32L16.1,32z"></path></svg>`;
-export const ALIAS = `<svg viewBox="0 0 100 100" class="forward-arrow" width="16" height="16"><path fill="currentColor" stroke="currentColor" d="m9.9,89.09226c-0.03094,0 -0.05414,0 -0.08508,0c-1.06734,-0.04641 -1.91039,-0.92812 -1.89492,-1.99547c0.00774,-0.48726 1.14469,-48.13101 47.52,-49.44586l0,-13.89094c0,-0.7657 0.44086,-1.4618 1.12922,-1.78664c0.68062,-0.33258 1.5082,-0.23203 2.09601,0.2475l31.68,25.74c0.46406,0.37899 0.73476,0.9436 0.73476,1.53914c0,0.59555 -0.2707,1.16016 -0.72703,1.53914l-31.68,25.74c-0.59555,0.47953 -1.41539,0.57234 -2.10375,0.2475c-0.68836,-0.32485 -1.12922,-1.02094 -1.12922,-1.78664l0,-13.84453c-41.26289,0.75024 -43.49039,24.81961 -43.56773,25.85601c-0.06961,1.04414 -0.93586,1.84078 -1.97226,1.84078z"></path></svg>`;
-export const TAG = `<svg viewBox="0 0 100 100" class="hashtag" width="17" height="17"><path fill="currentColor" stroke="currentColor" d="M36,18l-1.5,16H20l-0.4,4h14.5l-2.4,26H17.2l-0.4,4h14.5L30,82h4l1.3-14h26L60,82h4l1.3-14h15.5l0.4-4H65.7l2.4-26h15.5 l0.4-4H68.5L70,18h-4l-1.5,16h-26L40,18L36,18z M38.1,38h26l-2.4,26h-26L38.1,38z"></path></svg>`;
-export const LINK = `<svg viewBox="0 0 100 100" class="links-going-out" width="15" height="15"><path fill="currentColor" stroke="currentColor" d="M76.4,11.7c3.7,3.8,5.6,8.9,5,14.3c-0.5,4-2.4,7.6-5.2,10.5c-2.6,2.6-6.7,6.7-9.2,9.2c-2,2-4.4,3.6-7.1,4.5 c-4.5,1.4-9,1-12.8-0.9l2.9-2.9c1.4,0.5,3,0.8,4.5,0.8c3.6,0,7-1.4,9.5-3.9l9.6-9.6c3.3-3.3,4.7-8.1,3.5-13 c-0.3-1.2-0.8-2.4-1.5-3.5C73,13,68.7,10.6,64,10.6c-3.6,0-7,1.4-9.5,3.9L45,24c-2.5,2.5-3.9,5.9-3.9,9.5c0,1.6,0.3,3.1,0.8,4.5 l-3,3c-1.1-2.3-1.7-4.8-1.7-7.5c0-0.7,0-1.4,0.1-2.1c0.5-3.8,2.2-7.4,5-10.2l9.4-9.4C54.5,9,58.2,7,62.1,6.6 C67.5,6.1,72.6,7.9,76.4,11.7L76.4,11.7z M54.4,34.7c0.3,0.7,0.1,1.6-0.4,2.1L30.9,59.9c-0.5,0.5-1.2,0.7-1.9,0.5 s-1.2-0.7-1.4-1.4s0-1.4,0.5-1.9L51.2,34c0.3-0.4,0.8-0.6,1.3-0.6C53.4,33.5,54.1,34,54.4,34.7z M35.1,44.9l-2.9,2.9 c-1.4-0.5-3-0.8-4.5-0.8c-3.6,0-7,1.4-9.5,3.9l-9.6,9.6c-3.3,3.4-4.7,8.1-3.5,13c0.3,1.2,0.8,2.4,1.5,3.5 c2.6,4.2,6.9,6.6,11.6,6.6c3.6,0,7-1.4,9.5-3.9l9.6-9.6c2.5-2.5,3.9-5.9,3.9-9.5c0-1.6-0.3-3.1-0.8-4.5l2.9-2.9 c1.1,2.3,1.7,4.8,1.7,7.5c0,3-0.8,5.9-2.2,8.5c-0.8,1-1.5,1.9-2.1,2.9c-0.3,0.3-0.5,0.6-0.8,0.8l-9.4,9.4 c-2.9,2.9-6.6,4.8-10.6,5.2c-6.2,0.6-12-1.9-15.8-6.9c-2.4-3.2-3.6-7.2-3.4-11.2c0-0.1,0-0.2,0-0.3c0.3-4.2,2-8.1,5-11.1l9.4-9.4 c2-2,4.4-3.6,7.1-4.5C26.8,42.6,31.3,43,35.1,44.9L35.1,44.9z"></path><path fill="currentColor" stroke="currentColor" d="M99.2,69.3c0-0.2,0-0.2,0-0.4c0-0.2,0-0.2,0-0.4s0-0.2-0.2-0.4c0-0.2,0-0.2-0.2-0.4l0,0l-0.2-0.2l-0.2-0.2L79.2,53 c-0.6-0.4-1.3-0.6-1.9-0.2c-0.8,0.4-1.2,1-1.2,1.7V62c-8.1,0.4-14.6,3.1-19.2,8.1c-8.5,9-7.7,22.5-7.7,23.1c0,0.2,0,0.2,0,0.4 c0,0.2,0,0.2,0,0.4s0.2,0.2,0.2,0.4l0.2,0.2c0.2,0.2,0.2,0.2,0.4,0.2l0.2,0.2c0.2,0,0.4,0,0.6,0.2H51l0,0l0,0c0,0,0,0,0.2,0 s0.2,0,0.4,0s0.2,0,0.4-0.2c0.2,0,0.2-0.2,0.4-0.2s0.2-0.2,0.4-0.2c0,0,0.2-0.2,0.2-0.4c0-0.2,0.2-0.2,0.2-0.4s0-0.2,0-0.4 c0-0.2,0-0.2,0-0.4c0-0.8,0.6-16.6,23.1-17.5v7.3c0,0.8,0.4,1.3,1,1.7c0.6,0.4,1.3,0.2,1.9-0.2l19.2-14l0.2-0.2l0.2-0.2l0,0 c0-0.2,0.2-0.2,0.2-0.4L99.2,69.3L99.2,69.3z"></path></svg>`;
-export const HEADER = `<svg viewBox="0 0 100 100" class="bullet-list" width="15" height="15"><path fill="currentColor" stroke="currentColor" d="M16.4,16.4c-3.5,0-6.4,2.9-6.4,6.4s2.9,6.4,6.4,6.4s6.4-2.9,6.4-6.4S19.9,16.4,16.4,16.4z M16.4,19.6 c1.8,0,3.2,1.4,3.2,3.2c0,1.8-1.4,3.2-3.2,3.2s-3.2-1.4-3.2-3.2C13.2,21,14.6,19.6,16.4,19.6z M29.2,21.2v3.2H90v-3.2H29.2z M16.4,43.6c-3.5,0-6.4,2.9-6.4,6.4s2.9,6.4,6.4,6.4s6.4-2.9,6.4-6.4S19.9,43.6,16.4,43.6z M16.4,46.8c1.8,0,3.2,1.4,3.2,3.2 s-1.4,3.2-3.2,3.2s-3.2-1.4-3.2-3.2S14.6,46.8,16.4,46.8z M29.2,48.4v3.2H90v-3.2H29.2z M16.4,70.8c-3.5,0-6.4,2.9-6.4,6.4 c0,3.5,2.9,6.4,6.4,6.4s6.4-2.9,6.4-6.4C22.8,73.7,19.9,70.8,16.4,70.8z M16.4,74c1.8,0,3.2,1.4,3.2,3.2c0,1.8-1.4,3.2-3.2,3.2 s-3.2-1.4-3.2-3.2C13.2,75.4,14.6,74,16.4,74z M29.2,75.6v3.2H90v-3.2H29.2z"></path></svg>`;
-export const SEARCH = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v3"></path>
-  <polyline points="14 2 14 8 20 8"></polyline>
-  <path d="M5 17a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
-  <path d="m9 18-1.5-1.5"></path>
-</svg>`;
-export const FILTER = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-</svg>`;
-export const FRONT_MATTER = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 20 20"><g fill="none"><path d="M10.32 2.013A4 4 0 0 0 6.162 7.13l-3.987 3.986a.6.6 0 0 0-.176.424V14.4a.6.6 0 0 0 .6.6h2.8a.6.6 0 0 0 .6-.6V13h1.9a.6.6 0 0 0 .6-.6v-1.693l.735-.735a5.51 5.51 0 0 1-.569-.846l-.99.991a.6.6 0 0 0-.176.424V12H5.6a.6.6 0 0 0-.6.6V14H3v-2.293l4.32-4.32l-.118-.303a3.001 3.001 0 0 1 1.96-3.965c.33-.423.72-.796 1.157-1.106zM13.5 6.25a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5zM9 6.5a4.5 4.5 0 1 1 7 3.742v2.05l.783.784a.6.6 0 0 1 0 .848L15.707 15l1.068 1.067a.6.6 0 0 1-.05.893l-2.35 1.88a.6.6 0 0 1-.75 0l-2.4-1.92a.6.6 0 0 1-.225-.468v-6.21A4.496 4.496 0 0 1 9 6.5zM13.5 3a3.5 3.5 0 0 0-1.75 6.532a.5.5 0 0 1 .25.433v6.295l2 1.6l1.751-1.401l-1.034-1.035a.6.6 0 0 1 0-.848l1.076-1.076l-.617-.617a.6.6 0 0 1-.176-.424V9.965a.5.5 0 0 1 .25-.433A3.5 3.5 0 0 0 13.5 3z" fill="currentColor"></path></g></svg>`;
-export const PREVIEW = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 20 20"><g fill="none"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5a2 2 0 0 0-2-2zm0 16H5V7h14v12zm-5.5-6c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5s1.5.67 1.5 1.5zM12 9c-2.73 0-5.06 1.66-6 4c.94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4zm0 6.5a2.5 2.5 0 0 1 0-5a2.5 2.5 0 0 1 0 5z" fill="currentColor"></path></g></svg>`;
-export const SCORE = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="16" viewBox="0 0 20 20"><g fill="none"><path d="M11 6H9V4h2v2zm4-2h-2v2h2V4zM9 14h2v-2H9v2zm10-4V8h-2v2h2zm0 4v-2h-2v2h2zm-6 0h2v-2h-2v2zm6-10h-2v2h2V4zm-6 4V6h-2v2h2zm-6 2V8h2V6H7V4H5v16h2v-8h2v-2H7zm8 2h2v-2h-2v2zm-4-2v2h2v-2h-2zM9 8v2h2V8H9zm4 2h2V8h-2v2zm2-4v2h2V6h-2z" fill="currentColor"></path></g></svg>`;
-export const CROSS = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`;
+/**
+ * アイコンのSVGをDOM APIだけで組み立てるモジュール。
+ *
+ * 以前はSVGのHTML文字列をinsertAdjacentHTMLで差し込んでいたが、
+ * Obsidianコミュニティプラグインの自動レビュー(no-unsanitized/method)で
+ * エラー扱いになるため、文字列HTMLを経由しない生成に置き換えている。
+ * 見た目を変えないよう、属性の値と並び順は元のSVG文字列のまま保っている。
+ */
+
+type SvgSpec = {
+  tag: keyof SVGElementTagNameMap;
+  attr: Record<string, string>;
+  children?: SvgSpec[];
+};
+
+function buildSvg(spec: SvgSpec): SVGElement {
+  const el: SVGElement = createSvg(spec.tag, { attr: spec.attr });
+  for (const child of spec.children ?? []) {
+    el.appendChild(buildSvg(child));
+  }
+  return el;
+}
+
+/** lucide系アイコン(SEARCH/FILTER/CROSS)で共通のsvg属性 */
+function lucideSvgAttr(size: string): Record<string, string> {
+  return {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    "stroke-width": "2",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+  };
+}
+
+const FILE_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: {
+    xmlns: "http://www.w3.org/2000/svg",
+    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+    viewBox: "0 0 24 24",
+    width: "15",
+    height: "15",
+  },
+  children: [
+    {
+      tag: "g",
+      attr: {
+        fill: "none",
+        stroke: "currentColor",
+        "stroke-width": "2",
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+      },
+      children: [
+        { tag: "path", attr: { d: "M14 3v4a1 1 0 0 0 1 1h4" } },
+        {
+          tag: "path",
+          attr: {
+            d: "M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z",
+          },
+        },
+      ],
+    },
+  ],
+};
+
+const FOLDER_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: {
+    viewBox: "0 0 100 100",
+    class: "folder",
+    width: "17",
+    height: "17",
+  },
+  children: [
+    {
+      tag: "path",
+      attr: {
+        fill: "currentColor",
+        stroke: "currentColor",
+        d: "M6.1,8c-3.3,0-6,2.7-6,6v73.8c-0.1,0.5-0.1,0.9,0.1,1.4c0.6,2.7,3,4.8,5.9,4.8h78c3,0,5.4-2.2,5.9-5.1 c0-0.1,0.1-0.2,0.1-0.4c0,0,0-0.1,0-0.1l0.1-0.3c0,0,0,0,0-0.1l9.9-53.6l0.1-0.2V34c0-3.3-2.7-6-6-6v-6c0-3.3-2.7-6-6-6H36.1 c0,0,0,0-0.1,0c-0.1,0-0.2-0.2-0.6-0.6c-0.5-0.6-1.1-1.5-1.7-2.5c-0.6-1-1.3-2.1-2.1-3C30.9,9,29.7,8,28.1,8L6.1,8z M6.1,12h22 c-0.1,0,0.1,0,0.6,0.6c0.5,0.6,1.1,1.5,1.7,2.5c0.6,1,1.3,2.1,2.1,3c0.8,0.9,1.9,1.9,3.6,1.9h52c1.1,0,2,0.9,2,2v6h-74 c-3.1,0-5.7,2.5-5.9,5.6h-0.1L10.1,34l-6,32.4V14C4.1,12.9,4.9,12,6.1,12z M16.1,32h78c1.1,0,2,0.9,2,2l-9.8,53.1l-0.1,0.1 c0,0.1,0,0.2-0.1,0.2c0,0.1,0,0.2-0.1,0.2c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0.1,0,0.2-0.1,0.3c0,0.1,0,0.1,0,0.2 c0,0.1,0,0.2,0,0.2c-0.3,0.8-1,1.4-1.9,1.4h-78c-1.1,0-2-0.9-2-2L14,34.4l0.1-0.2V34C14.1,32.9,14.9,32,16.1,32L16.1,32z",
+      },
+    },
+  ],
+};
+
+const ALIAS_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: {
+    viewBox: "0 0 100 100",
+    class: "forward-arrow",
+    width: "16",
+    height: "16",
+  },
+  children: [
+    {
+      tag: "path",
+      attr: {
+        fill: "currentColor",
+        stroke: "currentColor",
+        d: "m9.9,89.09226c-0.03094,0 -0.05414,0 -0.08508,0c-1.06734,-0.04641 -1.91039,-0.92812 -1.89492,-1.99547c0.00774,-0.48726 1.14469,-48.13101 47.52,-49.44586l0,-13.89094c0,-0.7657 0.44086,-1.4618 1.12922,-1.78664c0.68062,-0.33258 1.5082,-0.23203 2.09601,0.2475l31.68,25.74c0.46406,0.37899 0.73476,0.9436 0.73476,1.53914c0,0.59555 -0.2707,1.16016 -0.72703,1.53914l-31.68,25.74c-0.59555,0.47953 -1.41539,0.57234 -2.10375,0.2475c-0.68836,-0.32485 -1.12922,-1.02094 -1.12922,-1.78664l0,-13.84453c-41.26289,0.75024 -43.49039,24.81961 -43.56773,25.85601c-0.06961,1.04414 -0.93586,1.84078 -1.97226,1.84078z",
+      },
+    },
+  ],
+};
+
+const TAG_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: {
+    viewBox: "0 0 100 100",
+    class: "hashtag",
+    width: "17",
+    height: "17",
+  },
+  children: [
+    {
+      tag: "path",
+      attr: {
+        fill: "currentColor",
+        stroke: "currentColor",
+        d: "M36,18l-1.5,16H20l-0.4,4h14.5l-2.4,26H17.2l-0.4,4h14.5L30,82h4l1.3-14h26L60,82h4l1.3-14h15.5l0.4-4H65.7l2.4-26h15.5 l0.4-4H68.5L70,18h-4l-1.5,16h-26L40,18L36,18z M38.1,38h26l-2.4,26h-26L38.1,38z",
+      },
+    },
+  ],
+};
+
+const LINK_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: {
+    viewBox: "0 0 100 100",
+    class: "links-going-out",
+    width: "15",
+    height: "15",
+  },
+  children: [
+    {
+      tag: "path",
+      attr: {
+        fill: "currentColor",
+        stroke: "currentColor",
+        d: "M76.4,11.7c3.7,3.8,5.6,8.9,5,14.3c-0.5,4-2.4,7.6-5.2,10.5c-2.6,2.6-6.7,6.7-9.2,9.2c-2,2-4.4,3.6-7.1,4.5 c-4.5,1.4-9,1-12.8-0.9l2.9-2.9c1.4,0.5,3,0.8,4.5,0.8c3.6,0,7-1.4,9.5-3.9l9.6-9.6c3.3-3.3,4.7-8.1,3.5-13 c-0.3-1.2-0.8-2.4-1.5-3.5C73,13,68.7,10.6,64,10.6c-3.6,0-7,1.4-9.5,3.9L45,24c-2.5,2.5-3.9,5.9-3.9,9.5c0,1.6,0.3,3.1,0.8,4.5 l-3,3c-1.1-2.3-1.7-4.8-1.7-7.5c0-0.7,0-1.4,0.1-2.1c0.5-3.8,2.2-7.4,5-10.2l9.4-9.4C54.5,9,58.2,7,62.1,6.6 C67.5,6.1,72.6,7.9,76.4,11.7L76.4,11.7z M54.4,34.7c0.3,0.7,0.1,1.6-0.4,2.1L30.9,59.9c-0.5,0.5-1.2,0.7-1.9,0.5 s-1.2-0.7-1.4-1.4s0-1.4,0.5-1.9L51.2,34c0.3-0.4,0.8-0.6,1.3-0.6C53.4,33.5,54.1,34,54.4,34.7z M35.1,44.9l-2.9,2.9 c-1.4-0.5-3-0.8-4.5-0.8c-3.6,0-7,1.4-9.5,3.9l-9.6,9.6c-3.3,3.4-4.7,8.1-3.5,13c0.3,1.2,0.8,2.4,1.5,3.5 c2.6,4.2,6.9,6.6,11.6,6.6c3.6,0,7-1.4,9.5-3.9l9.6-9.6c2.5-2.5,3.9-5.9,3.9-9.5c0-1.6-0.3-3.1-0.8-4.5l2.9-2.9 c1.1,2.3,1.7,4.8,1.7,7.5c0,3-0.8,5.9-2.2,8.5c-0.8,1-1.5,1.9-2.1,2.9c-0.3,0.3-0.5,0.6-0.8,0.8l-9.4,9.4 c-2.9,2.9-6.6,4.8-10.6,5.2c-6.2,0.6-12-1.9-15.8-6.9c-2.4-3.2-3.6-7.2-3.4-11.2c0-0.1,0-0.2,0-0.3c0.3-4.2,2-8.1,5-11.1l9.4-9.4 c2-2,4.4-3.6,7.1-4.5C26.8,42.6,31.3,43,35.1,44.9L35.1,44.9z",
+      },
+    },
+    {
+      tag: "path",
+      attr: {
+        fill: "currentColor",
+        stroke: "currentColor",
+        d: "M99.2,69.3c0-0.2,0-0.2,0-0.4c0-0.2,0-0.2,0-0.4s0-0.2-0.2-0.4c0-0.2,0-0.2-0.2-0.4l0,0l-0.2-0.2l-0.2-0.2L79.2,53 c-0.6-0.4-1.3-0.6-1.9-0.2c-0.8,0.4-1.2,1-1.2,1.7V62c-8.1,0.4-14.6,3.1-19.2,8.1c-8.5,9-7.7,22.5-7.7,23.1c0,0.2,0,0.2,0,0.4 c0,0.2,0,0.2,0,0.4s0.2,0.2,0.2,0.4l0.2,0.2c0.2,0.2,0.2,0.2,0.4,0.2l0.2,0.2c0.2,0,0.4,0,0.6,0.2H51l0,0l0,0c0,0,0,0,0.2,0 s0.2,0,0.4,0s0.2,0,0.4-0.2c0.2,0,0.2-0.2,0.4-0.2s0.2-0.2,0.4-0.2c0,0,0.2-0.2,0.2-0.4c0-0.2,0.2-0.2,0.2-0.4s0-0.2,0-0.4 c0-0.2,0-0.2,0-0.4c0-0.8,0.6-16.6,23.1-17.5v7.3c0,0.8,0.4,1.3,1,1.7c0.6,0.4,1.3,0.2,1.9-0.2l19.2-14l0.2-0.2l0.2-0.2l0,0 c0-0.2,0.2-0.2,0.2-0.4L99.2,69.3L99.2,69.3z",
+      },
+    },
+  ],
+};
+
+const HEADER_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: {
+    viewBox: "0 0 100 100",
+    class: "bullet-list",
+    width: "15",
+    height: "15",
+  },
+  children: [
+    {
+      tag: "path",
+      attr: {
+        fill: "currentColor",
+        stroke: "currentColor",
+        d: "M16.4,16.4c-3.5,0-6.4,2.9-6.4,6.4s2.9,6.4,6.4,6.4s6.4-2.9,6.4-6.4S19.9,16.4,16.4,16.4z M16.4,19.6 c1.8,0,3.2,1.4,3.2,3.2c0,1.8-1.4,3.2-3.2,3.2s-3.2-1.4-3.2-3.2C13.2,21,14.6,19.6,16.4,19.6z M29.2,21.2v3.2H90v-3.2H29.2z M16.4,43.6c-3.5,0-6.4,2.9-6.4,6.4s2.9,6.4,6.4,6.4s6.4-2.9,6.4-6.4S19.9,43.6,16.4,43.6z M16.4,46.8c1.8,0,3.2,1.4,3.2,3.2 s-1.4,3.2-3.2,3.2s-3.2-1.4-3.2-3.2S14.6,46.8,16.4,46.8z M29.2,48.4v3.2H90v-3.2H29.2z M16.4,70.8c-3.5,0-6.4,2.9-6.4,6.4 c0,3.5,2.9,6.4,6.4,6.4s6.4-2.9,6.4-6.4C22.8,73.7,19.9,70.8,16.4,70.8z M16.4,74c1.8,0,3.2,1.4,3.2,3.2c0,1.8-1.4,3.2-3.2,3.2 s-3.2-1.4-3.2-3.2C13.2,75.4,14.6,74,16.4,74z M29.2,75.6v3.2H90v-3.2H29.2z",
+      },
+    },
+  ],
+};
+
+const SEARCH_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: lucideSvgAttr("16"),
+  children: [
+    {
+      tag: "path",
+      attr: { d: "M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v3" },
+    },
+    { tag: "polyline", attr: { points: "14 2 14 8 20 8" } },
+    { tag: "path", attr: { d: "M5 17a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" } },
+    { tag: "path", attr: { d: "m9 18-1.5-1.5" } },
+  ],
+};
+
+const FILTER_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: lucideSvgAttr("16"),
+  children: [
+    {
+      tag: "polygon",
+      attr: { points: "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" },
+    },
+  ],
+};
+
+const FRONT_MATTER_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "17",
+    height: "17",
+    viewBox: "0 0 20 20",
+  },
+  children: [
+    {
+      tag: "g",
+      attr: { fill: "none" },
+      children: [
+        {
+          tag: "path",
+          attr: {
+            d: "M10.32 2.013A4 4 0 0 0 6.162 7.13l-3.987 3.986a.6.6 0 0 0-.176.424V14.4a.6.6 0 0 0 .6.6h2.8a.6.6 0 0 0 .6-.6V13h1.9a.6.6 0 0 0 .6-.6v-1.693l.735-.735a5.51 5.51 0 0 1-.569-.846l-.99.991a.6.6 0 0 0-.176.424V12H5.6a.6.6 0 0 0-.6.6V14H3v-2.293l4.32-4.32l-.118-.303a3.001 3.001 0 0 1 1.96-3.965c.33-.423.72-.796 1.157-1.106zM13.5 6.25a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5zM9 6.5a4.5 4.5 0 1 1 7 3.742v2.05l.783.784a.6.6 0 0 1 0 .848L15.707 15l1.068 1.067a.6.6 0 0 1-.05.893l-2.35 1.88a.6.6 0 0 1-.75 0l-2.4-1.92a.6.6 0 0 1-.225-.468v-6.21A4.496 4.496 0 0 1 9 6.5zM13.5 3a3.5 3.5 0 0 0-1.75 6.532a.5.5 0 0 1 .25.433v6.295l2 1.6l1.751-1.401l-1.034-1.035a.6.6 0 0 1 0-.848l1.076-1.076l-.617-.617a.6.6 0 0 1-.176-.424V9.965a.5.5 0 0 1 .25-.433A3.5 3.5 0 0 0 13.5 3z",
+            fill: "currentColor",
+          },
+        },
+      ],
+    },
+  ],
+};
+
+const PREVIEW_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "17",
+    height: "17",
+    viewBox: "0 0 20 20",
+  },
+  children: [
+    {
+      tag: "g",
+      attr: { fill: "none" },
+      children: [
+        {
+          tag: "path",
+          attr: {
+            d: "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5a2 2 0 0 0-2-2zm0 16H5V7h14v12zm-5.5-6c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5s1.5.67 1.5 1.5zM12 9c-2.73 0-5.06 1.66-6 4c.94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4zm0 6.5a2.5 2.5 0 0 1 0-5a2.5 2.5 0 0 1 0 5z",
+            fill: "currentColor",
+          },
+        },
+      ],
+    },
+  ],
+};
+
+const SCORE_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "24",
+    height: "16",
+    viewBox: "0 0 20 20",
+  },
+  children: [
+    {
+      tag: "g",
+      attr: { fill: "none" },
+      children: [
+        {
+          tag: "path",
+          attr: {
+            d: "M11 6H9V4h2v2zm4-2h-2v2h2V4zM9 14h2v-2H9v2zm10-4V8h-2v2h2zm0 4v-2h-2v2h2zm-6 0h2v-2h-2v2zm6-10h-2v2h2V4zm-6 4V6h-2v2h2zm-6 2V8h2V6H7V4H5v16h2v-8h2v-2H7zm8 2h2v-2h-2v2zm-4-2v2h2v-2h-2zM9 8v2h2V8H9zm4 2h2V8h-2v2zm2-4v2h2V6h-2z",
+            fill: "currentColor",
+          },
+        },
+      ],
+    },
+  ],
+};
+
+const CROSS_SPEC: SvgSpec = {
+  tag: "svg",
+  attr: lucideSvgAttr("20"),
+  children: [
+    { tag: "path", attr: { d: "M18 6 6 18" } },
+    { tag: "path", attr: { d: "m6 6 12 12" } },
+  ],
+};
+
+export function createFileIcon(): SVGElement {
+  return buildSvg(FILE_SPEC);
+}
+
+export function createFolderIcon(): SVGElement {
+  return buildSvg(FOLDER_SPEC);
+}
+
+export function createAliasIcon(): SVGElement {
+  return buildSvg(ALIAS_SPEC);
+}
+
+export function createTagIcon(): SVGElement {
+  return buildSvg(TAG_SPEC);
+}
+
+export function createLinkIcon(): SVGElement {
+  return buildSvg(LINK_SPEC);
+}
+
+export function createHeaderIcon(): SVGElement {
+  return buildSvg(HEADER_SPEC);
+}
+
+export function createSearchIcon(): SVGElement {
+  return buildSvg(SEARCH_SPEC);
+}
+
+export function createFilterIcon(): SVGElement {
+  return buildSvg(FILTER_SPEC);
+}
+
+export function createFrontMatterIcon(): SVGElement {
+  return buildSvg(FRONT_MATTER_SPEC);
+}
+
+export function createPreviewIcon(): SVGElement {
+  return buildSvg(PREVIEW_SPEC);
+}
+
+export function createScoreIcon(): SVGElement {
+  return buildSvg(SCORE_SPEC);
+}
+
+export function createCrossIcon(): SVGElement {
+  return buildSvg(CROSS_SPEC);
+}

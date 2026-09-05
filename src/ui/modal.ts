@@ -1,6 +1,6 @@
 import { Platform, type SuggestModal } from "obsidian";
 import type { AppHelper } from "../app-helper";
-import { CROSS } from "./icons";
+import { createCrossIcon } from "./icons";
 
 /**
  * Adds a small button at the left edge of the input on mobile, which clears
@@ -22,7 +22,7 @@ export function addMobileDismissButton(modal: SuggestModal<unknown>): void {
     cls: ["another-quick-switcher__mobile-dismiss-button", "clickable-icon"],
     attr: { type: "button", "aria-label": "Clear input or dismiss" },
   });
-  buttonEl.insertAdjacentHTML("beforeend", CROSS);
+  buttonEl.appendChild(createCrossIcon());
   buttonEl.addEventListener("click", () => {
     // GrepModal replaces the visible input with a clone of inputEl,
     // so look up the live element instead of using modal.inputEl directly

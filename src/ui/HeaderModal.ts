@@ -10,7 +10,7 @@ import {
   smartWhitespaceSplit,
 } from "../utils/strings";
 import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
-import { PREVIEW } from "./icons";
+import { createPreviewIcon } from "./icons";
 import { addMobileDismissButton, setFloatingModal } from "./modal";
 
 interface SuggestionItem {
@@ -164,7 +164,7 @@ export class HeaderModal extends AbstractSuggestionModal<SuggestionItem> {
         "afterend",
         createDiv({ cls: "another-quick-switcher__header__auto-preview-icon" }),
       );
-      this.previewIcon?.insertAdjacentHTML("beforeend", PREVIEW);
+      this.previewIcon?.appendChild(createPreviewIcon());
     }
   }
 

@@ -13,7 +13,11 @@ jest.mock("obsidian", () => ({ Platform: { isMobile: false } }), {
   virtual: true,
 });
 
+import { createCrossIcon } from "./icons";
 import { addMobileDismissButton, setFloatingModal } from "./modal";
+// このファイルはjest.mockのホイストのためbabel変換が挟まる。imported bindingを
+// 型注釈に使うと変換に失敗するため、型はローカルに書く
+import { StubElement, serializeIcon } from "./test-helpers/obsidian-dom-stub";
 
 type Rect = {
   x: number;
@@ -179,14 +183,18 @@ type FakeButtonEl = {
   tag: string;
   classes: string[];
   attrs: Record<string, string>;
-  htmls: string[];
+  children: unknown[];
   listeners: Record<string, () => void>;
-  insertAdjacentHTML(position: string, html: string): void;
+  appendChild(node: unknown): void;
   addEventListener(type: string, listener: () => void): void;
 };
 
 function createDismissFixture(option: { initialInputValue?: string } = {}) {
   const createdEls: FakeButtonEl[] = [];
+  (globalThis as any).createSvg = (
+    tag: string,
+    o?: { attr?: Record<string, string> },
+  ) => new StubElement(tag, o);
   (globalThis as any).createEl = (
     tag: string,
     o?: {
@@ -198,10 +206,10 @@ function createDismissFixture(option: { initialInputValue?: string } = {}) {
       tag,
       classes: o?.cls ? (Array.isArray(o.cls) ? o.cls : [o.cls]) : [],
       attrs: o?.attr ?? {},
-      htmls: [],
+      children: [],
       listeners: {},
-      insertAdjacentHTML(_position: string, html: string) {
-        this.htmls.push(html);
+      appendChild(node: unknown) {
+        this.children.push(node);
       },
       addEventListener(type: string, listener: () => void) {
         this.listeners[type] = listener;
@@ -316,7 +324,10 @@ describe("addMobileDismissButton", () => {
     );
     // is-tabletでbutton:not(.clickable-icon)に付く強制paddingを回避する
     expect(buttonEl.classes).toContain("clickable-icon");
-    expect(buttonEl.htmls).toHaveLength(1); // CROSS icon
+    // CROSSアイコンがSVG要素として差し込まれる
+    expect(buttonEl.children.map(serializeIcon)).toEqual([
+      serializeIcon(createCrossIcon()),
+    ]);
     expect(inputContainer.children).toEqual([buttonEl]);
     expect(modalEl.children).toHaveLength(0);
   });

@@ -18,7 +18,7 @@ import {
 } from "../utils/strings";
 import { isPresent } from "../utils/types";
 import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
-import { PREVIEW } from "./icons";
+import { createPreviewIcon } from "./icons";
 import { addMobileDismissButton, setFloatingModal } from "./modal";
 
 const globalInternalStorage: {
@@ -190,7 +190,7 @@ export class InFileModal extends AbstractSuggestionModal<SuggestionItem> {
           cls: "another-quick-switcher__in-file__auto-preview-icon",
         }),
       );
-      this.previewIcon?.insertAdjacentHTML("beforeend", PREVIEW);
+      this.previewIcon?.appendChild(createPreviewIcon());
     }
   }
 

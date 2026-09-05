@@ -42,7 +42,7 @@ import {
   trimLineByEllipsis,
 } from "../utils/strings";
 import { AbstractSuggestionModal } from "./AbstractSuggestionModal";
-import { FOLDER } from "./icons";
+import { createFolderIcon } from "./icons";
 import { addMobileDismissButton, setFloatingModal } from "./modal";
 
 const globalInternalStorage: {
@@ -258,7 +258,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
       );
       promptInputContainerEl?.after(wrapper);
 
-      wrapper.insertAdjacentHTML("afterbegin", FOLDER);
+      wrapper.prepend(createFolderIcon());
 
       if (this.settings.autoPreviewInGrepSearch) {
         this.debouncePreview = debounce(
@@ -646,7 +646,7 @@ export class GrepModal extends AbstractSuggestionModal<SuggestionItem> {
         const directoryDiv = createDiv({
           cls: "another-quick-switcher__item__directory",
         });
-        directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
+        directoryDiv.appendChild(createFolderIcon());
         const text = this.settings.showFullPathOfDirectory
           ? item.file.parent?.path
           : item.file.parent?.name;

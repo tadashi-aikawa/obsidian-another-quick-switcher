@@ -19,12 +19,7 @@ export class StubTextNode {
   constructor(public readonly text: string) {}
 }
 
-/** insertAdjacentHTMLで挿入されたHTML断片(アイコンSVGなど)のマーカー */
-export class StubHtmlNode {
-  constructor(public readonly html: string) {}
-}
-
-export type StubChild = StubElement | StubTextNode | StubHtmlNode;
+export type StubChild = StubElement | StubTextNode;
 
 /** DocumentFragment相当。appendChildされると中身が移動する */
 export class StubFragment {
@@ -68,8 +63,11 @@ export class StubElement {
     return node;
   }
 
-  insertAdjacentHTML(_position: "beforeend", html: string): void {
-    this.children.push(new StubHtmlNode(html));
+  prepend(node: StubChild): void {
+    this.children.unshift(node);
+    if (node instanceof StubElement) {
+      node.parent = this;
+    }
   }
 
   appendText(text: string): void {
@@ -162,9 +160,35 @@ export function findByClass(
   return findAllByClass(root, cls)[0] ?? null;
 }
 
-/** 直下の子のうちHTML断片(アイコンなど)を返す */
-export function htmlNodesOf(el: StubElement): StubHtmlNode[] {
-  return el.children.filter((x) => x instanceof StubHtmlNode);
+/** 直下の子のうちSVG要素(アイコン)を返す */
+export function svgNodesOf(el: StubElement): StubElement[] {
+  return el.children.filter(
+    (x): x is StubElement => x instanceof StubElement && x.tag === "svg",
+  );
+}
+
+/**
+ * StubElementをHTML文字列へ直列化する。アイコン生成が元のSVGと
+ * 一致することをテストで比較するために使う
+ */
+export function serializeStubElement(el: StubElement): string {
+  const attrs = Object.entries(el.attrs)
+    .map(([key, value]) => ` ${key}="${value}"`)
+    .join("");
+  const inner = el.children
+    .map((child) =>
+      child instanceof StubElement ? serializeStubElement(child) : "",
+    )
+    .join("");
+  return `<${el.tag}${attrs}>${inner}</${el.tag}>`;
+}
+
+/**
+ * アイコン生成関数の戻り値を直列化する。型上はSVGElementだが、
+ * スタブ環境での実体はStubElementなので受け取り側で読み替える
+ */
+export function serializeIcon(icon: unknown): string {
+  return serializeStubElement(icon as StubElement);
 }
 
 /**
@@ -175,6 +199,8 @@ export function installObsidianDomStubs(): void {
   const g = globalThis as any;
   g.createDiv = (o?: StubDomElementInfo) => new StubElement("div", o);
   g.createSpan = (o?: StubDomElementInfo) => new StubElement("span", o);
+  g.createSvg = (tag: string, o?: StubDomElementInfo) =>
+    new StubElement(tag, o);
   // momentは提供しない(parseFrontMatterDateはDate.parseへフォールバックする)
   g.activeWindow = {};
   g.document = {

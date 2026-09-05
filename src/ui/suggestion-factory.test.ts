@@ -1,14 +1,16 @@
 import { describe, expect, test } from "@jest/globals";
 import type { MatchQueryResult, SuggestionItem } from "../matcher";
 import { createSuggestionItem as createItem } from "../test-helpers/suggestion-item";
-import { ALIAS, FILE } from "./icons";
+import { createAliasIcon, createFileIcon } from "./icons";
 import { createElements, filterFrontMatter } from "./suggestion-factory";
 import {
   findAllByClass,
   findByClass,
-  htmlNodesOf,
   installObsidianDomStubs,
   type StubElement,
+  serializeIcon,
+  serializeStubElement,
+  svgNodesOf,
 } from "./test-helpers/obsidian-dom-stub";
 
 installObsidianDomStubs();
@@ -278,7 +280,9 @@ describe("createElements: エイリアス表示", () => {
     expect(titleDiv.textContent).toBe("nikki");
     expect(hitWordsOf(titleDiv)).toEqual(["nik"]);
     // エイリアス表示のアイコンが付く
-    expect(htmlNodesOf(titleDiv).map((x) => x.html)).toContain(ALIAS);
+    expect(svgNodesOf(titleDiv).map(serializeStubElement)).toContain(
+      serializeIcon(createAliasIcon()),
+    );
 
     // description側にはファイル名がFILEアイコン付きで表示される
     const aliasSpan = findByClass(
@@ -286,7 +290,9 @@ describe("createElements: エイリアス表示", () => {
       "another-quick-switcher__item__description__alias",
     )!;
     expect(aliasSpan.textContent).toBe("Diary");
-    expect(htmlNodesOf(aliasSpan).map((x) => x.html)).toContain(FILE);
+    expect(svgNodesOf(aliasSpan).map(serializeStubElement)).toContain(
+      serializeIcon(createFileIcon()),
+    );
   });
 
   test("displayAliaseAsTitleで全エイリアスが ' | ' 区切りでタイトル表示され、オフセット付きでハイライトされる", () => {

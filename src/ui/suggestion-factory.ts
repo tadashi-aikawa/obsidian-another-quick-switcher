@@ -10,14 +10,14 @@ import { getMatchedTitleAndAliases, type SuggestionItem } from "../matcher";
 import { count, omitBy, uniq, uniqFlatMap } from "../utils/collection-helper";
 import { round } from "../utils/math";
 import {
-  ALIAS,
-  FILE,
-  FOLDER,
-  FRONT_MATTER,
-  HEADER,
-  LINK,
-  SCORE,
-  TAG,
+  createAliasIcon,
+  createFileIcon,
+  createFolderIcon,
+  createFrontMatterIcon,
+  createHeaderIcon,
+  createLinkIcon,
+  createScoreIcon,
+  createTagIcon,
 } from "./icons";
 
 interface Elements {
@@ -319,7 +319,7 @@ function createItemDiv(
   }
 
   if (shouldShowAliasAsTitle) {
-    titleDiv.insertAdjacentHTML("beforeend", ALIAS);
+    titleDiv.appendChild(createAliasIcon());
   }
 
   const highlightedContent = createHighlightedText(
@@ -354,7 +354,7 @@ function createItemDiv(
     const directoryDiv = createDiv({
       cls: "another-quick-switcher__item__directory",
     });
-    directoryDiv.insertAdjacentHTML("beforeend", FOLDER);
+    directoryDiv.appendChild(createFolderIcon());
     const text = options.showFullPathOfDirectory
       ? item.file.parent?.path
       : item.file.parent?.name;
@@ -413,7 +413,7 @@ function createMetaDiv(args: {
     const scoreSpan = createSpan({
       cls: "another-quick-switcher__item__meta__score",
     });
-    scoreSpan.insertAdjacentHTML("beforeend", SCORE);
+    scoreSpan.appendChild(createScoreIcon());
     scoreSpan.appendText(String(args.score));
     scoreDiv.appendChild(scoreSpan);
     metaDiv.appendChild(scoreDiv);
@@ -433,7 +433,7 @@ function createMetaDiv(args: {
         cls: "another-quick-switcher__item__meta__front_matter",
         title: `${key}: ${value}`,
       });
-      frontMatterDiv.insertAdjacentHTML("beforeend", FRONT_MATTER);
+      frontMatterDiv.appendChild(createFrontMatterIcon());
       frontMatterDiv.createSpan({
         cls: "another-quick-switcher__item__meta__front_matter__key",
         title: key,
@@ -515,9 +515,8 @@ function createDescriptionDiv(args: {
         cls: "another-quick-switcher__item__description__alias",
       });
 
-      aliasSpan.insertAdjacentHTML(
-        "beforeend",
-        shouldShowFileAsDescription ? FILE : ALIAS,
+      aliasSpan.appendChild(
+        shouldShowFileAsDescription ? createFileIcon() : createAliasIcon(),
       );
 
       const ranges: { start: number; end: number }[] = [];
@@ -559,7 +558,7 @@ function createDescriptionDiv(args: {
       const tagsSpan = createSpan({
         cls: "another-quick-switcher__item__description__tag",
       });
-      tagsSpan.insertAdjacentHTML("beforeend", TAG);
+      tagsSpan.appendChild(createTagIcon());
       tagsSpan.appendText(x.replace("#", ""));
       tagsDiv.appendChild(tagsSpan);
     }
@@ -583,7 +582,7 @@ function createDescriptionDiv(args: {
             : "",
         ],
       });
-      linkSpan.insertAdjacentHTML("beforeend", LINK);
+      linkSpan.appendChild(createLinkIcon());
       linkSpan.appendChild(
         createSpan({ text: link, attr: { style: "padding-left: 3px" } }),
       );
@@ -610,7 +609,7 @@ function createDescriptionDiv(args: {
             : "",
         ],
       });
-      headersSpan.insertAdjacentHTML("beforeend", HEADER);
+      headersSpan.appendChild(createHeaderIcon());
       headersSpan.appendChild(
         createSpan({ text: header, attr: { style: "padding-left: 3px" } }),
       );
