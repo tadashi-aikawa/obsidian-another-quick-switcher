@@ -4,6 +4,8 @@
 
 - テスト: `bun run test`
 - リント: `bun run lint`
+- リント(コミュニティディレクトリの自動レビュー相当): `bun run lint:obsidian`
+    - errorのみ表示する。warnも見るときは `bun run lint:obsidian:all`
 - 型チェック: `bun run typecheck`
 - ビルド: `bun run build`
 
